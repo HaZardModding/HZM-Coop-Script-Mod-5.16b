@@ -1,0 +1,20 @@
+// cache models/weapons/worldmodel-phaser-STX.tik
+// cache models/weapons/worldmodel-tricorder-STX.tik
+// cache models/weapons/worldmodel-fieldassaultrifle.tik
+// cache models/weapons/worldmodel-burstrifle.tik
+// cache models/weapons/worldmodel-grenadelauncher.tik
+// cache models/weapons/worldmodel-photon.tik
+
+cache sound/footsteps/grill/g1.wav
+cache sound/footsteps/grill/g2.wav
+cache sound/footsteps/grill/g3.wav
+cache sound/footsteps/grill/g4.wav
+cache sound/footsteps/grill/g5.wav
+cache sound/footsteps/grill/g6.wav
+cache sound/footsteps/grill/g7.wav
+cache sound/footsteps/metal/step_metal1.wav
+cache sound/footsteps/metal/step_metal2.wav
+cache sound/footsteps/metal/step_metal3.wav
+cache sound/footsteps/metal/step_metal4.wav
+cache sound/footsteps/metal/step_metal5.wav
+cache sound/footsteps/metal/step_metal6.wav

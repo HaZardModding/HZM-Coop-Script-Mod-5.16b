@@ -1,0 +1,247 @@
+//-----------------------------------------------------------------------------------
+// Script By:	Christian Sebastian Strahl (Chrissstrahl)
+// Created on:	2009.12.12
+// E-Mail:		chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+// CONTAINING MODELS HANDLING RELATED FUNCTIONS FOR THE HZM CO-OP MOD
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2012 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+
+float globalCoop_model_calcSkillModifier(float fFloat)
+//------------------------------------------------------------------------------
+//the higher the skill, that more woundable are players, depending on class
+//------------------------------------------------------------------------------
+{
+	float fSkill;
+	fSkill=cvar_integer_coop_skill;
+//if skill is not set to easy
+	if(fSkill>0)
+	{
+	//correct bad value
+		if(fSkill > 3)
+		{
+			fSkill=3;
+		}
+	//applay new value
+		fFloat=(fFloat / fSkill);
+	//if very hard is set
+		if(fSkill==3)
+		{
+			fFloat=0;
+		}
+	}
+	return fFloat;
+}
+
+float globalCoop_model_calcSkillModifierDefault()
+//------------------------------------------------------------------------------
+//the higher the skill, that more woundable are players in generall
+//------------------------------------------------------------------------------
+{
+	float fFloat,fSkill;
+	fSkill=cvar_integer_coop_skill;
+//if skill is not set to easy
+	if(fSkill>0)
+	{
+		fFloat = -25;
+	//correct bad value
+		if(fSkill > 3)
+		{
+			fSkill=3;
+		}
+	//applay new woundability
+		fFloat=(fFloat * fSkill);
+	}
+	return fFloat;
+}
+
+float globalCoop_model_checkValid(string sModel)
+//------------------------------------------------------------------------------
+//check if the current player model is allowed
+//------------------------------------------------------------------------------
+{
+	float fValid;
+
+	if(sModel == coop_string_playerModelResetTiki)
+	{
+		fValid = 1;
+	}
+	else
+	{
+		if(	sModel == "models/char/dm_munro.tik" 	||
+			sModel == "models/char/dm_chang.tik"	||
+			sModel == "models/char/eb_gonzales.tik"	||
+			sModel == "models/char/dm_jurot.tik"	||
+			sModel == "models/char/dm_telsia.tik"	||
+			sModel == "models/char/dm_kourban.tik"	||
+			sModel == "models/char/dm_chell.tik"
+			)
+		{
+			fValid = 1;
+		}
+	}
+	return fValid;
+}
+
+void globalCoop_model_validate(entity ePlayer)
+//------------------------------------------------------------------------------
+//check if the current player model is allowed
+//------------------------------------------------------------------------------
+{
+//player really there
+	if(doesEntityExist(ePlayer))
+	{
+		string	sModel;
+		float	fUpSetTheGreatTikiGod;
+		
+		sModel	= ePlayer.getModelName();
+		
+		if(!globalCoop_check_playerSpectator(ePlayer))
+		{
+			if(	ePlayer.getStringVar("coop_previouseModel") != sModel)
+			{
+				fUpSetTheGreatTikiGod=1;
+			//REMEMBER CURRENT MODEL
+				ePlayer.setStringVar("coop_previouseModel",sModel);
+			}
+			
+			if(!globalCoop_model_checkValid(sModel))
+			{
+				fUpSetTheGreatTikiGod=1;
+			//REMEMBER CURRENT MODEL
+				ePlayer.setStringVar("coop_previouseModel",coop_string_playerModelResetTiki);
+			//DISABLE MODEL SELECTION - FORCE NEW MODEL ON PLAYER
+				globalCoop_player_transmitter(ePlayer,"globalwidgetcommand playerselectionlist disable\nset mp_playermodel "+coop_string_playerModelResetTiki);
+				globalCoop_main_waitZeroDot2();
+			//TAKE AND GIVE CURRENT WEAPON, AVOID FLYING GUN EFFECT
+				//we don't do that anymore
+			}
+			if(fUpSetTheGreatTikiGod)
+			{
+			//RUN SETUP ON THE TIKI
+				globalCoop_model_setupPlayer(ePlayer);
+			//RUN OPTIONAL THREAD
+				if(doesEntityExist(ePlayer))
+				{
+					thread globalCoop_level_callReliably("coop_changedModel"+ePlayer.getRawTargetname());
+				}
+			}
+		}
+	}
+}
+
+void globalCoop_model_setupPlayer(entity ePlayer)
+//----------------------------------------------------------------------
+// OVERWRITE MODEL SETTINGS!!! (when: changed/spawned)
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(ePlayer))
+	{
+		string sClass;
+//INIZIAL AMMO AMMOUNT
+		float	fMaxAmmount	= 700,
+				fMaxFed		= 700;
+		
+//SET MASS - makes players sligthly pushable by projectile impact
+		ePlayer.mass(200);
+		
+//HIDE DURING CINEMATIC
+		if(coop_integer_cinematicIsActive == 1)
+		{
+			ePlayer.hide();
+			ePlayer.notsolid();
+		}
+//MAKE SURE THE ANIMATIONS DO NOT MESSUP, not sure if that even works...
+		ePlayer.resetstate();
+//RESET ALL RESISTANCES
+		//ePlayer.removeresistance("gas");
+		ePlayer.removeresistance("melee");
+		ePlayer.removeresistance("vaporize");
+		ePlayer.removeresistance("explosion");
+		ePlayer.removeresistance("small_explosion");
+		ePlayer.removeresistance("electric");
+		ePlayer.removeresistance("sniper");
+		ePlayer.removeresistance("disruptor");
+		//ePlayer.removeresistance("sword");
+		//ePlayer.removeresistance("falling");
+		//ePlayer.removeresistance("plasmashotgun");
+		//ePlayer.removeresistance("fast_bullet");
+		//ePlayer.removeresistance("assault_rifle");
+		//ePlayer.removeresistance("stasis");
+		//ePlayer.removeresistance("tetryon");
+		//ePlayer.removeresistance("vaporize_disruptor");
+		//ePlayer.removeresistance("vaporize_photon");
+		//ePlayer.removeresistance("phaser");
+		//ePlayer.removeresistance("comp_rifle");
+		//ePlayer.removeresistance("vaporize_comp");
+		//ePlayer.removeresistance("imod_primary");
+		//ePlayer.removeresistance("imod_secondary");		
+//SET ALL RESISTANCED
+		ePlayer.resistance("telefrag",100);//fix telefrag beeing reset when player changes models
+		ePlayer.resistance("slime",globalCoop_model_calcSkillModifierDefault());
+		ePlayer.resistance("melee",globalCoop_model_calcSkillModifierDefault());
+		ePlayer.resistance("sniper",globalCoop_model_calcSkillModifierDefault());
+		ePlayer.resistance("vaporize",globalCoop_model_calcSkillModifierDefault());
+		ePlayer.resistance("disruptor",globalCoop_model_calcSkillModifierDefault());
+		ePlayer.resistance("small_explosion",globalCoop_model_calcSkillModifierDefault());
+		ePlayer.resistance("explosion",globalCoop_model_calcSkillModifierDefault());
+		ePlayer.resistance("slime",globalCoop_model_calcSkillModifierDefault());
+		globalCoop_main_waitAFrame();
+
+//GET CLASS //GET CLASS //GET CLASS
+		sClass = ePlayer.getStringvar("globalCoop_className");
+////SETUP TECHNICIAN
+		if(sClass == "HeavyWeapons")
+		{
+			ePlayer.resistance("vaporize",globalCoop_model_calcSkillModifier(30));//enemy vaporisation
+			ePlayer.resistance("disruptor",globalCoop_model_calcSkillModifier(30));//enemy disruptors
+			ePlayer.resistance("sniper",globalCoop_model_calcSkillModifier(40));//snipers
+			ePlayer.resistance("explosion",globalCoop_model_calcSkillModifier(30));//
+			ePlayer.resistance("small_explosion",globalCoop_model_calcSkillModifier(30));//spashdamage
+			ePlayer.resistance("slime",globalCoop_model_calcSkillModifier(-40));//exos
+			fMaxFed		= 450;
+			fMaxAmmount = 400;
+		}
+//SETUP MEDIC
+		else if(sClass == "Medic")
+		{
+			ePlayer.resistance("slime",globalCoop_model_calcSkillModifier(50));//exos
+			ePlayer.resistance("melee",globalCoop_model_calcSkillModifier(30));//kick/batleth
+			ePlayer.resistance("sniper",globalCoop_model_calcSkillModifier(-75));//snipers
+//RESET HEALTH STATUS, update medic hud
+			$world.setFloatVar("coop_activePlayersHealth",getLevelTime());
+		}
+//SETUP HEAVY WEAPONS
+		else
+		{//"Technician"
+			ePlayer.resistance("electric",globalCoop_model_calcSkillModifier(50));//traps
+			ePlayer.resistance("sniper",globalCoop_model_calcSkillModifier(-50));//snipers
+		}
+//SET AMMO, DISABLE SCREEN FLASHING,MAKE WOUNDABLE
+		//ePlayer.ammo("Phaser",500,500);
+		ePlayer.ammo("Fed",0,fMaxFed);
+		ePlayer.ammo("Plasma",0,fMaxAmmount);
+		ePlayer.ammo("Idryll",0,fMaxAmmount);
+		ePlayer.doDamageScreenFlash(0);
+		ePlayer.deactivateshield();
+		ePlayer.takeDamage();
+//does not work in mp dedicated server
+//ePlayer.damagemodifier("actortype","teammate",0);
+//ePlayer.damagemodifier("actortype","friend",0);
+//ADD INDICATOR TO MODEL - FOR CLASS AND PLAYER ID
+		globalCoop_class_addIndicator(ePlayer,sClass);
+	}
+}
+

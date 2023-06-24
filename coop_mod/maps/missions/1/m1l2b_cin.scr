@@ -1,0 +1,243 @@
+void Generator1FieldPower_Destroyed();
+void Generator2FieldPower_Destroyed();
+void EndingCinematic();
+
+
+//---------------------
+// Generator1FieldPower_Destroyed
+// PowerCup blows up and removes green forcefield
+//---------------------
+void Generator1FieldPower_Destroyed()
+{
+	$Generator1FieldPower.nodamage();
+	$Generator1FieldPowerSpawn.modelname( "fx/fx-explosion-fieldgenerator.tik" );
+	$Generator1FieldPowerSpawn.spawntargetname( "Generator1FieldPowerExplosion" );
+	globalCoop_level_triggerEntity($Generator1FieldPowerSpawn);
+
+	$Generator1FieldPowerSpawn.remove();
+	$Generator1FieldPower.remove();
+	$Generator1FieldPowerDamaged.show();
+	wait ( 1 );
+	$Generator1FieldPowerExplosion.remove();
+
+	spawn ("Camera","targetname","Generator1FieldCam");
+	cam.load ("m1l2b_Generator1Field");
+	
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.5);
+	wait(1);
+	globalCoop_cin_follow($Generator1FieldCam,$m1l2b_Generator1Field );
+	globalCoop_cin_cut($Generator1FieldCam);
+	wait (.1);
+	globalCoop_cin_cuecamera($Generator1FieldCam);
+	globalCoop_main_camFadeIn(1);
+	wait (.5);
+
+	$Generator1Field.stoploopsound();
+	$Generator1Field.playsound ( "sound/ships/borg/borg_forcefield2_down.wav", 6, 1, 200 );
+
+	$Generator1FieldClip.remove();
+	$Generator1Field.hide();
+	wait ( .1 );
+	$Generator1Field.show();
+	wait ( .1 );
+	$Generator1Field.hide();
+	wait ( .15 );
+	$Generator1Field.show();
+	wait ( .15 );
+	$Generator1Field.remove();
+	wait ( 1 );
+	globalCoop_main_camFadeOut(1);
+	cam_fadeout( 1, 0, 0, 0, 1, 0 );
+	wait ( 1 );
+
+	globalCoop_cin_end();
+	
+	wait ( .25 );
+	globalCoop_main_camFadeIn(1);
+
+	//--makes generator1 sequence trigger triggerable
+	$Generator1Trigger.triggerable();
+}
+
+
+//---------------------
+// Generator2FieldPower_Destroyed
+// PowerCup blows up and removes green forcefield
+//---------------------
+void Generator2FieldPower_Destroyed()
+{
+	$Generator2FieldPower.nodamage();
+	$Generator2FieldPowerSpawn.modelname( "fx/fx-explosion-fieldgenerator.tik" );
+	$Generator2FieldPowerSpawn.spawntargetname( "Generator2FieldPowerExplosion" );
+	globalCoop_level_triggerEntity($Generator2FieldPowerSpawn);
+	$Generator2FieldPowerSpawn.remove();
+	$Generator2FieldPower.remove();
+	$Generator2FieldPowerDamaged.show();
+	
+	wait ( 1 );
+	$Generator2FieldPowerExplosion.remove();
+
+	spawn ("Camera","targetname","Generator2FieldCam");
+	cam.load ("m1l2b_Generator2Field");
+
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(1);
+	wait ( 1 );
+	globalCoop_cin_follow($Generator2FieldCam,$m1l2b_Generator2Field );
+	globalCoop_cin_cut($Generator2FieldCam);
+	globalCoop_cin_cuecamera($Generator2FieldCam);
+	wait (.1);
+	globalCoop_main_camFadeIn(.5);
+	wait (.5);
+
+	$Generator2Field.stoploopsound ();
+	$Generator2Field.playsound ( "sound/ships/borg/borg_forcefield2_down.wav", 6, 1, 200 );
+
+	$Generator2FieldClip.remove();
+	$Generator2Field.hide();
+	wait ( .1 );
+	$Generator2Field.show();
+	wait ( .1 );
+	$Generator2Field.hide();
+	wait ( .15 );
+	$Generator2Field.show();
+	wait ( .15 );
+	$Generator2Field.remove();
+	wait ( 1 );
+	globalCoop_main_camFadeOut(1);
+	wait (1);
+	
+	globalCoop_cin_end();
+	
+	wait (.25);
+	globalCoop_main_camFadeIn(1);
+
+	//makes chell generator sequence trigger triggerable
+	$Generator2Trigger.triggerable();
+}
+
+
+//---------------------
+//EndingCinematic, when both maps are completed
+//---------------------
+void EndingCinematic()
+{
+//make sure next map is loadad when time runs out during cin
+	globalCoop_mission_accomplished();
+	
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.5);
+    music( "aux5" );
+	spawn( "Camera", "targetname", "EndingCinematicCam");
+	cam.load( "m1l2b_EndCinematic_Cam1" );
+
+	//--- hide the game characters
+	$chell.ai_off();
+	$chell.hide();
+	$chell.notsolid();
+	$telsia.ai_off();
+	$telsia.hide();
+	$telsia.notsolid();
+
+	//--- show the cinematic characters
+	$Munro_EndCinematic.show();
+	$Munro_EndCinematic.useActorWeapon( "none" );
+	$Chell_EndCinematic.show();
+	$Chell_EndCinematic.useActorWeapon( "none" );
+	$Telsia_EndCinematic.show();
+	$Telsia_EndCinematic.useActorWeapon( "none" );
+	wait( .5 );
+
+	//----------------------------------------------------------------
+	//	Shot 1 - panning camera around hazard team	
+
+	globalCoop_cin_follow($EndingCinematicCam, $m1l2b_EndCinematic_Cam1 );
+	globalCoop_cin_cut($EndingCinematicCam);
+	wait (.25);
+	globalCoop_cin_cuecamera( $EndingCinematicCam );
+
+	//--- fade in
+	globalCoop_main_camFadeIn(1);
+	wait (1);
+
+	//--- munro taps his comm badge
+	$Munro_EndCinematic.anim( "tap_comm" );
+	waitforanimation( $Munro_EndCinematic, "tap_comm" );
+	
+	$Munro_EndCinematic.anim ("idle");
+
+	//--- hazard team talks to voyager	
+	thread globalCoop_dialog_play($Munro_EndCinematic,"borg02/munro_howdamp.mp3", 1, 20000, 0 );
+	wait( .25 );
+	
+	$Telsia_EndCinematic.headWatchTarget( "Munro_EndCinematic", 7 );
+	wait( .2 );
+	
+	$Chell_EndCinematic.headWatchTarget( "Munro_EndCinematic", 7 );
+	globalCoop_dialog_waitForDialog( $Munro_EndCinematic );
+	wait( .2 );
+	
+	thread globalCoop_dialog_play($tuvok,"borg02/tuvok_dissipate.mp3", 1, 20000, 1);
+	wait( .4 );
+	
+	$Munro_EndCinematic.headWatchTarget( "Chell_EndCinematic", 7 );
+	wait( .5 );
+	
+	$Telsia_EndCinematic.headWatchTarget( "Chell_EndCinematic", 7 );
+	globalCoop_dialog_waitForDialog( $tuvok );
+	wait( .2 );
+	
+	thread globalCoop_dialog_play($Munro_EndCinematic,"borg02/munro_3tobeam.mp3", 1, 20000, 0 );
+	$Munro_EndCinematic.headWatchTarget( "none", 7 );
+	wait( .5 );
+	
+	$Telsia_EndCinematic.headWatchTarget( "none", 7 );
+	globalCoop_dialog_waitForDialog( $Munro_EndCinematic );
+	wait( .5 );
+	
+	$Chell_EndCinematic.headWatchTarget( "none", 7 );
+	wait( 1 );
+	
+	//thread globalCoop_dialog_play($Munro_EndCinematic,"borg02/munro_4tobeam.mp3", 1, 8000, 1);
+	//globalCoop_dialog_waitForDialog( $Munro_EndCinematic );
+	//thread globalCoop_dialog_play($Munro_EndCinematic,"borg02/munro_3tobeam.mp3", 1, 8000, 1);
+	//globalCoop_dialog_waitForDialog( $Munro_EndCinematic );
+/*
+	else // telsia didn't survive lines
+	{
+
+		$Munro_EndCinematic.anim( "tap-comm" );
+		waitforanimation( $Munro_EndCinematic, "tap-comm" );
+		// play commbadge sound
+		$Munro_EndCinematic.anim ("idle");
+
+		thread globalCoop_dialog_play($Munro_EndCinematic,"borg02/munro_misscomp.mp3", 1, 8000, 1);
+		globalCoop_dialog_waitForDialog( $Munro_EndCinematic );
+		thread globalCoop_dialog_play($tuvok,"borg02/tuvok_dampgone.mp3", 1, 8000, 1);
+		globalCoop_dialog_waitForDialog( $Tuvok );
+		thread globalCoop_dialog_play($Munro_EndCinematic,"borg02/munro_3tobeam.mp3", 1, 8000, 1);
+		globalCoop_dialog_waitForDialog( $Munro_EndCinematic );
+
+	}
+*/
+
+	$Chell_EndCinematic.displayEffect( "TransportOut", "Federation" );
+	$Chell_EndCinematic.playsound( "sound/environment/transporter/transport1.wav", 1, .5, 100 );
+	wait( .1 );
+	
+	$Munro_EndCinematic.displayEffect( "TransportOut", "Federation" );
+	$Munro_EndCinematic.playsound( "sound/environment/transporter/transport1.wav", 1, .5, 100 );
+	wait( .05 );
+	
+	$Telsia_EndCinematic.displayEffect( "TransportOut", "Federation" );
+	$Telsia_EndCinematic.playsound( "sound/environment/transporter/transport1.wav", 1, .5, 100 );
+	wait( 3 );
+
+	globalCoop_main_camFadeOut(1);
+	wait( 1.5 );
+
+	//--- end the level	
+	thread LevelEnd();
+}
+

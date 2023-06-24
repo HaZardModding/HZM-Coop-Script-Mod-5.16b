@@ -1,0 +1,524 @@
+//-----------------------------------------------------------------------------------
+// Script By:	Christian Sebastian Strahl (Chrissstrahl)
+// Created on:	2007.09.29
+// E-Mail:		chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+// CONTAININS ALL OBJECTIVE RELATED FUNCTIONS FOR THE CO-OP MOD
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2012 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+void globalCoop_objectives_manager()
+//----------------------------------------------------------------------
+// ALLOW MULTIPLE OBJECTIVES INIZIALISED AT ONCE
+//----------------------------------------------------------------------
+{
+	coop_float_objectivesStamp=getLevelTime();
+	if(!coop_bool_objectivesManagerActive){
+		coop_bool_objectivesManagerActive=1;
+		
+		entity ePlayer;
+		float fPlayerId;
+		if(!cvar_bool_multiplayer)
+		{
+			thread globalCoop_objectives_playerIndicate($player);
+		}
+		else
+		{
+			globalCoop_main_waitForWarmupTime();
+			globalCoop_main_wait1DotZero();
+			
+			fPlayerId=1;
+			while(fPlayerId<=coop_integer_maxPlayers)
+			{
+				ePlayer = getentity("player"+fPlayerId);
+				thread globalCoop_objectives_playerIndicate(ePlayer);
+				fPlayerId++;
+			}
+
+		}
+//ALLOW A DELAY OF 0.5 SEC TO ADD MULTIPLE OBJECTIVES, or wait during cinematic
+		fPlayerId = 1;
+	//listen servers do not do well with getLevelTime() 
+		float fLevelTime;
+		float fWarmupTime;
+		
+		while(fPlayerId)
+		{
+			globalCoop_main_waitAFrame();
+			fLevelTime	= getLevelTime();
+			if(cvar_bool_multiplayer)
+			{
+				fWarmupTime	= getCvarInt("mp_warmUpTime");
+				fWarmupTime += 5;
+			}
+			
+			if(	(coop_float_gameStartedTime + fWarmupTime) < fLevelTime &&
+				(coop_float_objectivesStamp + 0.5) <= fLevelTime &&
+				coop_integer_cinematicIsActive != 1)
+			{
+				fPlayerId = 0;
+			}
+		}
+//accept new objectives now
+		coop_bool_objectivesManagerActive=0;
+//SHOW NOW OBJECTIVES TO ALL PLAYERS
+		if(!cvar_bool_multiplayer)
+		{
+			globalCoop_objectives_playerShow($player);
+		}
+		else
+		{
+//SHOW OBJECTIVES FOR EACH PLAYER
+			fPlayerId=1;
+			while(fPlayerId<=coop_integer_maxPlayers)
+			{
+				ePlayer = getentity("player"+fPlayerId);
+				thread globalCoop_objectives_playerShow(ePlayer);
+				fPlayerId++;
+			}
+		}
+	}
+}
+
+void globalCoop_objectives_playerIndicate(entity ePlayer)
+//----------------------------------------------------------------------
+// INDICATE HUD AND PLAY NOTIFICATION SOUND
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(ePlayer))
+	{
+		globalCoop_huds_Add(ePlayer,"objectivenotifytext");//INFO TEXT, New Objectives/Updated
+		globalCoop_playSound_c3v1r60(ePlayer,"sound/ships/enterprise/ent_beep_confirm.wav");
+		globalCoop_huds_Add(ePlayer,"coop_notify");//SYMBOL->(|!|)
+	}
+}
+
+void globalCoop_objectives_localization(float fObjectiveItem)
+//----------------------------------------------------------------------
+// ADD $$ IF coop_string_objectiveLoc IS NOT EMPTY
+//----------------------------------------------------------------------
+{
+//IS THIS ITEM PROCESSED ?
+	if(cvar_bool_multiplayer)
+	{
+		if($world.getFloatVar("coop_string_objectiveItemLocalized"+fObjectiveItem) != 1){
+		//MARK IT
+			$world.setFloatVar("coop_string_objectiveItemLocalized"+fObjectiveItem,1);
+		//SEE IF LOC IS REQUIRED
+			if(coop_string_objectiveLoc == "$$")
+			{
+				if(fObjectiveItem < 2)
+					coop_string_objectiveItem1 = globalCoop_objectives_makeToLocString(coop_string_objectiveItem1);
+				if(fObjectiveItem == 2)
+					coop_string_objectiveItem2 = globalCoop_objectives_makeToLocString(coop_string_objectiveItem2);
+				if(fObjectiveItem == 3)
+					coop_string_objectiveItem3 = globalCoop_objectives_makeToLocString(coop_string_objectiveItem3);
+				if(fObjectiveItem == 4)
+					coop_string_objectiveItem4 = globalCoop_objectives_makeToLocString(coop_string_objectiveItem4);
+				if(fObjectiveItem == 5)
+					coop_string_objectiveItem5 = globalCoop_objectives_makeToLocString(coop_string_objectiveItem5);
+				if(fObjectiveItem == 6)
+					coop_string_objectiveItem6 = globalCoop_objectives_makeToLocString(coop_string_objectiveItem6);
+				if(fObjectiveItem == 7)
+					coop_string_objectiveItem7 = globalCoop_objectives_makeToLocString(coop_string_objectiveItem7);
+				if(fObjectiveItem == 8)
+					coop_string_objectiveItem8 = globalCoop_objectives_makeToLocString(coop_string_objectiveItem8);
+				if(fObjectiveItem > 8){
+					coop_string_objectiveTacticalInfo1 = globalCoop_objectives_makeToLocString(coop_string_objectiveTacticalInfo1);
+					coop_string_objectiveTacticalInfo2 = globalCoop_objectives_makeToLocString(coop_string_objectiveTacticalInfo2);
+					coop_string_objectiveTacticalInfo3 = globalCoop_objectives_makeToLocString(coop_string_objectiveTacticalInfo3);
+				}
+			}
+		}
+	}
+}
+
+string globalCoop_objectives_makeToLocString(string sObj)
+//----------------------------------------------------------------------
+// Return the given string as local string
+//----------------------------------------------------------------------
+{
+	//if(coop_string_objectiveLoc == "$$"){
+	sObj = coop_string_objectiveLoc+sObj+coop_string_objectiveLoc;
+	//}
+	return sObj+"";
+}
+
+void globalCoop_objectives_update(string objectiveState , float objectiveItem , float objectiveshowNow)
+//----------------------------------------------------------------------
+// Show Objectives, for each player
+//----------------------------------------------------------------------
+{
+//LOCALIZE STRING
+	globalCoop_objectives_localization(objectiveItem);
+
+	globalCoop_server_listenServerControll();
+//IF OBJECTIVESTATE DELIVERS A INVALID VALUE APPLAY INCOMPLETE STATE ON IT.
+	if(objectiveState == "complete")
+	{
+		objectiveState = "ObjectiveComplete";
+	}
+	else if(objectiveState == "failed")
+	{
+		objectiveState = "ObjectiveFailed";
+	}
+	else
+	{
+		objectiveState = "ObjectiveIncomplete";
+	}		
+//GET CURRENT MISSION OBJECTIVES
+	string objectiveItemName;
+//was if else, restore if issue
+	if(objectiveItem < 2)
+		objectiveItemName = coop_string_objectiveItem1;
+	if(objectiveItem == 2)
+		objectiveItemName = coop_string_objectiveItem2;
+	if(objectiveItem == 3)
+		objectiveItemName = coop_string_objectiveItem3;
+	if(objectiveItem == 4)
+		objectiveItemName = coop_string_objectiveItem4;
+	if(objectiveItem == 5)
+		objectiveItemName = coop_string_objectiveItem5;
+	if(objectiveItem == 6)
+		objectiveItemName = coop_string_objectiveItem6;
+	if(objectiveItem == 7)
+		objectiveItemName = coop_string_objectiveItem7;
+	if(objectiveItem > 7 )
+		objectiveItemName = coop_string_objectiveItem8;
+	
+//KEEP OBSERVER POSTED
+	thread globalCoop_main_print("==============CO-OP OBJECTIVE UPDATED, ITEM:"+objectiveItem+"===============");
+	thread globalCoop_main_print("$$"+objectiveState+"$$ | "+objectiveItemName);
+//MULTIPLAYER
+	if(cvar_bool_multiplayer == 1 || coop_string_objectiveLoc == ""){
+//EXIT IF A COMPLETED OBJECTIVE SAHLL BE SET TO INCOPMPLETE
+		if(objectiveState=="ObjectiveIncomplete" && $world.getStringVar("coop_string_objectiveItemState"+objectiveItem) == "ObjectiveComplete")
+		{
+			return;
+		}
+//UPDATE GLOBAL OBJECTIVE STATE
+//was if else, restore if issue
+		if(objectiveItem < 2)
+			coop_string_objectiveItemState1 = objectiveState;
+		if(objectiveItem == 2)
+			coop_string_objectiveItemState2 = objectiveState;
+		if(objectiveItem == 3)
+			coop_string_objectiveItemState3 = objectiveState;
+		if(objectiveItem == 4)
+			coop_string_objectiveItemState4 = objectiveState;
+		if(objectiveItem == 5)
+			coop_string_objectiveItemState5 = objectiveState;
+		if(objectiveItem == 6)
+			coop_string_objectiveItemState6 = objectiveState;
+		if(objectiveItem == 7)
+			coop_string_objectiveItemState7 = objectiveState;
+		if(objectiveItem > 7)
+			coop_string_objectiveItemState8 = objectiveState;
+	}
+//SINGLEPLAYER - EXIT
+	else{
+		if(objectiveState == "ObjectiveComplete")
+		{
+			$player.setObjectiveshow(objectiveItemName,1);
+			$player.setObjectiveComplete(objectiveItemName,1);
+		}
+		else if(objectiveState == "ObjectiveFailed")
+		{
+			$player.setObjectiveFailed(objectiveItemName,1);
+		}
+		else
+		{
+			$player.setobjectiveshow(objectiveItemName,1);
+		}
+		return;
+	}
+///////////////////////////////////////////////////////Only if SinglePlayer Mode
+//////////////////////////////////////////////////////////////////////////END OF
+//APPLAY NEW OBJECTIVE
+	coop_string_objectiveItemCurrent = objectiveItem;
+//MARK OBJECTIVES VALID
+	$world.setFloatVar("coop_bool_objectiveAreSet",1);
+	globalCoop_main_waitAFrame();
+//SET GLOBAL STATE FOR OBJECTIVES, QUIT, IF THE OBJECTIVES HAVE NOT BEEN UPDATED!
+	if(	$world.getStringVar("coop_string_objectiveItemState1") == coop_string_objectiveItemState1 &&
+		$world.getStringVar("coop_string_objectiveItemState2") == coop_string_objectiveItemState2 &&
+		$world.getStringVar("coop_string_objectiveItemState3") == coop_string_objectiveItemState3 &&
+		$world.getStringVar("coop_string_objectiveItemState4") == coop_string_objectiveItemState4 &&
+		$world.getStringVar("coop_string_objectiveItemState5") == coop_string_objectiveItemState5 &&
+		$world.getStringVar("coop_string_objectiveItemState6") == coop_string_objectiveItemState6 &&
+		$world.getStringVar("coop_string_objectiveItemState7") == coop_string_objectiveItemState7 &&
+		$world.getStringVar("coop_string_objectiveItemState8") == coop_string_objectiveItemState8
+		){return;}
+	else{
+		$world.setStringVar("coop_string_objectiveItemState1",coop_string_objectiveItemState1);
+		$world.setStringVar("coop_string_objectiveItemState2",coop_string_objectiveItemState2);
+		$world.setStringVar("coop_string_objectiveItemState3",coop_string_objectiveItemState3);
+		$world.setStringVar("coop_string_objectiveItemState4",coop_string_objectiveItemState4);
+		$world.setStringVar("coop_string_objectiveItemState5",coop_string_objectiveItemState5);
+		$world.setStringVar("coop_string_objectiveItemState6",coop_string_objectiveItemState6);
+		$world.setStringVar("coop_string_objectiveItemState7",coop_string_objectiveItemState7);
+		$world.setStringVar("coop_string_objectiveItemState8",coop_string_objectiveItemState8);
+	}
+//WAIT FOR MULTIPLE UPDATES
+	thread globalCoop_objectives_manager();
+}
+
+
+void globalCoop_objectives_playerSetTacticalInfo(entity ePlayer)
+//----------------------------------------------------------------------
+// sets the tactical information on a mission for a player
+//----------------------------------------------------------------------
+{
+	globalCoop_objectives_localization(9);
+	wait(3);
+//Add Tactical Information
+	globalCoop_objectives_playerItemTransmitOnce(ePlayer,"coop_t1",coop_string_objectiveTacticalInfo1);
+	globalCoop_objectives_playerItemTransmitOnce(ePlayer,"coop_t2",coop_string_objectiveTacticalInfo2);
+	globalCoop_objectives_playerItemTransmitOnce(ePlayer,"coop_t3",coop_string_objectiveTacticalInfo3);
+}
+
+
+void globalCoop_objectives_hudManager(entity ePlayer,string objectiveState,string objectiveItemString,float fItem) 
+//----------------------------------------------------------------------
+// Add hud for state, and objectives item text contents, they are now totaly clientside *snif*
+//----------------------------------------------------------------------
+{
+	if(objectiveItemString != "" && objectiveState != ""){
+		thread globalCoop_huds_Add(ePlayer,"coop_MiObj"+fItem+"_"+objectiveState);
+	}
+}
+
+
+float globalCoop_objectives_playerItemShown(entity ePlayer,float fObjective,string sState)
+//----------------------------------------------------------------------
+// Check if player has seen this completed objective allready
+//----------------------------------------------------------------------
+{
+float fDisplayedCompleted;
+
+	if(sState == "ObjectiveComplete"){
+		string sFloatVarName;
+		sFloatVarName = "coop_complete"+fObjective+"StateDisplayed";
+	//Check for dude
+		if(doesEntityExist(ePlayer)){
+			fDisplayedCompleted = ePlayer.getFloatVar(sFloatVarName);
+			if(!fDisplayedCompleted){
+				ePlayer.setFloatVar(sFloatVarName,1);
+			}
+		}else{
+			return 1;
+		}
+	}
+	return fDisplayedCompleted;
+}
+
+
+void globalCoop_objectives_playerItemTransmitOnce(entity ePlayer,string sObjectiveItemName,string sObjectiveItemContent)
+//----------------------------------------------------------------------
+//Chek if the item has been send to the player already, do not send twiche
+//----------------------------------------------------------------------
+{
+//Check if we have to send anything
+	if(sObjectiveItemContent != "" && sObjectiveItemContent != "$$$$")
+	{
+		if(doesEntityExist(ePlayer))
+		{
+			if(!ePlayer.getFloatVar(sObjectiveItemName))
+			{
+				globalCoop_level_setFloatVar(ePlayer,sObjectiveItemName,1);
+				globalCoop_player_transmitter(ePlayer,"set "+sObjectiveItemName+" "+sObjectiveItemContent);//setadoesnotwork
+				globalCoop_player_transmitter(ePlayer,"exec coop_mod/cfg/deu_"+cvar_string_mapname);
+			}
+		}
+	}
+}
+
+
+float globalCoop_objectives_playerProcessItem(entity ePlayer,float fObjective,string sState,string sObjectiveItem)
+//----------------------------------------------------------------------
+//Check if we shall show that item to the given player or not again
+//----------------------------------------------------------------------
+{
+//chek if the items are empty
+	if(sState != "" && sObjectiveItem != "")
+	{
+		if(!globalCoop_objectives_playerItemShown(ePlayer,fObjective,sState))
+		{
+			return 1;
+		}
+	}
+	return 0;
+}
+
+void globalCoop_objectives_playerHudPrint(entity ePlayer,string sText)
+//----------------------------------------------------------------------
+//if player does not have the co-op mod installed, show the objective in the chat hud
+//----------------------------------------------------------------------
+{
+	if(ePlayer.getFloatVar("coop_hasCoopInstalled") == 0)
+	{
+		ePlayer.hudprint("^5$$"+sText+"\n");
+	}
+}
+
+void globalCoop_objectives_playerShow(entity ePlayer)
+//----------------------------------------------------------------------
+// Show Objectives,  to a player
+//- Ready Clientside Objective Huds
+//- Show Missions Objectives
+//----------------------------------------------------------------------
+{
+//IF OBJECTIVES ARE EMPTY, QUIT
+//TEST
+	//if(
+	// coop_string_objectiveItemState1 == ""	&&
+	// coop_string_objectiveItemState2 == ""	&&
+	// coop_string_objectiveItemState3 == ""	&&
+	// coop_string_objectiveItemState4 == ""	&&
+	// coop_string_objectiveItemState5 == ""	&&
+	// coop_string_objectiveItemState6 == ""	&&
+	// coop_string_objectiveItemState7 == ""	&&
+	// coop_string_objectiveItemState8 == "")
+	// {
+		// return;
+	// }
+	
+//DO THIS ONLY IF PLAYER IS STILL ON SERVER
+	if($world.getFloatVar("coop_bool_objectiveAreSet") == 1)
+	{
+//IF PLAYER IS STILL ON THE SERVER
+		if(doesEntityExist(ePlayer))
+		{
+			globalCoop_player_waitForFreeReliableServerCommand(ePlayer);
+//REMEMBER WHEN LAST SHOWN OBJECTIVES
+			thread globalCoop_main_devInfo("globalCoop_objectives_playerShow("+ePlayer.getRawTargetName()+")");
+//GRAB CURRENT TIME AND PUT IN A VAR, LET THE VIRT-SCRIPT-MANAGER PLAY WITH THE VARS, DO NOT ASK THE ENGINE
+			float	fShowObjective1,
+					fShowObjective2,
+					fShowObjective3;
+			fShowObjective1 = ePlayer.getFloatVar("globalCoop_timeEntered");
+			fShowObjective2 = getLevelTime();
+			if(fShowObjective2 > 20)
+			{
+				fShowObjective3 = 70;
+			}
+//SET TIME STAMP
+			ePlayer.setFloatvar("globalCoop_objectiveLastShownAt",fShowObjective2);
+//WAIT BEFORE SHOWING OBJECTIVE (reset in progress)
+			while(getLevelTime() < (fShowObjective1 + 3) && fShowObjective3 < 30 || coop_integer_cinematicIsActive == 1)
+			{
+				globalCoop_main_waitZeroDotZero5();
+				fShowObjective3++;
+			}		
+//CHECK IF THIS OBJECTIVE IS OUTDATED ALLREADY, EXIT IF SO
+			if(fShowObjective2 != ePlayer.getFloatvar("globalCoop_objectiveLastShownAt"))
+			{
+				return;
+			}
+//IF PLAYER IS STILL ON THE SERVER
+			if(doesEntityExist(ePlayer))
+			{
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////ADD CLIENTSIDE HUDS FOR THE CO-OP OBJECTIVES HUD
+////////////////////////////////////////////////////////////////////////////////
+				thread globalCoop_objectives_hudManager(ePlayer,coop_string_objectiveItemState1,globalCoop_objectives_makeToLocString(coop_string_objectiveItem1),1);
+				thread globalCoop_objectives_hudManager(ePlayer,coop_string_objectiveItemState2,globalCoop_objectives_makeToLocString(coop_string_objectiveItem2),2);
+				thread globalCoop_objectives_hudManager(ePlayer,coop_string_objectiveItemState3,globalCoop_objectives_makeToLocString(coop_string_objectiveItem3),3);
+				globalCoop_objectives_hudManager(ePlayer,coop_string_objectiveItemState4,globalCoop_objectives_makeToLocString(coop_string_objectiveItem4),4);
+				thread globalCoop_objectives_hudManager(ePlayer,coop_string_objectiveItemState5,globalCoop_objectives_makeToLocString(coop_string_objectiveItem5),5);
+				thread globalCoop_objectives_hudManager(ePlayer,coop_string_objectiveItemState6,globalCoop_objectives_makeToLocString(coop_string_objectiveItem6),6);
+				thread globalCoop_objectives_hudManager(ePlayer,coop_string_objectiveItemState7,globalCoop_objectives_makeToLocString(coop_string_objectiveItem7),7);
+				globalCoop_objectives_hudManager(ePlayer,coop_string_objectiveItemState8,globalCoop_objectives_makeToLocString(coop_string_objectiveItem8),8);
+//IF PLAYER IS STILL ON THE SERVER
+				if(doesEntityExist(ePlayer) == 1 && cvar_bool_multiplayer == 1)
+				{
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////PRINT TO HUD
+////////////////////////////////////////////////////////////////////////////////
+//Create temp vars
+				float	//fShowObjective1, //declared above
+						//fShowObjective2, //declared above
+						//fShowObjective3, //declared above
+						fShowObjective4,
+						fShowObjective5,
+						fShowObjective6,
+						fShowObjective7,
+						fShowObjective8;
+//PROCESS EACH MISSION OBJECTIVE ITEM AND SEE WHICH ONE HAS TO BE SEND TO THE CLIENT
+						fShowObjective1 = globalCoop_objectives_playerProcessItem(ePlayer,1,coop_string_objectiveItemState1,globalCoop_objectives_makeToLocString(coop_string_objectiveItem1));
+						fShowObjective2 = globalCoop_objectives_playerProcessItem(ePlayer,2,coop_string_objectiveItemState2,globalCoop_objectives_makeToLocString(coop_string_objectiveItem2));
+						fShowObjective3 = globalCoop_objectives_playerProcessItem(ePlayer,3,coop_string_objectiveItemState3,globalCoop_objectives_makeToLocString(coop_string_objectiveItem3));
+						fShowObjective4 = globalCoop_objectives_playerProcessItem(ePlayer,4,coop_string_objectiveItemState4,globalCoop_objectives_makeToLocString(coop_string_objectiveItem4));
+						fShowObjective5 = globalCoop_objectives_playerProcessItem(ePlayer,5,coop_string_objectiveItemState5,globalCoop_objectives_makeToLocString(coop_string_objectiveItem5));
+						fShowObjective6 = globalCoop_objectives_playerProcessItem(ePlayer,6,coop_string_objectiveItemState6,globalCoop_objectives_makeToLocString(coop_string_objectiveItem6));
+						fShowObjective7 = globalCoop_objectives_playerProcessItem(ePlayer,7,coop_string_objectiveItemState7,globalCoop_objectives_makeToLocString(coop_string_objectiveItem7));
+						fShowObjective8 = globalCoop_objectives_playerProcessItem(ePlayer,8,coop_string_objectiveItemState8,globalCoop_objectives_makeToLocString(coop_string_objectiveItem8));
+//Check if there are even objectives we can display
+					if(	fShowObjective1 ||	fShowObjective2 ||
+						fShowObjective3	||	fShowObjective4 ||
+						fShowObjective5 ||	fShowObjective6 ||
+						fShowObjective7 ||	fShowObjective8)
+					{
+//TRANSMIT AND HUDPRINT OBJECTIVES
+//0=black , 1=red , 2=green , 3=yellow , 5=cyan , 6=magenta , 7=white
+						if(doesEntityExist(ePlayer))
+						{
+							if(!ePlayer.getFloatVar("coop_hasCoopInstalled"))
+							{
+								//globalCoop_playSound_c3v1r60(ePlayer,"sound/player/CommunicatorBeep.wav");
+								ePlayer.hudprint("\n^0=^5-^0=^5-^0=^5-^0=^5-^5^5Co-Op Mod "+coop_float_build+" ^0-^5 $$MissionObjectives$$ ^0=^5-^0=^5-^0=^5-^0=\n");	
+							}
+							if(fShowObjective1){
+								thread globalCoop_objectives_playerItemTransmitOnce(ePlayer,"coop_one",coop_string_objectiveItem1);
+								globalCoop_objectives_playerHudPrint(ePlayer,coop_string_objectiveItemState1+"$$:^7 "+coop_string_objectiveItem1);
+							}
+							if(fShowObjective2){
+								thread globalCoop_objectives_playerItemTransmitOnce(ePlayer,"coop_two",coop_string_objectiveItem2);
+								globalCoop_objectives_playerHudPrint(ePlayer,coop_string_objectiveItemState2+"$$:^7 "+coop_string_objectiveItem2);
+							}
+							if(fShowObjective3){
+								thread globalCoop_objectives_playerItemTransmitOnce(ePlayer,"coop_three",coop_string_objectiveItem3);
+								globalCoop_objectives_playerHudPrint(ePlayer,coop_string_objectiveItemState3+"$$:^7 "+coop_string_objectiveItem3);
+							}
+							if(fShowObjective4){
+								thread globalCoop_objectives_playerItemTransmitOnce(ePlayer,"coop_four",coop_string_objectiveItem4);
+								globalCoop_objectives_playerHudPrint(ePlayer,coop_string_objectiveItemState4+"$$:^7 "+coop_string_objectiveItem4);							}
+							if(fShowObjective5){
+								thread globalCoop_objectives_playerItemTransmitOnce(ePlayer,"coop_five",coop_string_objectiveItem5);
+								globalCoop_objectives_playerHudPrint(ePlayer,coop_string_objectiveItemState5+"$$:^7 "+coop_string_objectiveItem5);
+							}
+							if(fShowObjective6){
+								thread globalCoop_objectives_playerItemTransmitOnce(ePlayer,"coop_six",coop_string_objectiveItem6);
+								globalCoop_objectives_playerHudPrint(ePlayer,coop_string_objectiveItemState6+"$$:^7 "+coop_string_objectiveItem6);
+							}
+							if(fShowObjective7){
+								thread globalCoop_objectives_playerItemTransmitOnce(ePlayer,"coop_seven",coop_string_objectiveItem7);
+								globalCoop_objectives_playerHudPrint(ePlayer,coop_string_objectiveItemState7+"$$:^7 "+coop_string_objectiveItem7);
+							}
+							if(fShowObjective8){
+								thread globalCoop_objectives_playerItemTransmitOnce(ePlayer,"coop_eight",coop_string_objectiveItem8);
+								globalCoop_objectives_playerHudPrint(ePlayer,coop_string_objectiveItemState8+"$$:^7 "+coop_string_objectiveItem8);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+

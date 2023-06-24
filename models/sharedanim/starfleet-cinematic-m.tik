@@ -1,0 +1,1072 @@
+init
+{
+	server
+		{
+		classname Actor
+		}
+}
+
+animations models/char/base-male2
+	{
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m12-end-2nd
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+cin-m12-end-2nd-tuvok			cin-m12-end-2nd-tuvok.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			437 playDialog			"loc/eng/sound/dialog/m11l3/tuvok_endspeech1.mp3" 1, 10000, 0
+			437 simpleplayDialog	"loc/deu/sound/dialog/m11l3/tuvok_endspeech1.mp3" 1, 10000, 0
+		}
+	}
+
+cin-m12-end-2nd-picard		cin-m12-end-2nd-picard.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			210 playDialog			"loc/eng/sound/dialog/m11l3/picard_endspeech1.mp3" 1, 10000, 0
+			210 simpleplayDialog	"loc/deu/sound/dialog/m11l3/picard_endspeech1.mp3" 1, 10000, 0
+			
+			537 playDialog			"loc/eng/sound/dialog/m11l3/picard_endspeech2.mp3" 1, 10000, 0
+			537 simpleplayDialog	"loc/deu/sound/dialog/m11l3/picard_endspeech2.mp3" 1, 10000, 0
+			
+			665 playDialog			"loc/eng/sound/dialog/m11l3/picard_endspeech3.mp3" 1, 10000, 0
+			665 simpleplayDialog	"loc/deu/sound/dialog/m11l3/picard_endspeech3.mp3" 1, 10000, 0
+
+		}
+	}
+
+cin-m12-end-2nd-paco			cin-m12-end-2nd-paco.ska
+cin-m12-end-2nd-rico			cin-m12-end-2nd-rico.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+		}
+	}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m12-end
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+cin-m12-end-tuvok			cin-m12-end-tuvok.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+		}
+	}
+
+cin-m12-end-picard		cin-m12-end-picard.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			
+			13 playDialog			"loc/eng/sound/dialog/m11l3/picard_peaceful.mp3" 1, 10000, 0
+			13 simpleplayDialog	"loc/deu/sound/dialog/m11l3/picard_peaceful.mp3" 1, 10000, 0
+			
+			52 playDialog			"loc/eng/sound/dialog/m11l3/picard_suffer.mp3" 1, 10000, 0
+			52 simpleplayDialog	"loc/deu/sound/dialog/m11l3/picard_suffer.mp3" 1, 10000, 0
+			
+			122 playDialog			"loc/eng/sound/dialog/m11l3/picard_vain.mp3" 1, 10000, 0
+			122 simpleplayDialog	"loc/deu/sound/dialog/m11l3/picard_vain.mp3" 1, 10000, 0
+			
+			221 playDialog			"loc/eng/sound/dialog/m11l3/picard_clear.mp3" 1, 10000, 0
+			221 simpleplayDialog	"loc/deu/sound/dialog/m11l3/picard_clear.mp3" 1, 10000, 0
+			
+			349 playDialog			"loc/eng/sound/dialog/m11l3/picard_decimated.mp3" 1, 10000, 0
+			349 simpleplayDialog	"loc/deu/sound/dialog/m11l3/picard_decimated.mp3" 1, 10000, 0
+			
+			438 playDialog			"loc/eng/sound/dialog/m11l3/picard_short.mp3" 1, 10000, 0
+			438 simpleplayDialog	"loc/deu/sound/dialog/m11l3/picard_short.mp3" 1, 10000, 0
+			
+			553 playDialog			"loc/eng/sound/dialog/m11l3/picard_correct.mp3" 1, 10000, 0
+			553 simpleplayDialog	"loc/deu/sound/dialog/m11l3/picard_correct.mp3" 1, 10000, 0
+			
+			590 playDialog			"loc/eng/sound/dialog/m11l3/picard_rebound.mp3" 1, 10000, 0
+			590 simpleplayDialog	"loc/deu/sound/dialog/m11l3/picard_rebound.mp3" 1, 10000, 0
+			
+			747 playDialog			"loc/eng/sound/dialog/m11l3/picard_setaside.mp3" 1, 10000, 0
+			747 simpleplayDialog	"loc/deu/sound/dialog/m11l3/picard_setaside.mp3" 1, 10000, 0
+			
+			879 playDialog			"loc/eng/sound/dialog/m11l3/picard_course.mp3" 1, 10000, 0
+			879 simpleplayDialog	"loc/deu/sound/dialog/m11l3/picard_course.mp3" 1, 10000, 0
+			
+			931 playDialog			"loc/eng/sound/dialog/m11l3/picard_makeitso.mp3" 1, 10000, 0
+			931 simpleplayDialog	"loc/deu/sound/dialog/m11l3/picard_makeitso.mp3" 1, 10000, 0
+		}
+	}
+
+cin-m12-end-paco			cin-m12-end-paco.ska
+cin-m12-end-rico			cin-m12-end-rico.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			899 playDialog			"loc/eng/sound/dialog/m11l3/helm_return.mp3" 1, 10000, 0
+			899 simpleplayDialog	"loc/deu/sound/dialog/m11l3/helm_return.mp3" 1, 10000, 0
+		}
+	}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////             m11l1a_chell
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m11l1a_chell_Picard cin-m11l1a_chell_Picard.ska
+	{
+		server
+		{
+			147 playDialog			"loc/eng/sound/dialog/m11l1/picard_under.mp3" 1, 10000, 0//1
+			147 simpleplayDialog	"loc/deu/sound/dialog/m11l1/picard_under.mp3" 1, 10000
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////             m7-end
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m7-end-picard cin-m7-end-korban.ska
+	{
+		server
+		{
+			649 playDialog			"loc/eng/sound/dialog/m7l2/picard_takeshutt.mp3" 1, 10000, 0//1
+			649 simpleplayDialog	"loc/deu/sound/dialog/m7l2/picard_takeshutt.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////             igm4_protect
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-igm4_protect_BPicard cin-igm4_protect_BPicard.ska
+	{
+		server
+		{
+		}
+	}
+
+cin-igm4_protect_Picard cin-igm4_protect_Picard.ska
+	{
+		server
+		{
+			222 playDialog			"loc/eng/sound/dialog/ent_m4/picard_colony.mp3" 1, 10000, 0
+			222 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_colony.mp3" 1, 10000, 0
+			
+			334 playDialog			"loc/eng/sound/dialog/ent_m4/picard_intend.mp3" 1, 10000, 0
+			334 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_intend.mp3" 1, 10000, 0
+		}
+	}
+
+	cin-igm4_protect_tuvok cin-igm4_protect_tuvok.ska
+	{
+		server
+		{
+			75 playDialog			"loc/eng/sound/dialog/ent_m4/tuvok_distress2.mp3" 1, 10000, 0
+			75 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/tuvok_distress2.mp3" 1, 10000, 0
+		}
+	}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////             M4l2-Gonz
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	cin-m4l2-tuvok cin-m4l2-munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			616 playDialog			"loc/eng/sound/dialog/m4l2/tuvok_beamout2.mp3" 1, 10000, 0//1
+			616 simpleplayDialog	"loc/deu/sound/dialog/m4l2/tuvok_beamout2.mp3" 1, 10000 //1
+		}
+	}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m6l0-attack-engineering
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m6l0-engineering-barclay cin-m6l0-engineering-barclay.ska
+{
+		server
+		{
+			
+			83 forcealpha
+			83 alpha 0
+		}
+	}
+
+
+
+cin-m6l0-engineering-pinche cin-m6l0-engineering-barclayB.ska
+
+	{
+		server
+		{
+
+			0 forcealpha
+			0 alpha 0
+			83 alpha 100
+		}
+	}
+cin-m6l0-engineering-mike cin-m6l0-engineering-maleb.ska
+cin-m6l0-engineering-fred cin-m6l0-engineering-malec.ska
+cin-m6l0-engineering-bill cin-m6l0-engineering-maled.ska
+cin-m6l0-engineering-jose cin-m6l0-engineering-malee.ska
+cin-m6l0-engineering-juan cin-m6l0-engineering-malef.ska
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m9l2-munro
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+cin-m9l2_munro_lurok cin-m9l2_munro_lurok.ska
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m6l0-attack-bridgeB
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m6l0-bridge-B-tuvok cin-m6l0-bridge-B-tuvok.ska
+cin-m6l0-bridge-B-picard cin-m6l0-bridge-B-picard.ska
+cin-m6l0-bridge-B-maleA cin-m6l0-bridge-B-maleA.ska
+cin-m6l0-bridge-B-maleB cin-m6l0-bridge-B-maleB.ska
+cin-m6l0-bridge-B-maleC cin-m6l0-bridge-B-maleC.ska
+cin-m6l0-bridge-B-maleD cin-m6l0-bridge-B-maleD.ska
+cin-m6l0-bridge-B-maleF cin-m6l0-bridge-B-maleF.ska
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m6l0-attack-bridgeA
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m6l0-bridge-A-tuvok cin-m6l0-bridge-A-tuvok.ska
+cin-m6l0-bridge-A-picard cin-m6l0-bridge-A-picard.ska
+cin-m6l0-bridge-A-maleA cin-m6l0-bridge-A-maleA.ska
+cin-m6l0-bridge-A-maleB cin-m6l0-bridge-A-maleB.ska
+cin-m6l0-bridge-A-maleC cin-m6l0-bridge-A-maleC.ska
+cin-m6l0-bridge-A-maleD cin-m6l0-bridge-A-maleD.ska
+cin-m6l0-bridge-A-maleF cin-m6l0-bridge-A-maleF.ska
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              igm3-alienautopsy
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-igm3_tuvok cin-igm3_tuvok.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			60 playDialog		"loc/eng/sound/dialog/ent_m3/tuvok_pod.mp3" 1, 10000, 0
+			60 simpleplayDialog	"loc/deu/sound/dialog/ent_m3/tuvok_pod.mp3" 1, 10000, 0
+		}
+	}
+
+cin-igm3_picard cin-igm3_picard.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			190 playDialog			"loc/eng/sound/dialog/ent_m3/picard_organic.mp3" 1, 10000, 0
+			190 simpleplayDialog	"loc/deu/sound/dialog/ent_m3/picard_organic.mp3" 1, 10000, 0
+			
+			563 playDialog			"loc/eng/sound/dialog/ent_m3/picard_intell.mp3" 1, 10000, 0
+			563 simpleplayDialog	"loc/deu/sound/dialog/ent_m3/picard_intell.mp3" 1, 10000, 0
+			
+			856 playDialog			"loc/eng/sound/dialog/ent_m3/picard_fasc.mp3" 1, 10000, 0
+			856 simpleplayDialog	"loc/deu/sound/dialog/ent_m3/picard_fasc.mp3" 1, 10000, 0
+			
+			1182 playDialog			"loc/eng/sound/dialog/ent_m3/picard_instinct.mp3" 1, 10000, 0
+			1182 simpleplayDialog	"loc/deu/sound/dialog/ent_m3/picard_instinct.mp3" 1, 10000, 0
+			
+			1389 playDialog			"loc/eng/sound/dialog/ent_m3/picard_do.mp3" 1, 10000, 0
+			1389 simpleplayDialog	"loc/deu/sound/dialog/ent_m3/picard_do.mp3" 1, 10000, 0
+			
+			1526 playDialog			"loc/eng/sound/dialog/ent_m3/picard_research.mp3" 1, 10000, 0
+			1526 simpleplayDialog	"loc/deu/sound/dialog/ent_m3/picard_research.mp3" 1, 10000, 0
+			
+			1642 playDialog			"loc/eng/sound/dialog/ent_m3/picard_tactics.mp3" 1, 10000, 0
+			1642 simpleplayDialog	"loc/deu/sound/dialog/ent_m3/picard_tactics.mp3" 1, 10000, 0
+			
+			1807 playDialog			"loc/eng/sound/dialog/ent_m3/picard_consult.mp3" 1, 10000, 0
+			1807 simpleplayDialog	"loc/deu/sound/dialog/ent_m3/picard_consult.mp3" 1, 10000, 0
+			
+			2046 playDialog			"loc/eng/sound/dialog/ent_m3/picard_dismissed.mp3" 1, 10000, 0
+			2046 simpleplayDialog	"loc/deu/sound/dialog/ent_m3/picard_dismissed.mp3" 1, 10000, 0
+			
+			2156 playDialog			"loc/eng/sound/dialog/ent_m3/picard_goodjob.mp3" 1, 10000, 0
+			2156 playDialog			"loc/eng/sound/dialog/ent_m3/picard_goodjob.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              igm1_intro
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-igm1_intro_Picard cin-igm1_intro_Picard.ska
+	{
+		server
+		{
+			
+			135 playDialog			"loc/eng/sound/dialog/ent_m1/picard_welcome.mp3" 1, 10000, 0
+			135 simpleplayDialog	"loc/deu/sound/dialog/ent_m1/picard_welcome.mp3" 1, 10000, 0
+			
+			183 playDialog			"loc/eng/sound/dialog/ent_m1/picard_tuvok.mp3" 1, 10000, 0
+			183 simpleplayDialog	"loc/deu/sound/dialog/ent_m1/picard_tuvok.mp3" 1, 10000, 0
+			
+			474 playDialog			"loc/eng/sound/dialog/ent_m1/picard_addition.mp3" 1, 10000, 0
+			474 simpleplayDialog	"loc/deu/sound/dialog/ent_m1/picard_addition.mp3" 1, 10000, 0
+			
+			849 playDialog			"loc/eng/sound/dialog/ent_m1/picard_good2.mp3" 1, 10000, 0
+			849 simpleplayDialog	"loc/deu/sound/dialog/ent_m1/picard_good2.mp3" 1, 10000, 0
+		}
+	}
+
+	cin-igm1_intro_Tuvok cin-igm1_intro_Tuvok.ska
+	{
+		server
+		{
+			389 playDialog			"loc/eng/sound/dialog/ent_m1/tuvok_looking.mp3" 1, 10000, 0
+			389 simpleplayDialog	"loc/deu/sound/dialog/ent_m1/tuvok_looking.mp3" 1, 10000, 0
+			
+			1033 playDialog			"loc/eng/sound/dialog/ent_m1/tuvok_goarmory.mp3" 1, 10000, 0
+			1033 simpleplayDialog	"loc/deu/sound/dialog/ent_m1/tuvok_goarmory.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m6l1_idcap
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m6l1_idcap_Ops cin-m6l1_idcap_Ops.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			145 playDialog			"loc/eng/sound/dialog/m6l1/broff_ayeno.mp3" 1, 10000, 0
+			145 simpleplayDialog	"loc/deu/sound/dialog/m6l1/broff_ayeno.mp3" 1, 10000, 0
+		}
+	}
+
+cin-m6l1_idcap_Con cin-m6l1_idcap_Con.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			91	playDialog			"loc/eng/sound/dialog/m6l1/broff2_dead.mp3" 1, 10000, 0
+			91	simpleplayDialog	"loc/deu/sound/dialog/m6l1/broff2_dead.mp3" 1, 10000, 0
+			
+			351 playDialog			"loc/eng/sound/dialog/m6l1/broff_ayesir.mp3" 1, 10000, 0
+			351 simpleplayDialog	"loc/deu/sound/dialog/m6l1/broff_ayesir.mp3" 1, 10000, 0
+			
+			387 playDialog			"loc/eng/sound/dialog/m6l1/broff_noans.mp3" 1, 10000, 0
+			387 simpleplayDialog	"loc/deu/sound/dialog/m6l1/broff_noans.mp3" 1, 10000, 0
+			
+			586 playDialog			"loc/eng/sound/dialog/m6l1/broff_shipswarp.mp3" 1, 10000, 0
+			586 simpleplayDialog	"loc/deu/sound/dialog/m6l1/broff_shipswarp.mp3" 1, 10000, 0
+		}
+	}
+
+cin-m6l1_idcap_Tuvok cin-m6l1_idcap_Tuvok.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			21	playDialog			"loc/eng/sound/dialog/m6l1/tuvok_taravar.mp3" 1, 10000, 0
+			21	simpleplayDialog	"loc/deu/sound/dialog/m6l1/tuvok_taravar.mp3" 1, 10000, 0
+			
+			184 playDialog			"loc/eng/sound/dialog/m6l1/tuvok_exom.mp3" 1, 10000, 0
+			184 simpleplayDialog	"loc/deu/sound/dialog/m6l1/tuvok_exom.mp3" 1, 10000, 0
+			
+			411 playDialog			"loc/eng/sound/dialog/m6l1/tuvok_gridoff.mp3" 1, 10000, 0
+			411 simpleplayDialog	"loc/deu/sound/dialog/m6l1/tuvok_gridoff.mp3" 1, 10000, 0
+			
+			627 playDialog			"loc/eng/sound/dialog/m6l1/tuvok_ships.mp3" 1, 10000, 0
+			627 simpleplayDialog	"loc/deu/sound/dialog/m6l1/tuvok_ships.mp3" 1, 10000, 0
+		}
+	}
+
+cin-m6l1_idcap_Picard cin-m6l1_idcap_Picard.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			71	playDialog			"loc/eng/sound/dialog/m6l1/picard_shields.mp3" 1, 10000, 0
+			71	simpleplayDialog	"loc/deu/sound/dialog/m6l1/picard_shields.mp3" 1, 10000, 0
+			
+			125 playDialog			"loc/eng/sound/dialog/m6l1/picard_takein.mp3" 1, 10000, 0
+			125 simpleplayDialog	"loc/deu/sound/dialog/m6l1/picard_takein.mp3" 1, 10000, 0
+			
+			267 playDialog			"loc/eng/sound/dialog/m6l1/picard_highorb.mp3" 1, 10000, 0
+			267 simpleplayDialog	"loc/deu/sound/dialog/m6l1/picard_highorb.mp3" 1, 10000, 0
+			
+			371 playDialog			"loc/eng/sound/dialog/m6l1/picard_hail.mp3" 1, 10000, 0
+			371 simpleplayDialog	"loc/deu/sound/dialog/m6l1/picard_hail.mp3" 1, 10000, 0
+			
+			520 playDialog			"loc/eng/sound/dialog/m6l1/picard_assemble.mp3" 1, 10000, 0
+			520 simpleplayDialog	"loc/deu/sound/dialog/m6l1/picard_assemble.mp3" 1, 10000, 0
+			
+			660 playDialog			"loc/eng/sound/dialog/m6l1/picard_timing.mp3" 1, 10000, 0
+			660 simpleplayDialog	"loc/deu/sound/dialog/m6l1/picard_timing.mp3" 1, 10000, 0
+			
+			825 playDialog			"loc/eng/sound/dialog/m6l1/picard_sooner.mp3" 1, 10000, 0
+			825 simpleplayDialog	"loc/deu/sound/dialog/m6l1/picard_sooner.mp3" 1, 10000, 0
+			
+			1037 playDialog			"loc/eng/sound/dialog/m6l1/picard_orders.mp3" 1, 10000, 0
+			1037 simpleplayDialog	"loc/deu/sound/dialog/m6l1/picard_orders.mp3" 1, 10000, 0
+			
+			1136 playDialog			"loc/eng/sound/dialog/m6l1/picard_beamdown.mp3" 1, 10000, 0
+			1136 simpleplayDialog	"loc/deu/sound/dialog/m6l1/picard_beamdown.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m6l1_picgun
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m6l1_picgun_Picard cin-m6l1_picgun_Picard.ska
+	{
+		server
+		{
+			0 rendereffects +shadowFromBip01
+			0 useactorweapon "none"
+			58 attachmodel actorweapons/fed-compressionrifle-enhanced.tik tag_Rhand
+			60	playDialog			"loc/eng/sound/dialog/m6l1/picard_thanklt.mp3" 1, 10000, 0
+			60	simpleplayDialog	"loc/deu/sound/dialog/m6l1/picard_thanklt.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m6l1_Krindo
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		cin-m6l1_krindo_Tuvok cin-m6l1_krindo_Tuvok.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			81	playDialog			"loc/eng/sound/dialog/m6l1/tuvok_lowered.mp3" 1, 10000, 0
+			81	simpleplayDialog	"loc/deu/sound/dialog/m6l1/tuvok_lowered.mp3" 1, 10000, 0
+		}
+	}
+
+		cin-m6l1_krindo_Picard cin-m6l1_krindo_Picard.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			27	playDialog			"loc/eng/sound/dialog/m6l1/broff_offline.mp3" 1, 10000, 0
+			27	simpleplayDialog	"loc/deu/sound/dialog/m6l1/broff_offline.mp3" 1, 10000, 0
+			
+			214 playDialog			"loc/eng/sound/dialog/m6l1/picard_onscreen.mp3" 1, 10000, 0
+			214 simpleplayDialog	"loc/deu/sound/dialog/m6l1/picard_onscreen.mp3" 1, 10000, 0
+			
+			265 playDialog			"loc/eng/sound/dialog/m6l1/picard_krindo.mp3" 1, 10000, 0
+			265 simpleplayDialog	"loc/deu/sound/dialog/m6l1/picard_krindo.mp3" 1, 10000, 0
+			
+			422 playDialog			"loc/eng/sound/dialog/m6l1/picard_munro.mp3" 1, 10000, 0
+			422 simpleplayDialog	"loc/deu/sound/dialog/m6l1/picard_munro.mp3" 1, 10000, 0
+			
+			457 playDialog			"loc/eng/sound/dialog/m6l1/picard_stopby.mp3" 1, 10000, 0
+			457 simpleplayDialog	"loc/deu/sound/dialog/m6l1/picard_stopby.mp3" 1, 10000, 0
+			
+			495 playDialog			"loc/eng/sound/dialog/m6l1/picard_shotgun.mp3" 1, 10000, 0
+			495 simpleplayDialog	"loc/deu/sound/dialog/m6l1/picard_shotgun.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               igm2 debrief
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-igm2_debrief_Tuvok cin-igm2_debrief_Tuvok.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			167 playDialog			"loc/eng/sound/dialog/ent_m2/tuvok_candid.mp3" 1, 10000, 0
+			167	simpleplayDialog	"loc/deu/sound/dialog/ent_m2/tuvok_candid.mp3" 1, 10000, 0
+			
+			1176 playDialog			"loc/eng/sound/dialog/ent_m2/tuvok_cloaked.mp3" 1, 10000, 0
+			1176 simpleplayDialog	"loc/deu/sound/dialog/ent_m2/tuvok_cloaked.mp3" 1, 10000, 0
+		}
+	}
+
+cin-igm2_debrief_Picard cin-igm2_debrief_Picard.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			41 playDialog			"loc/eng/sound/dialog/ent_m2/picard_whathapp.mp3" 1, 10000, 0
+			41 simpleplayDialog	"loc/deu/sound/dialog/ent_m2/picard_whathapp.mp3" 1, 10000, 0
+			
+			1089 playDialog			"loc/eng/sound/dialog/ent_m2/picard_noship.mp3" 1, 10000, 0
+			1089 simpleplayDialog	"loc/deu/sound/dialog/ent_m2/picard_noship.mp3" 1, 10000, 0
+			
+			1220 playDialog			"loc/eng/sound/dialog/ent_m2/picard_rescue.mp3" 1, 10000, 0
+			1220 simpleplayDialog	"loc/deu/sound/dialog/ent_m2/picard_rescue.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m11l1 Romulan General
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m11l1_romgen_Picard cin-m11l1_romgen_Picard.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			77 playDialog			"loc/eng/sound/dialog/m11l1/picard_hail.mp3" 1, 10000, 0
+			77 simpleplayDialog	"loc/deu/sound/dialog/m11l1/picard_hail.mp3" 1, 10000, 0
+			
+			175 playDialog			"loc/eng/sound/dialog/m11l1/picard_emerg.mp3" 1, 10000, 0
+			175 simpleplayDialog	"loc/deu/sound/dialog/m11l1/picard_emerg.mp3" 1, 10000, 0
+			
+			380 playDialog			"loc/eng/sound/dialog/m11l1/picard_gladly.mp3" 1, 10000, 0
+			380 simpleplayDialog	"loc/deu/sound/dialog/m11l1/picard_gladly.mp3" 1, 10000, 0
+			
+			679 playDialog			"loc/eng/sound/dialog/m11l1/picard_dooms.mp3" 1, 10000, 0
+			679 simpleplayDialog	"loc/deu/sound/dialog/m11l1/picard_dooms.mp3" 1, 10000, 0
+			
+			1007 playDialog			"loc/eng/sound/dialog/m11l1/picard_afraid2.mp3" 1, 10000, 0
+			1007 simpleplayDialog	"loc/deu/sound/dialog/m11l1/picard_afraid2.mp3" 1, 10000, 0
+			
+			1291 playDialog			"loc/eng/sound/dialog/m11l1/picard_inside.mp3" 1, 10000, 0
+			1291 simpleplayDialog	"loc/deu/sound/dialog/m11l1/picard_inside.mp3" 1, 10000, 0
+			
+			1639 playDialog			"loc/eng/sound/dialog/m11l1/picard_goahead3.mp3" 1, 10000, 0
+			1639 simpleplayDialog	"loc/deu/sound/dialog/m11l1/picard_goahead3.mp3" 1, 10000, 0
+		}
+	}
+
+cin-m11l1_romgen_Crew cin-m11l1_romgen_Crew.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			39 playDialog			"loc/eng/sound/dialog/m11l1/brcrew_uncloak.mp3" 1, 10000, 0
+			39 simpleplayDialog		"loc/deu/sound/dialog/m11l1/brcrew_uncloak.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                igm6 brig
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-igm6_brig_Picard cin-igm6_brig_Picard.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			224 playDialog			"loc/eng/sound/dialog/ent_m6/picard_noone.mp3" 1, 10000, 0
+			224 simpleplayDialog	"loc/deu/sound/dialog/ent_m6/picard_noone.mp3" 1, 10000, 0
+			
+			267 playDialog			"loc/eng/sound/dialog/ent_m6/picard_pity.mp3" 1, 10000, 0
+			267 simpleplayDialog	"loc/deu/sound/dialog/ent_m6/picard_pity.mp3" 1, 10000, 0
+			
+			373 playDialog			"loc/eng/sound/dialog/ent_m6/picard_whodid.mp3" 1, 10000, 0
+			373 simpleplayDialog	"loc/deu/sound/dialog/ent_m6/picard_whodid.mp3" 1, 10000, 0
+			
+			534 playDialog			"loc/eng/sound/dialog/ent_m6/picard_knewabout.mp3" 1, 10000, 0
+			534 simpleplayDialog	"loc/deu/sound/dialog/ent_m6/picard_knewabout.mp3" 1, 10000, 0
+			
+			615 playDialog			"loc/eng/sound/dialog/ent_m6/picard_refomag.mp3" 1, 10000, 0
+			615 simpleplayDialog	"loc/deu/sound/dialog/ent_m6/picard_refomag.mp3" 1, 10000, 0
+			
+			773 playDialog			"loc/eng/sound/dialog/ent_m6/picard_findhim.mp3" 1, 10000, 0
+			773 simpleplayDialog	"loc/deu/sound/dialog/ent_m6/picard_findhim.mp3" 1, 10000, 0
+			
+			820 playDialog			"loc/eng/sound/dialog/ent_m6/picard_digitup.mp3" 1, 10000, 0
+			820 simpleplayDialog	"loc/deu/sound/dialog/ent_m6/picard_digitup.mp3" 1, 10000, 0
+			
+			966 playDialog			"loc/eng/sound/dialog/ent_m6/picard_basecomm.mp3" 1, 10000, 0
+			966 simpleplayDialog	"loc/deu/sound/dialog/ent_m6/picard_basecomm.mp3" 1, 10000, 0
+			
+			1139 playDialog			"loc/eng/sound/dialog/ent_m6/picard_barclay.mp3" 1, 10000, 0
+			1139 simpleplayDialog	"loc/deu/sound/dialog/ent_m6/picard_barclay.mp3" 1, 10000, 0
+		}
+	}
+
+cin-igm6_brig_Barclay cin-igm6_brig_Picard.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			1219 playDialog			"loc/eng/sound/dialog/ent_m6/barclay_aye2.mp3" 1, 10000, 0//1
+			1219 simpleplayDialog	"loc/deu/sound/dialog/ent_m6/barclay_aye2.mp3" 1, 10000
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                igm7 brief
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-igm7_brief_Tuvok cin-igm7_brief_Tuvok.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			571 playDialog			"loc/eng/sound/dialog/ent_m7/tuvok_locate.mp3" 1, 10000, 0
+			571 simpleplayDialog	"loc/deu/sound/dialog/ent_m7/tuvok_locate.mp3" 1, 10000, 0
+			
+			870 playDialog			"loc/eng/sound/dialog/ent_m7/tuvok_surgical.mp3" 1, 10000, 0
+			870 simpleplayDialog	"loc/deu/sound/dialog/ent_m7/tuvok_surgical.mp3" 1, 10000, 0
+		}
+	}
+
+cin-igm7_brief_Picard cin-igm7_brief_Picard.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			78 playDialog			"loc/eng/sound/dialog/ent_m7/picard_forged.mp3" 1, 10000, 0
+			78 simpleplayDialog		"loc/deu/sound/dialog/ent_m7/picard_forged.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                igm7 ready
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-igm7_ready_Tuvok cin-igm7_ready_Tuvok.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			193 playDialog			"loc/eng/sound/dialog/ent_m7/tuvok_without.mp3" 1, 10000, 0
+			193 simpleplayDialog	"loc/deu/sound/dialog/ent_m7/tuvok_without.mp3" 1, 10000, 0
+			
+			431 playDialog			"loc/eng/sound/dialog/ent_m7/tuvok_fedlaw.mp3" 1, 10000, 0
+			431 simpleplayDialog	"loc/deu/sound/dialog/ent_m7/tuvok_fedlaw.mp3" 1, 10000, 0
+		}
+	}
+
+cin-igm7_ready_Picard cin-igm7_ready_Picard.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			301 playDialog			"loc/eng/sound/dialog/ent_m7/picard_release.mp3" 1, 10000, 0
+			301 simpleplayDialog	"loc/deu/sound/dialog/ent_m7/picard_release.mp3" 1, 10000, 0
+			
+			538 playDialog			"loc/eng/sound/dialog/ent_m7/picard_oh.mp3" 1, 10000, 0
+			538 simpleplayDialog	"loc/deu/sound/dialog/ent_m7/picard_oh.mp3" 1, 10000, 0
+			
+			650 playDialog			"loc/eng/sound/dialog/ent_m7/picard_odd.mp3" 1, 10000, 0
+			650 simpleplayDialog	"loc/deu/sound/dialog/ent_m7/picard_odd.mp3" 1, 10000, 0
+			
+			775 playDialog			"loc/eng/sound/dialog/ent_m7/picard_careful.mp3" 1, 10000, 0
+			775 simpleplayDialog	"loc/deu/sound/dialog/ent_m7/picard_careful.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                igm3 Brief
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-igm3_brief_Tuvok cin-igm3_brief_Tuvok.ska
+	{
+		server
+		{
+			187 playDialog			"loc/eng/sound/dialog/ent_m3/tuvok_sweep.mp3" 1, 10000, 0
+			187 simpleplayDialog	"loc/deu/sound/dialog/ent_m3/tuvok_sweep.mp3" 1, 10000, 0
+			
+			578 playDialog			"loc/eng/sound/dialog/ent_m3/tuvok_shuttle.mp3" 1, 10000, 0
+			578 simpleplayDialog	"loc/deu/sound/dialog/ent_m3/tuvok_shuttle.mp3" 1, 10000, 0
+			
+			844 playDialog			"loc/eng/sound/dialog/ent_m3/tuvok_other.mp3" 1, 10000, 0
+			844 simpleplayDialog	"loc/deu/sound/dialog/ent_m3/tuvok_other.mp3" 1, 10000, 0
+		}
+	}
+
+	cin-igm3_brief_Picard cin-igm3_brief_Picard.ska
+	{
+		server
+		{
+			80 playDialog			"loc/eng/sound/dialog/ent_m3/picard_viok.mp3" 1, 10000, 0
+			80 simpleplayDialog	"loc/deu/sound/dialog/ent_m3/picard_viok.mp3" 1, 10000, 0
+			
+			504 playDialog			"loc/eng/sound/dialog/ent_m3/picard_answer.mp3" 1, 10000, 0
+			504 simpleplayDialog	"loc/deu/sound/dialog/ent_m3/picard_answer.mp3" 1, 10000, 0
+			
+			772 playDialog			"loc/eng/sound/dialog/ent_m3/picard_trail.mp3" 1, 10000, 0
+			772 simpleplayDialog	"loc/deu/sound/dialog/ent_m3/picard_trail.mp3" 1, 10000, 0
+			
+			922 playDialog			"loc/eng/sound/dialog/ent_m3/picard_invest.mp3" 1, 10000, 0
+			922 simpleplayDialog	"loc/deu/sound/dialog/ent_m3/picard_invest.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                IGM1-Picard
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-igm1-picard cin-igm1-picard.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			69 playDialog			"loc/eng/sound/dialog/ent_m1/picard_bridge.mp3" 1, 10000, 0
+			69 simpleplayDialog		"loc/deu/sound/dialog/ent_m1/picard_bridge.mp3" 1, 10000, 0
+			
+			141 playDialog			"loc/eng/sound/dialog/ent_m1/picard_long.mp3" 1, 10000, 0
+			141 simpleplayDialog	"loc/deu/sound/dialog/ent_m1/picard_long.mp3" 1, 10000, 0
+			
+			548 playDialog			"loc/eng/sound/dialog/ent_m1/picard_maxwarp.mp3" 1, 10000, 0
+			548 simpleplayDialog	"loc/deu/sound/dialog/ent_m1/picard_maxwarp.mp3" 1, 10000, 0
+			
+			621 playDialog			"loc/eng/sound/dialog/ent_m1/picard_makeso.mp3" 1, 10000, 0
+			621 simpleplayDialog	"loc/deu/sound/dialog/ent_m1/picard_makeso.mp3" 1, 10000, 0
+			
+			657 playDialog			"loc/eng/sound/dialog/ent_m1/picard_apology.mp3" 1, 10000, 0
+			657 simpleplayDialog	"loc/deu/sound/dialog/ent_m1/picard_apology.mp3" 1, 10000, 0
+			
+			986 playDialog			"loc/eng/sound/dialog/ent_m1/picard_andl.mp3" 1, 10000, 0
+			986 simpleplayDialog	"loc/deu/sound/dialog/ent_m1/picard_andl.mp3" 1, 10000, 0
+			
+			1035 playDialog			"loc/eng/sound/dialog/ent_m1/picard_rely.mp3" 1, 10000, 0
+			1035 simpleplayDialog	"loc/deu/sound/dialog/ent_m1/picard_rely.mp3" 1, 10000, 0
+		}
+	}
+
+	cin-igm1-tuvok cin-igm1-tuvok.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			247 playDialog			"loc/eng/sound/dialog/ent_m1/tuvok_distress.mp3" 1, 10000, 0
+			247 simpleplayDialog	"loc/deu/sound/dialog/ent_m1/tuvok_distress.mp3" 1, 10000, 0
+			
+			310 playDialog			"loc/eng/sound/dialog/ent_m1/gall_distress.mp3" 1, 10000, 0
+			310 simpleplayDialog	"loc/deu/sound/dialog/ent_m1/gall_distress.mp3" 1, 10000, 0
+		}
+	}
+
+	cin-igm1-helm cin-igm1-helm.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			598 playDialog			"loc/eng/sound/dialog/ent_m1/helm_hours.mp3" 1, 10000, 0
+			598 simpleplayDialog	"loc/deu/sound/dialog/ent_m1/helm_hours.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                igm4-leave
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-igm4_leave_Tuvok cin-igm4_leave_Tuvok.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			40 playDialog			"loc/eng/sound/dialog/ent_m4/tuvok_custody.mp3" 1, 10000, 0
+			40 simpleplayDialog		"loc/deu/sound/dialog/ent_m4/tuvok_custody.mp3" 1, 10000, 0
+			
+			703 playDialog			"loc/eng/sound/dialog/ent_m4/tuvok_bodies.mp3" 1, 10000, 0
+			703 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/tuvok_bodies.mp3" 1, 10000, 0
+		}
+	}
+
+	cin-igm4_leave_Picard cin-igm4_leave_Picard.ska
+	{
+		server
+		{
+			777 playDialog			"loc/eng/sound/dialog/ent_m4/picard_pichere.mp3" 1, 10000, 1
+			777 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_pichere.mp3" 1, 10000, 1
+			
+			851 playDialog			"loc/eng/sound/dialog/ent_m4/picard_stay.mp3" 1, 10000, 1
+			851 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_stay.mp3" 1, 10000, 1
+			
+			912 playDialog			"loc/eng/sound/dialog/ent_m4/picard_out.mp3" 1, 10000, 1
+			912 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_out.mp3" 1, 10000, 1
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                igm4 - attrex confrontation
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-igm4_attrex_Picard cin-igm4_attrex_Picard.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			40 	playDialog			"loc/eng/sound/dialog/ent_m4/picard_escort.mp3" 1, 10000, 0
+			40 	simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_escort.mp3" 1, 10000, 0
+			
+			97 	playDialog			"loc/eng/sound/dialog/ent_m4/picard_begpardon.mp3" 1, 10000, 0
+			97 	simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_begpardon.mp3" 1, 10000, 0
+			
+			210 playDialog			"loc/eng/sound/dialog/ent_m4/picard_certain.mp3" 1, 10000, 0
+			210 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_certain.mp3" 1, 10000, 0
+			
+			370 playDialog			"loc/eng/sound/dialog/ent_m4/picard_imposs.mp3" 1, 10000, 0
+			370 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_imposs.mp3" 1, 10000, 0
+			
+			452 playDialog			"loc/eng/sound/dialog/ent_m4/picard_priceless.mp3" 1, 10000, 0
+			452 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_priceless.mp3" 1, 10000, 0
+			
+			705 playDialog			"loc/eng/sound/dialog/ent_m4/picard_against.mp3" 1, 10000, 0
+			705 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_against.mp3" 1, 10000, 0
+			
+			810 playDialog			"loc/eng/sound/dialog/ent_m4/picard_impound.mp3" 1, 10000, 0
+			810 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_impound.mp3" 1, 10000, 0
+			
+			913 playDialog			"loc/eng/sound/dialog/ent_m4/picard_counter.mp3" 1, 10000, 0
+			913 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_counter.mp3" 1, 10000, 0
+			
+			1009 playDialog			"loc/eng/sound/dialog/ent_m4/picard_facility.mp3" 1, 10000, 0
+			1009 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_facility.mp3" 1, 10000, 0
+			
+			1146 playDialog			"loc/eng/sound/dialog/ent_m4/picard_justice.mp3" 1, 10000, 0
+			1146 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_justice.mp3" 1, 10000, 0
+			
+			1199 playDialog			"loc/eng/sound/dialog/ent_m4/picard_repairs.mp3" 1, 10000, 0
+			1199 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_repairs.mp3" 1, 10000, 0
+		}
+	}
+
+	cin-igm4_attrex_Tuvok cin-igm4_attrex_Tuvok.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			1051 playDialog			"loc/eng/sound/dialog/ent_m4/tuvok_antimatt.mp3" 1, 10000, 0
+			1051 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/tuvok_antimatt.mp3" 1, 10000, 0
+			
+			1241 playDialog			"loc/eng/sound/dialog/ent_m4/tuvok_aye.mp3" 1, 10000, 0
+			1241 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/tuvok_aye.mp3" 1, 10000, 0
+		}
+	}
+	
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                igm4_brief
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	cin-igm4_brief_Sec cin-igm4_brief_Sec.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+		}
+	}
+
+	cin-igm4_wbrief_Sec cin-igm4_brief_Secw.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+		}
+	}
+
+cin-igm4_brief_Picard cin-igm4_brief_Picard.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			262 playDialog			"loc/eng/sound/dialog/ent_m4/picard_deadatt.mp3" 1, 10000, 0
+			262 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_deadatt.mp3" 1, 10000, 0
+			
+			390 playDialog			"loc/eng/sound/dialog/ent_m4/picard_create.mp3" 1, 10000, 0
+			390 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_create.mp3" 1, 10000, 0
+			
+			569 playDialog			"loc/eng/sound/dialog/ent_m4/picard_serious.mp3" 1, 10000, 0
+			569 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_serious.mp3" 1, 10000, 0
+			
+			950 playDialog			"loc/eng/sound/dialog/ent_m4/picard_enough.mp3" 1, 10000, 0
+			950 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_enough.mp3" 1, 10000, 0
+			
+			1072 playDialog			"loc/eng/sound/dialog/ent_m4/picard_confined.mp3" 1, 10000, 0
+			1072 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_confined.mp3" 1, 10000, 0
+			
+			1261 playDialog			"loc/eng/sound/dialog/ent_m4/picard_talk.mp3" 1, 10000, 0
+			1261 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_talk.mp3" 1, 10000, 0
+			
+			1357 playDialog			"loc/eng/sound/dialog/ent_m4/picard_ithink.mp3" 1, 10000, 0
+			1357 simpleplayDialog	"loc/deu/sound/dialog/ent_m4/picard_ithink.mp3" 1, 10000, 0
+		}
+	}
+
+cin-igm4_brief_Tuvok cin-igm4_brief_Tuvok.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+		}
+	}
+
+cin-igm4_wbrief_Tuvok cin-igm4_brief_Tuvokw.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m3l2 - Chell
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m3l2-c-picard cin-m3l2-c-picard.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			324 playDialog			"loc/eng/sound/dialog/dallas02/picard_understands.mp3" 1, 10000, 0//1
+			324 simpleplayDialog	"loc/deu/sound/dialog/dallas02/picard_understands.mp3" 1, 10000
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m3l2 - Transporter Room
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	cin-m3l2-trans-crew2 cin-m3l2-trans-crew2.ska
+	{
+		server
+		{
+			0 forcealpha
+			0 alpha 0
+			
+			entry morph morph_lid-lshut 100 0.5
+			entry morph morph_lid-rshut 100 0.5
+			entry surface material3 +nodraw
+			entry blink 0
+			128 displayEffect TransportIn FederationNoAnim
+		}
+	}
+	
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                M2-L3 Picard
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	cin-m2l3_picard 			cin-m2l3_picard.ska
+		{
+		server
+		{
+			46 	playDialog			"loc/eng/sound/dialog/m2l2/picard_enjoy.mp3" 1, 10000, 0
+			46 	simpleplayDialog	"loc/deu/sound/dialog/m2l2/picard_enjoy.mp3" 1, 10000, 0
+			
+			128 playDialog			"loc/eng/sound/dialog/m2l2/picard_impress.mp3" 1, 10000, 0
+			128 simpleplayDialog	"loc/deu/sound/dialog/m2l2/picard_impress.mp3" 1, 10000, 0
+			
+			203 playDialog			"loc/eng/sound/dialog/m2l2/picard_beg.mp3" 1, 10000, 0
+			203 simpleplayDialog	"loc/deu/sound/dialog/m2l2/picard_beg.mp3" 1, 10000, 0
+			
+			236 playDialog			"loc/eng/sound/dialog/m2l2/picard_hazard.mp3" 1, 10000, 0
+			236 simpleplayDialog	"loc/deu/sound/dialog/m2l2/picard_hazard.mp3" 1, 10000, 0
+			
+			287 playDialog			"loc/eng/sound/dialog/m2l2/picard_excuse.mp3" 1, 10000, 0
+			287 simpleplayDialog	"loc/deu/sound/dialog/m2l2/picard_excuse.mp3" 1, 10000, 0
+			
+			425 playDialog			"loc/eng/sound/dialog/m2l2/picard_areyou.mp3" 1, 10000, 0
+			425 simpleplayDialog	"loc/deu/sound/dialog/m2l2/picard_areyou.mp3" 1, 10000, 0
+			
+			485 playDialog			"loc/eng/sound/dialog/m2l2/picard_challenge.mp3" 1, 10000, 0
+			485 simpleplayDialog	"loc/deu/sound/dialog/m2l2/picard_challenge.mp3" 1, 10000, 0
+			
+			591 playDialog			"loc/eng/sound/dialog/m2l2/picard_tellme.mp3" 1, 10000, 0
+			591 simpleplayDialog	"loc/deu/sound/dialog/m2l2/picard_tellme.mp3" 1, 10000, 0
+			
+			651 playDialog			"loc/eng/sound/dialog/m2l2/picard_transfer.mp3" 1, 10000, 0
+			651 simpleplayDialog	"loc/deu/sound/dialog/m2l2/picard_transfer.mp3" 1, 10000, 0
+			
+			697 playDialog			"loc/eng/sound/dialog/m2l2/picard_build.mp3" 1, 10000, 0
+			697 simpleplayDialog	"loc/deu/sound/dialog/m2l2/picard_build.mp3" 1, 10000, 0
+		}
+		}	
+	cin-m2l3_stem 			cin-m2l3_stem.ska
+		{
+		server
+		{
+			8 	playDialog			"loc/eng/sound/dialog/m2l2/stem_greet.mp3" 1, 10000, 0
+			8 	simpleplayDialog	"loc/deu/sound/dialog/m2l2/stem_greet.mp3" 1, 10000, 0
+			
+			79 	playDialog			"loc/eng/sound/dialog/m2l2/stem_sched.mp3" 1, 10000, 0
+			79 	simpleplayDialog	"loc/deu/sound/dialog/m2l2/stem_sched.mp3" 1, 10000, 0
+			
+			265 playDialog			"loc/eng/sound/dialog/m2l2/stem_superfl.mp3" 1, 10000, 0
+			265 simpleplayDialog	"loc/deu/sound/dialog/m2l2/stem_superfl.mp3" 1, 10000, 0
+			
+			312 playDialog			"loc/eng/sound/dialog/m2l2/stem_lawless.mp3" 1, 10000, 0
+			312 simpleplayDialog	"loc/deu/sound/dialog/m2l2/stem_lawless.mp3" 1, 10000, 0
+			
+			459 playDialog			"loc/eng/sound/dialog/m2l2/stem_wellno.mp3" 1, 10000, 0
+			459 simpleplayDialog	"loc/deu/sound/dialog/m2l2/stem_wellno.mp3" 1, 10000, 0
+			
+			582 playDialog			"loc/eng/sound/dialog/m2l2/stem_but.mp3" 1, 10000, 0
+			582 simpleplayDialog	"loc/deu/sound/dialog/m2l2/stem_but.mp3" 1, 10000, 0
+			
+			767 playDialog			"loc/eng/sound/dialog/m2l2/stem_well.mp3" 1, 10000, 0
+			767 simpleplayDialog	"loc/deu/sound/dialog/m2l2/stem_well.mp3" 1, 10000, 0
+		}
+		}
+		
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                M2L1-SF-Acadamy
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                                                                
+	cin-m2_stem cin-m2_stem.ska                                                       
+	{                                                                                 
+		server                                                                    
+		{                                                                         
+			29 	playDialog			"loc/eng/sound/dialog/m2l1/stem_satout.mp3" 1, 10000, 0        
+			29 	simpleplayDialog	"loc/deu/sound/dialog/m2l1/stem_satout.mp3" 1, 10000, 0        
+			
+			174 playDialog			"loc/eng/sound/dialog/m2l1/stem_newass.mp3" 1, 10000, 0       
+			174 simpleplayDialog	"loc/deu/sound/dialog/m2l1/stem_newass.mp3" 1, 10000, 0       
+			
+			409 playDialog			"loc/eng/sound/dialog/m2l1/stem_prec.mp3" 1, 10000, 0         
+			409 simpleplayDialog	"loc/deu/sound/dialog/m2l1/stem_prec.mp3" 1, 10000, 0         
+			
+			438 playDialog			"loc/eng/sound/dialog/m2l1/stem_chell.mp3" 1, 10000, 0
+			438 simpleplayDialog	"loc/deu/sound/dialog/m2l1/stem_chell.mp3" 1, 10000, 0
+			
+			568 playDialog			"loc/eng/sound/dialog/m2l1/stem_munroass.mp3" 1, 10000, 0     
+			568 simpleplayDialog	"loc/deu/sound/dialog/m2l1/stem_munroass.mp3" 1, 10000, 0     
+			
+			807 playDialog			"loc/eng/sound/dialog/m2l1/stem_best.mp3" 1, 10000, 0         
+			807 simpleplayDialog	"loc/deu/sound/dialog/m2l1/stem_best.mp3" 1, 10000, 0         
+			
+			1003 playDialog			"loc/eng/sound/dialog/m2l1/stem_delta.mp3" 1, 10000, 0              
+			1003 simpleplayDialog	"loc/deu/sound/dialog/m2l1/stem_delta.mp3" 1, 10000, 0              
+		}
+	}
+	cin-m2_2stem cin-m2_2stem.ska
+	{
+		server
+		{
+			60	playDialog			"loc/eng/sound/dialog/m2l1/stem_alpha.mp3" 1, 10000, 0
+			60	simpleplayDialog	"loc/deu/sound/dialog/m2l1/stem_alpha.mp3" 1, 10000, 0
+			
+			261 playDialog			"loc/eng/sound/dialog/m2l1/stem_nohaz.mp3" 1, 10000, 0
+			261 simpleplayDialog	"loc/deu/sound/dialog/m2l1/stem_nohaz.mp3" 1, 10000, 0
+			
+			362 playDialog			"loc/eng/sound/dialog/m2l1/stem_what.mp3" 1, 10000, 0
+			362 simpleplayDialog	"loc/deu/sound/dialog/m2l1/stem_what.mp3" 1, 10000, 0
+			
+			583 playDialog			"loc/eng/sound/dialog/m2l1/stem_extemp.mp3" 1, 10000, 0
+			583 simpleplayDialog	"loc/deu/sound/dialog/m2l1/stem_extemp.mp3" 1, 10000, 0
+			
+			757 playDialog			"loc/eng/sound/dialog/m2l1/stem_grate.mp3" 1, 10000, 0
+			757 simpleplayDialog	"loc/deu/sound/dialog/m2l1/stem_grate.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               IN GAME
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	cin-m3_pointing			cin-m3_pointing.ska
+	cin-m3_kneel-down			cin-m3_kneel-down.ska
+	cin-m3_idle-kneel			cin-m3_idle-kneel.ska
+	cin-m3_kneel-up			cin-m3_kneel-up.ska
+	cin-m3_collapse			cin-m3_collapse.ska
+	cin-m3_idle-collapse		cin-m3_idle-collapse.ska
+	cin-m3_bail			cin-m3_bail.ska
+	cin-m3_sitting			cin-m3_sitting.ska
+	cin-m3_frank			cin-m3_frank.ska
+	
+	}

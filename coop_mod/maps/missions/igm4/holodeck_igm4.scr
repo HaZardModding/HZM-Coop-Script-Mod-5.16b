@@ -1,0 +1,80 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	  HoloMission - 3
+//  Script By:    K. Thompson
+//  Geometry By:  K. Thompson
+//  Created on:   01/10/2002
+//
+//-----------------------------------------------------------------
+
+//void startHoloTrainingMissionIGM4();
+
+void grenadeLauncherWait();
+void grenadeLauncherGo();
+
+//Voided in ent-deck8-mission4
+//void holoMissionIGM4Over();
+
+////////////////////////////////
+//  startHoloTrainingMissionIGM4
+//  Start the holo mission
+////////////////////////////////
+void startHoloTrainingMissionIGM4()
+{
+	$triggerHoloDeck.thread( "" );
+	
+	//killAllTalking();
+
+	grenadeLauncherWait();
+}
+
+////////////////////////////////
+// Wait till player picks up grenade launcher
+////////////////////////////////
+void grenadeLauncherWait()
+{
+	$grenadeLauncher.ontouch( "grenadeLauncherGo" );
+	pause();
+}
+
+////////////////////////////////
+// start mission
+////////////////////////////////
+void grenadeLauncherGo()
+{
+	$grenadeLauncher.notouch();	
+	$grenadeLauncher.missionobjective( 0 );
+	$grenadeLauncher.remove();
+
+	globalCoop_level_hideAndNotSolid($holoDeckWeaponStand);
+	lockHoloDoor();
+	
+	globalCoop_player_giveAll("weapons/worldmodel-GrenadeLauncher.tik",.2);
+
+	//Remove This and the function that is calls.
+	setNextDialog( $korban, 11 );
+	$player.useentity( $korban );
+	
+//	centerprint( "add Fade out on other script on reload" );
+//	 globalCoop_main_wait2DotZero();
+
+//////////////////////////////////////////////
+//
+//////////////////////////////////////////////
+//
+// You need to remove unnecessary script stuff and just make the HoloMap load to 
+// ent-deck1_bridge instead of comming back here
+//
+//////////////////////////////////////////////
+//
+//////////////////////////////////////////////
+	
+	//--- Fade Out
+	camfadeout05();
+	dontSaveOrientation();
+	globalCoop_mission_completed("ent-training_weap2");
+}
+
+

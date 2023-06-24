@@ -1,0 +1,23 @@
+// WEAPONS
+cache models/weapons/worldmodel-phaser-STX.tik
+cache models/weapons/worldmodel-burstrifle.tik
+cache models/weapons/worldmodel-sniperrifle.tik
+cache models/weapons/worldmodel-photon.tik
+cache models/weapons/worldmodel-tricorder-STX.tik
+cache models/weapons/worldmodel-attrex-rifle.tik
+cache models/weapons/worldmodel-rom-radgun.tik
+//Not used in mp
+//cache models/weapons/worldmodel-grenadelauncher.tik
+//cache models/weapons/worldmodel-tetryon.tik
+//cache models/weapons/worldmodel-drull-staff.tik
+//cache models/weapons/worldmodel-IMod.tik
+
+// FX
+cache models/fx/fx-explosion-lavaburst-creature.tik
+cache models/fx/fx-explosion-debris-rocks-dust-gray.tik
+cache models/fx/fx-explosion-debris-metal-forever.tik
+cache models/fx/fx-lava-turmoil-small.tik
+
+cache models/fx/fx-beamsparkle-item.tik
+cache models/fx/fx-beamsparkle-boogaloo.tik
+cache models/fx/fx-beamsparkle-boogaloo2.tik

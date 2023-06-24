@@ -1,0 +1,116 @@
+TIKI
+setup
+   {
+   scale 4.35
+   lod_scale 2000
+   path models/obj/debris/rock
+   surface material1 shader gibgreen2
+   }
+
+init
+	{
+	server
+		{
+		classname               Projectile
+		setsize                 "-6 -6 -6" "6 6 6"
+		speed                   600
+		hitdamage               3
+		health                  5
+		meansofdeath            explosion
+		explosionmodel          fx/fx-explosion-projectile-basher-goo.tik
+		cache 			models/fx/fx-explosion-projectile-basher-goo.tik
+		addvelocity 		0 0 30
+		knockback               0
+		life                    2.25
+		drunk	  		1 3.25
+		surface all 		+nodraw
+		proj_notshootable
+		}
+
+	client
+	   {
+
+		cache goospray-basher.spr
+		cache goomist3.spr
+		cache sound/chars/crab/crab_projloop.wav
+		cache sound/chars/crab/crab_explo.wav
+		cache glowbeam-orange-01.spr
+
+      	originemitter goocenter
+        	(
+				spawnrate 24//26
+				model goospray-basher.spr
+				hardlink
+				life 0.4
+				scale 0.15
+				scalerate 1.75
+				angles 0 0 random 360
+				avelocity 0 0 crandom 35
+				randvel crandom 10 crandom 10 crandom 10
+				dofade 0.1 0 0
+	        )
+
+      	originemitter goocenter2
+        	(
+				spawnrate 10//11
+				model goomist3.spr
+				color 0.75 0.5 0.0
+				hardlink
+				life 0.3
+				scale 0.125
+				scalerate 1.75
+				angles 0 0 random 360
+				avelocity 0 0 crandom 35
+				randvel crandom 17 crandom 17 crandom 18
+				dofade 0.2 0 0
+	        )
+
+
+	   }
+	}
+
+
+animations
+   {
+   idle swiperock.tan
+	{
+	client
+		{
+
+		0 loopsound sound/chars/crab/crab_projloop.wav 1 150
+		exit sound sound/chars/crab/crab_explo.wav 1 1 350
+
+		entry swipeon "glowbeam-orange-01" tag_p1 tag_p2 0.375
+		exit swipeoff
+
+      		entry originspawn
+        	(
+				count 6
+				model goospray-basher.spr
+				hardlink
+				life 0.4
+				scale 0.15
+				scalerate 1.75
+				angles 0 0 random 360
+				avelocity 0 0 crandom 35
+				randvel crandom 10 crandom 10 crandom 10
+				dofade 0.1 0 0
+	        )
+
+      		entry originspawn
+        	(
+				count 3
+				model goomist3.spr
+				color 0.75 0.5 0.0
+				hardlink
+				life 0.3
+				scale 0.125
+				scalerate 1.75
+				angles 0 0 random 360
+				avelocity 0 0 crandom 35
+				randvel crandom 17 crandom 17 crandom 18
+				dofade 0.2 0 0
+	        )
+		}
+	}
+   }

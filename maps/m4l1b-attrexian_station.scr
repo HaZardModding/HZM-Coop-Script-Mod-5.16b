@@ -1,0 +1,1371 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	  M4L1b-attrexian_station
+//  Script By:    Adam 'Senn' Bellefeuil
+//  Geometry By:  Adam 'Senn' Bellefeuil
+//  Created on:   04/01/2002
+//  Last Edited:  Adam B
+//-----------------------------------------------------------------
+
+void main();
+void init();
+
+void initArchetypes();
+void setupAI();
+
+void levelStartSequence();
+
+void controlRoomLift();
+void dynamicLights();
+
+// hallway sequence 01
+void hallway_seq01_setup();
+void hallway_seq01();
+
+// hallway sequence 02
+void hallway_seq02_setup();
+void hallway_seq02();
+
+void hallway_seq02_chewerDeath();
+void hallway_seq02_chaser1Death();
+void hallway_seq02_chaser2Death();
+
+float chaser1alive = 1;
+float chaser2alive = 1;
+
+// control room sequence 02
+void controlRoom_seq02_setup();
+void controlRoom_seq02();
+
+// control room sequence 03
+void controlRoom_seq03_setup();
+void controlRoom_seq03();
+void controlRoom_seq03_launchPod();
+void controlRoom_seq03_kill();
+void controlRoom_seq03_weaponEnergy();
+void pod_launch_countdown();
+void trappedBasherTaunt();
+void controlRoom_seq03_basherDead();
+void lift_enable_failsafe();
+void lift_activate();
+
+float lift_activated = 0;
+float trappedBasherAlive = 1;
+float controlRoomDoorOpen = 0;
+float basherloose = 0;
+float controlRoom_seq02_attrexian_dead = 0;
+float controlRoom_seq02_attrexian2_dead = 0; 
+
+
+// control room sequence 04
+void controlRoom_seq04_setup();
+void controlRoom_seq04();
+
+float escapePodLaunched = 0;
+
+// cinematic command officials
+void cinematicDeath();
+void cinematicDeath_globalCoop_cin_skipThread();
+void coop_removePath(entity ePath);
+
+float boolCinematicEndRescue = 0;
+
+// Common functions
+void commonPositionObject( entity entObject, entity entDestination );
+
+// command core sequence 01
+void commandCore_seq01_setup();
+void commandCore_seq01();
+
+// command core sequence 02
+void commandCore_seq02();
+
+void commandCoreGroup_check();
+
+float commandCoreWavesDone = 0;
+
+// dynamic lights
+void damagedLight01();
+void damagedLight02();
+void damagedLight03();
+void damagedLight04();
+
+void toggleLightObject(float toggleBlink , entity lightObject , entity darkObject );
+void blinkLightObjects(string group, string style , float waitTime , entity lightObject , entity darkObject , float toggleBlink );
+
+float damagedLightsOn = 0;
+float controlRoomLiftDown = 1;
+
+void mission_complete();
+void mission_failed();
+void coop_removeMonsters();
+void end_level();
+void coop_endLevel();
+
+float boolPlayerFailed = 0;
+float coop_endCinSkippedAt=0;
+
+//===================================================================================================================================================
+//===================================================================================================================================================
+//  INCLUDES
+//===================================================================================================================================================
+//===================================================================================================================================================
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/global/global_common.scr"
+#include "maps/global_scripts/global_math.scr"
+#include "maps/global_scripts/global_array.scr"
+#include "maps/global_scripts/global_spawnWave.scr"
+#include "coop_mod/maps/global/global_cinematicFX.scr"
+#include "maps/global_scripts/global_archetype.scr"
+#include "coop_mod/maps/missions/4/m4l1b_dialog.scr"
+#include "coop_mod/maps/missions/4/m4l1b_cin.scr"
+
+
+void coop_moveUpObjectFromCurrentLocation(entity eObject,float fMoveUp)
+{
+	wait(4);
+	if(doesEntityExist(eObject)){
+		eObject.gravity(0);
+		eObject.moveUp(fMoveUp);
+		eObject.time(1);
+	}
+}
+
+
+//---------------------
+// Main Function
+// Level start thread
+//---------------------
+void main()
+{
+	globalCoop_server_precacheSingleplayer();
+	soundtrack( "music/m4l1b-attrexian_station.mus" );
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_string_nextMapToCheck			= "m4l2b-attrexian_station";//set the map we gona load next while we are in testmode
+//Set spawnangles for this level
+	coop_float_spawnAngle0 				= 170;	
+	coop_vector_spawnOrigin8 			= '5972 1550 2220';
+	coop_vector_spawnOrigin7 			= '5972 1620 2220';
+	coop_vector_spawnOrigin6 			= '5972 1690 2220';
+	coop_vector_spawnOrigin5 			= '5972 1760 2220';
+	coop_vector_spawnOrigin4 			= '5872 1760 2220';
+	coop_vector_spawnOrigin3 			= '5872 1690 2220';
+	coop_vector_spawnOrigin2 			= '5872 1620 2220';
+	coop_vector_spawnOrigin1 			= '5872 1550 2220';
+//Definie Objective
+	coop_string_objectiveItem1			= "ProceedToCommandCenter";
+	coop_string_objectiveItem2			= "FindDallasCrew";
+	coop_string_objectiveItem3			= "LaunchPod";
+	coop_string_objectiveItem4			= "HelpDefendStation";	
+//definie weapons
+	coop_string_weapon1 = "models/weapons/worldmodel-FieldAssaultRifle.tik";
+	coop_string_weapon2 = "models/weapons/worldmodel-BurstRifle.tik";
+	coop_string_weapon3 = "models/weapons/worldmodel-Phaser-stx.tik";
+	coop_string_weapon4 = "models/weapons/worldmodel-Tricorder-stx.tik";
+	coop_string_weapon5 = getCvar("coop_eWtik");
+//DYN Weapon
+	if(coop_string_weapon5 != "models/weapons/worldmodel-attrex-rifle.tik"){coop_string_weapon5 ="";}
+	else{setfloatvar("game.attrexianWeaponFound",1);}
+	
+	float fLift;
+	fLift = vectorGetZ($arch_lift1.getOrigin());
+	fLift += 40;
+	coop_vector_spawnOrigin1_z=fLift;
+	coop_vector_spawnOrigin2_z=fLift;
+	coop_vector_spawnOrigin3_z=fLift;
+	coop_vector_spawnOrigin4_z=fLift;
+	coop_vector_spawnOrigin5_z=fLift;
+	coop_vector_spawnOrigin6_z=fLift;
+	coop_vector_spawnOrigin7_z=fLift;
+	coop_vector_spawnOrigin8_z=fLift;
+	
+	thread 	setupAI();
+	
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+//Set viewModes
+	//$world.addAvailableViewMode( "structuralintegrity" ); //Not needed in this level
+
+	$sky.rendereffects( "+skyorigin" );
+	$world.entity_fade_dist( 8000 );
+	$world.clearAvailableViewModes();
+	$world.addAvailableViewMode( "none" );
+
+	waitForPlayer();
+	thread init();
+
+	// setup objectives
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.loadobjectives("m4l1b-attrexian_station");
+		wait( .1 );
+		$player.setobjectiveshow ( "CommandCenter" , 1 );
+	}else{
+	//spawn Class Selection
+		thread globalCoop_class_setup("Medic",'5292 1622 2190');
+		thread globalCoop_class_setup("HeavyWeapons",'5492 1622 2190');
+		thread globalCoop_class_setup("Technician",'5392 1622 2190');
+	}
+	//--- set starting objectives
+	//$player.setobjectiveshow ( "FindDallasCrew" , 1 );
+	globalCoop_objectives_update("incomplete",1,0);
+	thread globalCoop_objectives_update("incomplete",2,1);
+	
+	
+//Correct class selection origins, needed, since this map has a clip over the floor
+	thread coop_moveUpObjectFromCurrentLocation($coop_class_HeavyWeaponsModel,4);
+	thread coop_moveUpObjectFromCurrentLocation($coop_class_TechnicianModel,4);
+	thread coop_moveUpObjectFromCurrentLocation($coop_class_MedicModel,4);
+}
+
+
+
+//save us entity count the server has to deal with and this will reduce sync data
+//wich is permenantly exceeded on this map, making is unable for players to join
+//one the level is about 35% completed
+void coop_removePath(entity ePath)
+{
+	entity eRemove;
+	
+	while(doesEntityExist(ePath)){
+		eRemove = ePath;
+		ePath = ePath.gettargetentity();
+		globalCoop_level_remove(eRemove);
+		globalCoop_main_waitAFrame();
+	}
+}
+
+void commonPositionObject( entity entObject, entity entDestination )
+{
+	entObject.origin( entDestination.getOrigin() );
+	wait( .1 );
+	entObject.angles( entDestination.getAngles() );
+}
+
+
+void inaccessible_sound()
+{
+	entity e;
+	e = getcurrententity();
+	e.playsound( "sound/doors/door_locked.wav", 1, .7, 90 );
+}
+
+//---------------------
+// Init Function
+// Setup the world
+//---------------------
+void init()
+{
+	thread initDialog();
+	thread initArchetypes();
+	thread dynamicLights();
+	thread levelStartSequence();
+	thread hallway_seq01_setup();
+	thread hallway_seq02_setup();
+	thread controlRoom_seq02_setup();
+	thread controlRoom_seq03_setup();
+	thread controlRoom_seq04_setup();
+	thread commandCore_seq01_setup();
+
+	$commandOfficial01.scale( .975 );
+
+	$commandOfficial01.pushable( 0 );
+	$commandOfficial02.pushable( 0 );
+	$commandOfficial03.pushable( 0 );
+
+	$commandOfficial01.mass( 999999 );
+	$commandOfficial02.mass( 999999 );
+	$commandOfficial03.mass( 999999 );
+
+	// setup attrexians
+	$controlRoom_seq02_attrexian2.pushable( 0 );
+	$controlRoom_seq02_attrexian.pushable( 0 );
+
+	$controlRoom_seq02_attrexian2.immortal( 1 );
+	$controlRoom_seq02_attrexian.immortal( 1 );
+
+	$launchdoor.lock();
+
+	// turn off hazard team ai
+	$chell.ai_off();
+	$chang.ai_off();
+	$jurot.ai_off();
+
+	// dead attrexian anims
+	$deadgus1.anim( "dead_ground2" );
+	$deadgus2.anim( "dead_wall2" );
+
+	$commandOfficial01.nodamage();
+	$commandOfficial02.immortal( 1 );
+	$commandOfficial03.immortal( 1 );
+	$commandOfficial01.mass ( 30000 ); //You're not going ANYWHERE!!!
+
+	//--- setup the death cam actors
+	$commandOfficial01_DeathCam.setFrame( 50, "death2" );
+	$commandOfficial01_DeathCam.hide();
+	$commandOfficial01_DeathCam.notSolid();
+	$commandOfficial01_DeathCam.origin ( '4332.00 3244.00 2404.00' );
+
+	setfloatvar( "level.PodNotLaunched", TRUE );
+	setfloatvar( "level.PodLaunched", FALSE );
+	setfloatvar( "level.BasherLoose", FALSE );
+
+	wait( .25 );
+	// bind the control room lift trigger to the lift
+	$controlRoomLiftTrigger.bind( $controlRoomLift );
+	$arch_lift2.bind( $controlRoomLift );
+	thread controlRoomLift();
+
+	// globalCommon_SetupContextDialog( $chell , "chell" );
+	// globalCommon_SetupContextDialog( $chang , "chang" );
+	// globalCommon_SetupContextDialog( $jurot , "jurot" );
+}
+
+//---------------------
+// Archetypes Setup
+// Setup the archetypes
+//---------------------
+void initArchetypes()
+{
+	wait( 0.05 );
+	globalArchetype_Setup( $arch_lift1, "AttrexianLiftControl" );
+	globalArchetype_Setup( $arch_lift2, "AttrexianLiftControl" );
+	globalArchetype_Setup( $arch_doorpanel1, "AttrexianDoorPanel" );
+	globalArchetype_Setup( $arch_doorpanel2, "AttrexianDoorPanel" );
+	globalArchetype_Setup( $arch_doorpanel3, "AttrexianDoorPanel" );
+	globalArchetype_Setup( $arch_doorpanel4, "AttrexianDoorPanel" );
+	globalArchetype_Setup( $arch_doorpanel5, "AttrexianDoorPanel" );
+	globalArchetype_Setup( $arch_podcomputer1, "AttrexianPodPanel" );
+}
+
+//---------------------
+// setupAI
+// setup the AI
+//---------------------
+void setupAI()
+{
+	globalCommon_AiDummyHide( $lurkerEndRescue1 );
+	globalCommon_AiDummyHide( $lurkerEndRescue2 );
+	globalCommon_AiDummyHide( $lurkerEndRescue3 );
+	globalCommon_AiDummyHide( $lurkerEndRescue4 );
+	globalCommon_AiDummyHide( $lurkerEndRescue5 );
+	globalCommon_AiDummyHide( $lurkerEndRescue_Fake );
+	
+	$controlRoom_seq02_attrexian.ai_off();
+
+	$lurkerEndRescue1.immortal( 1 );
+	$lurkerEndRescue2.immortal( 1 );
+	$lurkerEndRescue3.immortal( 1 );
+	$lurkerEndRescue4.immortal( 1 );
+	$lurkerEndRescue5.immortal( 1 );
+	
+	$commandOfficial01.ai_off();
+	$commandOfficial02.ai_off();
+	$commandOfficial03.ai_off();
+
+	$cinematicMunro.ai_off();
+	$cinematicMunro.hide();
+	$cinematicMunro.notsolid();
+	
+	$cinematicMunro.ai_off();
+	$cinematicMunro.hide();
+	$cinematicMunro.angle(135);
+	$cinematicMunro.notsolid();
+	
+	$podlaunch_munro.notsolid();
+	$podlaunch_munro.ai_off();
+	$podlaunch_munro.hide();
+	
+	$munro.ai_off();
+	$munro.notsolid();
+	$munro.hide();
+}
+
+void coop_updateSpawns()
+{
+	float fLift;
+	while(1)
+	{//1130
+		fLift = vectorGetZ($arch_lift1.getOrigin());
+		fLift += -40;
+		coop_vector_spawnOrigin1_z=fLift;
+		coop_vector_spawnOrigin2_z=fLift;
+		coop_vector_spawnOrigin3_z=fLift;
+		coop_vector_spawnOrigin4_z=fLift;
+		coop_vector_spawnOrigin5_z=fLift;
+		coop_vector_spawnOrigin6_z=fLift;
+		coop_vector_spawnOrigin7_z=fLift;
+		coop_vector_spawnOrigin8_z=fLift;
+		globalCoop_main_waitAFrame();
+	}
+}
+
+
+//---------------------
+// Level Start Sequence
+// Elevator ride at level start
+//---------------------
+void levelStartSequence()
+{
+	wait( .5 );
+
+	thread coop_updateSpawns();
+	// start elevator up
+	$elevatorLevelStart.playsound( "sound/environment/machine/lift4.wav", 9, 1, 250 );
+	$arch_lift1.bind( $elevatorLevelStart );
+	$elevatorLevelStart.time( 8 );
+	$elevatorLevelStart.moveup( 1184 );
+	$elevatorLevelStart.nodamage();
+	waitfor( $elevatorLevelStart );
+	$elevatorLevelStart.playsound( "sound/environment/machine/lift4stop.wav", 9, 1, 250 );
+	wait( 1 );
+
+//Stop updating spawns
+	killthread("coop_updateSpawns");
+	
+	$doorLevelStart.playsound( "sound/doors/attrex_door_short1.wav", 10, 1, 250 );
+	trigger( "$doorLevelStart" );
+}
+
+//---------------------
+// Hallway Sequence 01 Setup
+// Chewer chases attrexian down the hall
+//---------------------
+void hallway_seq01_setup()
+{
+	//--- change the music
+
+	// turn off ai for the helpless attrexian
+	$hallway_seq01_attrexian.ai_off();
+	//$hallway_seq01_deadAttrexian.ai_off();
+
+	// turn off ai for the chewer
+	$hallway_seq01_chewer01.ai_off();
+	//$hallway_seq01_chewer02.ai_off();
+
+	// set the dead attrexians animation
+	//$hallway_seq01_deadAttrexian.anim( "cower_left_duck" );
+}
+
+//---------------------
+// Hallway Sequence 01
+// Chewer chases attrexian down the hall
+//---------------------
+void hallway_seq01()
+{
+	// Fire up the Dialog
+	music( "aux1" );
+	//Aaaaaaa! Help!
+	thread globalCoop_dialog_play($hallway_seq01_attrexian,"m4l1/att4_help.mp3", 1, 800, 0);
+
+	// Make the attrexian run down the hall
+	$hallway_seq01_attrexian.walkto( "hallway_seq01_attrexianNode01", "run" );
+	wait ( .5 );
+
+	// Make the Chewer hunt him down
+	$hallway_seq01_chewer01.walkto( "hallway_seq01_chewerNode01", "run" );
+	waitfor( $hallway_seq01_chewer01 );
+
+	$hallway_seq01_chewer01.turntoangle( 135 );
+	$hallway_seq01_attrexian.turntoangle( 315 );
+	waitfor ( $hallway_seq01_attrexian );
+	$hallway_seq01_attrexian.headwatch(globalCoop_return_playerClosestPreferActive($hallway_seq01_attrexian));
+
+	// Animate the  
+	globalCoop_actor_animateWaitForAnimation($hallway_seq01_chewer01,"attackcombo3");
+	wait ( .25 );
+	
+	// Spawn the explosion
+	trigger( "$hallway_seq01_explodePanel" );
+	
+	// Kill the attrexian, if not dead allready
+	if($hallway_seq01_attrexian.getHealth() > 0)
+	{
+		$hallway_seq01_attrexian.suicide();
+	}
+
+	// Animate the Chewer
+	globalCoop_actor_animateWaitForAnimation($hallway_seq01_chewer01,"alert1");
+
+	// Give the Chewer the player as an enemy, to ruin his day
+	$hallway_seq01_chewer01.attack(globalCoop_return_playerClosestPreferActive($hallway_seq01_chewer01));
+	$hallway_seq01_chewer01.ai_on();
+}
+
+//---------------------
+// Hallway Sequence 02 Setup
+//
+//---------------------
+void hallway_seq02_setup()
+{
+	$chaser1.health( 120 );
+	$chaser1.health( 120 );
+
+	$runner.killthread( "hallway_seq02_chewerDeath" );
+	$chaser1.killthread( "hallway_seq02_chaser1Death" );
+	$chaser2.killthread( "hallway_seq02_chaser2Death" );
+}
+
+//---------------------
+// Hallway Sequence 02
+//
+//---------------------
+void hallway_seq02()
+{
+	trigger( "$chewerSound1" );
+
+	$runner.walkto( "$runnerNode1", "run" );
+	$chaser1.walkto( "$chaser1node", "run" );
+	$chaser2.walkto( "$chaser2node", "run" );
+	thread globalCoop_dialog_play($chaser1,"m4l1/attrex2_moving.mp3", 1, 800, 0 );
+	
+	thread globalCoop_actor_healthMultiplicatePerPlayer($runner);
+	
+	wait( 1 );
+	globalCoop_dialog_play($chaser2,"m4l1/attrex_stopinv.mp3", 1, 800, 0 );
+	wait(1.5);
+	if($chaser1.getHealth() > 0)
+	{
+		$chaser1.suicide();
+	}
+	wait(0.5);
+	if($chaser2.getHealth() > 0)
+	{
+		$chaser2.suicide();
+	}
+
+	thread globalCoop_dialog_playSimple($world,"m4l1/attcomp_sechub9.mp3", 1,1111111);
+	$runner.ai_on();
+	$runner.attack(globalCoop_return_playerClosestPreferActive($runner));
+	trigger( "$chewerSound1" );
+}
+
+//---------------------
+// Hallway Sequence 02 Chewer Death Thread
+//
+//---------------------
+void hallway_seq02_chewerDeath()
+{
+	wait( 1 );
+
+	if( chaser1alive == 1 )
+	{
+		//$chaser1.ai_off();
+		$chaser1.turntowardsplayer();
+		thread globalCoop_dialog_play($chaser1,"m4l1/attrex4_thankfa.mp3", 1, 800, 1 );
+
+		if( chaser2alive == 1 )
+		{
+			//$chaser2.ai_off();
+			$chaser2.turntowardsplayer();
+		}
+
+		wait(4);
+
+		if( chaser2alive == 1 )
+		{
+			thread globalCoop_dialog_play($chaser1,"m4l1/attrex_giveyou.mp3", 1, 800, 1 );
+		}
+	}
+}
+
+//---------------------
+// Hallway Sequence 02 Attrexian 1 Death Thread
+//
+//---------------------
+void hallway_seq02_chaser1Death()
+{
+	chaser1alive = 0;
+}
+
+//---------------------
+// Hallway Sequence 02 Attrexian 2 Death Thread
+//
+//---------------------
+void hallway_seq02_chaser2Death()
+{
+	chaser2alive = 0;
+}
+
+//---------------------
+// Control Room Lift
+// Operates the control room lift
+//---------------------
+void controlRoomLift()
+{
+	$controlRoomLiftTrigger.nottriggerable();
+	if( controlRoomLiftDown == 1 )
+	{
+		// move the lift up
+		$controlRoomLift.playsound( "sound/ships/attrexian/att-beepconfirm.wav", 6, .7, 250 );
+
+		$controlRoomLift.playsound( "sound/environment/machine/lift4.wav", 9, 1, 250 );
+		if(!cvar_bool_multiplayer){//Singleplayer
+			$lift_clip.solid();
+		}
+		$controlRoomLift.time( 4 );
+		$controlRoomLift.movetopos('7584 3752 2368');
+		//NEW SOUND - Lift moves up
+		waitfor( $controlRoomLift );
+		$lift_clip.notsolid();
+		$controlRoomLift.playsound( "sound/environment/machine/lift4stop.wav", 9, 1, 250 );
+		controlRoomLiftDown = 0;
+	//Get that lift down again, to avoid players get stuck down there in multiplayer
+		if(controlRoomLiftDown == 0 && cvar_bool_multiplayer == 1 && lift_activated == 1){
+			wait(4);
+			if(controlRoomLiftDown == 0){
+				thread controlRoomLift();
+			}
+		}
+	}
+	else
+	{
+		$controlRoomLift.playsound( "sound/ships/attrexian/att-beepconfirm.wav", 6, .7, 250 );
+		// move the lift down
+		$controlRoomLift.playsound( "sound/environment/machine/lift4.wav", 9, 1, 250 );
+		$controlRoomLift.time( 4 );
+		$controlRoomLift.movetopos('7584 3752 2112');
+		//NEW SOUND - Lift moves down
+		waitfor( $controlRoomLift );
+		$controlRoomLift.playsound( "sound/environment/machine/lift4stop.wav", 9, 1, 250 );
+		controlRoomLiftDown = 1;
+	}
+
+	wait( .25 );
+
+	$controlRoomLiftTrigger.triggerable();
+}
+
+
+//---------------------
+// We Need Help Dialog
+// Attrexian dialog if player tries to leave
+//---------------------
+void weNeedHelp()
+{
+	//if(!cvar_bool_multiplayer){//Singleplayer
+		//Where are you going? We need help!
+		globalCoop_dialog_play($controlRoom_seq02_attrexian2,"m4l1/att4_wherego.mp3", 1, 800, 1);
+	//}
+}
+
+void controlRoom_seq02_setup()
+{
+
+}
+
+//---------------------
+// Control Room Sequence 02
+// Attrexian lowers lift to control room for player
+//---------------------
+void controlRoom_seq02()
+{
+	thread pod_launch_countdown();
+	thread lift_enable_failsafe();
+	
+	//--- change the music
+	music( "suspense" );
+
+	$controlRoom_seq02_attrexian.setactorflag("cannotuse" , 1.0 );
+
+	//Attrexian return to the window
+	globalCoop_actor_walkToVector($controlRoom_seq02_attrexian2,'7956 3524 2112.5',"walk");
+	wait( .5 );
+	
+	// attrexian runs to broken wall panel
+	globalCoop_actor_walkTo($controlRoom_seq02_attrexian,"$controlRoom_seq02_node01","run");
+	wait( .25 );
+
+	$controlRoom_seq02_attrexian.turntoangle( 270 );
+	wait( .5 );
+
+	// attrexian works on panel
+	$controlRoom_seq02_sparks.loopsound( "sound/environment/electric/fritz2.wav", 1.5, 300 );
+
+	globalCoop_actor_animateWaitForAnimation($controlRoom_seq02_attrexian,"ent-curvedconsole-gesture");
+	globalCoop_actor_animateWaitForAnimation($controlRoom_seq02_attrexian,"ent-curvedconsole-gesture1");
+	globalCoop_actor_animateWaitForAnimation($controlRoom_seq02_attrexian,"ent-curvedconsole-gesture2");
+	globalCoop_actor_animateWaitForAnimation($controlRoom_seq02_attrexian,"ent-curvedconsole-idle");
+	wait( 1 );
+
+	globalCoop_actor_animateWaitForAnimation($controlRoom_seq02_attrexian,"ent-curvedconsole-gesture");
+	$controlRoom_seq02_sparks.stoploopsound();
+	
+	$controlRoom_seq02_sparks.stop();
+	$controlRoom_seq02_sparks.playsound( "sound/ships/attrexian/att-beepconfirm.wav", 6, 1, 500 );
+
+	thread lift_activate();
+
+	wait( .5 );
+	$controlRoom_seq02_attrexian.anim( "idle" );
+	$controlRoom_seq02_attrexian.turntowardsplayer();
+	wait( .25 );
+	$controlRoom_seq02_attrexian.angle( 0 );
+
+	globalCoop_actor_walkTo($controlRoom_seq02_attrexian,"$controlRoom_seq02_node03","walk");
+}
+
+void lift_activate()
+{
+	thread controlRoomLift();
+
+	lift_activated = 1;
+
+	//It worked! Get to the master control room and launch the pod!
+	$controlRoom_seq02_attrexian.setactorflag("cannotuse" , 0.0 );
+	globalCoop_dialog_play($controlRoom_seq02_attrexian,"m4l1/att4_wrkpod.mp3", 1, 800, 1);
+
+	// attrexian runs to the window to watch the pod
+	globalCoop_actor_walkTo($controlRoom_seq02_attrexian,"$controlRoom_seq02_node02","run");
+	$controlRoom_seq02_attrexian.turntoangle( 0 );
+}
+
+void lift_enable_failsafe()
+{
+	wait( 20 );
+	if( lift_activated != 1 )
+	{
+		killthread( "controlRoom_seq02" );
+		thread lift_activate();
+	}
+}
+
+//---------------------
+// Countdown and update the boss health bar until time is up, then release the basher.
+// This thread should be killed if the player successfully launches the pod.
+//---------------------
+float PODLAUNCH_MAXTIME = 35;
+void pod_launch_countdown()
+{
+	//--- change the music
+	music( "suspense" );
+	thread globalCoop_objectives_update("incomplete",3,1);
+
+	float timeLeft;
+	timeLeft = PODLAUNCH_MAXTIME;
+	
+	globalCoop_huds_AddAll("m4l1b-podtimer");
+	float fPlayerIdInUse;
+	while( timeLeft >= 0 )
+	{
+		if(!cvar_bool_multiplayer){//Singleplayer
+			$player.setstat( "generic", 100 * (timeLeft / PODLAUNCH_MAXTIME) );
+			wait( 1 );
+		}
+		else{
+			entity ePlayer;
+			
+			fPlayerIdInUse = 1;
+			while(fPlayerIdInUse <= coop_integer_maxPlayers){
+				ePlayer = getentity("player"+ fPlayerIdInUse);
+				if(doesEntityExist(ePlayer)){
+					ePlayer.setstat( "generic", 100 * (timeLeft / PODLAUNCH_MAXTIME) );
+				}
+				fPlayerIdInUse++;
+				wait(.05);
+			}
+			wait( 0.7 );
+		}
+		timeLeft--;
+	}
+
+	// time up
+	globalCoop_huds_RemoveAll("m4l1b-podtimer");
+
+	//--- change the music
+	music( "failure" );
+	thread globalCoop_objectives_update("failed",3,1);
+
+	thread controlRoom_seq03();
+}
+
+//---------------------
+// Control Room Sequence 03
+// Launch escape pod sequence
+//---------------------
+void controlRoom_seq03_setup()
+{
+	// turn off the trapped chewers ai and set his animation
+	$trappedBasher.bind( $escapePod );
+	$trappedBasher.notsolid();
+
+	//--- bind the escape pod to the script origin
+	$escapePod.bind( $escapePod_Origin );
+	$pod_fire1.bind( $escapePod_Origin );
+	$pod_fire2.bind( $escapePod_Origin );
+}
+
+void trappedBasherTaunt()
+{
+	while( trappedBasherAlive == 1 )
+	{
+		if( doesEntityExist( $trappedBasher ) )
+		{
+			globalCoop_actor_animateWaitForAnimation($trappedBasher,"nosound_taunt");
+			$trappedBasher.anim( "nosound_idle1" );	wait( 4 );
+			globalCoop_actor_animateWaitForAnimation($trappedBasher,"nosound_twitch");
+			globalCoop_actor_animateWaitForAnimation($trappedBasher,"nosound_twitch");
+			$trappedBasher.anim( "nosound_idle1" );	wait( 4 );
+
+			$trappedBasher.angle( 270 );
+			$trappedBasher.moveSouth( 180 );
+			waitfor( $trappedBasher );
+
+			globalCoop_actor_animateWaitForAnimation($trappedBasher,"nosound_attackcombo2");
+			$trappedBasher.anim( "nosound_idle1" );
+
+			$trappedBasher.angle( 90 );
+			$trappedBasher.moveNorth( 180 );
+			waitfor( $trappedBasher );
+			$trappedBasher.angle( 180 );
+		}
+
+		wait( 2 );
+	}
+}
+
+void controlRoom_seq03()
+{
+	basherloose = 1;
+
+	if( doesEntityExist( $weNeedHelpTrigger ) )
+	{
+		$weNeedHelpTrigger.remove();
+	}
+
+	if ( escapePodLaunched == 0 )
+	{
+		// alien breaks loose and attacks attrexian
+		trappedBasherAlive = 0;
+		killthread( "trappedBasherTaunt" );
+
+		$thankYouTrigger.remove();
+
+		$trappedBasher.anim( "nosound_idle1" );
+		$trappedBasher.angle( 270 );
+		$trappedBasher.time( .75 );
+		$trappedBasher.moveSouth( 400 );
+		waitfor( $trappedBasher );
+		$trappedBasher.remove();
+
+		thread globalCoop_dialog_play($controlRoom_seq02_attrexian,"m4l1/att5_out.mp3", 1, 800, 0); //It's out! It's loose!
+		$controlRoom_seq02_attrexian.anim( "cowerr" );
+		$controlRoom_seq02_attrexian2.anim( "cowerl" );
+
+		setfloatvar( "level.PodNotLaunched", FALSE );
+		setfloatvar( "level.PodLaunched", FALSE );
+		setfloatvar( "level.BasherLoose", TRUE );
+
+		wait( 4 );
+
+		//--- change the music
+		music( "failure" );
+		trigger( "$controlRoomPodBasherSpawn" );
+		wait( .1 );
+
+		thread globalCoop_dialog_play($controlRoom_seq02_attrexian,"m4l1/attrex1_going.mp3", 1, 1000, 0);
+
+		// blow open the door
+		$controlRoomDoor.remove();
+		$podDoorClip.remove();
+		triggerentity( $bentDoorExplosion );
+		$bentDoor.show();
+		$bentDoorPlayerClip.solid();
+	
+		globalCoop_actor_healthMultiplicatePerPlayer($controlRoomPodBasher);
+		$controlRoomPodBasher.pushable( 0 );
+		$controlRoomPodBasher.updatebosshealth( 1 , 1 );
+		$controlRoomPodBasher.maxbosshealth ( $controlRoomPodBasher.getHealth() );
+		$controlRoomPodBasher.health ( $controlRoomPodBasher.getHealth() );
+		$controlRoomPodBasher.killthread( "controlRoom_seq03_basherDead" );
+
+		$controlRoom_seq02_attrexian.setactorflag("cannotuse" , 1.0 );
+		$controlRoom_seq02_attrexian2.setactorflag("cannotuse" , 1.0 );
+
+		$controlRoomPodBasher.ai_off();
+		$controlRoomPodBasher.walkto( "cinematic_controlRoom_node01", "run" , 0, -1 );
+		waitfor( $controlRoomPodBasher );
+
+		thread globalCoop_dialog_play($controlRoom_seq02_attrexian2,"m4l1/att4_help2.mp3", 1, 800, 0); //Help! Help!
+
+		// close the door
+		trigger( "$controlRoomDoor" );
+
+		$controlRoomPodBasher.ai_on();
+		//$controlRoom_seq02_attrexian.ai_on();
+		//$controlRoom_seq02_attrexian2.ai_on();
+		$controlRoom_seq02_attrexian.immortal( 0 );
+		$controlRoom_seq02_attrexian2.immortal( 0 );
+		$controlRoom_seq02_attrexian.health( 5 );
+		$controlRoom_seq02_attrexian2.health( 5 );
+		$controlRoom_seq02_attrexian.takedamage();
+		$controlRoom_seq02_attrexian2.takedamage();
+		$controlRoom_seq02_attrexian.killthread( "controlRoom_seq03_basherAttack1" );
+		$controlRoom_seq02_attrexian2.killthread( "controlRoom_seq03_basherAttack2" );
+
+		$controlRoomPodBasher.attack( $controlRoom_seq02_attrexian );
+	}
+}
+
+void controlRoom_seq03_basherAttack1()
+{
+	controlRoom_seq02_attrexian_dead = 1;
+	$controlRoomPodBasher.attack( $controlRoom_seq02_attrexian2 );
+}
+
+void controlRoom_seq03_basherAttack2()
+{
+	controlRoom_seq02_attrexian2_dead = 1;
+	$controlRoomPodBasher.attack(globalCoop_return_playerClosestPreferActive($controlRoomPodBasher));
+}
+
+void controlRoom_seq03_basherDead()
+{
+	setfloatvar( "level.PodNotLaunched", FALSE );
+	setfloatvar( "level.PodLaunched", TRUE );
+	setfloatvar( "level.BasherLoose", FALSE );
+
+	$launchdoor.unlock();
+	$launchdoor_green.show();
+	$launchdoor_red.remove();	
+
+	if( controlRoom_seq02_attrexian_dead != 1 )
+	{
+		$controlRoom_seq02_attrexian.immortal( 1 );
+		$controlRoom_seq02_attrexian.anim( "idle" );
+	}
+
+	if( controlRoom_seq02_attrexian2_dead != 1 )
+	{
+		$controlRoom_seq02_attrexian2.immortal( 1 );
+		$controlRoom_seq02_attrexian2.anim( "idle" );
+
+		//Thank you!
+		globalCoop_dialog_play($controlRoom_seq02_attrexian2,"m4l1/att4_thank.mp3", 1, 800, 1);
+	}
+}
+
+
+void controlRoom_seq03_launchPod()
+{
+	killthread( "pod_launch_countdown" );
+	globalCoop_huds_RemoveAll("m4l1b-podtimer");
+
+	$controlRoom_seq02_attrexian.setactorflag("cannotuse" , 0.0 );
+
+	if( basherloose != 1 )
+	{
+		$launchdoor.unlock();
+		$launchdoor_green.show();
+		$launchdoor_red.remove();
+	}
+
+	if( trappedBasherAlive == 1 )
+	{
+		thread globalCoop_objectives_update("complete",3,1);
+	}
+
+	escapePodLaunched = 1;
+	trappedBasherAlive = 0;
+	killthread( "trappedBasherTaunt" );
+
+	setfloatvar( "level.PodNotLaunched", FALSE );
+	setfloatvar( "level.PodLaunched", TRUE );
+	setfloatvar( "level.BasherLoose", FALSE );
+
+	$podUnlaunched.remove();
+	$podLaunched.show();
+
+	if( doesEntityExist( $weNeedHelpTrigger ) )
+	{
+		$weNeedHelpTrigger.remove();
+	}
+
+	//--- change the music
+	music( "success" );
+
+	$podLaunched.playsound( "sound/ships/attrexian/att-beepconfirm.wav", 6, .7, 800 );
+	$podLaunched.playsound( "sound/ships/attrexian/att-podjet.wav", 5, .7, 800 );
+
+	//centerprint( "POD LAUNCH SUCCESSFUL" );
+
+	triggerentity( $podLaunchDust );
+	triggerentity( $podLaunchQuake );
+	$escapePod_Origin.followpath( $escapePodPath01 );
+
+	wait( .5 );
+	$pod_fire1.show();
+	$pod_fire2.show();
+
+	if( doesEntityExist( $thankYouTrigger ) )
+	{
+		$thankYouTrigger.triggerable();
+	}
+
+	wait( .5 );
+	globalCoop_dialog_playSimple($world,"m4l1/attcomp_esclaunched.mp3", 1, 1111111);
+
+	wait( .75 );
+
+	if( doesEntityExist( $trappedBasher ) )
+	{
+		$trappedBasher.remove();
+	}
+
+	$escapePod_Origin.remove();
+	$escapePod.remove();
+	$pod_fire1.remove();
+	$pod_fire2.remove();
+}
+
+void controlRoom_seq03_weaponEnergy()
+{
+	$controlRoom_seq02_attrexian.setactorflag("cannotuse" , 1.0 );
+
+	$controlRoom_seq02_attrexian.turntowardsplayer();
+	$controlRoom_seq02_attrexian.headwatch(globalCoop_return_playerClosestPreferActive($controlRoom_seq02_attrexian));
+	wait( .25 );
+	$controlRoom_seq02_attrexian2.turntowardsplayer();
+	$controlRoom_seq02_attrexian2.headwatch(globalCoop_return_playerClosestPreferActive($controlRoom_seq02_attrexian2));
+	wait( .25 );
+	//Thank you!
+	globalCoop_dialog_play($controlRoom_seq02_attrexian2,"m4l1/att4_thank.mp3", 1, 800, 1);
+	//Can we offer you weapon energy?
+	globalCoop_dialog_play($controlRoom_seq02_attrexian,"m4l1/att5_offer.mp3", 1, 800, 1);
+
+	controlRoom_seq04();
+}
+
+void controlRoom_seq03_kill()
+{
+	//--- remove the pod and the basher
+	trappedBasherAlive = 0;
+	killthread( "trappedBasherTaunt" );
+}
+
+//---------------------
+// Control Room Sequence 04
+// Pod launch success, attrexian unlocks health and ammo room
+//---------------------
+void controlRoom_seq04_setup()
+{
+	// lock health and ammo room
+	$controlRoomDoor2.lock();
+
+	// hide indicator for locked door
+	$controlRoomDoor2IndicatorOn.hide();
+}
+
+void controlRoom_seq04()
+{
+	$controlRoom_seq02_attrexian.resethead();
+	
+	// attrexian walks to locked door
+	$controlRoom_seq02_attrexian.walkto( "$controlRoom_seq03_node01" , "walk");
+	waitfor( $controlRoom_seq02_attrexian );
+
+	$controlRoom_seq02_attrexian.turntoangle( 90 );
+	wait( .25 );
+	$controlRoom_seq02_attrexian.angle( 90 );
+
+	// attrexian unlocks door to health and ammo
+	globalCoop_actor_animateWaitForAnimation($controlRoom_seq02_attrexian,"ent-compstation-idle");
+	globalCoop_actor_animateWaitForAnimation($controlRoom_seq02_attrexian,"ent-compstation-idle-look");
+	//globalCoop_actor_animateWaitForAnimation($controlRoom_seq02_attrexian,"ent-compstation-idle");
+
+	// unlock the health and ammo room
+	$controlRoomDoor2.unlock();
+	triggerentity( $controlRoomDoor2 );
+
+	// turn on the green door indicator
+	$controlRoomDoor2IndicatorOff.hide();
+	$controlRoomDoor2IndicatorOn.show();
+	$lockerlight_red.remove();
+	$lockerlight_green.show();
+
+	$controlRoom_seq02_attrexian.setactorflag("cannotuse" , 0.0 );
+
+	wait( .5 );
+	$controlRoom_seq02_attrexian.headwatch($controlRoom_seq02_attrexian2);
+	$controlRoom_seq02_attrexian.walkto( "cinematic_controlRoom_node01", "walk" );
+	
+	$controlRoom_seq02_attrexian2.turntowardsentity($controlRoom_seq02_attrexian);
+	$controlRoom_seq02_attrexian2.headwatch($controlRoom_seq02_attrexian);
+	
+	waitFor($controlRoom_seq02_attrexian);
+	$controlRoom_seq02_attrexian.turntowardsentity($controlRoom_seq02_attrexian2);
+}
+
+
+//---------------------
+// Command Core Sequence 01
+// Aliens bust in and attack
+//---------------------
+void commandCore_seq01_setup()
+{
+	$commandOfficial01.killthread( "cinematicDeath" );
+	//$commandOfficial02.killthread( "mission_failed" );
+	//$commandOfficial03.killthread( "mission_failed" );
+
+	globalSpawnWave_Setup( "commandCoreGroupOne", 4, 4, 2, 2, 1 );
+	globalSpawnWave_Setup( "commandCoreGroupTwo", 4, 4, 2, 2, 2 );
+	globalSpawnWave_Setup( "commandCoreGroupThree", 6, 2, 2, 2, 3 );
+	globalSpawnWave_Setup( "commandCoreGroupFour", 4, 4, 2, 2, 4 );
+
+	globalSpawnWave_SetupDeathThread( "commandCoreGroupOne", "commandCoreGroup_check" );
+	globalSpawnWave_SetupDeathThread( "commandCoreGroupTwo", "commandCoreGroup_check" );
+	globalSpawnWave_SetupDeathThread( "commandCoreGroupThree", "commandCoreGroup_check" );
+	globalSpawnWave_SetupDeathThread( "commandCoreGroupFour", "commandCoreGroup_check" );
+}
+
+void commandCore_seq01()
+{
+	//--- change the music
+	forcemusic( "aux3" );
+
+	thread globalCoop_actor_walkTo($commandOfficial02,"$commandOfficial_cower2","run");
+	thread globalCoop_actor_walkTo($commandOfficial01,"$commandOfficial_cower1","run");
+	globalCoop_actor_walkTo($commandOfficial03,"$commandOfficial_cower3","run");
+	$commandOfficial03.anim( "cowerl" );
+	$commandOfficial02.anim( "cowerr" );
+	$commandOfficial01.anim( "scared" );
+	$commandOfficial01.takedamage();
+
+	$commandOfficial01.updatebosshealth( 1 , 1 );
+	$commandOfficial01.health( 250 ); //<<-- XYZ = amount of health you want him to have
+	$commandOfficial01.maxbosshealth( 250 ); //<<-- must be EXACTLY the same number from the line above.
+	$commandOfficial01.sethatemodifier( 3 );
+
+	//Making CommandOfficial A Teammate so enemies will attack them
+	$commandOfficial01.actortype( "teammate" );
+
+	wait( 1 );
+
+	trigger( "$commandCoreWall01");
+	trigger( "$commandCoreWall01_fx");
+
+	thread globalSpawnWave_Start( "commandCoreGroupOne" );
+
+	wait( 8 );
+
+	trigger( "$commandCoreWall02");
+	trigger( "$commandCoreWall02_fx");
+
+	thread globalSpawnWave_Start( "commandCoreGroupTwo" );
+}
+
+void commandCoreGroup_check()
+{
+	commandCoreWavesDone ++;
+
+	if( commandCoreWavesDone == 2 )
+	{
+		trigger( "$commandCoreDoor" );
+
+		thread globalSpawnWave_Start( "commandCoreGroupThree" );
+	}
+	else if( commandCoreWavesDone == 3 )
+	{
+		thread globalSpawnWave_Start( "commandCoreGroupFour" );
+
+		commandCore_seq02();
+	}
+	else if( commandCoreWavesDone == 4 )
+	{
+		wait( 1 );
+    	//--- set objective
+		globalCoop_objectives_update("complete",4,1);
+		thread mission_complete();
+	}
+}
+
+//---------------------
+// Command Core Sequence 02
+// Hazard team enters and helps player battle remaining aliens
+//---------------------
+void commandCore_seq02()
+{
+	trigger( "$hazardTeam_door1" );
+	
+	$chell.ai_on();
+	$jurot.ai_on();
+	$chang.ai_on();
+	wait(1);
+	//Need any help, Munro?
+	globalCoop_dialog_play($chell,"m4l1/chell_needam.mp3", 1, 10000, 1);
+	wait(2);
+	//What took you so long?
+	globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($commandOfficial03),"m4l1/munro_tooklong.mp3", 1, 10000, 0);
+//We took the scenic route.
+	globalCoop_dialog_play($chell,"m4l1/chang_scenic.mp3", 1, 10000, 1);
+	wait(3);
+}
+
+//---------------------
+// Dynamic Lights Function
+// Controls flickering lights in world
+//---------------------
+void dynamicLights()
+{
+	damagedLightsOn = 1;
+
+	thread damagedLight01();
+
+	thread damagedLight02();
+
+	thread damagedLight03();
+
+	thread damagedLight04();
+}
+
+void damagedLight01()
+{
+	while ( damagedLightsOn == 1 )
+	{
+		blinkLightObjects( "damaged_light01" , "zzzzzzzzzzzzzzzzzzzz" , 20 , $damagedLight01_on , $damagedLight01_off , 1 );
+		blinkLightObjects( "damaged_light01" , "aaaaaaaaaaaaaaaaaaaa" , 20 , $damagedLight01_on , $damagedLight01_off , 0 );
+		blinkLightObjects( "damaged_light01" , "zzzzz" , 5 , $damagedLight01_on , $damagedLight01_off , 1 );
+		blinkLightObjects( "damaged_light01" , "aaaaa" , 5 , $damagedLight01_on , $damagedLight01_off , 0 );
+		blinkLightObjects( "damaged_light01" , "zzzzzzzzzz" , 10 , $damagedLight01_on , $damagedLight01_off , 1 );
+		blinkLightObjects( "damaged_light01" , "aaaaaaaaaa" , 10 , $damagedLight01_on , $damagedLight01_off , 0 );
+	}
+}
+
+void damagedLight02()
+{
+	while ( damagedLightsOn == 1 )
+	{
+		blinkLightObjects( "damaged_light01" , "zzzzzzzzzzzzzzzzzzzz" , 20 , $damagedLight02_on , $damagedLight02_off , 1 );
+		blinkLightObjects( "damaged_light01" , "aaaaaaaaaaaaaaaaaaaa" , 20 , $damagedLight02_on , $damagedLight02_off , 0 );
+		blinkLightObjects( "damaged_light01" , "zzzzz" , 5 , $damagedLight02_on , $damagedLight02_off , 1 );
+		blinkLightObjects( "damaged_light01" , "aaaaa" , 5 , $damagedLight02_on , $damagedLight02_off , 0 );
+		blinkLightObjects( "damaged_light01" , "zzzzzzzzzz" , 10 , $damagedLight02_on , $damagedLight02_off , 1 );
+		blinkLightObjects( "damaged_light01" , "aaaaaaaaaa" , 10 , $damagedLight02_on , $damagedLight02_off , 0 );
+	}
+}
+
+void damagedLight03()
+{
+	while ( damagedLightsOn == 1 )
+	{
+		blinkLightObjects( "damaged_light01" , "zzzzzzzzzzzzzzzzzzzz" , 20 , $damagedLight03_on , $damagedLight03_off , 1 );
+		blinkLightObjects( "damaged_light01" , "aaaaaaaaaaaaaaaaaaaa" , 20 , $damagedLight03_on , $damagedLight03_off , 0 );
+		blinkLightObjects( "damaged_light01" , "zzzzz" , 5 , $damagedLight03_on , $damagedLight03_off , 1 );
+		blinkLightObjects( "damaged_light01" , "aaaaa" , 5 , $damagedLight03_on , $damagedLight03_off , 0 );
+		blinkLightObjects( "damaged_light01" , "zzzzzzzzzz" , 10 , $damagedLight03_on , $damagedLight03_off , 1 );
+		blinkLightObjects( "damaged_light01" , "aaaaaaaaaa" , 10 , $damagedLight03_on , $damagedLight03_off , 0 );
+	}
+}
+
+void damagedLight04()
+{
+	while ( damagedLightsOn == 1 )
+	{
+		blinkLightObjects( "damaged_light01" , "zzzzzzzzzzzzzzzzzzzz" , 20 , $damagedLight04_on , $damagedLight04_off , 1 );
+		blinkLightObjects( "damaged_light01" , "aaaaaaaaaaaaaaaaaaaa" , 20 , $damagedLight04_on , $damagedLight04_off , 0 );
+		blinkLightObjects( "damaged_light01" , "zzzzz" , 5 , $damagedLight04_on , $damagedLight04_off , 1 );
+		blinkLightObjects( "damaged_light01" , "aaaaa" , 5 , $damagedLight04_on , $damagedLight04_off , 0 );
+		blinkLightObjects( "damaged_light01" , "zzzzzzzzzz" , 10 , $damagedLight04_on , $damagedLight04_off , 1 );
+		blinkLightObjects( "damaged_light01" , "aaaaaaaaaa" , 10 , $damagedLight04_on , $damagedLight04_off , 0 );
+	}
+}
+
+//---------------------
+// Dynamic Lights Function
+// Turns on and off script objects synched to flickering dynamic lights
+//---------------------
+void toggleLightObject(float toggleBlink , entity lightObject , entity darkObject )
+{
+	if ( toggleBlink > 0 )
+	{
+		lightObject.show();
+		darkObject.hide();
+	}
+	else
+	{
+		lightObject.hide();
+		darkObject.show();
+	}
+}
+
+//---------------------
+// Dynamic Lights Function
+// Synch dynamic flickering lights to script objects
+//---------------------
+void blinkLightObjects(string group, string style , float waitTime , entity lightObject , entity darkObject , float toggleBlink )
+{
+	toggleLightObject( toggleBlink , lightObject , darkObject );
+	$world.light_lightstyle( group , style , 0 );
+	wait ( .05 * waitTime );
+}
+
+//---------------------
+// Mission Failed
+// Fails the mission
+//---------------------
+void mission_failed()
+{
+	//--- change the music
+	forcemusic( "failure" );
+
+	//The loss of the command officials just doomed any hope of cooperation from the Attrexians.
+	globalCoop_dialog_play($picard,"m4l1/picard_loss.mp3", 1, 10000, 1);
+	wait( 2 );
+	globalCoop_mission_fail();
+}
+
+//---------------------
+// Mission Complete
+// End the misison
+//---------------------
+void mission_complete()
+{
+	//--- check if the official's dead, if so, skip out
+	if( boolPlayerFailed == TRUE ){
+		return;
+	}
+
+	//--- make the command official immortal
+	$commandOfficial01.immortal( 1 );
+	wait( 2 );
+
+	//--- start the end cinematic
+	thread cinematicEndRescue();
+}
+
+void coop_removeMonsters()
+{
+	removeActorsNamed( "Lurker" );
+	removeActorsNamed( "Chewer" );
+}
+
+
+void end_level()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		cam_fadeout( 2, 0, 0, 0, 1, 0 );
+		wait( 2 );
+		
+		//--- level transition to m4l2b-attrexian_station
+		spawn ( "trigger_changelevel", "targetname", "trigger_endlevel", "map", "m4l2b-attrexian_station" );
+		wait ( .5 );
+		triggerentity ( $trigger_endlevel );
+		return;
+	}
+	
+	thread coop_endLevel();
+}
+
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed("m4l2b-attrexian_station");
+}

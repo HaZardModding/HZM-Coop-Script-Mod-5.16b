@@ -1,0 +1,141 @@
+CHANGELOG ELITE FORCE II - HAZARDMODDING COOP SCRIPT MOD
+
+	+ Added feature or noticeable improvement
+	- Bug fix or something removed
+	* Changed or Information
+	! Important - Take note!
+
+
+
+
++ ent-deck7a: Added Code Keypad
++ Updated readme and installation instructions
++ A Symbol is now shown bellow injured players
++ Added a new Information Gathering Mission (IGM6)
++ Added a new Information Gathering Mission (IGM7)
++ Added a new Information Gathering Mission (IGM8)
++ m6-deck16_engineering: Added Code Keypad Menu
++ m10l2a-romulan_installation: Added Code Keypad
++ m10l2a-romulan_installation: Difficulty increased
++ m11l1a-drull_ruins3: Added a new respawn location
++ m11l1a-drull_ruins3: A orbital-attack destroys a Tower
++ m0-intro: Added a Fake-cinematic Menu with skip button
++ Players can select their Class at the Coop Special menu
++ Mission 10 Maps are now forcing Romulan Skin on players
++ Coop Headhud Display uses Model instead of Headshot images
++ Health and Energy Terminals can now be disabled and enabled
++ Mission 3 Maps add I-Mod to inventory if found on Enterprise
++ Added a Coop Mod special Vote System (requires the Mod client)
++ The coop_skill Level can now be voted at the Coop Special menu
++ Context Dialogs are now available regardless of the server language
++ Activating the Tricorder Scan while walking puts you into Turbo modus
++ The Player his Class is now remembered and restored when changing levels
++ Player Classes can now be disabled and enabled at the Coop Special menu
++ Added facial animation to German version (was forgotten in the Stock game)
++ Added missing Information Gathering Missions, the Campaign is now fully playable
++ Player Weapon Damage is now skill based: Easy=100,Normal=80,Hard=60,VeryHard=35
++ Some of the AI health will increase by Skill: Easy=Normal,Normal=10%,Hard=20%,VeryHard=30%
++ A Setup Screen is now displayed to make the new Coop version work
++ Objective and Background-Story menus have been sized up
++ Teamhealth hud shows now the Player Health instead of text
++ Upgraded the Background-Story menu it can now display Images
++ Added a Option to select the Font Type and Size for the Chat
++ Coop Player Models are now saved and will be restored each time
++ Upgraded globalCoop_armory_putAwayWeapon it works now 4 times as fast
++ All important features can now be accessed via the Objective Menu
++ New Key-bind options are available in the options menu
++ A description has been added to the Player List (When pressing TAB)
++ A hud displaying a "Please Update" message has been added for the Client
++ Added message shown to all on cinematic start: CINEMATIC - press use to skip
++ Objectives are no longer Printed during Cinematic
++ Tricorder is now animated when modulating
++ Added Information Dialog on ent-deck11: Feature requires the Coop Mod...
++ Added Information Dialog on m7l1a-attrexian_colony: Feature requires the Coop Mod...
++ Mouse is now disabled during cinematic, camera can not be shaken any more
++ Rewrote all routines for Player Setup, Spawn and health state Management
+* Updated the Medic Teamhealth hud for resolutions above 1650 width
+* New Master Server will now be automatically set on your Coop Server
+* coop_string_mp_waponToTakeAwayFromPlayer1 is no longer pre-set
+* Communicator menu is now scaling relative to screen resolution
+* Updated several configuration files
+* Updated the Coop Internal MOM
+* Removed obsolete CFG files
+* Removed hud coop_resetFov
+* Removed hud coop_detect
+* Updated all Information Gathering Missions
+* m10l2a-romulan_installation: Changed player spawn locations on map start
+! Removed: Transporter Build ability of Technician Class
+! Removed: Targetname Huds, targetname is displayed at Objectives Menu
+! Replaced: Cvar coop_communicatorTeam with coop_comT
+! Replaced: Cvar coop_communicatorLabel with coop_comL
+! Fixed: Vital Coop related Cvars not saving in client cfg
+! Fixed: Coudn't load file precache_m8l2a-drull_ruins2$m8l2b-to-m8l2b.cam
+! The updated internal Coop Mod MOM is no longer backwards compatible
+! Changed Cvar coop_weapSpeed, using now a range from 15 to 999999
+! New Cvar coop_setupA, to store status of the Setup-Assitant
+! New Cvar coop_iSkill, to store Server Skill information
+! New Cvar coop_iDisClass, to store Server Player Class information
+! New Cvar coop_iTechOnly, to store Server Technician Modulation information
+! New Cvar coop_iDisDisp, to store Server Dispenser information
+! New Cvar coop_techOnly, replacing coop_disTechOnly
+! New Cvar coop_class, to store your class information
+! New Cvar coop_classR, to restore your class huds
+! New Cvar coop_crs, to store your crosshair information
+! New Cvar coop_3rd, to store your 3rd Person View information
+! New Cvar coop_svB, to store current server build
+! New Cvar coop_disDisp, to disable Health and Energy Dispensers
+! New Cvar coop_disClass, to disable classes on all maps
+! New Cvar coop_pModel, storing the Player Coop Mod model
+! New Cvar coop_setup, storing the status of the setup
+! New Cvar coop_pModelReset, storing the reset-model for MP
+! New Cvar coop_font, storing the chat font type and size
+! New Cvar coop_igmTr, storing IGM turbolift riding information
+! Obsolete Cvars: coop_h1,coop_h2,coop_h3,coop_h4,coop_h5,coop_h6,coop_h7,coop_h8,
+	coop_disTechOnly,coop_countdown,coop_disMedicMonitor,mp_playermodel2,
+	game.globalTurboliftRide,game.spokenWithPicardIGM3,game.holoDeckIGM1Done,
+	game.globalMissionEnterprise,coop_disForceTeam,coop_ui_eam
+! Disabled: Player Model Selection on Coop Servers (requires game restart without coop client)
+! Changed globalCoop_player_coopInstalled detection routine
+! Renamed: globalCoop_level_callThreadSavemode to globalCoop_level_callReliably
+- Function: globalcoop_puzzle_timer
+- Function: globalCoop_player_equipOnSpawn
+- Objectives not displaying on some Listen Servers
+- Puzzes sometimes rendering the Player Weapons unsuable
+- Medic Team Health Hud not resetting properly (Player 5,6,7,8)
+- Fixed Cvar for moving speed while firing weapon: coop_weapSpeed
+- Model, Hud and Menu reset failing on Listen Server hostsing client
+- Spectators possible blocking any Player after certain events occurred
+- Medic Team Health Hud not displaying health status until health changes
+- Fixed dialogs not playing when playing on English Server with the German game version
+- Server restarting during connecting of client-0, getting client stuck in loading screen
+- Late spawning players being visible during armature cinematic
+- secret1: Fixed Holodeck sometimes fading out before any player entered the game
+- ent-traing2: Fixed door that woudn't open
+- ent-deck11: Fixed mouse focus staying in menu mode when aborted
+- m3l1a-forever: breath sounds are now not played during the first cinematic
+- m3l1a-forever: delayed Camera fade out on level start
+- m3l1b-forever: mission getting stuck, when power is restored before the Exos attack
+- m4l1a-attrexian_station: Avakstas getting stuck by a blocking player
+- m4l1b-attrexian_station: Players spawning far above the lift
+- m5l1a-drull_ruins1: Quantum-burst being available in the inventory
+- m5l1b-drull_ruins1: Quantum-burst being available in the inventory
+- m5l2c-drull_ruins1: Missing Attrexian Weapon in player inventory
+- m6-deck1_bridge_redalert: Fixed Picard usable during cinematic
+- m6-exterior: Mission Failed Brig cinematic messing up
+- m6-exterior: Player deionizing during Intro cinematic
+- m6-exterior: Player not dieing when touching the polarized hull
+- m6-exterior: Cannon not being raised when Cinematic is skipped
+- m6-exterior: Players jumping into space while firing the turret
+- m6-exterior: Destroying the Capital ship not failing the mission
+- m7l1a-attrexian_colony: Code Keypad Menu braking when aborted by player
+- m7l1a-attrexian_colony: Objectives some times not displaying correctly
+- m7l1b-attrexian_colony: The Gate after the Basher pit getting stuck
+- m10l1-romulan_installation: Cinematic Intro jittering
+- m10l2a-romulan_installation: Bioscanners not activating the Alarm
+- coop_bugs: Players beaming down to the planet on the same spot 
+- coop_bugs: NPC being still there but invisible after beam out
+- coop_bugs: Part of a wall being invisible
+- Code Error in the Coop Dialog Head Huds
+- Cinematic holstering player weapons
+
+

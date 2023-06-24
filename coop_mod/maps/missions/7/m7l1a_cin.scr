@@ -1,0 +1,659 @@
+void cinematicIntro();
+void cinematicIntroDialog1();
+void cinematicIntroSkipThread();
+void cinematicIntro_shuttleTakeOff();
+void citySewer_FoundAttrexians();
+void citySewer_FoundAttrexians_skipThread();
+void citySewer_QuadCinematic();
+void citySewer_SkipThread();
+void citySewer_QuadAlienImpact();
+void citySewer_QuadAlienImpact_SkipThread();
+
+//----------------------
+// cinematicIntro
+// intro cinematic
+//----------------------
+void cinematicIntro()
+{
+	spawn( "Camera", "targetname", "cam1" );
+	//--moves player into shuttle
+	if(!cvar_bool_multiplayer)//Singleplayer
+		$player.origin ( '6868 13760 88' );
+	wait( 1 );
+
+	// --- Close shuttle doors
+	thread globalShuttle_CloseShuttleDoors();
+	thread cinematicIntroDialog1();
+
+	globalCoop_cin_start();
+
+	//--- make the shuttle fly in on the path
+	originStash = $shuttleEndOrigin.getOrigin();
+	anglesStash = $shuttleEndOrigin.getAngles();
+	$shuttleCenterOrigin.followpath( $shuttlePath01a0 );
+	wait(.2);
+	
+	//--- get the camera on the temp path
+	globalCoop_cin_followWatch($cam1,$camIntroTemp,$shuttleCenterOrigin);
+
+	//do a clean cut, no washing...
+	globalCoop_cin_cut($cam1);
+	
+	wait(.1);
+	
+	//--- switch to the camera
+	globalCoop_cin_cuecamera( $cam1 );
+
+	//--- start cinematic commands
+	globalCoop_main_camFadeIn(2);
+
+	//set skipthread
+	globalCoop_cin_skipThread("cinematicIntroSkipThread");
+	wait( 9 );
+
+	shuttleDoorsLocked = 0;
+
+	skipthread( "null" );
+
+	//--- call the ending of the cinematic
+	thread cinematicIntroSkipThread();
+}
+
+//---------------------
+// Function: cinematicIntroDialog1
+// Comments:
+//
+//---------------------
+void cinematicIntroDialog1()
+{
+	wait( 2 );
+	globalCoop_dialog_play($picard,"m7l1/picard_youass.mp3", 1, 80000, 1); //You are to assist the colonists any way possible.
+	globalCoop_level_remove($picard);//dismissed
+}
+
+//---------------------
+// Function: cinematicIntroSkipThread
+// Comments:
+// the short and sweet version of the intro to this level
+//---------------------
+void cinematicIntroSkipThread()
+{
+	//--- fade out and set the level up
+	globalCoop_main_camFadeOut(1);
+
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematicIntro" );
+	killthread( "cinematicIntroDialog1" );
+	globalCoop_level_remove($picard);//dismissed
+	
+	thread globalCoop_level_removePath($camIntroTemp);//remove camera path
+
+	//--- position the shuttle
+//	globalShuttle_OpenShuttleDoors();
+
+//messy shitt
+	$shuttleCenterOrigin.time( .2 );
+	$shuttleCenterOrigin.moveToPos( originStash );
+	$shuttleCenterOrigin.angles( anglesStash );
+	
+	waitfor( $shuttleCenterOrigin );
+	$shuttleCenterOrigin.endpath();
+	waitfor( $shuttleCenterOrigin );
+	
+	$shuttleCenterOrigin.time( .2 );
+	$shuttleCenterOrigin.moveToPos( originStash );
+	$shuttleCenterOrigin.angles( anglesStash );
+	waitfor( $shuttleCenterOrigin );
+//end of messy shitt
+	
+	
+	// $shuttleCenterOrigin.angle( 180 );
+	// $shuttleCenterOrigin.time( .2 );
+	// $shuttleCenterOrigin.moveToPos( '-1984 11344 400' );
+	// waitfor( $shuttleCenterOrigin );
+
+	$shuttleExterior.show();
+	$shuttleDoors.show();
+	$shuttleCenterOrigin.show();
+	$shuttleScriptOrigin.show();
+	//$shuttleClip.show();
+	$shuttleStartOrigin.show();
+	$shuttleRiderOrigin.show();
+	$shuttleBottomDoorOrigin.show();
+	$shuttleTopDoorOrigin.show();
+
+	//--- setup the player and team
+	
+	$kourban.origin( '-1136 11044 264' );
+	$jurot.origin( '-1132 11180 264' );
+	$chang.origin( '-1224 11016 272' );
+	
+	thread globalCoop_level_removePath($shuttlePath01a0);//remove shuttle fly in path
+	
+
+	if(!cvar_bool_multiplayer)//Singleplayer
+	{
+		$player.playerviewangles( '0 180 0' );
+		$player.origin( '-1256 11144 264' );
+		$shuttleOffloadClip.solid();
+	}
+	else
+	{
+		$shuttleOffloadClip.remove();
+	}
+
+	$kourban.show();
+	$jurot.show();
+	$chang.show();
+	$kourban.ai_on();
+	$jurot.ai_on();
+	$chang.ai_on();
+
+	globalCoop_cin_end();
+	globalCoop_main_camFadeIn(1);
+	
+	thread globalCoop_objectives_update("incomplete",1,1);
+
+//	thread cinematicIntro_shuttleTakeOff();
+
+	//--- say some dialog lines
+	globalCoop_dialog_play($munro,"m7l1/munro_loworbit.mp3", 1, 80000, 1); //Stay close, Sydney. We may need a quick escape.
+	globalCoop_dialog_play($sydney,"m7l1/syd_careful.mp3", 1, 80000, 1); //You got it. Be careful.
+	globalCoop_level_remove($sydney);//dismissed
+	globalCoop_dialog_play($jurot,"m7l1/jurot_readlife.mp3", 1, 80000, 1 );  //I'm reading attrexian lifesigns
+	globalCoop_dialog_play($munro,"m7l1/munro_letsgo2.mp3", 1, 80000, 1 );  //Let's go
+	globalCoop_dialog_play($jurot,"m7l1/jurot_wait.mp3", 1, 80000, 1 ); //Wait! There are also Exomorph lifesigns.
+	globalCoop_dialog_play($chang,"m7l1/chang_definitely.mp3", 1, 80000, 1 );  //Then let's definitely go
+
+	//--- now we start actual intro gameplay stuff
+	$jurot.useactorweapon( "fieldassaultrifle" );
+
+	$triggerCityEntrance_Dialog.triggerable();
+}
+
+//---------------------
+// Function: cinematicIntro_shuttleTakeOff
+// Comments:
+// when the player exists the shuttle this thread tells the shuttle to depart
+//---------------------
+void cinematicIntro_shuttleTakeOff()
+{
+	$cinematicIntro_shuttleTakeOffTrigger.remove();
+	thread shuttleFly_Departure();
+}
+
+
+//---------------------
+// citySewer_FoundAttrexians
+// found the two attrexians, jurot heals one they tell what's happened
+//---------------------
+void citySewer_FoundAttrexians()
+{
+	if( aquaduct_power_routed == 1 )
+	{
+		$attrex_unlocker_trigger.nottriggerable();
+
+		$jurot.origin( '-1568 3376 432' );
+		$kourban.origin( '-1696 3376 464' );
+		$chang.origin( '-1696 3280 464' );
+
+		globalCoop_dialog_play($kourban,"m7l1/korban_attrex.mp3", 1, 80000, 1 );  //Attrexians
+		$attrex_unlocker1.missionobjective( 0 );
+
+		$jurot.ai_off();
+
+		//--- Move Jurot Close
+		$jurot.walkto( "$jurot_heal_node", "run" );
+		waitfor( $jurot );
+
+		$kourban.ai_off();
+		$chang.ai_off();
+
+		$kourban.walkto( "$kourbanInjuredAttrex_node1" , "run" );
+		$chang.walkto( "$changInjuredAttrex_node1" , "run" );
+
+		$jurot.headwatchtarget( "attrex_unlocker1", 10 );
+
+		wait( .5 );
+
+		// cinematic
+		
+		globalCoop_cin_start();
+		globalCoop_main_camFadeOut(1);
+		wait( 1 );
+		removeActorsNamed( "Lurker" );
+		removeActorsNamed( "Chewer" );
+		removeActorsNamed( "Basher" );
+		
+		cinInjuredAttrexians = createcinematic( "m7l1a_injuredattrex" );		
+		
+		wait( 1 );
+
+		$jurot.hide();
+		$chang.hide();
+		$kourban.hide();
+		$attrex_unlocker1.hide();
+		$attrex_unlocker2.hide();
+
+		$attrex_unlocker1.anim( "idle" );
+		$attrex_unlocker2.anim( "idle" );
+
+		//set skipthread
+		globalCoop_cin_skipThread( "citySewer_FoundAttrexians_skipThread");
+
+		// start cinematic
+		cinInjuredAttrexians.setendthread( "citySewer_FoundAttrexians_skipThread" );
+		cinInjuredAttrexians.beginCinematic( "m7l1a_injuredattrex" );
+	}
+}
+
+//---------------------
+// Function: citySewer_FoundAttrexians_skipThread
+// Comments:
+//
+//---------------------
+void citySewer_FoundAttrexians_skipThread()
+{
+	cinInjuredAttrexians.setendthread( "" );
+	skipthread( "null" );
+
+	killthread( "citySewer_FoundAttrexians" );
+
+	wait( .1 );
+
+	cinInjuredAttrexians.endCinematic();
+
+	//fade to black
+	globalCoop_main_camFadeOut(1);
+	wait( 1 );
+
+	globalCoop_cin_end();
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.origin( '-1320 3928 384' );
+	}
+	$jurot.origin( '-1457 4086 384' );
+	$chang.origin( '-1320 3864 384' );
+	$kourban.origin( '-1560 3864 384' );
+
+	$jurot.show();
+	$chang.show();
+	$kourban.show();
+	$attrex_unlocker1.show();
+	$attrex_unlocker2.show();
+
+	globalCoop_main_camFadeIn(1);
+
+	attrexianAutoSave();
+
+	//$player.setobjectivecomplete( "HelpTrappedAttrexians", 1 );
+	//$player.setobjectiveshow( "FollowAttrexianToSewer", 1 );
+	globalCoop_objectives_update("complete",4,0);
+	thread globalCoop_objectives_update("incomplete",6,1);
+	
+	$attrex_unlocker1.missionobjective( 1 );
+	$attrex_unlocker1.archetype( "AttrexianFemaleTeammate" );
+
+	$attrex_unlocker2.headwatchtarget( "none", 10 );
+	$jurot.headwatchtarget( "none", 10 );
+
+	$jurot.ai_on();
+
+	$attrex_unlocker1.pushable( 1 );
+	$attrex_unlocker2.pushable( 1 );
+
+	wait( 2 );
+
+	$attrex_unlocker1.ai_on();
+
+	wait( 3 );
+
+	$kourban.ai_on();
+	$chang.ai_on();
+
+	$attrex_unlocker2.ai_on();
+
+	thread initDialogUnlocker();
+}
+
+
+//---------------------
+// Function: citySewer_QuadCinematic
+// Comments:
+// cinematic where attrexian gets killed by the quad alien thingy
+//---------------------
+void citySewer_QuadCinematic()
+{
+	//$player.setobjectivecomplete( "FollowAttrexianToSewer", 1 );
+	thread globalCoop_objectives_update("complete",6,1);
+
+	$attrex_unlocker1.missionobjective( 0 );
+	$attrex_unlocker1.archetype( "AttrexianFemale" );
+
+	thread farplaneOut();
+
+	//begin cinematic
+	globalCoop_main_camFadeOut(1);
+	cinQuad = createcinematic( "m7l1a_quadintro" );
+	wait( 1 );
+	globalCoop_cin_start();
+
+	$munro.hide();
+	$jurot.hide();
+	$chang.hide();
+	$kourban.hide();
+	$attrex_unlocker1.hide();
+
+	$munro.notsolid();
+	$jurot.notsolid();
+	$chang.notsolid();
+	$kourban.notsolid();
+	$attrex_unlocker1.notsolid();
+
+	$munro.ai_off();
+	$jurot.ai_off();
+	$chang.ai_off();
+	$kourban.ai_off();
+	$attrex_unlocker1.ai_off();
+
+	$munro.origin ( '-2816 1952 480' );
+	$jurot.origin( '-2688 2416 432' );
+	$chang.origin( '-2752 2384 432' );
+	$kourban.origin( '-2816 2392 432' );
+
+	$munro.angles( '0 315 0' );
+	$jurot.angles( '0 270 0' );
+	$chang.angles( '0 270 0' );
+	$kourban.angles( '0 270 0' );
+
+	if(!cvar_bool_multiplayer)
+	{
+		$cityQuadDoor1.lock();
+		$cityQuadDoor1_red.show();
+		$cityQuadDoor1_green.hide();
+	}
+	forcemusic( "aux1" );
+
+	//set skipthread
+	globalCoop_cin_skipThread( "citySewer_SkipThread" );
+
+	cinQuad.setendthread( "citySewer_SkipThread" );
+	cinQuad.beginCinematic( "m7l1a_quadintro" ) ;
+}
+
+//---------------------
+// Function: citySewer_SkipThread
+// Comments:
+//
+//---------------------
+void citySewer_SkipThread()
+{
+	//fade to black
+	cinQuad.setendthread( "" );
+	skipthread( "null" );
+//	cam_fadeout( 1, 0, 0, 0, 1, 0 );
+	globalCoop_cin_end();
+
+	cinQuad.endCinematic();
+
+	$munro.notsolid();
+	$munro.hide();
+	$munro.origin ( '6868 13760 88' );
+
+	$jurot.remove();
+	$chang.remove();
+	$kourban.remove();
+	
+	globalCoop_level_removePath($m7l1a_quadintro);
+	globalCoop_level_removePath($m7l1a_quadintrocomet);
+	globalCoop_level_removePath($m7l1a_quadintromunro);
+	
+	$attrex_unlocker1.origin( '-1152 1536 464' );
+	$attrex_unlocker1.angles( '0 135 0' );
+	$attrex_unlocker1.show();
+	$attrex_unlocker1.solid();
+	$attrex_unlocker1.ai_off();
+	$attrex_unlocker1.headwatchtarget( "player" , 30 );
+	$attrex_unlocker1.pushable( 0 );
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.origin( '-1280 1664 464' );
+		$player.playerviewangles( '0 45 0' );
+	}
+	
+	globalCoop_main_camFadeIn(1);
+
+	attrexianUnlockerNoCin = 1;
+
+	wait( 1 );
+
+	$attrex_unlocker1.anim( "gesture_come" );
+	waitForAnimation( $attrex_unlocker1, "gesture_come", 0 );
+
+	$attrex_unlocker1.anim( "idle" );
+
+	float fUnlockerTemp;
+
+	while( attrexianUnlockerNoCin == 1 )
+	{
+		if(!doesEntityExist($attrex_unlocker1)){return;}
+		$attrex_unlocker1.turntowardsentity(globalCoop_return_playerClosestPreferActive($attrex_unlocker1));
+		wait( .5 );
+		if(fUnlockerTemp > 10){
+			$attrex_unlocker1.anim( "gesture_come" );
+			waitForAnimation( $attrex_unlocker1, "gesture_come", 0 );
+			$attrex_unlocker1.anim( "idle" );
+			fUnlockerTemp=0;
+		}
+		fUnlockerTemp++;
+		wait(1);
+	}
+}
+
+//---------------------
+// citySewer_QuadAlienImpact
+// Launch the quadreped into the ground
+//---------------------
+void citySewer_QuadAlienImpact()
+{
+	cam.load( "m7l1a_quadintro" );
+	cam.load( "m7l1a_quadintrocomet" );
+	cam.load( "m7l1a_quadintromunro" );
+	
+	$endQuadExitDoor_trigger.nottriggerable();
+
+	$endQuadExitDoor_red.show();
+	globalCoop_level_remove($endQuadExitDoor_green);
+
+	//begin cinematic
+	$munro.notsolid();
+	$munro.show();
+	$munro.origin( '-784 1920 472' );
+	$munro.angles( '0 0 0' );
+
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(1);
+	wait( 1 );
+	attrexianUnlockerNoCin = 0;
+	$attrex_unlocker1.turntowardsplayer();
+	$attrex_unlocker1.anim( "idle" );
+
+	// set skipthread
+	globalCoop_cin_skipThread( "citySewer_QuadAlienImpact_SkipThread");
+	globalCoop_cin_follow($cam1, $m7l1a_quadintromunro );
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( .2 );
+	globalCoop_main_camFadeIn(1);
+
+	//-- setup for launch of quad
+	$endQuadFlying.loopsound( "sound/chars/chewer/chew_jet.wav", 1, 4096 );
+
+	$munro.turntoangle( -45 );
+	$munro.headwatchtarget( "endQuadFlying" , 2 );
+	spawn( "Camera", "targetname", "cam2" );
+	
+	wait( 1 );
+
+	//--- launch the quad
+	$endQuadFlying.show();
+	$endQuadFlying.notsolid();
+	$endQuadFlying.followpath( $citySewer_QuadAlienPath );
+	wait( .85 );
+
+	globalCoop_cin_follow($cam2, $m7l1a_quadintrocomet );
+	wait( .05 );
+	globalCoop_cin_cuecamera( $cam2 );
+	wait( 2.25 );
+
+	$attrex_unlocker1.walkto( "$endQuadAttrexianNode1" , "run" );
+
+	wait( .5 );
+
+	//--- do after launch stuff
+	$munro.headwatchtarget( "citySewer_QuadAlienReal" , 20 );
+	$endQuadFlying.stoploopsound();
+
+	$endQuadFlying.remove();
+
+	cam_fadeout( .1, 1, 1, 1, 1, 0 );
+
+	//--- trigger the explosion
+	$citySewer_QuadAlienSpawner.scale( 2 );
+	$citySewer_QuadAlienSpawner.modelname( "fx/fx-explosion-debris-idryllruins-xtralarge.tik" );
+	$citySewer_QuadAlienSpawner.spawntargetname( "citySewer_QuadAlienExplosion" );
+	triggerEntity( $citySewer_QuadAlienSpawner );
+	$citySewer_QuadAlien.playsound ( "sound/impact/explosion/explo_wall1.wav", 0, 1.5, 2048 );
+	globalCoop_dialog_playSimple($citySewer_QuadAlien,"combat/attfem_longp.mp3",1,10000);//auuaaaahhugh
+	wait( .1 );
+	$cityQuadPipe_notBroke.playsound( "sound/environment/rock/rock_collapse.wav", 0, 1, 1024 );
+	
+	globalCoop_level_remove($cityQuadPipe_notBroke);
+	$cityQuadPipe_Broke.show();
+	$cityQuadPipe_Pipe.show();
+
+	//--- cause an earthquake
+	$citySewer_QuadAlienSpawner.earthquake( 2, 3 );
+
+	//--- remove the alien and attrexian
+	$citySewer_QuadAlien.remove();
+	$attrex_unlocker1.remove();
+
+	//--- remove the caps and show the debris
+	$citySewer_QuadAlienDebris.show();
+	$citySewer_QuadAlienStreetCap1.remove();
+	globalCoop_level_remove($citySewer_QuadAlienStreetCap2);
+	$citySewer_QuadAlienStreetCap3.show();
+
+	$citySewer_BoxTrigger1.triggerable();
+	$citySewer_BoxTrigger2.triggerable();
+	$citySewer_BoxTrigger3.triggerable();
+	$citySewer_BoxTrigger4.triggerable();
+	$citySewer_BoxTrigger5.triggerable();
+	$citySewer_BoxTrigger6.triggerable();
+	wait( .1 );
+
+	globalCoop_main_camFadeIn(1);
+
+	//--- show the real quad
+	$citySewer_QuadAlienReal.solid();
+	$citySewer_QuadAlienReal.show();
+	$citySewer_QuadAlienReal.ai_off();
+	$citySewer_QuadAlienReal.origin( '-1280.00 1472.00 472.00' );
+	$citySewer_QuadAlienReal.angles( '0 180 0' );
+	$citySewer_QuadAlienReal.killthread( "citySewer_QuadAlienReal_OnDeath" );
+	$citySewer_QuadAlienReal.anim( "crash" );
+
+	$citySewer_QuadAlienWallSpawner.scale( 2 );
+	$citySewer_QuadAlienWallSpawner.modelname( "fx/fx-explosion-debris-idryllruins-xtralarge.tik" );
+	$citySewer_QuadAlienWallSpawner.spawntargetname( "citySewer_QuadAlienExplosion" );
+	triggerentity( $citySewer_QuadAlienWallSpawner );
+
+	$citySewer_QuadAlienWallSpawner.playsound( "sound/environment/rock/rock_collapse.wav", 0, 1, 1024 );
+	$citySewer_QuadAlienReal.playsound ( "sound/impact/explosion/explo_wall1.wav", 0, 1.5, 2048 );
+
+	$citySewer_QuadAlienWall_broken.show();
+	$citySewer_QuadAlienWall_broken.solid();
+	globalCoop_level_remove($citySewer_QuadAlienWall_notbroken);
+
+	waitForAnimation( $citySewer_QuadAlienReal, "crash", 0 );
+	$citySewer_QuadAlienReal.anim( "idle" );
+
+	skipthread ( "null" );
+	thread citySewer_QuadAlienImpact_SkipThread();
+}
+
+//---------------------
+// Function: citySewer_QuadAlienImpact_SkipThread
+// Comments:
+// cinematic AGAIN where the chick dies from a large unwieldy beast
+//---------------------
+void citySewer_QuadAlienImpact_SkipThread()
+{
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "citySewer_QuadAlienImpact" );
+	wait( .1 );
+
+//remove spawner
+	$citySewer_QuadAlienSpawner.remove();
+	
+	//fade to black
+	globalCoop_main_camFadeOut(1);
+	wait ( 1 );
+
+//remove munro, we do not need him anymore
+	$munro.remove();	
+	
+	globalCoop_cin_end();
+
+	// bloody fix the quad
+	$citySewer_QuadAlienReal.solid();
+	$citySewer_QuadAlienReal.show();
+	$citySewer_QuadAlienReal.origin( '-968.00 1472.00 472.00' );
+	$citySewer_QuadAlienReal.angles( '0 180 0' );
+	$citySewer_QuadAlienReal.killthread( "citySewer_QuadAlienReal_OnDeath" );
+	$citySewer_QuadAlienReal.anim( "idle" );
+	wait( .1 );
+
+	// do all the other stuff that should have already been done AGAIN
+	$endQuadFlying.remove();
+	globalCoop_level_remove($cityQuadPipe_notBroke);
+	$cityQuadPipe_Broke.show();
+	$cityQuadPipe_Pipe.show();
+
+	$citySewer_QuadAlien.remove();
+	$attrex_unlocker1.remove();
+
+	$citySewer_QuadAlienDebris.show();
+	$citySewer_QuadAlienStreetCap1.remove();
+	$citySewer_QuadAlienStreetCap2.hide();
+	$citySewer_QuadAlienStreetCap3.show();
+
+	$citySewer_BoxTrigger1.triggerable();
+	$citySewer_BoxTrigger2.triggerable();
+	$citySewer_BoxTrigger3.triggerable();
+	$citySewer_BoxTrigger4.triggerable();
+	$citySewer_BoxTrigger5.triggerable();
+	$citySewer_BoxTrigger6.triggerable();
+
+	$citySewer_QuadAlienWall_broken.show();
+	$citySewer_QuadAlienWall_broken.solid();
+	$citySewer_QuadAlienWall_notbroken.hide();
+
+	globalCoop_main_camFadeIn(1);
+	wait( .1 );
+	
+	thread globalCoop_level_removePath($m7l1a_quadintromunro);
+	thread globalCoop_level_removePath($citySewer_QuadAlienPath);
+	thread globalCoop_level_removePath($m7l1a_quadintrocomet);
+
+	$citySewer_QuadAlienReal.updatebosshealth( 1 , 1 );
+	$citySewer_QuadAlienReal.maxbosshealth( $citySewer_QuadAlienReal.gethealth() + 1 );
+
+	wait( 1 );
+
+	$citySewer_QuadAlienReal.ai_on();
+}
+
+
+

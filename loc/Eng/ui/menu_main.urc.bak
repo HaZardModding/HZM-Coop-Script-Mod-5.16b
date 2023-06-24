@@ -1,0 +1,1591 @@
+menu "main" 640 480 NONE 0
+bgcolor 0 0 0 .75
+borderstyle NONE
+fullscreen 1
+
+showcommand "exec coop_mod/cfg/main_menu.cfg\n"
+//showcommand "globalwidgetcommand playerselectionlist enable\n"
+//showcommand "ui_showmouse\n"
+//showcommand "set g_gametype 0; set bot_enable 0;set sv_maxclients 1;set sv_maxspeed 300\n"
+//showcommand "unpause;exec coop_mod/cfg/huds/reset_loading.cfg\n"
+
+include "loc/Eng/ui/background.inc"
+
+resource
+Label
+{
+    name "tooltip_main"
+    rect 49 403 320 26
+    fgcolor 1 1 1 1
+    bgcolor 0 0 0 0
+    font tahoma-8
+    
+    verticaljustify top
+    horizontaljustify left
+}
+
+resource
+Button
+{
+title "$$NewGame$$"
+name "Default"
+rect 44 55 138 32
+fgcolor 0.12 0.15 0.25 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+font serpentinemedium-12
+horizontaljustify center
+verticaljustify center
+hovershader menu/generic/button-hover
+pressedshader menu/generic/button-press
+hovercommand "globalwidgetcommand tooltip_main title \"$$StartANewGame$$\""
+hoverexitcommand "globalwidgetcommand tooltip_main title \"\""
+stuffcommand "pushmenu newgame"
+ordernumber 12
+
+
+hoversound sound/misc/menu/hover.wav
+clicksound sound/misc/menu/click.wav
+
+}
+
+resource
+Button
+{
+title "$$LoadGame$$"
+name "Default"
+rect 182 55 138 32
+fgcolor 0.12 0.15 0.25 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+
+font serpentinemedium-12
+horizontaljustify center
+verticaljustify center
+
+hovershader menu/generic/button-hover
+pressedshader menu/generic/button-press
+hovercommand "globalwidgetcommand tooltip_main title \"$$LoadASaveGame$$\""
+hoverexitcommand "globalwidgetcommand tooltip_main title \"\""
+stuffcommand "pushmenu loadgame"
+
+ordernumber 12
+
+hoversound sound/misc/menu/hover.wav
+clicksound sound/misc/menu/click.wav
+
+}
+
+resource
+Button
+{
+title "$$Multiplayer$$"
+name "Default"
+rect 320 55 138 32
+fgcolor 0.12 0.15 0.25 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+
+
+font serpentinemedium-12
+horizontaljustify center
+verticaljustify center
+
+hovershader menu/generic/button-hover
+pressedshader menu/generic/button-press
+hovercommand "globalwidgetcommand tooltip_main title \"$$MultiplayerGame$$\""
+hoverexitcommand "globalwidgetcommand tooltip_main title \"\""
+stuffcommand "pushmenu multiMatch"
+
+ordernumber 12
+
+hoversound sound/misc/menu/hover.wav
+clicksound sound/misc/menu/click.wav
+
+}
+
+resource
+Button
+{
+title "$$Settings$$"
+name "Default"
+rect 458 55 138 32
+fgcolor 0.12 0.15 0.25 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+
+font serpentinemedium-12
+horizontaljustify center
+verticaljustify center
+
+hovershader menu/generic/button-hover
+pressedshader menu/generic/button-press
+hovercommand "globalwidgetcommand tooltip_main title \"$$SetGameOptions$$\""
+hoverexitcommand "globalwidgetcommand tooltip_main title \"\""
+stuffcommand "pushmenu controls"
+
+ordernumber 12
+
+hoversound sound/misc/menu/hover.wav
+clicksound sound/misc/menu/click.wav
+
+}
+
+resource
+Button
+{
+title "$$Exit$$"
+name "Default"
+rect 435 428 96 32
+fgcolor 0.12 0.15 0.25 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+
+font serpentinemedium-12
+horizontaljustify center
+verticaljustify center
+
+hovershader menu/generic/button-hover
+pressedshader menu/generic/button-press
+hovercommand "globalwidgetcommand tooltip_main title \"$$ExitTheGame$$\""
+hoverexitcommand "globalwidgetcommand tooltip_main title \"\""
+stuffcommand "showmenu quit"
+
+ordernumber 12
+
+clicksound sound/misc/menu/back1.wav
+
+}
+////////////////////////////
+// This fires up the setup menu if required
+////////////////////////////
+resource
+checkbox
+{
+	linkcvar coop_setup
+    title ""
+    name "coop_setupInizialisator"
+    rect 424 330 123 16
+    fgcolor 1.00 1.00 1.00 1.00
+	bgcolor 0 0 0 0
+    rect 320 55 138 32
+    borderstyle "NONE"
+    checked_shader "sysimg/2d/blank"
+    unchecked_shader "sysimg/2d/blank"
+    font serpentinemedium-10
+    horizontaljustify left
+	
+	checked_command "showmenu coop_setup\n"
+    
+    hoversound sound/misc/menu/hover.wav
+    clicksound sound/misc/menu/click.wav
+}
+resource
+Button
+{
+cvarvisibility coop_setup 1 ==
+title "$$Multiplayer$$"
+name "Default"
+rect 320 55 138 32
+fgcolor 0.12 0.15 0.25 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+
+
+font serpentinemedium-12
+horizontaljustify center
+verticaljustify center
+
+hovershader menu/generic/button-hover
+pressedshader menu/generic/button-press
+hovercommand "globalwidgetcommand tooltip_main title \"$$MultiplayerGame$$\""
+hoverexitcommand "globalwidgetcommand tooltip_main title \"\""
+stuffcommand "pushmenu multiMatch"
+
+ordernumber 12
+
+hoversound sound/misc/menu/hover.wav
+clicksound sound/misc/menu/click.wav
+}
+////////////////////////////
+resource
+CheckBox
+{
+    title "Advanced"
+    name "AdvancedMain"
+    rect 424 350 123 16
+    fgcolor 1.00 1.00 1.00 1.00
+    bgcolor 0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    linkcvar "coop_ui_eam"
+    checked_shader "textures/menu/checkbox_checked"
+    unchecked_shader "textures/menu/checkbox_unchecked"
+    font serpentinemedium-10
+    horizontaljustify left
+    
+    hoversound sound/misc/menu/hover.wav
+    clicksound sound/misc/menu/click.wav
+}
+
+resource
+widget
+{
+	rect 	 371 369 256 32
+	fgcolor 1.00 1.00 0.00 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle "none"
+	
+	shader menu/main/secrets
+	shadercolor 1.00 0.00 0.00 1.00
+	hovershadercolor 1.00 0.00 0.00 1.00
+	armedshadercolor 1.00 0.00 0.00 1.00
+	selectedshadercolor 1.00 0.00 0.00 1.00
+	
+//	cvarvisibility secrets_enable 1
+	cvarvisibility g_gametype 0 ==
+}
+
+resource
+Button
+{
+	title "$$AccessSecrets$$"
+	name 	"Default"
+	rect 	 424 371 123 26
+	font serpentinemedium-12
+	fgcolor 		1.000 1.000 1.000 1.000
+	bgcolor 		0.000 0.000 0.000 0.000
+
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+
+	//borderstyle "BORDER_OUTLINE"
+	//borderwidth 1
+	//bordercolor 0.12 0.15 0.25 1.00
+
+	stuffcommand "pushmenu secrets\n"
+	
+//	cvarvisibility secrets_enable 1
+	cvarvisibility g_gametype 0 ==
+
+    hovercommand "globalwidgetcommand tooltip_main title \"$$SecretsFound$$\""
+    hoverexitcommand "globalwidgetcommand tooltip_main title \"\""
+    
+    clicksound sound/misc/menu/click.wav
+
+}
+
+resource
+widget
+{
+	rect 	 371 399 256 32
+	fgcolor 1.00 1.00 0.00 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle "none"
+	
+	shader menu/main/credits
+	shadercolor 1.0 1.0 1.0 1.0 
+	hovershadercolor 1.0 1.0 1.0 1.0 
+	armedshadercolor 1.0 1.0 1.0 1.0 
+	selectedshadercolor 1.0 1.0 1.0 1.0 
+	
+	cvarvisibility g_gametype 0 ==
+}
+
+resource
+Button
+{
+	title "$$Credits$$"
+	name 	"Default"
+	rect 	 424 401 123 26
+	font serpentinemedium-12
+	fgcolor 		1.000 1.000 1.000 1.000
+	bgcolor 		0.000 0.000 0.000 0.000
+
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+
+	//borderstyle "BORDER_OUTLINE"
+	//borderwidth 1
+	//bordercolor 0.12 0.15 0.25 1.00
+
+	stuffcommand "map credits"
+	
+    hovercommand "globalwidgetcommand tooltip_main title \"$$EF2Credits$$\""
+    hoverexitcommand "globalwidgetcommand tooltip_main title \"\""
+    
+    clicksound sound/misc/menu/click.wav
+	
+	cvarvisibility g_gametype 0 ==
+}
+
+//----------------------------------------------------------------------
+//	Settings
+// Quickaccess menue
+//----------------------------------------------------------------------
+resource 
+Label
+{
+    title "Fine Tuning"  //$$Settings$$
+	name "Default"
+	rect 34 87 215 16
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	font serpentinemedium-10
+	borderstyle "3D_BORDER"
+	hovercommand "globalwidgetcommand tooltip_main title \"Fine tune your Network settings here, after you have execute the Settings Assistent below\""
+	hoverexitcommand "globalwidgetcommand tooltip_main title \"\""
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+resource
+Widget
+{
+	name "Default"
+	rect 34 103 214 124//34 103 214 144
+	fgcolor 1 1 1 1
+	bgcolor 0.000 0.000 0.000 0.75
+	borderstyle "OUTLINE_BORDER"
+	borderwidth 1
+	bordercolor 0.278 0.365 0.510 1.000
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+//----------------------------------------------------------------------
+//	Settings
+// Quickaccess menue ASSISTENT
+//----------------------------------------------------------------------
+
+resource 
+Label
+{
+    title "Settings Assistent"  //$$Settings$$
+	name "Default"
+	rect 34 230 215 16
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	font serpentinemedium-10
+	borderstyle "3D_BORDER"
+	hovercommand "globalwidgetcommand tooltip_main title \"Execute this Setup Assistent in the correct order, before you fine tune your Settings!\""
+	hoverexitcommand "globalwidgetcommand tooltip_main title \"\""
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+resource
+Widget
+{
+	name "DefaultAssistent"
+	rect 34 246 214 100
+	fgcolor 1 1 1 1
+	bgcolor 0.000 0.000 0.000 0.75
+	borderstyle "OUTLINE_BORDER"
+	borderwidth 1
+	bordercolor 0.278 0.365 0.510 1.000
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+//----------------------------------------------------------------------
+//	Settings CPU SPEED
+//----------------------------------------------------------------------
+resource 
+Label
+{
+	name "DefaultPCSPEEDTITLE"
+	title "1. CPU SPEED"
+	rect 34 246 130 16
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource 
+Label
+{
+	name "DefaultPCSPEEDSELECT"
+	title "$$Settings$$"
+	linkcvar "coop_ui_cpu"
+	rect 90 246 130 16
+	fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource
+PulldownMenuContainer
+{
+	title "CPU SPEED"
+	name "pcspeed"
+	rect 230 246 16 16
+    fgcolor 				0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinelight-10
+	
+	menushader "MENU" "textures/menu/pulldownarrow"
+	selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "Very Slow CPU (< 1600)"	command "seta coop_ui_cpu vSlow;exec coop_mod/cfg/tuning/cpuveryslow.cfg\n"
+	addpopup "MENU" "Slow CPU (<= 2000)"		command "seta coop_ui_cpu Slow;exec coop_mod/cfg/tuning/cpuslow.cfg\n"
+	addpopup "MENU" "Medium CPU (>= 3000)"		command "seta coop_ui_cpu Medium;exec coop_mod/cfg/tuning/cpumedium.cfg\n"
+	addpopup "MENU" "Normal CPU (>= 2000)"		command "seta coop_ui_cpu Normal;exec coop_mod/cfg/tuning/cpunormal.cfg\n"
+	addpopup "MENU" "Fast CPU (>= 3500)"		command "seta coop_ui_cpu Fast;exec coop_mod/cfg/tuning/cpufast.cfg\n"
+	addpopup "MENU" "very Fast CPU (>= 3500)"	command "seta coop_ui_cpu vFast;exec coop_mod/cfg/tuning/cpuveryfast.cfg\n"
+	popup_width "MENU" 200
+	clicksound sound/misc/menu/click.wav
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+//----------------------------------------------------------------------
+//	Connection Settings
+//----------------------------------------------------------------------
+resource 
+Label
+{
+	name "DefaultnetworkTITLE"
+	title "2. Network"
+	rect 34 262 130 16
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource 
+Label
+{
+	name "DefaultnetworkSELECT"
+	title "$$Settings$$"
+	linkcvar "coop_ui_netw"
+	rect 84 262 130 16
+	fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource
+PulldownMenuContainer
+{
+	title "Network"
+	name "network"
+	rect 230 262 16 16
+    fgcolor 				0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinelight-10
+	
+	menushader "MENU" "textures/menu/pulldownarrow"
+	selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "RESET"				command "seta coop_ui_netw DEFAULT;exec coop_mod/cfg/tuning/resetconnection.cfg\n"
+	addpopup "MENU" "56k Modem"			command "seta coop_ui_netw 56k;exec coop_mod/cfg/tuning/56kconnection.cfg\n"
+	addpopup "MENU" "ISDN / DSL-light"	command "seta coop_ui_netw ISDN/DSL-light;exec coop_mod/cfg/tuning/dsl300connection.cfg\n"
+	addpopup "MENU" "DSL 1000"			command "seta coop_ui_netw DSL-1;exec coop_mod/cfg/tuning/dsl1000connection.cfg\n"
+	addpopup "MENU" "DSL 3000"			command "seta coop_ui_netw DSL-3;exec coop_mod/cfg/tuning/dsl3000connection.cfg\n"
+	addpopup "MENU" "DSL 6000"			command "seta coop_ui_netw DSL-6;exec coop_mod/cfg/tuning/dsl6000connection.cfg\n"
+	addpopup "MENU" "DSL 10000"			command "seta coop_ui_netw DSL-10;exec coop_mod/cfg/tuning/dsl10000connection.cfg\n"
+	addpopup "MENU" "LAN"				command "seta coop_ui_netw LAN;exec coop_mod/cfg/tuning/lanconnection.cfg\n"
+	addpopup "MENU" "Shared 56k Modem"	command "seta coop_ui_netw Shared-56k;exec coop_mod/cfg/tuning/shared56kconnection.cfg\n"
+	addpopup "MENU" "Shared ISDN/DSL-L"	command "seta coop_ui_netw ISDN/DSL-light;exec coop_mod/cfg/tuning/shareddsl300connection.cfg\n"
+	addpopup "MENU" "Shared DSL 1000"	command "seta coop_ui_netw Shared-DSL-1;exec coop_mod/cfg/tuning/shareddsl1000connection.cfg\n"
+	addpopup "MENU" "Shared DSL 3000"	command "seta coop_ui_netw Shared-DSL-3;exec coop_mod/cfg/tuning/shareddsl3000connection.cfg\n"
+	addpopup "MENU" "Shared DSL 6000"	command "seta coop_ui_netw Shared-DSL-6;exec coop_mod/cfg/tuning/shareddsl6000connection.cfg\n"
+	popup_width "MENU" 200
+	clicksound sound/misc/menu/click.wav
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+//----------------------------------------------------------------------
+//	Settings Renderer
+//----------------------------------------------------------------------
+resource 
+Label
+{
+	name "DefaultRendererTITLE"
+	title "3. Renderer-GFX"
+	rect 34 278 130 16
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource 
+Label
+{
+	name "DefaultRenderer"
+	title "$$Settings$$"
+	linkcvar "coop_ui_rSpeed"
+	rect 84 278 130 16
+	fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource
+PulldownMenuContainer
+{
+	title "Renderer"
+	name "coop_ui_rSpeed"
+	rect 230 278 16 16
+    fgcolor 				0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinelight-10
+	
+	menushader "MENU" "textures/menu/pulldownarrow"
+	selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "Very Low (< 32 MB)"	command "seta coop_ui_rSpeed vLow;exec coop_mod/cfg/rveryslow.cfg\n"
+	addpopup "MENU" "Low (< 64)"			command "seta coop_ui_rSpeed Low;exec coop_mod/cfg/rslow.cfg\n"
+	addpopup "MENU" "Normal (>= 64MB)"		command "seta coop_ui_rSpeed Normal;exec coop_mod/cfg/rnormal.cfg\n"
+	addpopup "MENU" "Medium (> 64MB fast)"	command "seta coop_ui_rSpeed Medium;exec coop_mod/cfg/rmedium.cfg\n"
+	addpopup "MENU" "Fast GPU"				command "seta coop_ui_rSpeed High;exec coop_mod/cfg/rfast.cfg\n"
+	addpopup "MENU" "very Fast GPU"			command "seta coop_ui_rSpeed vHigh;exec coop_mod/cfg/rveryfast.cfg\n"
+	popup_width "MENU" 200
+	clicksound sound/misc/menu/click.wav
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+resource 
+Label
+{
+	name "DefaultPCSPEEDTITLE"
+	title "Please execute the setup assistent in the correct order or it might not work correctly. Use the menu above only to fine tune your settings!"
+	rect 34 296 214 50
+    bgcolor 1.000 0.000 0.000 0.700
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-8
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+
+//----------------------------------------------------------------------
+// Com_maxfps
+//----------------------------------------------------------------------
+resource 
+Label
+{
+	name "Default"
+	title "Max Frames"
+	rect 34 103 130 16
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource 
+Label
+{
+	name "Default"
+	title "$$Settings$$"
+	linkcvar "com_maxfps"
+	rect 190 103 40 16
+	fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+
+resource
+PulldownMenuContainer
+{
+	title "$$list$$"
+	name "maxfps"
+	rect 230 103 16 16
+    fgcolor 				0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinelight-10
+	
+	menushader "MENU" "textures/menu/pulldownarrow"
+	selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "20"	command "seta com_maxfps 20\n"
+	addpopup "MENU" "25"	command "seta com_maxfps 25\n"
+	addpopup "MENU" "30"	command "seta com_maxfps 30\n"
+	addpopup "MENU" "40"	command "seta com_maxfps 40\n"
+	addpopup "MENU" "43"	command "seta com_maxfps 43\n"
+	addpopup "MENU" "50"	command "seta com_maxfps 50\n"
+	addpopup "MENU" "60"	command "seta com_maxfps 60\n"
+	addpopup "MENU" "62"	command "seta com_maxfps 62\n"
+	addpopup "MENU" "70"	command "seta com_maxfps 70\n"
+	addpopup "MENU" "75"	command "seta com_maxfps 75\n"
+	addpopup "MENU" "80"	command "seta com_maxfps 80\n"
+	addpopup "MENU" "85"	command "reset com_maxfps\n"
+	addpopup "MENU" "90"	command "seta com_maxfps 90\n"
+	addpopup "MENU" "Unlim." 	command "seta com_maxfps 0\n"
+	
+	popup_width "MENU" 50
+    clicksound sound/misc/menu/click.wav
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+
+//----------------------------------------------------------------------
+// cl_maxpackets
+//----------------------------------------------------------------------
+resource 
+Label
+{
+	name "Default"
+	title "Maxpackets"
+	rect 34 119 130 16
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource 
+Label
+{
+	name "Default"
+	title "maxpackets"
+	linkcvar "cl_maxpackets"
+	rect 190 119 40 16
+	fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+
+resource
+PulldownMenuContainer
+{
+	title "$$list$$"
+	name "maxpackets"
+	rect 230 119 16 16
+    fgcolor					0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinemedium-10
+	menushader "MENU" "textures/menu/pulldownarrow"
+	selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "reset"			command "seta cl_maxpackets 30\n"
+	addpopup "MENU" "38"			command "seta cl_maxpackets 38\n"
+	addpopup "MENU" "40"			command "seta cl_maxpackets 40\n"
+	addpopup "MENU" "43"			command "seta cl_maxpackets 43\n"
+	addpopup "MENU" "50"			command "seta cl_maxpackets 50\n"
+	addpopup "MENU" "60"			command "seta cl_maxpackets 60\n"
+	addpopup "MENU" "62"			command "seta cl_maxpackets 62\n"
+	addpopup "MENU" "70"			command "seta cl_maxpackets 70\n"
+	addpopup "MENU" "76"			command "seta cl_maxpackets 76\n"
+	addpopup "MENU" "85"			command "seta cl_maxpackets 85\n"
+
+	popup_width "MENU" 50
+    clicksound sound/misc/menu/click.wav
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+
+
+//----------------------------------------------------------------------
+// snaps
+//----------------------------------------------------------------------
+resource 
+Label
+{
+	name "Default"
+	title "snaps"
+	rect 34 135 130 16
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource 
+Label
+{
+	name "Default"
+	title "snaps"
+	linkcvar "snaps"
+	rect 190 135 40 16
+	fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+
+resource
+PulldownMenuContainer
+{
+	title "$$list$$"
+	name "Snaps"
+	rect 230 135 16 16
+    fgcolor					0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinemedium-10
+	menushader "MENU" "textures/menu/pulldownarrow"
+	selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "reset"	command "seta snaps 20\n"
+	addpopup "MENU" "30"	command "seta snaps 30\n"
+	addpopup "MENU" "40"	command "seta snaps 40\n"
+
+
+	popup_width "MENU" 50
+    clicksound sound/misc/menu/click.wav
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+
+//----------------------------------------------------------------------
+// Rate
+//----------------------------------------------------------------------
+resource 
+Label
+{
+	name "Default"
+	title "Data Rate"
+	rect 34 151 130 16
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource 
+Label
+{
+	name "Default"
+	title "rate"
+	linkcvar "rate"
+	rect 180 151 50 16
+	fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+
+resource
+PulldownMenuContainer
+{
+	title "$$list$$"
+	name "rate"
+	rect 230 151 16 16
+    fgcolor					0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinemedium-10
+	menushader "MENU" "textures/menu/pulldownarrow"
+	selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "Modem"			command "seta rate 4000\n"
+	addpopup "MENU" "ISDN"			command "seta rate 5000\n"
+	addpopup "MENU" "Dual ISDN"		command "seta rate 8000\n"
+	addpopup "MENU" "DSL Light"		command "seta rate 10000\n"
+	addpopup "MENU" "12.000"		command "seta rate 12000\n"
+	addpopup "MENU" "DSL 1k"		command "seta rate 14000\n"
+	addpopup "MENU" "DSL 6k"		command "seta rate 16000\n"
+	addpopup "MENU" "DSL 10k"		command "seta rate 18000\n"
+	addpopup "MENU" "LAN"			command "seta rate 20000\n"
+	addpopup "MENU" "24.000"		command "seta rate 24000\n"
+	addpopup "MENU" "Default"		command "seta rate 25000\n"
+	addpopup "MENU" "30.000"		command "seta rate 30000\n"
+	addpopup "MENU" "35.000"		command "seta rate 35000\n"
+	addpopup "MENU" "40.000"		command "seta rate 40000\n"
+
+
+	popup_width "MENU" 70	
+    clicksound sound/misc/menu/click.wav
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+
+//----------------------------------------------------------------------
+// FPS
+//----------------------------------------------------------------------
+resource 
+Label
+{
+	name "Default"
+	title "Show framrate"
+	rect 34 167 130 16
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource 
+Label
+{
+	name "fps"
+	title "Show"
+	rect 190 167 40 16
+	fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+	linkcvar fps
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource
+PulldownMenuContainer
+{
+	title "$$list$$"
+	name "fps"
+	rect 230 167 16 16
+    fgcolor					0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinemedium-10
+	menushader "MENU" "textures/menu/pulldownarrow"
+	selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "on"	command "seta fps 1\n"
+	addpopup "MENU" "off"	command "seta fps 0\n"
+
+
+	popup_width "MENU" 40
+    clicksound sound/misc/menu/click.wav
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+//----------------------------------------------------------------------
+// Logconsole
+//----------------------------------------------------------------------
+resource 
+Label
+{
+	name "Default"
+	title "Log Console"
+	rect 34 182 130 16
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource 
+Label
+{
+	name "logconsole"
+	title "On"
+	rect 190 182 40 16
+	fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+	linkcvar logfile
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+resource
+PulldownMenuContainer
+{
+	title "$$list$$"
+	name "logconsole"
+	rect 230 182 16 16
+    fgcolor					0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinemedium-10
+	menushader "MENU" "textures/menu/pulldownarrow"
+	selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "on"	command "seta logfile 1\n"
+	addpopup "MENU" "off"	command "seta logfile 0\n"
+
+	popup_width "MENU" 40	
+    clicksound sound/misc/menu/click.wav
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+
+
+//----------------------------------------------------------------------
+//Menu Animation
+//----------------------------------------------------------------------
+resource
+label
+{
+    name "Strafetilt"
+    title "View: Strafe tilt"
+    rect 34 197 160 15
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+resource 
+Label
+{
+	name "Strafetilt"
+	title "Off"
+	rect 190 197 40 16
+	fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+	linkcvar cg_viewStrafeTilt
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+
+resource
+PulldownMenuContainer
+{
+	title "Strafetilt"
+	name "Strafetilt"
+	rect 230 197 16 16
+    fgcolor                 0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinemedium-10
+	menushader		"MENU" "textures/menu/pulldownarrow"
+	selmenushader	"MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "reset"	command "seta cg_viewstrafetilt 1\n"
+	addpopup "MENU" "Off" 	command "seta cg_viewstrafetilt 0\n"
+	popup_width "MENU" 40
+	
+    clicksound sound/misc/menu/click.wav
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+
+//seta com_printwarnings "1"	
+
+//----------------------------------------------------------------------
+//Menu Animation
+//----------------------------------------------------------------------
+resource
+label
+{
+    name "Menu Animation"
+    title "select Menu-Model"
+    rect 34 213 160 15
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+resource
+PulldownMenuContainer
+{
+	title "Menu Animation"
+	name "SelectBGModel"
+	rect 230 213 16 16
+    fgcolor                 0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinemedium-10
+	menushader		"MENU" "textures/menu/pulldownarrow"
+	selmenushader	"MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "USS Enterprise"command "seta ui_mainMenuModel models/sky/sky_UI-stardome-ent.tik\n"
+	addpopup "MENU" "USS Voyager" 	command "seta ui_mainMenuModel models/sky/sky_UI-stardome02.tik\n"
+	addpopup "MENU" "Desert" 		command "seta ui_mainMenuModel models/sky/m5-skybox.tik\n"
+	addpopup "MENU" "none" 			command "seta ui_mainMenuModel models/sky/sky_stardome-black.tik\n"
+	popup_width "MENU" 130
+	
+    clicksound sound/misc/menu/click.wav
+	
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+
+
+//----------------------------------------------------------------------
+//Show Player Name
+// Informations only, no setup
+//----------------------------------------------------------------------
+resource 
+Label
+{
+    linkcvar "name"
+	name "Default"
+	rect 260 87 268 16
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	font serpentinemedium-10
+	borderstyle "3D_BORDER"
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+//----------------------------------------------------------------------
+//	Game Version
+//----------------------------------------------------------------------
+resource
+label
+{
+	name "Version"//Default
+	title "$$Version$$"
+	rect 260 106 120 15 //0 460 100 16
+	fgcolor 1.00 1.00 1.00 1.00
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "raised"  //RAISED
+	font serpentinemedium-10
+    verticaljustify top
+    horizontaljustify left
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource
+label
+{
+	name "Default"
+	rect 380 106  150 15 //120 460 64 16
+	fgcolor 0.953 0.667 0.271 1.000
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "NONE"
+	linkcvar "shortversion"
+	font serpentinemedium-10
+    verticaljustify top
+    horizontaljustify right
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+//----------------------------------------------------------------------
+// Display Refreshrate
+//----------------------------------------------------------------------
+resource
+label
+{
+	name "Default"
+	title "Display refresh rate"
+	rect 260 122 180 15
+	fgcolor 1.00 1.00 1.00 1.00
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "NONE"
+	font serpentinemedium-10
+    verticaljustify top
+    horizontaljustify left
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource
+label
+{
+    name "Default"
+    title "Display"
+    rect	380 122 150 15
+	fgcolor 0.953 0.667 0.271 1.000
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "NONE"
+    verticaljustify top	
+	horizontaljustify right
+    linkcvar "r_displayrefresh"
+    font serpentinemedium-10
+    //maxcharacters 32
+   	//hovercommand "globalwidgetcommand tooltip_main title \"$$TypeInPlayerName$$\""
+	//hoverexitcommand "globalwidgetcommand tooltip_main title \"\""
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+//----------------------------------------------------------------------
+//	Videocard Memory
+//----------------------------------------------------------------------
+resource
+label
+{
+	name "Default"
+	title "Videocard"
+	rect 260 137 120 15
+	fgcolor 1.00 1.00 1.00 1.00
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "NONE"
+	font serpentinemedium-10
+    verticaljustify top
+    horizontaljustify left
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource
+label
+{
+    name "Default"
+    title "VideocardValue"
+    rect	400 137 100 15
+	fgcolor 0.953 0.667 0.271 1.000
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "NONE"
+    verticaljustify top	
+	horizontaljustify right
+    linkcvar "r_vidMem"
+    font serpentinemedium-10
+    //maxcharacters 32
+   	//hovercommand "globalwidgetcommand tooltip_main title \"$$TypeInPlayerName$$\""
+	//hoverexitcommand "globalwidgetcommand tooltip_main title \"\""
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource
+label
+{
+    name "Default"
+    title "MB"
+    rect	500 137 30 15
+	fgcolor 1.00 1.00 1.00 1.00
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "NONE"
+    verticaljustify top	
+	horizontaljustify right
+    font serpentinemedium-10
+    //maxcharacters 32
+   	//hovercommand "globalwidgetcommand tooltip_main title \"$$TypeInPlayerName$$\""
+	//hoverexitcommand "globalwidgetcommand tooltip_main title \"\""
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+//----------------------------------------------------------------------
+//	Videocard Model
+//----------------------------------------------------------------------
+resource
+label
+{
+	name "Default"
+	title "Videocard"
+	rect 260 152 120 15
+	fgcolor 1.00 1.00 1.00 1.00
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "NONE"
+	font serpentinemedium-10
+    verticaljustify top
+    horizontaljustify left
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource
+label
+{
+    name "Default"
+    title "VideocardRendererName"
+    rect	380 152 150 15
+	fgcolor 0.953 0.667 0.271 1.000
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "NONE"
+    verticaljustify top	
+	horizontaljustify right
+    linkcvar "r_lastValidRenderer"
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+
+//----------------------------------------------------------------------
+//	Video Res
+//----------------------------------------------------------------------
+resource
+label
+{
+	name "Default"
+	title "$$VideoMode$$"
+	rect 260 167 120 15
+	fgcolor 1.00 1.00 1.00 1.00
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "NONE"
+	font serpentinemedium-10
+    verticaljustify top
+    horizontaljustify left
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+
+resource
+SwitchBox
+{
+    name "Default"
+    rect 380 167 150 15
+    fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+    linkcvar "r_mode"
+
+    option "640 x 480"      "" 3
+    option "800 x 600"      "" 4
+    option "1024 x 768"     "" 6
+    option "1152 x 864"     "" 7
+    option "1280 x 1024"    "" 8
+    option "1600 x 1200"    "" 9
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+resource //prevent mode change
+label
+{
+	name "Default"
+	title ""
+	rect 380 167 150 15
+	fgcolor 0.00 0.00 0.00 0.00
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle "NONE"
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+//----------------------------------------------------------------------
+//	Userfov
+//----------------------------------------------------------------------
+resource
+label
+{
+	name "Default"
+	title "Field of View"
+	rect 260 182 120 15
+	fgcolor 1.00 1.00 1.00 1.00
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "NONE"
+	font serpentinemedium-10
+    verticaljustify top
+    horizontaljustify left
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource
+label
+{
+    name "Default"
+    title "fov"
+    rect	380 182 150 15
+	fgcolor 0.953 0.667 0.271 1.000
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "NONE"
+    verticaljustify top	
+	horizontaljustify right
+    linkcvar "userfov"
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+//----------------------------------------------------------------------
+//	strafetilt
+//----------------------------------------------------------------------
+resource
+label
+{
+	name "strafetilt"
+	title "Starfe tilt"
+	rect 260 195 120 15
+	fgcolor 1.00 1.00 1.00 1.00
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "NONE"
+	font serpentinemedium-10
+    verticaljustify top
+    horizontaljustify left
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource
+label
+{
+    name "strafetilt"
+    title "On"
+    rect	380 195 150 15
+	fgcolor 0.953 0.667 0.271 1.000
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "NONE"
+    verticaljustify top	
+	horizontaljustify right
+	font serpentinemedium-10
+	linkCvar cg_viewStrafeTilt
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+//----------------------------------------------------------------------
+//	Timenuge
+//----------------------------------------------------------------------
+resource
+label
+{
+	name "Default"
+	title "Interpolation"
+	rect 260 210 120 15
+	fgcolor 1.00 1.00 1.00 1.00
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "NONE"
+	font serpentinemedium-10
+    verticaljustify top
+    horizontaljustify left
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource
+label
+{
+    name "Default"
+    title "timenuge"
+    rect	380 210 150 15
+	fgcolor 0.953 0.667 0.271 1.000
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "NONE"
+    verticaljustify top	
+	horizontaljustify right
+    linkcvar "cl_timenudge"
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+//----------------------------------------------------------------------
+//	packetdup //zero rocks
+//----------------------------------------------------------------------
+resource
+label
+{
+	name "packetdup"
+	title "Packets repeat:"
+	rect 260 225 130 15
+	fgcolor 1.00 1.00 1.00 1.00
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "NONE"
+	font serpentinemedium-10
+    verticaljustify top
+    horizontaljustify left
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+resource
+label
+{
+    name "packetdup"
+    title "packetdup"
+    rect	468 225 20 15
+	fgcolor 0.953 0.667 0.271 1.000
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "NONE"
+    verticaljustify top	
+	horizontaljustify right
+    font serpentinemedium-10
+    linkcvar "cl_packetdup"
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+resource
+label
+{
+    name "packetdup"
+    title "times"
+    rect	490 225 40 15
+	fgcolor 1.00 1.00 1.00 1.00
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "NONE"
+    verticaljustify top	
+	horizontaljustify right
+    font serpentinemedium-10
+	cvarvisibility coop_ui_eam 1 ==
+}
+//----------------------------------------------------------------------
+// Player Model
+//----------------------------------------------------------------------
+resource 
+Label
+{
+    title "Model"
+	name "Default"
+	rect 530 87 62 16
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	font serpentinemedium-10
+	borderstyle "3D_BORDER"
+	cvarvisibility coop_ui_eam 1 ==
+}
+resource 
+RenderModel
+{
+    name "Default"
+    rect  530 106 62 120
+    fgcolor 1.00 1.00 1.00 1.00
+    bgcolor 0.00 0.00 0.00 1.00
+    borderstyle "NONE"
+    bordercolor 1.0 1.0 1.0 1.0
+    
+    linkcvar "mp_playermodel"
+    
+    rendermodelangles "0 175 0"
+    rendermodeloffset "160 0 -85"
+    rendermodelrotateoffset "0 0 35"
+    rendermodelfov 20 40
+    rendermodelanimation "dm_idle"
+    
+    borderstyle	"OUTLINE_BORDER"
+    bordercolor	0.125 0.157 0.251 1.000
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+resource
+button
+{
+	title "Setup"
+	name "playerSetup"//Default
+	rect 530 106 62 136//530 230 62 16
+	fgcolor 1.00 1.00 1.00 1.00
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "none"	
+    verticaljustify bottom
+    horizontaljustify center
+    font serpentinelight-10
+	//hovershader menu/generic/button-hover
+	//pressedshader menu/generic/button-press
+    
+    hovercommand "globalwidgetcommand tooltip_main title \"$$SetPlayerOptions$$\""
+	hoverexitcommand "globalwidgetcommand tooltip_main title \"\""
+	stuffcommand "pushmenu playersetup_multiplayer"
+	
+	hoversound sound/misc/menu/hover.wav
+	clicksound sound/misc/menu/click.wav
+	cvarvisibility coop_ui_eam 1 ==
+}
+
+//----------------------------------------------------------------------
+// Info Displays
+//----------------------------------------------------------------------
+resource
+button
+{
+    name "packetdup"
+    title "cl_packetdup -> Value not recommended unless you play in LAN!"
+    rect	1 16 220 15
+	fgcolor 1.00 1.00 0.00 1.00
+	bgcolor 1.00 0.00 0.00 0.50
+	borderstyle	"OUTLINE_BORDER"
+    bordercolor	1.00 0.00 0.00 1.00
+    verticaljustify top	
+	horizontaljustify left
+    font Tahoma-8
+    cvarvisibility cl_packetdup 2 >=
+    hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+    
+	//stuffcommand "seta cl_packetdup 1"
+	hoversound sound/misc/menu/hover.wav
+	clicksound sound/misc/menu/click.wav
+}
+resource
+label
+{
+    name "maxpackets"
+    rect	0 0 640 480
+	fgcolor 1.00 1.00 0.00 1.00
+	bgcolor 0.00 0.00 0.00 0.90
+	borderstyle	"none"
+    cvarvisibility cl_maxpackets 29 <=
+}
+resource
+button
+{
+    name "maxpackets"
+    title "cl_maxpackets -> RESET!"
+    rect	1 32 220 15
+	fgcolor 1.00 1.00 0.00 1.00
+	bgcolor 1.00 0.00 0.00 0.50
+	borderstyle	"OUTLINE_BORDER"
+    bordercolor	1.00 0.00 0.00 1.00
+    verticaljustify top	
+	horizontaljustify left
+    font Tahoma-8
+    cvarvisibility cl_maxpackets 29 <=
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+    
+	stuffcommand "seta cl_maxpackets 30"
+	hoversound sound/misc/menu/hover.wav
+	clicksound sound/misc/menu/click.wav
+	//hovercommand "globalwidgetcommand tooltip_main title \"$$SetPlayerOptions$$\""
+	//hoverexitcommand "globalwidgetcommand tooltip_main title \"\""
+}
+//----------------------------------------------------------------------
+//	List all GameMaps
+//----------------------------------------------------------------------
+resource
+Button
+{
+	title "$$MapList$$"
+	name "Default"
+	rect 33 376 147 16
+	fgcolor 1.00 1.00 1.00 1.00
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "NONE"
+	stuffcommand "maplist \n"
+	font serpentinelight-10
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	hovercommand "globalwidgetcommand tooltip_main title \"$$ListOfMaps$$\""
+	hoverexitcommand "globalwidgetcommand tooltip_main title \"\""
+	ordernumber 12
+	
+	cvarvisibility developer 0 !=
+	
+	hoversound sound/misc/menu/hover.wav
+	clicksound sound/misc/menu/click.wav
+}
+end.

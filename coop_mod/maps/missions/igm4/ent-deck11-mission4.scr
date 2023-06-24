@@ -1,0 +1,738 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	      ent-deck11 - MISSION 4
+//  Script By:    K.Thompson
+//  Created on:   08/12/2002
+//	Last Edited:  08/12/2002 - kt
+//-----------------------------------------------------------------
+
+void setupMission4Deck11();
+void justLoadedDeckThreadIGM4();
+
+void cinematicKleeyaIGM4();
+void cinematicKleeyaIGM4Skipthread();
+void cinematicKleeyaIGM4End();
+
+void kleeya_workIGM4();
+void kleeyaDialog4_1();
+
+void ambientActorsIGM4();
+
+void stratton_workIGM4();
+void strattonDialog4_1();
+
+void miyamoto_workIGM4();
+void miyamotoDialog4_1();
+void miyamotoDialog4_2();
+void miyamotoDialog4_3();
+
+void setTurboLiftVariableIGM4();
+
+float tuvokHasCalledMunroToBridgeIGM4 = 0;
+
+//===================================================================================================================
+// Setup 
+//===================================================================================================================
+
+//---------------------
+// setupMission4Deck11	
+// does all the setup stuff for the mission
+//---------------------
+void setupMission4Deck11()
+{
+	thread globalCoop_level_onUse($elevatorButton,"checkForDeckChangeIGM4");
+	
+	//Definie Objectives
+	coop_string_objectiveItem1			= "IGM4TalkWithKleeya";
+	coop_string_objectiveItem2			= "IGM4GoToBridge";//IGM4GoToTelsia
+	coop_string_objectiveItem3			= "IGM4GoToBridge";
+	coop_string_objectiveItem4			= "IGM4GoToArmory";
+	coop_string_objectiveItem5			= "IGM4HoloDeck";
+
+	//--- Fade Out
+	globalCoop_main_camFadeOut(.5);
+	
+	spawn( "Camera", "targetname", "cam1" );
+	spawn( "Camera", "targetname", "cam2" );
+	spawn( "Camera", "targetname", "cam3" );
+	spawn( "Camera", "targetname", "cam4" );
+	spawn( "Camera", "targetname", "cam5" );
+	spawn( "Camera", "targetname", "cam6" );
+	spawn( "Camera", "targetname", "cam7" );
+	spawn( "Camera", "targetname", "cam8" );
+	spawn( "Camera", "targetname", "cam9" );
+	spawn( "Camera", "targetname", "cam10" );
+
+	cam.load( "cam_igm4_deck11_1" ); //Inrto
+	cam.load( "cam_igm4_deck11_2" ); 
+	cam.load( "cam_igm4_deck11_3" ); //Key board
+	cam.load( "cam_igm4_deck11_4" ); //Planet Shot 1
+	cam.load( "cam_igm4_deck11_5" ); //Munro Mid
+	cam.load( "cam_igm4_deck11_6" ); //Kleeya Mid
+	cam.load( "cam_igm4_deck11_7" ); //Munro Tight
+	cam.load( "cam_igm4_deck11_8" ); //Kleeya Tight
+	cam.load( "cam_igm4_deck11_9" ); //Planet Shot 2
+
+	//Close the hall portal
+	astrometricsCloseHallPortal();
+
+	globalCommon_SpawnActor( "char/kleeya-noweapon.tik", "kleeya", '-11072 1102 0', 90 );
+	globalCommon_SpawnActor( "char/hazardteam_sf-munro.tik", "scriptmunro", '-11072 975 0', 90 );
+	if(!cvar_bool_multiplayer){//Singleplayer
+		globalCommon_SpawnActor( "char/starfleet_tuvok.tik", "tuvok", '-11072 1152 0', 90 );
+	}
+	else{
+		spawn("script_model","model","fx/fx-dummy.tik","targetname","tuvok");
+		thread globalCoop_objectives_update("incomplete",1,1);//state,slot,show
+	}
+	
+	spawn( "script_origin", "targetname", "lookAtOrigin" );
+	
+	$tuvok.hide();
+	$tuvok.notsolid();
+	
+	thread cinematicKleeyaIGM4();
+	
+	thread ambientActorsIGM4();
+}
+
+//---------------------
+// justLoadedDeckThreadIGM4
+// Triggered and check to see if A cinematic should happen.
+//------------------------
+void justLoadedDeckThreadIGM4()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		if( getfloatvar( "game.IGM4GoToTelsia" ) >= 1 )
+		{
+			$player.setobjectiveshow( "IGM4GoToTelsia", 1 );		
+		}
+		if( getfloatvar( "game.IGM4GoToTelsia" ) == 2 )
+		{
+			$player.setobjectivecomplete( "IGM4GoToTelsia", 1 );			
+		}
+		if( getfloatvar( "game.IGM4TalkWithKleeya" ) >= 1 )
+		{
+			$player.setobjectiveshow( "IGM4TalkWithKleeya", 1 );		
+		}
+		if( getfloatvar( "game.IGM4TalkWithKleeya" ) == 2 )
+		{
+			$player.setobjectivecomplete( "IGM4TalkWithKleeya", 1 );			
+		}
+			
+		if( getfloatvar( "game.IGM4GoToBridge" ) >= 1 )
+		{
+			$player.setobjectiveshow( "IGM4GoToBridge", 1 );		
+		}
+		if( getfloatvar( "game.IGM4GoToBridge" ) == 2 )
+		{
+			$player.setobjectivecomplete( "IGM4GoToBridge", 1 );			
+		}
+		
+		if( getfloatvar( "game.IGM4GoToArmory" ) >= 1 )
+		{
+			$player.setobjectiveshow( "IGM4GoToArmory", 1 );		
+		}
+		if( getfloatvar( "game.IGM4GoToArmory" ) == 2 )
+		{
+			$player.setobjectivecomplete( "IGM4GoToArmory", 1 );			
+		}
+		if( getfloatvar( "game.IGM4HoloDeck" ) >= 1 )
+		{
+			$player.setobjectiveshow( "IGM4HoloDeck", 1 );		
+		}
+		if( getfloatvar( "game.IGM4HoloDeck" ) == 2 )
+		{
+			$player.setobjectivecomplete( "IGM4HoloDeck", 1 );			
+		}
+	}
+}
+
+//---------------------
+// cinematic
+// setup and begin cinematic
+//---------------------
+void cinematicKleeyaIGM4()
+{
+	globalCoop_cin_start();	
+	// --- Que Cams
+	globalCoop_cin_follow($cam1,$cam_igm4_deck11_1 );
+	globalCoop_cin_follow($cam2,$cam_igm4_deck11_2 );
+	globalCoop_cin_follow($cam3,$cam_igm4_deck11_3 );
+	//globalCoop_cin_follow($cam4,$cam_igm4_deck11_4 );
+	globalCoop_cin_follow($cam5,$cam_igm4_deck11_5 );
+	globalCoop_cin_follow($cam6,$cam_igm4_deck11_6 );
+	globalCoop_cin_follow($cam7,$cam_igm4_deck11_7 );
+	globalCoop_cin_follow($cam8,$cam_igm4_deck11_8 );
+	//$cam9.follow ( $cam_igm4_deck11_9 );
+	
+	globalCoop_cin_fov($cam1, 60 );
+	globalCoop_cin_fov($cam2, 30 );
+	globalCoop_cin_fov($cam3, 60 );
+	globalCoop_cin_fov($cam4, 60 );
+	globalCoop_cin_fov($cam5, 30 );
+	globalCoop_cin_fov($cam6, 30 );
+	globalCoop_cin_fov($cam7, 10 );
+	globalCoop_cin_fov($cam8,10 );
+	globalCoop_cin_fov($cam9,60 );
+	globalCoop_cin_fov($cam10,60 );
+
+	$cam1.cut();
+	$cam2.cut();
+	$cam3.cut();
+	$cam4.cut();
+	$cam5.cut();
+	$cam6.cut();
+	$cam7.cut();
+	$cam8.cut();
+	$cam9.cut();
+	$cam10.cut();
+	
+	globalCoop_cin_cuecamera( $cam1 );	
+	wait( 1 );
+	
+	globalCoop_cin_cuecamera( $cam1 );
+	
+	//--- Start & Fade in
+	globalCoop_main_camFadeIn(.5);
+	
+	// --- Skip Thread
+	globalCoop_cin_skipThread( "cinematicKleeyaIGM4Skipthread");
+	
+	$kleeya.walkto( "astrometricsNode0", "walk_fast" );
+	wait( 3 );
+	$scriptmunro.walkto( "astrometricsNode1" );
+	
+	wait( 6 );
+	
+	//--- Fade Out
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+	
+	$scriptmunro.anim( "idle" );
+	$kleeya.anim( "idle" );
+	
+	$kleeya.origin( '-11096 1800 10' );
+	$kleeya.angle( 70 );
+	
+	$scriptmunro.origin( '-11048 1800 0' );
+	$scriptmunro.angle( 140 );
+	
+	globalCoop_cin_cuecamera( $cam2 );
+	
+	$kleeya.headWatch( $scriptmunro, 10 );
+	$scriptmunro.headWatch( $kleeya, 10 );
+	
+	wait( 1 );
+	
+	//--- Fade Out
+	globalCoop_main_camFadeIn(.5);
+	wait( .6 );
+	
+	globalCoop_dialog_play($kleeya,"ent_m4/kleeya_mayi.mp3", 1, 10000, 0); //This ship is amazing. The resources here are overwhelming! If I had access this level of technology, I could have completed my work long ago. May I?	
+	
+	globalCoop_cin_cuecamera( $cam3 );
+	wait( .2 );	
+	thread globalCoop_dialog_play($scriptmunro,"ent_m4/munro_beguest.mp3", 1, 10000, 0); //Be my guest.
+	wait( .75 );
+	$kleeya.headWatch( $lookAtOrigin, 10 );
+	wait( .25 );
+	$scriptmunro.headWatch( $lookAtOrigin, 10 );
+	//wait( .5 );
+	
+	//--- Fade Out
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+	
+	fadeInKleeyaPlanets();
+		
+	wait( .75 );
+	
+	thread globalAccelMove_RotateY( $sunOrigin, 57, 18, "rampup", "" );
+	
+	$lookAtOrigin.origin( '-11160 1960 88' );
+	$lookAtOrigin.time( 18 );
+	$lookAtOrigin.moveEast( 128 );
+	
+	globalCoop_cin_follow($cam4,$cam_igm4_deck11_4 );
+	wait( .05 );
+	globalCoop_cin_cuecamera( $cam4 );
+	wait( .25 );
+	
+	//--- Fade Out
+	globalCoop_main_camFadeIn(.5);
+	wait( .6 );
+	
+	wait( .2 );
+	globalCoop_dialog_play($kleeya,"ent_m4/kleeya_idryll.mp3", 1, 10000, 0); //Here's my homeworld. Vaz'baj Seven to the Attrexians. I come from small island south of the largest continent. I haven't been back since I reached adolescence. I joined Inigor's research team while I was still in school.
+	$scriptmunro.headWatch( $kleeya, 10 );	
+	wait ( .4 );
+	
+	globalCoop_cin_cuecamera( $cam5 );
+	wait( .4 );
+	thread globalCoop_dialog_play($scriptmunro,"ent_m4/munro_whyleave.mp3", 1, 10000, 0); //Why did you leave so early?
+	wait( .2 );
+	$kleeya.headWatch( $scriptmunro, 10 );
+	globalCoop_dialog_waitForDialog( $scriptmunro );
+
+	globalCoop_cin_cuecamera( $cam6 );
+	wait( .2 );
+	globalCoop_dialog_play($kleeya,"ent_m4/kleeya_truth.mp3", 1, 10000, 0); //There is no truth to be found in Idryll schools. They are controlled by the Attrexians. I had to leave to find real knowledge.
+	
+	globalCoop_cin_cuecamera( $cam5 );
+	globalCoop_dialog_play($scriptmunro,"ent_m4/munro_didyoufind.mp3", 1, 10000, 0); //I left home early, too. But I couldn't wait to leave my planet. I had to get to the stars.
+
+	globalCoop_cin_cuecamera( $cam8 );
+	globalCoop_dialog_play($kleeya,"ent_m4/kleeya_peer.mp3", 1, 10000, 0); //Do you miss home?
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam7 );
+	wait( .2 );
+	globalCoop_dialog_play($scriptmunro,"ent_m4/munro_noidea.mp3", 1, 10000, 0); //Not until I thought I'd be stuck in the Delta Quadrant for the rest of my life. Then I couldn't wait to get home.
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam8 );
+	wait( .2 );
+	globalCoop_dialog_play($kleeya,"ent_m4/kleeya_brag.mp3", 1, 10000, 0); //Show me your world.
+
+	//--- Fade Out
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+	
+	wait( 1 );
+	
+	fadeOutKleeyaPlanets();
+	fadeInMunroPlanets();
+	
+	$sun.time( .05 );
+	$sun.moveEast( 256 );
+
+	$kleeya.headWatch( $lookAtOrigin, 10 );
+	$scriptmunro.headWatch( $lookAtOrigin, 10 );
+
+	wait( .75 );
+
+	globalCoop_cin_follow($cam9,$cam_igm4_deck11_9 );
+
+	$moonOrigin.rotateY( -10 );
+	//$moon.rotateY( 10 );
+	
+	$sunOrigin.time( .05 );
+	$sunOrigin.rotateYup( -25 );
+	wait( .05 );
+
+	globalCoop_cin_cuecamera( $cam9 );
+	wait( .25 );
+	
+	$lookAtOrigin.origin( '-10984 1960 88' );
+	$lookAtOrigin.time( 8 );
+	$lookAtOrigin.moveWest( 96 );
+	
+	$sunOrigin.time( 8 );
+	$sunOrigin.rotateYup( -30 );
+	//thread globalAccelMove_RotateY( $sunOrigin, -50, 8, "rampup", "" );
+	
+	//--- Fade Out
+	globalCoop_main_camFadeIn(.5);
+	wait( .6 );
+
+	globalCoop_dialog_play($scriptmunro,"ent_m4/munro_solthree.mp3", 1, 10000, 0); //This is Earth. Sol Three. I'm from an area called Vermont.
+	$kleeya.headWatch( $scriptmunro, 7 );
+	wait( .5 );
+	
+	globalCoop_cin_cuecamera( $cam6 );
+	wait( .5 );
+	$scriptmunro.headWatch( $kleeya, 5 );
+	wait( .5 );
+	globalCoop_dialog_play($kleeya,"ent_m4/kleeya_itlike.mp3", 1, 10000, 0); //What’s it like?
+	
+	globalCoop_cin_cuecamera( $cam5 );
+	wait( .2 );
+	globalCoop_dialog_play($scriptmunro,"ent_m4/munro_resource.mp3", 1, 10000, 0); //It's a rugged place. Very independent and resourceful people.
+
+	globalCoop_cin_cuecamera( $cam8 );
+	wait( .2 );
+	globalCoop_dialog_play($kleeya,"ent_m4/kleeya_likeyou.mp3", 1, 10000, 0); //Like you, Alexander.
+	
+	globalCoop_cin_cuecamera( $cam7 );
+	wait( .2 );
+	globalCoop_dialog_play($scriptmunro,"ent_m4/munro_well.mp3", 1, 10000, 0); //Call me Alex.
+	
+	globalCoop_cin_cuecamera( $cam8 );
+	wait( .2 );
+	globalCoop_dialog_play($kleeya,"ent_m4/kleeya_vermont.mp3", 1, 10000, 0); //I would love to see this land of Vermont, Alex.
+	
+	globalCoop_cin_cuecamera( $cam3 );
+	wait( .2 );
+	$scriptmunro.resetHead();
+	globalCoop_dialog_play($tuvok,"ent_m4/tuvok_munrobrid.mp3", 1, 10000, 1); //Lieutenant Munro to the Bridge.
+	
+	globalCoop_cin_cuecamera( $cam5 );
+	wait( .2 );
+	thread globalCoop_dialog_play($scriptmunro,"ent_m4/munro_escort2.mp3", 1, 10000, 0); //On my way. Kleeya, I’ll have security escort you back to your quarters.
+	wait( 1 );
+	$scriptmunro.headWatch( $kleeya, 10 );
+	globalCoop_dialog_waitForDialog( $scriptmunro );
+	
+	globalCoop_cin_cuecamera( $cam6 );
+	wait( .2 );
+	globalCoop_dialog_play($kleeya,"ent_m4/kleeya_tooshort.mp3", 1, 10000, 0); //Very well.  Perhaps later you can tell me more about Earth.
+
+	//--- End Thread
+	thread cinematicKleeyaIGM4End();
+}
+
+//---------------------
+// cinematicSkipthread
+// skipthread that calls the skipthread routines
+//------------------------
+void cinematicKleeyaIGM4Skipthread()
+{
+	//--- kill the cinematic thread
+	skipthread( "Null" );
+	killthread( "cinematicKleeyaIGM4" );
+	thread cinematicKleeyaIGM4End();
+}
+
+//---------------------
+// cinematicEnd
+// wrapup the cinematic
+//------------------------
+void cinematicKleeyaIGM4End()
+{
+	//--- fade out and set the level up
+	globalCoop_main_camFadeOut(.5);
+	wait( .75 );
+
+	killAllTalking();
+	
+	thread kleeya_workIGM4();
+	
+	$kleeya.resetHead();
+	$scriptmunro.resetHead();
+	
+	$scriptmunro.anim( "idle" );
+	$kleeya.anim( "idle" );
+	
+	$kleeya.origin( '-11096 1800 2' );
+	$kleeya.angle( 70 );
+	
+	$scriptmunro.hide();
+	$scriptmunro.notsolid();
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.origin( '-11048 1800 2' );
+	}else{
+		float fPlayer;
+		entity ePlayer;
+		for(fPlayer=1;fPlayer<=coop_integer_maxPlayers;fPlayer++){
+			ePlayer=getEntity("player"+fPlayer);
+			if(doesEntityExist(ePlayer)){
+				ePlayer.setVectorVar("coop_cinematic_location",'-11048 1800 2');
+				ePlayer.setVectorVar("coop_cinematic_viewangles",'0 160 0');
+			}
+		}
+		globalCoop_objectives_update("complete",1,0);//state,slot,show
+		thread globalCoop_objectives_update("incomplete",2,1);//state,slot,show
+	}
+	
+	$sunOrigin.time( .05 );
+	$sunOrigin.rotateYup( 10 );
+	wait( .05 );
+	
+	$sunOrigin.angles( '0 30 0' );
+	$moonOrigin.rotateY( -10 );
+	//$moon.rotateY( 10 );
+	
+	fadeOutKleeyaPlanets();
+	fadeInMunroPlanets();
+	
+	globalCoop_cin_end();
+	
+	globalCoop_main_camFadeIn(.5);
+		
+	setfloatvar ("game.checkEntMission4RoomsVisited", 4 );
+	
+	wait( .6 );
+	
+	//Turn Exit Triggers On
+	$triggerExit.triggerable();
+	
+	//Objectives
+	setfloatvar( "game.IGM4TalkWithKleeya", 2 );
+	setfloatvar( "game.IGM4GoToBridge", 1 );
+	justLoadedDeckThreadIGM4();
+}
+
+///////////////////////////
+// kleeyaOnUseWaitIGM4
+// Wait for player to talk to actor
+///////////////////////////
+void kleeya_workIGM4()
+{
+	setNextDialog( $kleeya, 1 );
+	setDialogFunction( $kleeya, "kleeyaDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $kleeya, "", "", 0 );
+		talkUntilDone( $kleeya );
+	}
+}
+
+///////////////////////////
+// kleeyaDialog4_1
+// Player and actor talk
+///////////////////////////
+void kleeyaDialog4_1()
+{
+	entity ePlayer;
+	ePlayer=globalCoop_return_playerClosestPreferActive($kleeya);
+	$kleeya.headwatch(ePlayer , 10 );
+
+	globalCoop_dialog_play($kleeya,"ent_m4/kleeya_listening.mp3", 1, 128, 0); //I enjoyed talking to you.
+	
+	setNextDialog( $kleeya, 1 );
+	$kleeya.resethead();
+	setDialogFinished( $kleeya );
+}
+
+//===================================================================================================================
+// Ambient Actors
+//===================================================================================================================
+//---------------------
+// ambientActorsIGM4	
+// Set up ambient Actors
+//---------------------
+void ambientActorsIGM4()
+{
+	globalCommon_SpawnActor( "char/starfleet_crew-male3.tik", "stratton", '-9804 -836  4', 270 );
+	//I do this so the door to astrometrics isn't open untill the cinematic characters walk through
+	wait( 4 );
+	$stratton.origin( '-11008 1376  0' );
+	$stratton.pushable( 0 );
+	thread stratton_workIGM4();
+	
+	thread randomlyAnimateActor( $stratton, "ent-guard" );
+	
+	globalCommon_SpawnActor( "char/starfleet_crew-female2.tik", "miyamoto", '-9780 -1108  8', 90 );	
+	globalCommon_AiActorUseWeapon( $miyamoto, "EnterpriseDatapad" );
+	$miyamoto.pushable( 0 );
+	$miyamoto.anim( "ent-datapad-use" );
+
+	thread miyamoto_workIGM4();
+	
+	globalCommon_SpawnActor( "char/starfleet_crew-male6.tik", "russel", '-10248 -272 0', 0 );
+	$russel.setnodeid( 50 );
+	$russel.alias( "russelIGMA1", "localization/sound/dialog/ent_m4/manaan_sorry2.mp3", 1, 128, 0); //Please don’t disturb me.
+	$russel.dialog( "russelIGMA" );
+	$russel.ai_on();
+
+	globalCommon_SpawnActor( "char/hazardteam_sf-redshirt2.tik", "thompson", '-9960 740 0', 0 );
+	$thompson.setnodeid( 50 );
+	$thompson.alias( "thompsonIGMA1", "localization/sound/dialog/ent_m4/jacobs_notime2.mp3", 1, 128, 0); //Please don’t disturb me.
+	$thompson.dialog( "thompsonIGMA" );
+	$thompson.ai_on();
+}
+
+///////////////////////////
+// strattonOnUseWaitIGM4
+// Wait for player to talk to actor
+///////////////////////////
+void stratton_workIGM4()
+{
+	setNextDialog( $stratton, 1 );
+	setDialogFunction( $stratton, "strattonDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $stratton, "", "", 0 );
+		talkUntilDone( $stratton );
+	}
+}
+
+///////////////////////////
+// strattonDialog4_1
+// Player and actor talk
+///////////////////////////
+void strattonDialog4_1()
+{
+	$stratton.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+	$stratton.anim( "ent-guard-scan" );
+	
+	entity ePlayer;
+	ePlayer=globalCoop_return_playerClosestPreferActive($stratton);
+	$stratton.headwatch(ePlayer , 10 );
+
+	globalCoop_dialog_play($stratton,"ent_m4/security_protect.mp3", 1, 128, 0 ); //Do you need protection?
+	
+	setNextDialog( $stratton, 1 );
+	$stratton.resethead();
+	$stratton.setFloatVar( "pauseRandomAnimate", 0 );
+	setDialogFinished( $stratton );
+}
+
+///////////////////////////
+// miyamotoOnUseWaitIGM4
+// Wait for player to talk to actor
+///////////////////////////
+void miyamoto_workIGM4()
+{
+	setNextDialog( $miyamoto, 1 );
+	setDialogFunction( $miyamoto, "miyamotoDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $miyamoto, "", "", 0 );
+		talkUntilDone( $miyamoto );
+	}
+}
+
+///////////////////////////
+// miyamotoDialog4_1
+// Player and actor talk
+///////////////////////////
+void miyamotoDialog4_1()
+{
+	$miyamoto.anim( "ent-datapad-scan" );
+	entity ePlayer;
+	ePlayer=globalCoop_return_playerClosestPreferActive($miyamoto);
+	$miyamoto.headwatch(ePlayer , 10 );
+	$miyamoto.turntowardsentity(ePlayer);
+	
+	globalCoop_dialog_play($miyamoto,"ent_m3/myamoto_helpyou.mp3", 1, 128, 0); //Can I help you?
+
+	setNextDialog( $miyamoto, 2 );
+	$miyamoto.resethead();
+	$miyamoto.angle( 90 );
+	$miyamoto.anim( "ent-datapad-use" );
+	setDialogFinished( $miyamoto );
+}
+
+///////////////////////////
+// miyamotoDialog4_2
+// Player and actor talk
+///////////////////////////
+void miyamotoDialog4_2()
+{
+	$miyamoto.anim( "ent-datapad-scan" );
+	entity ePlayer;
+	ePlayer=globalCoop_return_playerClosestPreferActive($miyamoto);
+	$miyamoto.headwatch(ePlayer , 10 );
+	$miyamoto.turntowardsentity(ePlayer);
+
+	globalCoop_dialog_play($miyamoto,"ent_m3/myamoto_whatit.mp3", 1, 128, 0); //What is it?
+
+	setNextDialog( $miyamoto, 3 );
+	$miyamoto.resethead();
+	$miyamoto.angle( 90 );
+	$miyamoto.anim( "ent-datapad-use" );
+	setDialogFinished( $miyamoto );
+}
+
+///////////////////////////
+// miyamotoDialog4_3
+// Player and actor talk
+///////////////////////////
+void miyamotoDialog4_3()
+{
+	$miyamoto.anim( "ent-datapad-scan" );
+	entity ePlayer;
+	ePlayer=globalCoop_return_playerClosestPreferActive($miyamoto);
+	$miyamoto.headwatch(ePlayer , 10 );
+	$miyamoto.turntowardsentity(ePlayer);
+
+	globalCoop_dialog_play($miyamoto,"ent_m3/myamoto_sorry.mp3", 1, 128, 0); //Sorry, I can't chat right now.
+
+	setNextDialog( $miyamoto, 1 );
+	$miyamoto.resethead();
+	$miyamoto.angle( 90 );
+	$miyamoto.anim( "ent-datapad-use" );
+	setDialogFinished( $miyamoto );
+}
+
+//===================================================================================================================
+// Deck Change Check
+//===================================================================================================================
+//---------------------
+// checkForDeckChangeIGM4
+//---------------------
+void checkForDeckChangeIGM4()
+{
+	$elevatorButton.nouse();
+	entity eTrigger,ePlayer;
+	eTrigger=getCurrentEntity();
+	ePlayer = eTrigger.getLastActivatingEntity();
+
+	if( getfloatvar( "game.checkEntMission4RoomsVisited" ) == 4 )
+	{
+		if(cvar_bool_multiplayer){
+			stuffcmd("seta coop_igmT 1\n");
+			stuffcmd("seta coop_igmR 4\n");
+		}else{
+			setfloatvar("level.deckToChangeToIGM",1);
+		}
+
+		globalCoop_dialog_play($scriptmunro,"ent_m1/munro_d1bridge.mp3", 1, 10000, 0); //Deck 1: Bridge
+	
+		thread setTurboLiftVariableIGM4();
+	}
+	
+	thread globalCoop_level_onUse($elevatorButton,"turboLiftDeckChangeGo");
+	wait(.2);
+	if(doesEntityExist(ePlayer)){
+		ePlayer.useentity($elevatorButton);
+		$elevatorButton.nouse();
+	}else{
+		triggerEntity($elevatorButton);
+		$elevatorButton.nouse();
+	}
+}
+
+//---------------------
+// makse it so turbo lift doesn't move sound in and open its doors.
+//---------------------
+void setTurboLiftVariableIGM4()
+{
+	//Wait here so the variable has time to be set normaily
+	//before I cange it for this special case
+	wait( 2 );
+	setfloatvar ( "game.globalTurboliftRide" , 0 );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

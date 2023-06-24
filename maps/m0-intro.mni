@@ -1,0 +1,21 @@
+LevelProperties
+{
+	mapname				"m0-intro"
+	longmapname			"^5Co-Op ^2Intro ^8m0-intro"
+	
+	screenshot			"sysimg/mapshots/m0-intro.tga"
+	
+	gametype			"Holomatch"
+	gametype			"TeamHolomatch"
+	gametype			"CaptureTheFlag"
+	
+	modifier            "instantkill"
+	modifier            "actionhero"
+	modifier            "handicap"
+	modifier            "weaponscore"
+	modifier            "controlpoints"
+	modifier            "oneflag"
+	modifier            "elimination"
+	
+	recommendedplayers	"2-4"
+}

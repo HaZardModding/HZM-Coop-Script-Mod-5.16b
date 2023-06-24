@@ -1,0 +1,627 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	      ent-deck8 - MISSION 8
+//  Script By:    K.Thompson
+//  Created on:   08/12/2002
+//	Last Edited:  08/12/2002 - kt
+//-----------------------------------------------------------------
+
+void setupMission8Deck8();
+void justLoadedDeckThreadIGM8();
+void playerReachedSecretIGM8();
+
+void munroOnDeck8IGM8();
+void cinematicsIGM8Over();
+void munroAtSickbayIGM8();
+void munroToBridgeIGM8();
+
+void ambientActorsIGM8();
+
+void korban_workIGM8();
+void korbanDialog8_1();
+void korbanDialog8_2();
+
+void dorchev_workIGM8();
+void dorchevDialog8_1();
+void dorchevDialog8_2();
+
+void stevenson_workIGM8();
+void stevensonDialog8_1();
+
+void kretar_workIGM8();
+void kretarDialog8_1();
+void kretarDialog8_2();
+
+float appropriateDeckChoiceIsMade = 0;
+
+float coop_forceModelStatus = 1;
+void coop_forceModelsNow();
+void coop_forceModel(float fPlayer);
+
+//===================================================================================================================
+// Setup
+//===================================================================================================================
+void coop_forceModelsNow()
+{
+	float fPlayer;
+	for(fPlayer=1;fPlayer<=8;fPlayer++)
+	{
+		thread coop_forceModel(fPlayer);
+	}
+}
+void coop_forceModel(float fPlayer)
+{
+	if(coop_forceModelStatus)
+	{
+		entity ePlayer;
+		ePlayer = getEntity("player"+fPlayer);
+		if(doesEntityExist(ePlayer))
+		{
+			globalCoop_player_transmitter(ePlayer,"set mp_playermodel "+coop_string_playerModelResetTiki);
+		}
+	}
+}
+void coop_changedModelplayer1(){coop_forceModel(1);}
+void coop_changedModelplayer2(){coop_forceModel(2);}
+void coop_changedModelplayer3(){coop_forceModel(3);}
+void coop_changedModelplayer4(){coop_forceModel(4);}
+void coop_changedModelplayer5(){coop_forceModel(5);}
+void coop_changedModelplayer6(){coop_forceModel(6);}
+void coop_changedModelplayer7(){coop_forceModel(7);}
+void coop_changedModelplayer8(){coop_forceModel(8);}
+
+//---------------------
+// setupMission8Deck8
+// does all the setup stuff for the mission
+//---------------------
+void setupMission8Deck8()
+{
+	$secretDoor.unlock();
+	//--- Fade Out
+	camfadeout01();
+	
+	if(!cvar_bool_multiplayer)
+	{
+		$player.origin ( '-9760 -1240 32' );
+		$player.playerviewangles( '0 270 0' );
+		$player.model( "models/char/munro-romulan.tik" );		
+		thread coop_freeinventoryHealth100AndGive("models/weapons/worldmodel-rom-datapad.tik");
+		$player.use( "Tricorder" );
+	}
+	else
+	{	
+		coop_string_weapon1 = "models/weapons/worldmodel-rom-datapad.tik";
+		coop_string_playerModelResetTiki = "models/char/munro-romulan.tik";
+		//IGM8RemoveImplants
+		//IGM8MeetWithPicard
+		//IGM8MeetTelsiaOrKleeya
+	//Definie Objective
+		coop_string_objectiveItem1			= "IGM8RemoveImplants";
+		coop_string_objectiveItem2			= "IGM8MeetWithPicard";
+	//set for internal script reference
+		setFloatVar( "game.globalMissionEnterprise", 8 );
+	//set for coop if server restarts during maps
+		stuffcmd("seta coop_igm 8\n");
+		stuffcmd("seta coop_igmH 0\n");
+		globalCoop_main_waitAFrame();
+		
+		stuffcmd("seta coop_igmR 0\n");
+		stuffcmd("seta coop_igmT 8\n");
+		globalCoop_main_waitAFrame();
+	}
+	ambientActorsIGM8();
+
+	if(!cvar_bool_multiplayer)
+	{
+		globalCommon_SpawnActor( "char/hazardteam_sf-munro.tik", "scriptmunro", '-9760 -1240 36', 270 );
+		globalCommon_AiActorUseWeapon( $scriptmunro, "none" );
+		globalCoop_level_hideAndNotSolid($scriptmunro);
+	}
+	else
+	{
+		spawn("script_model","model","fx/fx-dummy.tik","targetname","scriptmunro");
+	}
+	
+	coop_SpawnActorWithAlpha0("char/hazardteam_munro-rom-uniform.tik","romulanMunro",'-9750 -1240 32',270);
+	$romulanMunro.useActorWeapon( "none" );
+	$romulanMunro.notsolid();
+
+	globalCommon_SpawnActor( "char/starfleet_crew-male.tik", "jacobs", '-9760 -1240 36', 210 );
+	globalCoop_level_hideAndNotSolid($jacobs);
+	
+	//--- Start Game Cinimatic
+	munroOnDeck8IGM8();
+
+	//--- Start Intro Cinimatic
+	Intro8();
+
+	//--- Free Player
+	cinematicsIGM8Over();
+
+	//Setup Secret
+	$secretTrigger.thread( "playerReachedSecretIGM8" );
+	spawn( "trigger_secret", "targetname", "secretSpawner_trigger","thread","setupSecretRoom" );
+	trigger( "$secretSpawner" );
+}
+
+//---------------------
+// munroHereToSeePicardIGM8
+// Triggered and check to see if A cinematic should happen.
+//------------------------
+void justLoadedDeckThreadIGM8()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		if(getFloatVar( "game.IGM8RemoveImplants" ) >= 1 ){
+			$player.setobjectiveshow( "IGM8RemoveImplants", 1 );
+		}
+		if(getFloatVar( "game.IGM8RemoveImplants" ) == 2 ){
+			$player.setobjectivecomplete( "IGM8RemoveImplants", 1 );
+		}
+		if(getFloatVar( "game.IGM8MeetWithPicard" ) >= 1 ){
+			$player.setobjectiveshow( "IGM8MeetWithPicard", 1 );
+		}
+		if(getFloatVar( "game.IGM8MeetWithPicard" ) == 2 ){
+			$player.setobjectivecomplete( "IGM8MeetWithPicard", 1 );
+		}
+		if(getFloatVar( "game.IGM8MeetTelsiaOrKleeya" ) >= 1 ){
+			$player.setobjectiveshow( "IGM8MeetTelsiaOrKleeya", 1 );
+		}
+		if(getFloatVar( "game.IGM8MeetTelsiaOrKleeya" ) == 2 ){
+			$player.setobjectivecomplete( "IGM8MeetTelsiaOrKleeya", 1 );
+		}
+	}
+}
+
+//---------------------
+// munroOnDeck8IGM8
+//---------------------
+void munroOnDeck8IGM8()
+{
+	//wait(3);
+	cam.load( "IGM8_Deck8_BeamIn_Shot1" );
+	globalCoop_main_waitAFrame();
+	
+	globalCoop_cin_start();
+	globalCoop_cin_fov($cam1,70);
+	globalCoop_cin_follow($cam1,$IGM8_Deck8_BeamIn_Shot1);
+	globalCoop_cin_cuecamera($cam1);
+	globalCoop_main_waitAFrame();
+	
+	//--- fade in for the cinematic
+	camfadein1();
+	globalCoop_main_wait1DotZero();
+
+	//this is here so that the music times out right with the enterprise warping out cinematic.
+	allowmusicducking ( 0 );
+	forcemusic ( "aux3" );
+
+	$romulanMunro.displayEffect( "TransportIn", "Federation" );
+	wait(4);
+
+	//--- fade out
+	camfadeout05();
+	wait_06();
+
+	$romulanMunro.remove();
+}
+
+//---------------------
+// Frees Player
+//---------------------
+void cinematicsIGM8Over()
+{
+	globalCoop_cin_end();
+	globalCoop_main_wait2DotZero();
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		//--- set the player on his way
+		$player.immobilize( 0 );
+	}
+	else
+	{
+		//coop_forceModelsNow();
+		//IGM8RemoveImplants
+		//IGM8MeetWithPicard
+		//IGM8MeetTelsiaOrKleeya
+		thread globalCoop_objectives_update("incomplete",1,1);//state,slot,show
+	}
+	//--- fade in
+	camfadein05();
+	globalCoop_main_waitZeroDot5();
+
+	setFloatVar( "game.IGM8RemoveImplants", 1 );
+	justLoadedDeckThreadIGM8();
+
+	$triggerSickBay.thread( "munroAtSickbayIGM8" );
+}
+
+//---------------------
+// thread used to make munro get ride of uniform
+//---------------------
+void munroAtSickbayIGM8()
+{
+//animate laptop open now, it won't work in mp during level start
+	$laptop.anim( "open_idle" );
+//do not run this thread again
+	$triggerSickBay.thread( "" );
+	
+	entity ePlayer;
+	ePlayer = globalCoop_return_playerClosestPreferActive($stevenson);
+	if(doesEntityExist(ePlayer))
+	{
+		ePlayer.immobilize(1);
+		$stevenson.headwatch(ePlayer,5);
+	}
+
+	wait_06();
+	
+	//We'll remove those surgical implants immediately.
+	coop_playDialogNoHead_128($stevenson,"ent_m8/doc_implants.mp3");
+	
+	camfadeout05();
+	wait_06();
+	//--- setup the player
+	coop_freeinventoryHealth100AndGive("models/weapons/worldmodel-tricorder-STX.tik");
+
+	//Do any skin shange stuff here
+	if(!cvar_bool_multiplayer)
+	{
+		$player.model( "models/char/munro_sf.tik" );
+	}
+	else
+	{
+		coop_string_playerModelResetTiki = "models/char/munro_sf.tik";
+		coop_forceModelsNow();
+		wait(3);
+		coop_forceModelStatus=0;
+	}
+
+	$stevenson.origin( '-11744 -847  2' );
+	$stevenson.angle(  180 );
+	$stevenson.resetHead();
+	thread stevenson_workIGM8();
+	thread randomlyAnimateActor( $stevenson, "ent-table-laptop" );
+
+	globalCoop_main_wait2DotZero();
+
+	camfadein05();
+	
+	if(doesEntityExist(ePlayer))
+	{
+		ePlayer.immobilize( 0 );
+	}
+	wait_06();
+
+	//Turn Exit Triggers On
+	$triggerExit.triggerable();
+
+	setFloatVar( "game.IGM8RemoveImplants", 2 );
+	justLoadedDeckThreadIGM8();
+	
+	if(cvar_bool_multiplayer)
+	{
+		//IGM8RemoveImplants
+		//IGM8MeetWithPicard
+		//IGM8MeetTelsiaOrKleeya
+		thread globalCoop_objectives_update("complete",1,0);//state,slot,show
+	}
+	globalCoop_main_wait2DotZero();
+	munroToBridgeIGM8();
+}
+
+//---------------------
+// Calls Picards Dialogue Line
+//---------------------
+void munroToBridgeIGM8()
+{
+	//The Captain is waiting for you in the conference room on the bridge.
+	globalCoop_dialog_play($jacobs,"ent_m8/jacobs_readyroom.mp3", 1, 10000, 1);
+
+	setFloatVar( "game.IGM8MeetWithPicard", 1 );
+	justLoadedDeckThreadIGM8();
+	setFloatVar( "game.checkEntMission8RoomsVisited", 1 );
+	
+	if(cvar_bool_multiplayer)
+	{
+		//IGM8RemoveImplants
+		//IGM8MeetWithPicard
+		//IGM8MeetTelsiaOrKleeya
+		thread globalCoop_objectives_update("incomplete",2,1);//state,slot,show
+		stuffcmd("seta coop_igmR 1\n");
+		stuffcmd("seta coop_igm 8\n");
+		stuffcmd("seta coop_igmH 0\n");
+	}
+}
+
+//---------------------
+// used to place secret pieces in level
+//------------------------
+void playerReachedSecretIGM8()
+{
+	$secretTrigger.thread( "" );
+	trigger( "$secretSpawner_trigger" );
+}
+
+//===================================================================================================================
+// Ambient Actors
+//===================================================================================================================
+//---------------------
+// ambientActorsIGM8
+// Set up ambient Actors
+//---------------------
+void ambientActorsIGM8()
+{
+	
+	globalCommon_SpawnActor( "char/hazardteam_sf-kourban.tik", "korban", '-12644 -1382 16', 200 );
+	globalCommon_AiActorUseWeapon( $korban, "EnterpriseDatapad" );
+	$korban.pushable( 0 );
+	$korban.anim( "ent-datapad-use" );
+	thread korban_workIGM8();
+
+	globalCommon_SpawnActor( "char/starfleet_crew-male2.tik", "dorchev", '-9672 -1592 24', 90 );
+	thread randomlyAnimateActor( $dorchev, "ent-stand" );
+	thread dorchev_workIGM8();
+
+	globalCommon_SpawnActor( "char/starfleet_crew-female3.tik", "stevenson", '-11720 -1184 0', 180 );
+	$stevenson.pushable( 0 );
+	
+	globalCommon_SpawnScriptModel( "enviro/enterprise_electronic_laptop.tik", "laptop", '-11753 -847 46', 0 );
+
+	globalCommon_SpawnActor( "char/starfleet_crew-female4.tik", "kretar", '-11027 -1131  0', 315 );
+	globalCommon_AiActorUseWeapon( $kretar, "EnterpriseDatapad" );
+	$kretar.pushable( 0 );
+	$kretar.anim( "ent-datapad-use" );
+	thread kretar_workIGM8();
+
+	globalCommon_SpawnActor( "char/hazardteam_sf-redshirt6.tik", "jameson", '-11936 -2282 16', 0 );
+	$jameson.setnodeid( 50 );
+	if(!cvar_bool_multiplayer)
+	{
+		$jameson.alias( "jamesonIGMA1", "localization/sound/dialog/ent_m1/kretar_hello1.mp3" ); //Hello, Lieutenant.
+		$jameson.dialog( "jamesonIGMA" );
+	}
+	$jameson.ai_on();
+
+	if(!cvar_bool_multiplayer)
+	{	
+		globalCommon_SpawnActor( "char/starfleet_crew-male6.tik", "russel", '-10160 -1696 26', 0 );
+		$russel.setnodeid( 51 );
+		$russel.alias( "russelIGMA1", "localization/sound/dialog/ent_m8/dev_congrat.mp3" );
+		$russel.dialog( "russelIGMA" );
+		$russel.ai_on();
+	}
+
+	globalCommon_SpawnActor( "char/hazardteam_sf-redshirt3.tik", "mustaine", '-9940 -656 12', 90 );
+	$mustaine.setnodeid( 52 );
+	if(!cvar_bool_multiplayer)
+	{
+		$mustaine.alias( "mustaineIGMA1", "localization/sound/dialog/ent_m8/mustaine_omag.mp3" ); //Omag is certainly a talkative prisoner.
+		$mustaine.alias( "mustaineIGMA2", "localization/sound/dialog/ent_m8/mustaine_rules.mp3" ); //He’s trying to tell me why I should learn the rules of acquisition.
+		$mustaine.alias( "mustaineIGMA3", "localization/sound/dialog/ent_m8/mustaine_food.mp3" ); //And I keep telling him he’s Exomorph food if he doesn’t shut up.
+		$mustaine.dialog( "mustaineIGMA" );
+	}
+	$mustaine.ai_on();
+}
+
+///////////////////////////
+// korbanOnUseWaitIGM8
+// Wait for player to talk to actor
+///////////////////////////
+void korban_workIGM8()
+{
+	setNextDialog( $korban, 1 );
+	setDialogFunction( $korban, "korbanDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $korban, "", "", 0 );
+		talkUntilDone( $korban );
+	}
+}
+
+///////////////////////////
+// korbanDialog8_1
+// Player and actor talk
+///////////////////////////
+void korbanDialog8_1()
+{
+	$korban.anim( "ent-datapad-scan" );
+	coop_headWatchTurnTo($korban);
+
+	//I have howled to warn the dead. A great warrior has joined them.
+	coop_playDialogNoHead_128($korban,"ent_m8/korban_howled.mp3");
+
+	setNextDialog( $korban, 2 );
+	$korban.resethead();
+	$korban.angle( 200 );
+	$korban.anim( "ent-datapad-use" );
+	setDialogFinished( $korban );
+}
+
+///////////////////////////
+// korbanDialog8_2
+// Player and actor talk
+///////////////////////////
+void korbanDialog8_2()
+{
+	$korban.anim( "ent-datapad-scan" );
+	coop_headWatchTurnTo($korban);
+
+	//Honorless cowards held the power of death over an honorable man. They will pay!
+	coop_playDialogNoHead_128($korban,"ent_m8/korban_cowards.mp3");
+
+	setNextDialog( $korban, 1 );
+	$korban.resethead();
+	$korban.angle( 200 );
+	$korban.anim( "ent-datapad-use" );
+	setDialogFinished( $korban );
+}
+
+///////////////////////////
+// dorchevOnUseWaitIGM8
+// Wait for player to talk to actor
+///////////////////////////
+void dorchev_workIGM8()
+{
+	setNextDialog( $dorchev, 1 );
+	setDialogFunction( $dorchev, "dorchevDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $dorchev, "", "", 0 );
+		talkUntilDone( $dorchev );
+	}
+}
+
+///////////////////////////
+// dorchevDialog8_1
+// Player and actor talk
+///////////////////////////
+void dorchevDialog8_1()
+{
+	$dorchev.setFloatVar( "pauseRandomAnimate", 1 );
+	wait_025();
+	$dorchev.anim( "ent-stand-scan" );
+	coop_headWatch($dorchev);
+
+	//Where is Gonzalez?
+	coop_playDialogNoHead_128($dorchev,"ent_m8/dorchev_wheregonz.mp3");
+	//He's dead.
+	coop_playDialogNoHead_20000($scriptmunro,"ent_m8/munro_dead.mp3");
+
+	setNextDialog( $dorchev, 2 );
+
+	$dorchev.resethead();
+
+	setDialogFinished( $dorchev );
+	$dorchev.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// dorchevDialog8_2
+// Player and actor talk
+///////////////////////////
+void dorchevDialog8_2()
+{
+	$dorchev.setFloatVar( "pauseRandomAnimate", 1 );
+	wait_025();
+	$dorchev.anim( "ent-stand-scan" );
+	coop_headWatch($dorchev);
+
+	//The Captain is waiting for you in the conference room on the bridge.
+	coop_playDialogNoHead_128($dorchev,"ent_m8/dorchev_capwait.mp3");
+
+	setNextDialog( $dorchev, 1 );
+	$dorchev.resethead();
+	setDialogFinished( $dorchev );
+	$dorchev.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// stevensonOnUseWaitIGM8
+// Wait for player to talk to actor
+///////////////////////////
+void stevenson_workIGM8()
+{
+	setNextDialog( $stevenson, 1 );
+	setDialogFunction( $stevenson, "stevensonDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $stevenson, "", "", 0 );
+		talkUntilDone( $stevenson );
+	}
+}
+
+///////////////////////////
+// stevensonDialog8_1
+// Player and actor talk
+///////////////////////////
+void stevensonDialog8_1()
+{
+	$stevenson.setFloatVar( "pauseRandomAnimate", 1 );
+	wait_025();
+	$stevenson.anim( "ent-table-laptop-scan" );
+	coop_headWatch($stevenson);
+	//Good to see you Munro.
+	coop_playDialogNoHead_128($stevenson,"ent_m8/doc_goodsee2.mp3");
+
+	setNextDialog( $stevenson, 1 );
+	$stevenson.resethead();
+	setDialogFinished( $stevenson );
+	$stevenson.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// kretarOnUseWaitIGM8
+// Wait for player to talk to actor
+///////////////////////////
+void kretar_workIGM8()
+{
+	setNextDialog( $kretar, 1 );
+	setDialogFunction( $kretar, "kretarDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $kretar, "", "", 0 );
+		talkUntilDone( $kretar );
+	}
+}
+
+///////////////////////////
+// kretarDialog8_1
+// Player and actor talk
+///////////////////////////
+void kretarDialog8_1()
+{
+	$kretar.anim( "ent-datapad-scan" );
+	coop_headWatchTurnTo($kretar);
+
+	//Welcome back Munro!
+	coop_playDialogNoHead_128($kretar,"ent_m8/kretar_welcome.mp3");
+
+	setNextDialog( $kretar, 1 );
+	$kretar.resethead();
+	$kretar.angle( 315 );
+	$kretar.anim( "ent-datapad-use" );
+	setDialogFinished( $kretar );
+}
+
+///////////////////////////
+// kretarDialog8_2
+// Player and actor talk
+///////////////////////////
+void kretarDialog8_2()
+{
+	$kretar.anim( "ent-datapad-scan" );
+	coop_headWatchTurnTo($kretar);
+
+	//We'll need to remove the surgical implants ASAP.
+	coop_playDialogNoHead_128($kretar,"ent_m8/kretar_asap.mp3");
+
+	setNextDialog( $kretar, 1 );
+	$kretar.resethead();
+	$kretar.angle( 315 );
+	$kretar.anim( "ent-datapad-use" );
+	setDialogFinished( $kretar );
+}
+
+//===================================================================================================================
+// Deck Change Check
+//===================================================================================================================
+//---------------------
+// checkForDeckChangeIGM8
+//---------------------
+void checkForDeckChangeIGM8()
+{
+	//centerprint( "Room " + getfloatvar( "game.checkEntMission8RoomsVisited" ) + " " );
+	if(getFloatVar( "game.checkEntMission8RoomsVisited" ) == 1 )
+	{
+		setFloatVar("level.deckToChangeToIGM",1);
+		if(cvar_bool_multiplayer)
+		{
+			stuffcmd("seta coop_igmT 1\n");
+		}
+		//Deck 1: Bridge
+		thread coop_playDialogNoHead_20000($scriptmunro,"ent_m1/munro_d1bridge.mp3");
+	}
+}
+

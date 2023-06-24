@@ -1,0 +1,65 @@
+//-----------------------------------------------------------------
+//Co-Op Statement SAVE functions!!!
+//This functions here save us a few statements, else we would reach the script
+//statement limits (THIS IS VERY BAD)!!!!
+void coop_statementSaver_playSoundAndRemove(entity e,string sPlaySound,float fChannel,float fVolume,float fMinDist)
+//Play a sound and remove the entity then
+{
+	if(doesEntityExist(e)){
+		e.playsound(sPlaySound, fChannel, 1, 5000 );
+		globalCoop_level_remove(e);
+	}
+}
+void coop_statementSaver_hideAndShow(entity eHide,entity eShow)
+//hide an entity and show a entity
+{
+	globalCoop_level_hide(eHide);
+	globalCoop_level_show(eShow);
+}
+void coop_statementSaver_moveToWithinTime(entity eMove,entity eMoveToMe,float fTime)
+//move object to an other
+{
+	if(doesEntityExist(eMove) && doesEntityExist(eMoveToMe))
+	{
+		eMove.time(fTime);
+		eMove.moveto(eMoveToMe);
+	}
+}
+void coop_statementSaver_rotateXrotateYrotateZWithin_up(entity eRotateMe,float fRotateX,float fRotateY,float fRotateZ,float fTime)
+//rotate the given entity within the specified ammount of time
+{
+	if(doesEntityExist(eRotateMe)){
+		eRotateMe.time( fTime );
+		eRotateMe.rotateXup( fRotateX );
+		eRotateMe.rotateYup( fRotateY );
+		eRotateMe.rotateZup( fRotateZ );
+	}
+}
+void coop_statementSaver_moveUpAndWaitForIt(entity eMove,float fUnitsMoveUp)
+//move up the entity by the given ammount of units
+{
+	if(doesEntityExist(eMove)){
+		eMove.moveUp(fUnitsMoveUp);
+		waitfor( eMove );
+	}
+}
+void coop_statementSaver_moveUpAndWaitForItWintin(entity eMove,float fUnitsMoveUp,float fTime)
+//move up the entity by the given ammount of units and time
+{
+	if(doesEntityExist(eMove)){
+		eMove.time(fTime);
+		eMove.moveUp(fUnitsMoveUp);
+		waitfor( eMove );
+	}
+}
+
+void coop_statementSaver_playdialogNoHead(entity e,string sDialog)
+{
+	globalCoop_dialog_play(e,sDialog,1,11111,0);
+}
+
+
+void coop_statementSaver_playdialog(entity e,string sDialog)
+{
+	globalCoop_dialog_play(e,sDialog,1,11111,1);
+}

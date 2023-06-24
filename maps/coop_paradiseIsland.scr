@@ -1,0 +1,1022 @@
+//for details check: http://www.ritualistic.com/games/ef2/gdkdocs/content/allclasses_g.html
+void main();
+void setUpAI();
+void spRegenerate();
+void setupShuttle();
+void setupWater();
+void newspawn1();
+void newspawn2();
+void updateShuttleSpawn(vector vLocation);
+void deviceDisabled();
+void killExo();
+void trapwarning();
+void coop_waitForTeam();
+void coop_endLevel();
+//entity spawnArche(vector vOrigin);
+
+// WATER SCRIPT FUNCTIONS DECLARATION, DO NOT HAVE THE NAMES OF FUNCTIONS DUBLICATED/REDECLARED!
+void	hzm_waterTouched();
+void	hzm_waterTakeCareOfPlayer(entity ePlayer,entity eTrigger);
+float	hzm_waterCheckBB(vector vOri1,vector vMins1,vector vMaxs1,vector vOri2,vector vMins2,vector vMaxs2,float fPad);
+float	hzm_waterReturnFloatNotNegative(float fNotNegative);
+float	hzm_waterCheckValueOfGiven(float fValue,float fGiven);
+void	hzm_waterPlayerLeakAir(entity ePlayer,entity eTrigger);
+void	hzm_waterShakeAndMoveUp(entity eBubble,entity eTrigger);
+//GLOBAL VARIABLES
+// THIS VARIABLES ARE ACCESSABLE FROM WITHIN EVERY FUNCTION, DO NOT HAVE THE NAMES DUBLICATED!
+float	hzm_water_float_checkAssiningToucher;//Don't touch this one it's set automaticly
+float	hzm_water_integer_airTime = 12;			//(12 MIN:5) Time how long in sec the player can stand under water before he leaks air
+float	hzm_water_integer_damageInvervall = 3;	//(3 MIN:3) Player leak air all x sec when still under water
+float	hzm_water_float_damageDivider = 1;		//(1) player takes damage the time he is under water, 5 secounds = 5 damage, 
+												//the divider factor works like this: 25-secounds / 5-divider = 5 damage
+float	hzm_water_integer_minimumBubbles = 3;	//(3 MAX:11) air bubles minimum leaked per damage
+float	hzm_water_integer_maximumBubbles = 10;	//(6 MAX:12) air bubles maximum leaked per damage and leaked when player gets drown
+
+
+float crabexokilled = 0;
+float spawnposition = 0;
+float lift = 0;
+
+//COMPATIBILITY-PUT_BEFORE_INCLUSIONS!
+void reservedCoop_newPlayerEntred(entity ePlayer);//keep it for co-op 4.3 compatibility
+void reservedCoop_newPlayerEntred(entity ePlayer){}//keep it for co-op 4.3 compatibility
+
+void coop_levelExitTrigger();
+
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/optional_modules/puzzles.scr"
+#include "coop_mod/maps/global/global_common.scr"
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+void main()
+{
+//set water color to lil green instad of blue (red green blue -> 1-0)
+	$world.watercolor('0 .1 .05');
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+//OVERWRITE CO-OP SETTINGS
+	coop_bool_showMissionSucessHud	= 0;//---load paradise2 !! show sucess hud instead of just loading
+	coop_string_objectiveLoc	= "";//coustom objectives, no local strings, without $$
+	coop_string_levelAuthor		= "Daedalus";//level creator, team and involved, keep it short(10 chars)!!!
+//WEAPONS
+	coop_float_spawnAngle0 		= 90;
+	coop_string_objectiveItem1	= "Make your way to the idryll temple";
+	coop_string_objectiveItem2	= "Disable the Communication device";
+	coop_string_weapon1 		= "models/weapons/worldmodel-FieldAssaultRifle.tik";
+	coop_string_weapon2 		= "models/weapons/worldmodel-BurstRifle.tik";
+	coop_string_weapon3 		= "models/weapons/worldmodel-CompressionRifle.tik";
+	coop_string_weapon4 		= "models/weapons/worldmodel-Phaser-stx.tik";
+	coop_string_weapon5 		= "models/weapons/worldmodel-Tricorder-stx.tik";
+	coop_string_weapon6 		= "models/weapons/worldmodel-attrex-rifle.tik";
+	coop_string_weapon7 		= "models/weapons/worldmodel-sniperrifle.tik";
+	coop_string_weapon8 		= "models/weapons/worldmodel-rom-disruptor.tik";
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	$world.farplane(2000);
+	setUpAI();
+	wait(1);
+	
+	$tricorderff.viewmode("tripwire");	
+//spawn Class Selection
+	thread globalCoop_class_setup("Medic",'-390 2262 -448');
+	thread globalCoop_class_setup("HeavyWeapons",'-145 2276 -448');
+	thread globalCoop_class_setup("Technician",'-145 2179 -448');
+	thread coop_levelExitTrigger();
+	waitForPlayer();
+	if(!cvar_bool_multiplayer){//If singleplayer
+		$player.playSound("sound/weapons/powerup/shield_pickup.wav",0,2,128);
+		$player.armor("BasicArmor",2000);
+		$player.ammo("Idryll",9000,9000);
+		$player.ammo("Fed",9000,9000);
+		$player.ammo("Phaser",9000,9000);
+		$player.ammo("Plasma",9000,9000);
+		thread spRegenerate();
+	}	
+	$world.clearAvailableViewModes();
+	$world.addAvailableViewMode( "tripwire" );
+	globalCoop_objectives_update("InComplete",1,1);//State,Item,ShowIt
+	setupShuttle();
+	thread setupWater();
+	if(!cvar_bool_multiplayer){//If singleplayer
+		vector vOrigin;
+		vOrigin = $displayOn.getOrigin();
+		entity e;
+		e = spawn("puzzle_object","origin",vectorToString(vOrigin),"puzzleobject_solvedthread","deviceDisabled","puzzleobject_itemtouse","Tricorder");
+		wait(.1);
+		e.puzzleobject_timeToUse(15);
+	}
+	spawn("script_model","model","use.tik","origin","138 108 -18","targetname","use1Symbol");
+	spawn("script_model","model","use.tik","origin","-12728 19300 -1232","targetname","use2Symbol");
+	spawn("script_model","model","use.tik","origin","-12712 19298 -536","targetname","use3Symbol");
+	spawn("script_model","model","use.tik","origin","-12568 19230 -536","targetname","use4Symbol");
+	spawn("script_model","model","modulate.tik","origin","-7777 21936 -1225","targetname","modulate1Symbol");
+	wait(.3);
+	$use4Symbol.bind($liftOrigin);
+}
+void coop_levelExitTrigger()
+//find entities without targetname and do something with em
+{
+	float fEntity;
+	entity e;
+	for(fEntity=0;fEntity<1023;fEntity++){
+		e=getEntity("*"+fEntity);
+		if(doesEntityExist(e)){
+			if(e.getOrigin() == '-12635 19584 -568'){
+				e.setsize('-1100 -1100 -150','1100 1100 2000');
+				e.origin('-12640 19168 -400');
+//EXIT if there are no further entities to be found!
+				return;
+			}
+		}
+	}
+}
+
+void spRegenerate()
+{
+	while(1){
+		wait(2);
+		if($player.gethealth() < 100){
+			$player.addhealth(2,100);
+			$player.playSound("sound/misc/mp_healthshard.wav",0,1,80);
+		}
+	}
+}
+
+void setUpAI()
+{
+	$temple1.lock();	
+	$lift_door1_left.bind($liftOrigin);
+	$lift_door1_right.bind($liftOrigin);
+	$lift_door2_left.bind($liftOrigin);
+	$lift_door2_right.bind($liftOrigin);
+	$lift.bind($liftOrigin);
+	$trigger_lift_2.bind($liftOrigin);
+	
+	$lift_door1_left.remove();
+	$lift_door1_right.remove();
+	$lift_door2_right.remove();
+	$lift_door2_left.remove();
+	// $lift_door1_left.time(3);
+	// $lift_door1_left.rotateYdownto(90);
+	// $lift_door1_right.time(3);
+	// $lift_door1_right.rotateYupto(90);
+	// $lift_door2_left.time(90);
+	// $lift_door2_left.rotateYupto(90);
+	// $lift_door2_right.time(3);
+	// $lift_door2_right.rotateYdownto(90);
+	
+	//entity e;
+	//e = spawnArche('-12568 19240 -536');
+	//e.bind($liftOrigin);
+	//thread spawnArche('-12728 19290 -1232');
+	//thread spawnArche('-12552 18918 -1232');
+	//thread spawnArche('-12712 19288 -536');
+	
+//stop the alien from gliding down to the stairs
+	$stairsalien.hide();
+	$stairsalien.gravity(0);
+	$stairsalien.mass(0);
+	$stairsalien.setvelocity('0 0 0');
+	
+	$leviatan1.setSize('-50 -50 0','50 50 70');
+	$leviatan2.setSize('-50 -50 0','50 50 70');
+	$leviatan2.swim();
+	$crab1.killthread("killExo");
+	$crab2.killthread("killExo");
+	$crab3.killthread("killExo");
+	$crab4.killthread("killExo");
+	$crab5.killthread("killExo");
+	$basher1.setSize('-40 -40 0','40 40 120');
+	$basher2.setSize('-40 -40 0','40 40 120');
+	
+	$stairsalien.deathShrink();
+	$leviatan1.deathSink();
+	$leviatan2.deathSink();
+	$leviatan3.deathSink();
+	$leviatan4.deathSink();
+	$basher1.deathSink();
+	$basher2.deathSink();
+	$basher3.deathSink();
+	$basher4.deathSink();
+	$bridgeGuard.deathSink();
+	$bridgeGuard.pushable(0);
+	$bridgeGuard.mass(99999);
+	$stalker1.deathSink();
+	$stalker2.deathSink();
+}
+
+void setupShuttle()
+{
+	spawn("script_model","model","use.tik","origin","138 108 -18","targetname","shuttleuseSymbol");
+	spawn("script_origin","targetname","shuttleTransporterLeft_transportTo");
+	spawn("script_origin","targetname","shuttleTransporterRight_transportTo");
+	spawn("trigger_multiple","origin","187 90 -65","targetname","shuttleTransporterLeft","nottriggerable","1","thread","shuttleTransport");
+	spawn("trigger_multiple","origin","187 22 -65","targetname","shuttleTransporterRight","nottriggerable","1","thread","shuttleTransport");
+	spawn("trigger_use","origin","147 111 -10","targetname","shuttleTransporterUse","thread","shuttleTransporterUse");
+	wait(.05);
+	$shuttleuseSymbol.bind($origin_shuttle);
+	$shuttleTransporterLeft.setsize('-2 -2 -20','2 2 20');
+	$shuttleTransporterRight.setsize('-2 -2 -20','2 2 20');
+	$shuttleTransporterLeft_transportTo.setSize('-25 -25 0','25 25 1');
+	$shuttleTransporterRight_transportTo.setSize('-25 -25 0','25 25 1');
+	$shuttleTransporterLeft.bind($origin_shuttle);
+	$shuttleTransporterRight.bind($origin_shuttle);
+	$shuttleTransporterUse.bind($origin_shuttle);
+	$shuttle1.bind($origin_shuttle);
+	$shuttle2.bind($origin_shuttle);
+	$shuttle3.bind($origin_shuttle);
+	$shuttle4.bind($origin_shuttle);
+	$shuttle5.bind($origin_shuttle);
+	$shuttlespawn1.bind($origin_shuttle);
+	$shuttlespawn2.bind($origin_shuttle);
+	$shuttle4.loopsound("sound/vehicles/shuttlecraft/shuttle_interior_loop1.wav",.4,386);
+	$shuttle5.loopsound("sound/vehicles/shuttlecraft/shuttle_interior_loop1.wav",.4,386);
+	$origin_shuttle.time(.2);
+	$origin_shuttle.rotateYdownto(94);
+	$origin_shuttle.movetoPos('-1840 3000 -310');
+}
+
+
+void shuttleTransporterUse()
+{
+	entity e;
+	e=getCurrentEntity();
+	if(doesEntityExist(e)){
+		e.nottriggerable();
+		entity ePlayer;
+		ePlayer=e.getLastActivatingEntity();
+		if(doesEntityExist(ePlayer)){
+			ePlayer.hudprint("^5$$ObjectiveIncomplete$$:^2 Transporter\n");
+		}
+		e.playsound("sound/environment/computer/lcars_yes.wav" ,1 ,1 ,128 );
+		wait(1);
+		$shuttleTransporterLeft.triggerable();
+		$shuttleTransporterRight.triggerable();
+		wait(2);
+		$shuttleTransporterLeft.nottriggerable();
+		$shuttleTransporterRight.nottriggerable();
+		e.triggerable();
+	}
+}
+
+void shuttleTransport()
+{
+	entity e;
+	e=getCurrentEntity();
+	if(doesEntityExist(e)){
+		e.nottriggerable();
+		vector vOrigin,vTarget;
+		entity ePlayer;
+		ePlayer=e.getLastActivatingEntity();
+		if(doesEntityExist(ePlayer)){
+			entity eTransportTo;
+			string sTargetEntity;
+			sTargetEntity = "shuttleTransporterRight_transportTo";
+			if("shuttleTransporterLeft" == e.getRawTargetname()){
+				sTargetEntity = "shuttleTransporterLeft_transportTo";
+			}
+			eTransportTo = getEntity(sTargetEntity);
+			
+			if(doesEntityExist(eTransportTo)){
+				vOrigin = $origin_shuttle.getOrigin();
+				vOrigin_z = (vOrigin_z - 111);
+				eTransportTo.origin(vOrigin);
+				eTransportTo.dropToFloor(8000);
+				wait(.05);
+				vTarget = eTransportTo.getOrigin();
+				if(vectorLength(vTarget - vOrigin) >= 110){
+					ePlayer.setcustomshader("transport");
+					ePlayer.playsound("sound/environment/transporter/transport_fast.wav",3,1,75);
+					ePlayer.forcealpha(1);
+					ePlayer.alpha(1);
+					ePlayer.fade(.75,0);
+					ePlayer.immobilize(1);
+					wait(.75);
+					if(!doesEntityExist(ePlayer)){return;}
+					ePlayer.clearcustomshader("transport");
+			//do not make players stuck in each other
+					if(e.getRawTargetname() == "shuttleTransporterLeft")
+					{
+						vTarget_x += 40;
+					}
+					else{
+						vTarget_x -= 80;
+					}
+					ePlayer.warp(vTarget);
+					thread globalCoop_player_makeSolidASAP(ePlayer);
+					ePlayer.forcealpha(1);
+					ePlayer.alpha(.1);
+					ePlayer.fadein(.75,1);
+					ePlayer.setcustomshader("transport");
+					ePlayer.playsound("sound/environment/transporter/transport_fast.wav",3,1,75);
+					ePlayer.immobilize(0);
+					wait(.75);
+					if(!doesEntityExist(ePlayer)){return;}
+					ePlayer.clearcustomshader("transport");
+					ePlayer.forcealpha(0);
+					return;
+				}
+			}
+			ePlayer.hudprint("^1Can not Transport at this location\n");
+		}
+	}
+}
+
+void spawnWaterTrigger(vector vOrigin,float fDepth)
+{
+	entity e;
+	e = spawn("trigger_multiple","thread","hzm_waterTouched","origin",vectorToString(vOrigin));
+	wait(.1);
+	vOrigin = '0 0 0';
+	vOrigin_z = fDepth;
+	e.setSize(vOrigin,'2000 2000 0');
+}
+
+void spawnWaterTriggerSmall(vector vOrigin,float fDepth)
+{
+	entity e;
+	e = spawn("trigger_multiple","thread","hzm_waterTouched","origin",vectorToString(vOrigin));
+	wait(.1);
+	vOrigin = '0 0 0';
+	vOrigin_z = fDepth;
+	e.setSize(vOrigin,'200 200 0');
+}
+
+void setupWater()
+{
+//(-4184 -491 -1574) : 87
+//(-4159 5696 -1577) : 358
+//(4346 5567 -1582) : 262
+//WATER1
+//1
+	spawnWaterTrigger('-4184 -491 -1550',-1500);
+	spawnWaterTrigger('-2184 -491-1550',-1500);
+	spawnWaterTrigger('-184 -491 -1550',-1500);
+	spawnWaterTrigger('1816 -491 -1550',-1500);
+	spawnWaterTrigger('3816 -491 -1550',-1500);
+//2
+	spawnWaterTrigger('-4184 1509 -1550',-1500);
+	spawnWaterTrigger('-2184 1509 -1550',-1500);
+	spawnWaterTrigger('-184 1509 -1550',-1500);
+	spawnWaterTrigger('1816 1509 -1550',-1500);
+	spawnWaterTrigger('3816 1509 -1550',-1500);
+//3
+	spawnWaterTrigger('-4184 3509 -1550',-1500);
+	spawnWaterTrigger('-2184 3509 -1550',-1500);
+	spawnWaterTrigger('-184 3509 -1550',-1500);
+	spawnWaterTrigger('1816 3509 -1550',-1500);
+	spawnWaterTrigger('3816 3509 -1550',-1500);
+//4
+	spawnWaterTrigger('-4184 3509 -1550',-1500);
+	spawnWaterTrigger('-2184 3509 -1550',-1500);
+	spawnWaterTrigger('-184 3509 -1550',-1500);
+	spawnWaterTrigger('1816 3509 -1550',-1500);
+	spawnWaterTrigger('3816 3509 -1550',-1500);
+//WATER2
+//(-5274 12218 -1872) : 77
+//(-5135 16395 -1818) : 312
+//(1087 16380 -1818) : 209
+//1
+	spawnWaterTrigger('-5274 12218 -1856',-450);
+	spawnWaterTrigger('-3274 12218 -1856',-450);
+	spawnWaterTrigger('-1274 12218 -1856',-450);
+//2
+	spawnWaterTrigger('-5274 14218 -1856',-450);
+	spawnWaterTrigger('-3274 14218 -1856',-450);
+	spawnWaterTrigger('-1274 14218 -1856',-450);
+//3
+	spawnWaterTrigger('-5274 16218 -1856',-450);
+	spawnWaterTrigger('-3274 16218 -1856',-450);
+	spawnWaterTrigger('-1274 16218 -1856',-450);
+//-2302
+//-1856
+//(-6935 17250 -2302) : 94
+//(-7381 19490 -2302) : 304
+//(-4352 19526 -2302) : 242
+//1
+	spawnWaterTrigger('-6935 17250 -1856',-450);
+	spawnWaterTrigger('-6935 19250 -1856',-450);
+//2
+	spawnWaterTrigger('-4935 17250 -1856',-450);
+	spawnWaterTrigger('-4935 19250 -1856',-450);
+//WATER4
+//1
+	spawnWaterTriggerSmall('-12800 18941 -1320',-1300);
+	spawnWaterTriggerSmall('-12800 19141 -1320',-1300);
+//2
+	spawnWaterTriggerSmall('-12600 18941 -1320',-1300);
+	spawnWaterTriggerSmall('-12600 19141 -1320',-1300);
+}
+
+void stairsalien()
+{
+	if(!cvar_bool_multiplayer)
+	{
+		thread globalCommon_AutoSaveWithName("Coop_paradiseIsland - Stairs");
+	}
+	$stairsalien.mass(99999);
+	$stairsalien.gravity(1);
+	$stairsalien.ai_on();
+	$stairsalien.dropToFloor(12000);
+	$stairsalien.show();
+	
+	//globalCoop_actor_healthMultiplicatePerPlayer($stairsalien);
+	//globalCoop_actor_healthMultiplicatePerPlayer($basher1);
+	globalCoop_actor_healthMultiplicatePerPlayer($basher2);
+	//globalCoop_actor_healthMultiplicatePerPlayer($quad1);
+	//globalCoop_actor_healthMultiplicatePerPlayer($leviatan1);
+}
+
+/*
+entity spawnArche(vector vOrigin)
+{
+	entity e;
+	e = spawn("script_model","model","fx/fx-dummy.tik","origin",vectorToString(vOrigin));
+	wait(.1);
+	e.setSize('-4 -4 -10','4 4 10');
+	e.nodamage();
+	e.noTouch();
+	e.notsolid();
+	e.contents("targetable");
+	e.archeType("DrullLiftControl");
+	setgameplaystring("DrullLiftControl","Description1","Use");
+	return e;
+}
+*/
+
+void newspawn1()
+{
+
+
+	float romulan;
+	entity e;
+	for(romulan=1;romulan<3;romulan++){
+		e = getEntity("sniper"+romulan);
+		e = getEntity("sniper"+romulan);
+		e.PushAble(0);
+		e.mass(99999);
+		e.deathShrink();
+		globalCoop_actor_healthMultiplicatePerPlayer(e);
+	}
+	if(!cvar_bool_multiplayer)
+	{
+		thread globalCommon_AutoSaveWithName("Coop_paradiseIsland - Bridge");
+	}
+	else{
+		centerPrint("^2CHECKPOINT 1: ^7Shuttle is now comming to the checkpoint! \n");
+		thread globalCoop_level_moveToPos($coop_class_HeavyWeaponsModel,'-2270 11718 -1050');
+		thread globalCoop_level_moveToPos($coop_class_TechnicianModel,'-2270 11882 -1050');
+		thread globalCoop_level_moveToPos($coop_class_MedicModel,'-2270 12034 -1050');
+		$origin_shuttle.playsound("sound/vehicles/shuttlecraft/shuttle_takeoff.wav",0,2,512);
+		$origin_shuttle.time(6);
+		$origin_shuttle.movetoPos('-1870 4283 -58');
+		updateShuttleSpawn('-1870 4283 -58');
+		//globalCoop_actor_healthMultiplicatePerPlayer($leviatan2);
+		$origin_shuttle.time(30);
+		$origin_shuttle.movetoPos('-2607 9898 -500');
+		updateShuttleSpawn('-2607 9898 -500');
+	}
+	spawnposition++;
+}
+
+
+void newspawn2()
+{
+	thread globalCoop_puzzle_add("device","deviceDisabled",60,$displayOn.getOrigin());
+	thread globalCoop_objectives_update("InComplete",2,1);//State,Item,ShowIt
+	
+	float romulan;
+	entity e;
+	for(romulan=4;romulan<17;romulan++){
+		if(doesEntityExist(e)){
+			e = getEntity("sniper"+romulan);
+			e.PushAble(0);
+			e.mass(99999);
+			e.deathShrink();
+			globalCoop_actor_healthMultiplicatePerPlayer(e);
+		}
+	}
+	
+	if(!cvar_bool_multiplayer)
+	{
+		thread globalCommon_AutoSaveWithName("Coop_paradiseIsland - ComDevice");
+	}
+	else{
+		centerPrint("^2CHECKPOINT 2: ^7Shuttle is now comming to the checkpoint! \n");
+		//globalCoop_actor_healthMultiplicatePerPlayer($leviatan3);
+		//globalCoop_actor_healthMultiplicatePerPlayer($leviatan4);
+		//globalCoop_actor_healthMultiplicatePerPlayer($stalker1);
+		//globalCoop_actor_healthMultiplicatePerPlayer($stalker2);
+		//globalCoop_actor_healthMultiplicatePerPlayer($quad2);
+		globalCoop_actor_healthMultiplicatePerPlayer($basher3);
+		globalCoop_actor_healthMultiplicatePerPlayer($basher4);
+		
+		while(spawnposition == 0)
+		{
+			wait(2);
+		}
+		thread globalCoop_level_moveToPos($coop_class_HeavyWeaponsModel,'-7332 21641 -1427');
+		thread globalCoop_level_moveToPos($coop_class_TechnicianModel,'-7325 21736 -1409');
+		thread globalCoop_level_moveToPos($coop_class_MedicModel,'-7323 21827 -1405');
+		$origin_shuttle.time(5);
+		$origin_shuttle.rotateYUpto(100);
+		$origin_shuttle.movetoPos('-2700 10000 0');
+		$origin_shuttle.playsound("sound/vehicles/shuttlecraft/shuttle_takeoff.wav",0,2,512);
+		updateShuttleSpawn('-2700 10000 0');
+		$origin_shuttle.time(44);
+		$origin_shuttle.movetoPos('-6315 21300 -300');
+		updateShuttleSpawn('-6315  21300 -300');
+		$origin_shuttle.time(8);
+		$origin_shuttle.movetoPos('-7100 21600 -1100');
+		$origin_shuttle.playsound("sound/vehicles/shuttlecraft/shuttle_decelerate.wav",0,2,512);
+		updateShuttleSpawn('-7100 21600 -1100');
+	}
+}
+
+void updateShuttleSpawn(vector vLocation)
+{
+vector v1;
+vector v2;
+	while($origin_shuttle.getOrigin() != vLocation)
+	{
+		v1 = $shuttlespawn1.getOrigin();
+		v2 = $shuttlespawn2.getOrigin();
+		coop_vector_respawnOrigin1 = v1;
+		coop_vector_respawnOrigin2 = v2;
+		coop_vector_respawnOrigin3 = v1;
+		coop_vector_respawnOrigin4 = v2;
+		coop_vector_respawnOrigin5 = v1;
+		coop_vector_respawnOrigin6 = v2;
+		coop_vector_respawnOrigin7 = v1;
+		coop_vector_respawnOrigin8 = v2;
+		coop_vector_spawnOrigin1 = v1;
+		coop_vector_spawnOrigin2 = v2;
+		coop_vector_spawnOrigin3 = v1;
+		coop_vector_spawnOrigin4 = v2;
+		coop_vector_spawnOrigin5 = v1;
+		coop_vector_spawnOrigin6 = v2;
+		coop_vector_spawnOrigin7 = v1;
+		coop_vector_spawnOrigin8 = v2;
+		wait(.15);
+	}
+}
+
+
+void deviceDisabled()
+{
+	$modulate1Symbol.remove();
+	$stalker1.ai_on();
+	$stalker1.solid();
+	$stalker1.show();
+	
+	//make adapt top players
+	//$crab1.ai_on();
+	//$crab2.ai_on();
+	
+	$crab1.health(200);
+	$crab2.health(200);
+	$crab1.ai_on();
+	$crab2.ai_on();
+	globalCoop_actor_healthMultiplicatePerPlayer($crab1);
+	globalCoop_actor_healthMultiplicatePerPlayer($crab2);
+	
+	$temple1.unlock();
+	$temple2.unlock();
+	
+	thread globalCoop_objectives_update("complete",2,1);//State,Item,ShowIt
+	
+	if(doesEntityExist($displayOn)){
+		$displayOn.playsound("sound/ships/romulan/rom_beep_yes.wav",3,2,500);
+		wait(2);
+		$displayOn.remove();
+	}
+	
+	entity e;
+	e = spawn("weapon","model","weapons/worldmodel-drull-staff.tik","origin","-7830 21819 -1099","scale",".5","gravity","0");
+	wait(.1);
+	e.stopAnimating();
+	
+	$devicePower.playsound("sound/environment/machine/mech_move2.wav",3,2,500);
+	$devicePower.time(12);
+	$devicePower.moveDown(800);
+	wait(2);
+	$devicePower.loopsound("sound/environment/machine/lift3_looponly.wav",2,400);
+	waitFor($devicePower);
+}
+
+void call_lift()
+{
+	if(lift == 0){
+		lift = 2;
+		$liftOrigin.playsound("sound/environment/machine/lift3.wav",3,2,386);
+		$liftOrigin.time(6.1);
+		$liftOrigin.movedown(688);
+		waitFor($liftOrigin);
+		$liftOrigin.playsound("sound/environment/machine/lift3stop.wav",3,2,386);
+		lift = 1;
+	}
+	else if (lift == 1){
+		lift = 2;
+		$liftOrigin.playsound("sound/environment/machine/lift3.wav",3,2,386);
+		$liftOrigin.time(6.1);
+		$liftOrigin.moveup(688);
+		waitFor($liftOrigin);
+		$liftOrigin.playsound("sound/environment/machine/lift3stop.wav",3,2,386);
+		lift = 0;
+	}
+}
+
+
+void killExo()
+{
+	crabexokilled++;
+	if(crabexokilled == 5){
+		thread coop_waitForTeam();
+	}
+}
+
+void trapwarning()
+{
+	if(!cvar_bool_multiplayer)
+	{
+		thread globalCommon_AutoSaveWithName("Coop_paradiseIsland - Temple");
+	}
+	centerPrint("^3BE CAREFUL! ^5There might are some traps in this old Temple! \n");
+}
+
+
+void coop_waitForTeam()
+//------------------------------------------------------------------------------
+//waitForPlayers beeing close, end then the Level
+//------------------------------------------------------------------------------
+{
+	globalCoop_main_waitForTeam('-12640 19168 -400','-1100 -1100 -150','1100 1100 2000');
+	globalCoop_objectives_update("complete",1,1);//State,Item,ShowIt
+	wait(4);
+	coop_endLevel();
+}
+
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	if(!cvar_bool_multiplayer){//If singleplayer
+		nointermission();
+	}
+	thread globalCoop_mission_completed("coop_paradiseIsland2");
+	if(!cvar_bool_multiplayer){//If singleplayer
+		wait(4);
+	//if map loading fails, abort level
+		stuffCMD("disconnect\n");
+	}
+}
+
+
+void hzm_waterTouched()
+////////////////////////////////////////////////////////////////////////////////
+//let us know that someone is taking a bath (some dude touched a trigger)
+////////////////////////////////////////////////////////////////////////////////
+{
+//IF THIS THREAD IS RUNNING DO NOT CALL IT, WAIT FOR THE TRIGGER TO FIRE AGAIN.
+//THIS AVOIDS THAT THIS FUNCTION IS CALLED MULTIPLE TIMES ON THE SAME PLAYER
+	if(!hzm_water_float_checkAssiningToucher){
+//LOCK DOWN THIS FUCNTION
+		hzm_water_float_checkAssiningToucher=1;
+//CREATE VARIABLES FROM TYPE ENTITY/OBJECT
+		entity eTrigger;
+//GRAB THE CURRENT OBJECT, WICH IS THE TRIGGER CALLING THIS THREAD
+		eTrigger = getCurrentEntity();
+//CHECK IF THE TRIGGER EXISTS
+		if(doesEntityExist(eTrigger)){
+//CREATE VARIABLES FROM TYPE ENTITY/OBJECT
+			entity ePlayer;
+//GRAB ENTITY WHICH HAS ACTIVATED THE TRIGGER (WHICH IS A PLAYER!)
+			ePlayer = eTrigger.getlastActivatingEntity();
+//CHECK IF THE PLAYER EVEN EXISTS
+			if(doesEntityExist(ePlayer)){
+//START THE FUNCTION WHICH TAKES CARE OF THE PLAYER AND CHECK IF THE PLAYER IS IN/UNDER THE WATER
+//START IT AS "THREAD" SO THIS THREAD CAN END AND DOES NOT WAIT FOR THE PLAYER TO LEAVE TEH WATER AGAIN.
+				thread hzm_waterTakeCareOfPlayer(ePlayer,eTrigger);
+			}
+		}
+//HAVE A DELAY HERE, TO AVOID THAT THIS THREAD CALLS TWICE ON THE SAME PLAYER
+		wait(.1);
+//UNLOCK THIS FUNCTION
+		hzm_water_float_checkAssiningToucher=0;
+	}
+}
+
+
+void hzm_waterTakeCareOfPlayer(entity ePlayer,entity eTrigger)
+////////////////////////////////////////////////////////////////////////////////
+//Take Care of the player under water :D, check if player is still in/under water
+////////////////////////////////////////////////////////////////////////////////
+{
+//blub blub->z==44 crouched
+//blub blub->z==86 stand
+	if(doesEntityExist(ePlayer) && doesEntityExist(eTrigger)){
+		if(ePlayer.getFloatvar("hzm_waterTakeCareOfPlayer") != 1){
+			ePlayer.setFloatVar("hzm_waterTakeCareOfPlayer",1);
+			float fHealth,fIsUnderWaterTime,fDamage,fBuble,fRandom;
+			vector vTrig,vBBoxMin,vBBoxMax,vPlayer,vPlayerMax,vTimeArray;
+//GET ONLY ONCE, THIS TRIGGER IS NOT SUPPOSE TO MOVE
+			vTrig = eTrigger.getOrigin();
+			vBBoxMin = eTrigger.getMins();
+			vBBoxMax = eTrigger.getMaxs();	
+//CHECK BEFORE USE
+ 			if(hzm_water_integer_minimumBubbles > 9){
+				hzm_water_integer_minimumBubbles = 9;
+			}
+			if(hzm_water_integer_maximumBubbles > 10){
+				hzm_water_integer_maximumBubbles = 10;
+			} 
+			if(hzm_water_integer_damageInvervall < 3){
+				hzm_water_integer_damageInvervall = 3;
+			}
+			if(hzm_water_integer_airTime < 5){
+				hzm_water_integer_airTime = 5;
+			}
+			vTimeArray = ePlayer.getVectorVar("lastUnderWaterTime");
+			if((vTimeArray_x + .3) > getLevelTime()){
+				fIsUnderWaterTime = vTimeArray_y;
+			}
+			
+//GET/CHEK THIS ALL THE TIME
+			while(doesEntityExist(ePlayer)){
+				fHealth = ePlayer.getHealth();				
+				if(fHealth > 0){
+					vPlayer = ePlayer.getOrigin();
+					vPlayerMax = ePlayer.getMaxs();
+					
+ 					if(vPlayerMax_z == 49){
+						vPlayerMax = '22 22 44';
+					}
+					else{
+						vPlayerMax = '22 22 86';
+					}
+					
+					if((vPlayer_z + vPlayerMax_z) <= (vTrig_z + vBBoxMax_z) && (vTrig_z + vBBoxMin_z) <= (vPlayer_z + vPlayerMax_z)){//(vPlayer_z + vMaxs_z) <= fCalcTriggerZTop
+						vTimeArray_x = getLevelTime();
+						vTimeArray_y = fIsUnderWaterTime;
+						
+						if(hzm_waterCheckBB(vTrig,vBBoxMin,vBBoxMax,vPlayer,'-22 -22 0',vPlayerMax,0)){
+							
+							fIsUnderWaterTime++;
+							fDamage = ((fIsUnderWaterTime / 10) / hzm_water_float_damageDivider);
+							if((fIsUnderWaterTime / 10) >= hzm_water_integer_airTime){
+								if(hzm_waterCheckValueOfGiven((fIsUnderWaterTime / 10),hzm_water_integer_damageInvervall)){
+									fHealth = (fHealth - fDamage);
+									if(fHealth < 1){
+ 										for(fBuble=hzm_water_integer_maximumBubbles;fBuble>0;fBuble--){
+											thread hzm_waterPlayerLeakAir(ePlayer,eTrigger);
+										}
+										ePlayer.killed(ePlayer,fDamage,ePlayer,1);
+										ePlayer.setVectorVar("lastUnderWaterTime",vTimeArray);
+										ePlayer.setFloatVar("hzm_waterTakeCareOfPlayer",0);
+										return;
+									}
+									else{
+										ePlayer.hurt(1);
+										ePlayer.health(fHealth); 
+										ePlayer.playSound("sound/player/player_gulp.wav",3,7,12);
+ 										fRandom = (randomInt((hzm_water_integer_maximumBubbles - hzm_water_integer_minimumBubbles)) + hzm_water_integer_minimumBubbles);
+										for(fBuble=fRandom;fBuble>0;fBuble--){
+											thread hzm_waterPlayerLeakAir(ePlayer,eTrigger);
+										}
+									}
+								}
+							}
+						}
+						else{
+							ePlayer.setVectorVar("lastUnderWaterTime",vTimeArray);
+							ePlayer.setFloatVar("hzm_waterTakeCareOfPlayer",0);
+							return;
+						}
+					}
+ 					else{
+						ePlayer.setVectorVar("lastUnderWaterTime",vTimeArray);
+						ePlayer.setFloatVar("hzm_waterTakeCareOfPlayer",0);
+						return;
+					}
+				}
+				else{
+					ePlayer.setVectorVar("lastUnderWaterTime",vTimeArray);
+					ePlayer.setFloatVar("hzm_waterTakeCareOfPlayer",0);
+					return;
+				} 
+				wait(.1);
+			}
+		}
+	}
+}
+
+
+void hzm_waterPlayerLeakAir(entity ePlayer,entity eTrigger)
+////////////////////////////////////////////////////////////////////////////////
+//Spawn some buble sprites at the player his head location, plus some lil offset
+////////////////////////////////////////////////////////////////////////////////
+{
+	if(doesEntityExist(ePlayer) && doesEntityExist(eTrigger)){
+		ePlayer.morph("MORPH_O",120,0.3,1);
+		vector vOrigin,vOriginTrigger,vTriggerMaxOrigin;
+		entity eBubble,eSplash;
+		vOrigin = ePlayer.getOrigin();
+//DUCKED, NOT DUCKED
+		if(vectorGetZ(ePlayer.getMaxs()) == 49){
+			vOrigin_z += 67;
+		}
+		else{
+			vOrigin_z += 96;
+		}
+	
+		vTriggerMaxOrigin	= eTrigger.getOrigin();
+		vTriggerMaxOrigin_z	+= vectorGetZ(eTrigger.getMaxs());
+		if((vOrigin_z + 8) < vTriggerMaxOrigin_z){
+			eBubble = spawn("script_model","model","waterdrop1.spr","origin",vectortoString(vOrigin),"scale","0.001","notsolid","1");
+			wait(.05);
+			hzm_waterShakeAndMoveUp(eBubble,eTrigger);
+			vOrigin = eBubble.getOrigin();
+		}
+		vOrigin_z = vTriggerMaxOrigin_z;
+		eSplash = spawn("script_model","model","rainsplash.spr","origin",vectortoString(vOrigin),"scale","0.001","notsolid","1");
+		wait(.05);
+		if(doesEntityExist(eBubble)){
+			eBubble.remove();
+		}
+		eSplash.time(.1);
+		eSplash.rotateXdownto(90);		
+		eSplash.playSound("sound/environment/water/drip.wav",3,2,15);
+//SCALE SPLASH UP
+		float fScale = .02,fMaxScale;
+		fMaxScale = ((randomInt(10) / 100) + .1);
+		while(fScale < fMaxScale){
+			wait(.02);//.01
+			fScale = (fScale + .02);//.01
+			if(doesEntityExist(eSplash)){
+				eSplash.scale(fScale);
+			}
+		}
+//REMOVE SPLASH
+		if(doesEntityExist(eSplash)){
+			eSplash.remove();
+		}
+	}
+}
+
+
+void hzm_waterShakeAndMoveUp(entity eBubble,entity eTrigger)
+////////////////////////////////////////////////////////////////////////////////
+//move the given airbubble towards the surface and shake it, the deeper in water the faster they move up
+////////////////////////////////////////////////////////////////////////////////
+{
+	if(doesEntityExist(eBubble) && doesEntityExist(eTrigger)){
+		float fDirection,fRounds,fMoveAt,fCount,fRanomMaxZSpeed;
+		vector vVelocity,vOriginTrigger,vBBoxMax,vBBoxMin,vBubleOrigin;
+		vOriginTrigger = eTrigger.getOrigin();
+		vBBoxMax = eTrigger.getMaxs();
+		vBBoxMin = eTrigger.getMins();
+		eBubble.scale(.15);
+		
+		while(hzm_waterCheckBB(vOriginTrigger,vBBoxMin,vBBoxMax,(vBubleOrigin = eBubble.getOrigin()),'0 0 0','0 0 8',(vVelocity_z / 10))){
+			fRounds++;
+			fCount++;
+			fMoveAt = (randomInt(10) + 15);
+			vVelocity_z = (randomint(((vOriginTrigger_z + vBBoxMax_z) - vBubleOrigin_z)) + 20 );
+			if(fRounds >= fMoveAt || fCount == 1){
+				fRounds = 0;
+				fDirection = randomInt(4);
+				if(fDirection==0){
+					vVelocity_x = randomint(15);
+					vVelocity_y = randomint(15);
+				}
+				else if(fDirection==1){
+					vVelocity_x = randomint(-15);
+					vVelocity_y = randomint(-15);
+				}
+				else if(fDirection==2){
+					vVelocity_x = randomint(-15);
+					vVelocity_y = randomint(-15);
+				}
+				else{
+					vVelocity_x = randomint(15);
+					vVelocity_y = randomint(15);
+				}	
+			}
+//check da bubble
+			if(doesEntityExist(eBubble)){
+				if((vectorGetZ(eBubble.getOrigin()) + (vVelocity_z / 10)) >= (vOriginTrigger_z + vBBoxMax_z) ){
+					return;
+				}
+			}
+//da bubble quit, exit the loop
+			else{
+				return;
+			}
+			eBubble.setVelocity(vVelocity);
+			wait(.01);
+		}
+	}
+}
+
+
+float hzm_waterCheckBB(vector vOri1,vector vMins1,vector vMaxs1,vector vOri2,vector vMins2,vector vMaxs2,float fPad)
+//------------------------------------------------------------------------------
+//HAZARD MODDING CO-OP MOD FUNCTION, DO GIVE CREDIT WHEN USE
+//------------------------------------------------------------------------------
+{
+	float fTemp,fCalc;
+ 	vector vTemp1,vTemp2;
+	if(vOri1 != vOri2){
+		vTemp2 = (vTemp1 = '0 0 0');
+		vTemp1_x = vOri1_x;
+		vTemp2_x = vOri2_x;
+		fTemp = ( floor(vectorLength(vTemp1 - vTemp2)) - fPad );
+		
+		if(vTemp1_x >= vTemp2_x){
+			fCalc = vMaxs2_x / 2;
+			if(	fTemp > (hzm_waterReturnFloatNotNegative(vMins1_x) + fCalc)){
+				return 0;
+			}
+		}
+		else{
+			fCalc = hzm_waterReturnFloatNotNegative(vMins2_x);
+			fCalc = (fCalc / 2);
+			if(fTemp > (vMaxs1_x + fCalc)){
+				return 0;
+			}
+		}
+		vTemp2 = (vTemp1 = '0 0 0');
+		vTemp1_y = vOri1_y;
+		vTemp2_y = vOri2_y;
+		fTemp = ( floor(vectorLength(vTemp1 - vTemp2)) - fPad );
+		
+		if(vTemp1_y >= vTemp2_y){
+			fCalc = (vMaxs2_y / 2);
+			if(	fTemp > (hzm_waterReturnFloatNotNegative(vMins1_y) + fCalc)){
+				return 0;
+			}
+		}
+		else{
+			fCalc = hzm_waterReturnFloatNotNegative(vMins2_y);
+			fCalc = (fCalc / 2);
+			if(fTemp > (vMaxs1_y + fCalc)){
+				return 0;
+			}
+		}
+		vTemp2 = (vTemp1 = '0 0 0');
+		vTemp1_z = vOri1_z;
+		vTemp2_z = vOri2_z;
+		fTemp = ( floor(vectorLength(vTemp1 - vTemp2)) - fPad );
+		
+		if(vTemp1_z <= vTemp2_z){
+			fCalc = hzm_waterReturnFloatNotNegative(vMins2_z);
+			if(	fTemp > (vMaxs1_z + fCalc)){
+				return 0;
+			}
+		}
+		else{
+			fCalc = (vMaxs2_z / 2);
+			if(fTemp > (hzm_waterReturnFloatNotNegative(vMins1_z) + fCalc)){
+				return 0;
+			}
+		}
+	}
+	return 1;
+}
+
+
+float hzm_waterReturnFloatNotNegative(float fNotNegative)
+////////////////////////////////////////////////////////////////////////////////
+//do not return negative value
+////////////////////////////////////////////////////////////////////////////////
+{
+	if(fNotNegative < 0){
+		fNotNegative = (fNotNegative - (fNotNegative*2));
+	}
+	return fNotNegative;
+}
+
+
+float hzm_waterCheckValueOfGiven(float fValue,float fGiven)
+////////////////////////////////////////////////////////////////////////////////
+//check if the value is a power of the given integer
+////////////////////////////////////////////////////////////////////////////////
+{
+	float fValueCalc;
+	fValueCalc = (fValue / fGiven);
+	fValueCalc = floor(fValueCalc);
+	if((fValueCalc * fGiven) == fValue){
+		return 1;
+	}
+	return 0;
+}
+

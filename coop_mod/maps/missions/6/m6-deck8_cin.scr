@@ -1,0 +1,113 @@
+void cinematicAttack_Start();
+void cinematicAttack_Action_HazardteamToDuty();
+void cinematicAttack_Action_TransporterTechsToDuty();
+void cinematicAttack_End();
+
+void cinematicAttack_Start()
+{
+	globalCoop_cin_start();
+	spawn("camera","targetname","cam1","origin","-9694 -1300 115","angles","0 270 0");
+	spawn("camera","targetname","cam2","origin","-9417 -1541 109","angles","0 150 20");
+	wait(.1);
+	globalCoop_cin_watch($cam1,$transporterDude);
+	globalCoop_cin_fov($cam1,11);
+	globalCoop_cin_cuecamera($cam1);
+	globalCoop_main_camFadeIn(.5);
+	wait( 0.5 );
+	
+	globalCoop_cin_skipThread("cinematicAttack_End");
+	
+	// transporter guy dialog while people run out of the room
+	//The transporters are down, along with the Turbolifts!
+	globalCoop_dialog_play($transporterDude,"m6l1/dorchev_transdown.mp3", 1, 11111, 1 );
+	wait(.2);
+	
+	//To all hazard team members, emergency deploy!!!  Fight off the idryll invaders!
+	globalCoop_dialog_play(globalCoop_return_entityE1OrE2(globalCoop_return_playerClosestPreferActive($transporterDude),$munro),"m6l1/munro_emdeploy.mp3", 1, 11111, 1);
+	
+	globalCoop_cin_watch($cam2,$chang);
+	globalCoop_cin_fov($cam2,70);
+	globalCoop_cin_cuecamera($cam2);
+	
+	// run the hazard team off of the pad
+	thread cinematicAttack_Action_HazardteamToDuty();
+	wait(4);
+	
+	globalCoop_cin_watch($cam1,$transporterDude);
+	globalCoop_cin_fov($cam1,11);
+	globalCoop_cin_cuecamera($cam1);
+	
+	//I've got Idryll beam-in signatures appearing all over the ship!
+	globalCoop_dialog_play($transporterDude,"m6l1/dorchev_beamin.mp3", 1, 11111, 1 );
+	wait(.2);
+	
+	thread cinematicAttack_Action_TransporterTechsToDuty();
+	thread cinematicAttack_End();
+}
+
+
+void cinematicAttack_End()
+{
+	killthread("cinematicAttack_Start");
+	skipthread("null");
+	globalCoop_main_camFadeOut(.5);
+	wait(1);
+	
+	$transporterDude.stopdialog();
+	$korban.warp( $nodeKorban_Cargobay.getOrigin() );
+	$jurot.warp( $nodeJurot_Sickbay.getOrigin() );
+
+	globalCommon_AiDummyHide( $korban );
+	globalCommon_AiDummyHide( $jurot );
+	
+	globalCoop_level_remove($transporterChick);
+	globalCoop_level_remove($cam1);
+	globalCoop_level_remove($cam2);
+	globalCoop_level_remove($chang);
+	
+	$transporterDude.giveactorweapon( "actorweapons/fed-compressionrifle.tik", 1.0 );
+	$transporterDude.useactorweapon( "CompressionRifle" );
+	$transporterDude.ai_on();
+	
+	globalCoop_cin_end();
+	
+	globalCoop_main_camFadeIn(.5);
+	wait(2);
+
+	thread setupStartingObjectives();
+}
+
+
+//------------------
+// cinematicAttack_Action_HazardteamToDuty
+// run the hazard team out of the transporter room
+//------------------
+void cinematicAttack_Action_HazardteamToDuty()
+{
+	$korban.walkto( "$nodeHazardTeamRemove1", "swat_run" );
+	wait( .5 );
+	
+	$jurot.walkto( "$nodeHazardTeamRemove2", "swat_run" );
+	wait( .3 );
+	
+	$chang.walkto( "$nodeHazardTeamRemove1", "swat_run" );
+	wait( 4 );
+	
+	globalCommon_AiDummyHide( $korban );
+	globalCommon_AiDummyHide( $jurot );
+	
+	$korban.warp( $nodeKorban_Cargobay.getOrigin() );
+	$jurot.warp( $nodeJurot_Sickbay.getOrigin() );
+	globalCoop_level_remove($chang);
+}
+
+
+void cinematicAttack_Action_TransporterTechsToDuty()
+{
+	$transporterDude.giveactorweapon( "actorweapons/fed-compressionrifle.tik", 1.0 );
+	$transporterDude.useactorweapon( "CompressionRifle" );
+	$transporterDude.walkto( "$transporterDudeNode", "swat_walk" );
+	waitfor( $transporterDude );
+	$transporterDude.ai_on();
+}
+

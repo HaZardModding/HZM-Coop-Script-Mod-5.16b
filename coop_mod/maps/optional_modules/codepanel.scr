@@ -1,0 +1,216 @@
+//This script contains the code for the codepannel, use as you please
+//This script contains the code for the codepannel, use as you please
+//This script contains the code for the codepannel, use as you please
+
+
+//Global Variables, can be accessed by all Functions/scriptfiles
+//if definied outside a function, just like this
+////////////////////////////////////////////////////////////////////////////////
+float 	float_codepanelCurrentNumber,
+		float_codepanelLastUsed;
+
+//declaration
+////////////////////////////////////////////////////////////////////////////////
+void	codepanel_noMenu();
+void	codepanel_set(entity eTrigger,float fNumber);
+void	codepanel();
+void	codepanel_One();
+void	codepanel_Two();
+void	codepanel_Three();
+void	codepanel_Four();
+void	codepanel_Five();
+void	codepanel_Six();
+void	codepanel_Seven();
+void	codepanel_Eight();
+void	codepanel_Nine();
+void	codepanel_Zero();
+
+void codepanel_noMenu()
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+	thread globalCoop_player_transmitter(ePlayer,"globalwidgetcommand OkDialogTitle title ^8Needs^0_^5Coop^8Mod^0_^8above^0_^8Build^5#15\nforcemenu okdialog");
+}
+
+
+void codepanel()
+//this function is started once the trigger is used
+{
+//KEEP DEV POSTED
+	globalCoop_main_devInfo("MOM::codepanel");
+	
+	entity	eTrigger,ePlayer;
+	eTrigger = getCurrentEntity();
+	if(doesEntityExist(eTrigger))
+	{
+		float fTell;
+		float fTimer;
+		float fCorrectCode;
+		float fCorrectLength;
+		float fCodeCurrent;
+		float fCodeIndex;
+		float fCodeIndexPreviouse;
+		string sCodeCorrect;
+		string sCodeCurrent;
+		string sCodeEntred;
+		
+		ePlayer			= eTrigger.getLastActivatingEntity();
+		fTimer			= vectorgetx(eTrigger.getvectorvar("coop_codepannelCCD"));
+		fCorrectCode	= vectorgety(eTrigger.getvectorvar("coop_codepannelCCD"));
+		fCorrectLength	= vectorgetz(eTrigger.getvectorvar("coop_codepannelCCD"));
+		fTell			= eTrigger.getfloatvar("coop_codepannelTell");
+		
+//start USED thread
+		thread globalCoop_level_callReliably(""+eTrigger.getstringvar("coop_codepannelUsed"));
+		
+		
+		if(fTell==1)
+		{
+			thread globalCoop_player_transmitter(ePlayer,"set coop_pScanned "+fCorrectCode);
+		}
+		
+		//debug
+		//ePlayer.hudprint("x: "+fTimer+" - y: "+fCorrectCode+" - z: "+fCorrectLength+"\n");
+		
+	//construct correct code
+		sCodeCorrect	= (""+fCorrectCode);
+		
+	//compensate for wait time
+		fTimer = (fTimer * 20);
+		
+		eTrigger.setFloatVar("globalCoop_codepannel_index",0);
+		
+//repeat this procedure the whole time
+		while(doesEntityExist(eTrigger))
+		{		
+		//make sure timer set to 0 doesn't fail instantly
+			fTimer--;
+			
+	//get current status
+			fCodeIndex		= eTrigger.getFloatVar("globalCoop_codepannel_index");
+			fCodeCurrent	= eTrigger.getFloatVar("globalCoop_codepannel_diget"+fCodeIndex);
+			
+			if(fCodeIndex != fCodeIndexPreviouse || fTimer == 0)
+			{
+			//debug
+				//ePlayer.hudprint(fCodeIndex+"!="+fCodeIndexPreviouse+"||"+fTimer+"==0\n");
+			
+			//remember current index
+				fCodeIndexPreviouse=fCodeIndex;
+				sCodeCurrent = "";
+				sCodeCurrent = ("" + fCodeCurrent);
+			//construct entred code
+				sCodeEntred	= (sCodeEntred + sCodeCurrent);
+				
+				//debug
+				//ePlayer.hudprint(sCodeEntred+"=="+sCodeCorrect+"#"+fCodeIndex+">="+fCorrectLength+"\n");
+				
+	//puzzle solved, sucessfully or failed
+				if(sCodeEntred == sCodeCorrect || fCodeIndex >= fCorrectLength || fTimer == 0)
+				{
+				//remove the Menu from the player again
+					thread mom_exitMenuPlayer(ePlayer);
+				//reset scanned code
+					if(fTell==1)
+					{
+						thread globalCoop_player_transmitter(ePlayer,"set coop_pScanned ^0");
+					}
+	//SUCSESS
+					if(sCodeEntred == sCodeCorrect)
+					{
+						eTrigger.playsound("sound/weapons/tricorder/tri_puzz_success.wav",0,2);
+						globalCoop_level_callReliably(""+eTrigger.getstringvar("coop_codepannelSucess"));
+					//disable trigger - remove thread cuz trigger is reactivated by momy
+						eTrigger = getEntity(eTrigger.getStringVar("mom_originalTriggerName"));
+						eTrigger.thread("");
+					}
+					else
+					{
+						eTrigger.playsound("sound/weapons/tricorder/tri_puzz_failure.wav",0,2);
+						globalCoop_level_callReliably(""+eTrigger.getstringvar("coop_codepannelFailed"));
+					}
+					return;
+				}
+			}
+		//wait time is 1/20th sec
+			wait(0.05);
+		}
+	}
+}
+
+void codepanel_One()
+//this function is called when option 1 is used
+{
+	codepanel_set(getCurrentEntity(),1);
+	//centerprint("used one\n");
+}
+void codepanel_Two()
+//this function is called when option 2 is used
+{
+	codepanel_set(getCurrentEntity(),2);
+	//centerprint("used two\n");
+}
+void codepanel_Three()
+//this function is called when option 3 is used
+{
+	codepanel_set(getCurrentEntity(),3);
+	//centerprint("used three\n");
+}
+void codepanel_Four()
+//this function is called when option 4 is used
+{
+	codepanel_set(getCurrentEntity(),4);
+	//centerprint("used four\n");
+}
+void codepanel_Five()
+//this function is called when option 5 is used
+{
+	codepanel_set(getCurrentEntity(),5);
+	//centerprint("used five\n");
+}
+void codepanel_Six()
+//this function is called when option 6 is used
+{
+	codepanel_set(getCurrentEntity(),6);
+	//centerprint("used six\n");
+}
+void codepanel_Seven()
+//this function is called when option 7 is used
+{
+	codepanel_set(getCurrentEntity(),7);
+	//centerprint("used seven\n");
+}
+void codepanel_Eight()
+//this function is called when option 8 is used
+{
+	codepanel_set(getCurrentEntity(),8);
+	//centerprint("used eight\n");
+}
+void codepanel_Nine()
+//this function is called when option 9 is used
+{
+	codepanel_set(getCurrentEntity(),9);
+	//centerprint("used nine\n");
+}
+//this function is called when option 10 is used
+void codepanel_Zero()
+{
+	codepanel_set(getCurrentEntity(),0);
+	//centerprint("used zero\n");
+}
+
+void codepanel_set(entity eTrigger,float fNumber)
+{
+	if(doesEntityExist(eTrigger))
+	{
+		float fIndex;
+		fIndex = eTrigger.getFloatVar("globalCoop_codepannel_index");
+		fIndex++;
+		eTrigger.setFloatVar("globalCoop_codepannel_diget"+fIndex,fNumber);
+		eTrigger.setFloatVar("globalCoop_codepannel_index",fIndex);
+		
+		//debug
+		//$player1.hudprint("fIndex: "+fIndex+" - fNumber: "+fNumber+"\n");
+	}
+}
+

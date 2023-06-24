@@ -1,0 +1,117 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	  HoloMission - 3
+//  Script By:    K. Thompson
+//  Geometry By:  K. Thompson
+//  Created on:   01/10/2002
+//
+//-----------------------------------------------------------------
+
+void startHoloTrainingMissionIGM6();
+
+void photonBurstWaitIGM6();
+void photonBurstGoIGM6();
+
+//voided in ent-deck 8 IGM6 script
+//void holoMissionIGM6Over();
+
+////////////////////////////////
+//  startHoloTrainingMissionIGM6
+//  Start the holo mission
+////////////////////////////////
+void startHoloTrainingMissionIGM6()
+{
+	$triggerHoloDeck.thread( "" );
+
+	globalCoop_dialog_stopAll();
+	
+	thread photonBurstWaitIGM6();
+}
+
+////////////////////////////////
+// Wait till player picks up grenade launcher
+////////////////////////////////
+void photonBurstWaitIGM6()
+{
+	$photonBurst.ontouch( "photonBurstGoIGM6" );
+	pause();
+}
+
+////////////////////////////////
+// start mission
+////////////////////////////////
+void photonBurstGoIGM6()
+{
+	$photonBurst.notouch();
+	$photonBurst.missionobjective( 0 );
+	$photonBurst.remove();
+	
+	globalCoop_level_hideAndNotSolid($holoDeckWeaponStand);
+	
+	globalCoop_player_giveAll("weapons/worldmodel-photon.tik",.2);	
+	globalCoop_main_waitZeroDot2();
+
+	camfadeout05();
+	dontSaveOrientation();
+	globalCoop_mission_completed("ent-training_weap3");
+	//coop_loadMap();
+}
+
+////////////////////////////////
+// end Mission
+////////////////////////////////
+void holoMissionIGM6Over()
+{
+	if(coop_bool_AlmosenFuerEinenKlingoTen)
+	{
+		return;
+	}
+	coop_bool_AlmosenFuerEinenKlingoTen=1;
+	// This is here so this function won't get called twice
+	setFloatVar("game.checkEntMission6RoomsVisited", 5.5 );
+	
+	if(!cvar_bool_multiplayer)
+	{
+		waitforplayer();
+		$player.immobilize( 0 );
+	}
+	else
+	{
+		globalCoop_main_waitForWarmupTime();
+		wait(1);
+	}
+	camfadein05();
+	wait_06();
+	
+	unlockHoloDoor();
+	
+	if(!cvar_bool_multiplayer)
+	{
+		$player.take( "photonburst" );
+		$player.health( 100 );
+	}
+	else
+	{
+		wait(1);
+	}
+
+	//globalCoop_dialog_play($korban,"ent_m7/korban_effective.mp3", 1, 10000, 1 ); //Very effective. 
+	//Almost as good as a Klingon!
+	globalCoop_dialog_play($korban,"ent_m7/korban_almost.mp3", 1, 10000, 1 );
+	
+	setFloatVar("game.checkEntMission6RoomsVisited", 6 );
+	setFloatVar( "game.IGM6MeetInBriefingRoom", 1 );
+
+	if(cvar_bool_multiplayer)
+	{
+		//coop_bool_AlmosenFuerEinenKlingoTen
+		stuffCMD("seta coop_igmR 6\n");//rooms visited
+	}
+	
+	wait_06();
+	
+	justLoadedDeckThreadIGM6();
+}
+

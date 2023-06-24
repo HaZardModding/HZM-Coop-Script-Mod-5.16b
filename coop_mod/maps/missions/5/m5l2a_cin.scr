@@ -1,0 +1,240 @@
+void cinematicGasChamber1Start();
+void cinematicGasChamber1Start_SkipThread();
+
+
+void cinematicGasChamber1Start()
+{
+//disable trigger
+	entity eTrigger;
+	eTrigger = getCurrentEntity();
+	globalCoop_level_remove(eTrigger);
+	
+	spawn( "Camera", "targetname", "cam1");
+	spawn( "Camera", "targetname", "cam2");
+	cam.load( "m5l2a_gascam1" );
+	cam.load( "m5l2a_gascam2" );
+	globalCoop_main_camFadeOut(.5);
+	wait(.5);
+	
+	if(cvar_bool_multiplayer){//Multiplayer
+		coop_float_spawnAngle0 			= 0;
+		coop_float_spawnAngle1 			= 0;
+		coop_float_spawnAngle2 			= 0;
+		coop_float_spawnAngle3 			= 0;
+		coop_float_spawnAngle4 			= 0;
+		coop_float_spawnAngle5 			= 0;
+		coop_float_spawnAngle6 			= 0;
+		coop_float_spawnAngle7 			= 0;
+		coop_float_spawnAngle8 			= 0;
+		coop_vector_spawnOrigin1 		= '1300 -1500 0';
+		coop_vector_spawnOrigin2 		= '1300 -1570 0';
+		coop_vector_spawnOrigin3 		= '1300 -1640 0';
+		coop_vector_spawnOrigin4 		= '1300 -1710 0';
+		coop_vector_spawnOrigin5 		= '1300 -1780 0';
+		coop_vector_spawnOrigin6 		= '1300 -1850 0';
+		coop_vector_spawnOrigin7 		= '1400 -1850 0';
+		coop_vector_spawnOrigin8 		= '1400 -1850 0';
+	//make players respawn exactly here...
+		globalCoop_applaySpawnOriginOnReSpwanOrigin();
+	//Warp players to thair spawn Origin
+		globalCoop_player_warpToSpawnOriginAll();
+	}
+	wait( 1 );
+	globalCoop_cin_start();
+
+	$Munro.show();
+	$Munro.solid();
+	$Munro.ai_off();
+
+	$Kourban.ai_off();
+	$Chell.ai_off();
+	$Telsia.ai_off();
+	
+	$Chell.origin ( '484 -1576 8' );
+	$Kourban.origin ( '544 -1664 8' );
+	$Telsia.origin ( '524 -1752 8' );
+	$Munro.origin ( '616 -1704 8' );
+	
+	// make sure everythings ready
+	wait( .3 );
+
+	// set skipthread
+	globalCoop_cin_skipThread( "cinematicGasChamber1Start_SkipThread");
+	globalCoop_cin_follow($cam1, $m5l2a_gascam1 );
+	globalCoop_cin_cuecamera( $cam1 );
+	music( "mystery" );
+	wait( .2 );
+
+	globalCoop_main_camFadeIn(1);
+	wait( 1 );
+	
+	// start cinematic
+
+	$Chell.walkto( "$gasChamber_introNode1" , "run" );
+	$Kourban.walkto( "$gasChamber_introNode2" , "run" );
+	$Telsia.walkto( "$gasChamber_introNode3" , "run" );
+	$Munro.walkto( "$gasChamber_introNode4" , "run" );
+	waitfor( $Munro );
+
+	$Chell.walkto( "$gasChamber_introNode5" );
+
+	$Munro.anim( "conv-overthere" );
+	
+    $gasChamber_blastDoor1_5.playsound ( "sound/doors/drull_bigdoor_01.wav", 0, 1.5, 3000);
+	
+	gasChamber_blastDoor_close();
+	
+
+	$Munro.anim( "idle" );
+
+	trigger( "$gasChamber_dustExplosion1" );    
+    $gasChamber_blastDoor1_5.playsound ( "sound/doors/drull_bigdoor_stop_01.wav", 0, 1.5, 3000);
+
+	wait( 1 );
+
+	globalCoop_cin_follow($cam2, $m5l2a_gascam2 );
+	globalCoop_cin_cuecamera( $cam2 );
+	globalCoop_cin_cut($cam2);
+	$gaschamberClouds1.show();
+
+	//Infestation becoming acute. Detection of individual life forms required. Escalating to localized eradication system.
+	globalCoop_dialog_playSimple($Munro,"m5l2/idryllcomp_localized.mp3",1,20000);
+	wait(3);
+	
+	$Telsia.walkto( "$gasChamber_introNode6" );
+	waitfor( $Telsia );
+
+	$Telsia.anim( "tricorder_draw" );	
+	$Chell.anim( "conv-poundfist" );
+	waitfor( $Chell );
+	
+	$Chell.anim( "idle" );
+
+	$Telsia.anim( "tricorder_fire" );
+
+	music( "suspense" );
+
+	//Whats next?
+	globalCoop_dialog_play($Telsia,"m5l2/telsia_whatsnxt.mp3",1,20000,0);
+
+	$Chell.headwatchtarget( "Kourban" , 5 );
+
+	//Poison gas! The cowards! 
+	thread globalCoop_dialog_play($Kourban,"m5l2/korban_poison.mp3",1,20000,0);
+	$Chell.anim( "tricorder_draw" );
+	wait( 1 );
+	$Chell.anim( "tricorder_scan180" );
+	$Kourban.anim( "conv-fingerup-warning" );
+	waitfor( $Kourban );
+
+	$Kourban.anim( "compressionrifle_idle1" );
+	$Chell.walkto( "$gasChamber_introNode1" );
+
+	globalCoop_dialog_waitForDialog( $Kourban );
+
+	$Kourban.headwatchtarget( "Munro" , 5 );
+	$Chell.headwatchtarget( "Munro" , 5 );
+
+//	waitfor( $Chell );
+	
+	//Where's it coming from?
+	thread globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($Kourban),"m5l2/munro_wherecome.mp3",1,8000,0);
+	$Munro.anim( "conv-wtf" );
+
+	wait( 1 );
+	
+	$Chell.anim( "tricorder_fire" );
+
+	$Chell.headwatchtarget( "Munro" , 5 );
+
+//	waitfor( $Telsia );
+	globalCoop_dialog_waitForDialog( $Munro );
+
+	$Kourban.anim( "compressionrifle_tense_idle3" );
+	$Munro.anim( "idle" );
+
+	$Kourban.headwatchtarget( "Chell" , 5 );
+	$Munro.headwatchtarget( "Chell" , 5 );
+
+	wait( 1 );
+
+	$Telsia.anim( "tricorder_fire" );
+	
+	//I don't know. Use the Trace Gas Viewmode on your tricorder to find it, and use your phaser to seal the vent!
+	globalCoop_dialog_play($Chell,"m5l2/chell_tracegas.mp3", 1, 20000, 0);
+
+	$Chell.anim( "tricorder_tense_idle1" );
+	$Kourban.anim( "compressionrifle_idle1" );
+	$Telsia.anim( "tricorder_tense_idle1" );
+	
+	thread cinematicGasChamber1Start_SkipThread();
+}
+
+//---------------------
+// cinematicGasChamber1Start_SkipThread
+// ship thread for gas chamber cinematic
+//---------------------
+void cinematicGasChamber1Start_SkipThread()
+{
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematicGasChamber1Start" );
+	wait( .1 );
+	
+	//fade to black
+	globalCoop_main_camFadeOut(1);
+	wait ( 1 );
+	
+	globalCoop_cin_end();
+
+	if( gasChamber_blastDoors_closed == 0 )
+	{
+		thread gasChamber_blastDoor_close();
+	}
+	
+//remove cam paths to keepp entity count low (Traffic)
+	globalCoop_level_removePath($m5l2a_gascam1);
+	globalCoop_level_removePath($m5l2a_gascam2);
+	
+	$gaschamberClouds1.show();
+
+	$Chell.headwatchtarget( "none", 5 );
+	$Kourban.headwatchtarget( "none", 5 );
+	$Munro.headwatchtarget( "none", 5 );
+	$Telsia.headwatchtarget( "none", 5 );
+
+	$Munro.hide();
+	$Munro.notsolid();
+
+	$Chell.origin( '1192 -1664 8' );
+	$Kourban.origin( '1320 -1664 8' );
+	$Telsia.origin( '1312 -1752 8' );
+	$Munro.origin( '-2756 836 280' );
+	$player.origin( '1432 -1576 8' );
+	
+	$Kourban.ai_on();
+	$Chell.ai_on();
+	$Telsia.ai_on();
+
+	$gaschamber_triggerHurt.triggerable();
+
+	$gaschamberClouds1.playsound ( "sound/environment/machine/poisongas_start.wav", 14, 1, 100 );
+	$gaschamberClouds1.loopsound ( "sound/environment/machine/poisongas_loop.wav", .8, 32 );
+
+	$panel1_gas_emitter2.loopsound( "sound/ships/drull/drull_gastrap.wav", .5, 100 );
+	$panel2_gas_emitter2.loopsound( "sound/ships/drull/drull_gastrap.wav", .5, 100 );
+	$panel3_gas_emitter2.loopsound( "sound/ships/drull/drull_gastrap.wav", .5, 100 );
+	$panel4_gas_emitter2.loopsound( "sound/ships/drull/drull_gastrap.wav", .5, 100 );
+	
+	globalCoop_main_camFadeIn(1);
+
+	wait( .1 );
+
+	//$player.setobjectiveshow( "SealGasVents", 1 );
+	thread globalCoop_objectives_update("incomplete",3,1);
+	
+	thread gasChamberChellRun();
+}
+
+
+

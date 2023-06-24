@@ -1,0 +1,478 @@
+//-----------------------------------------------------------------------------------
+// Script By:		Christian Sebastian Strahl (Chrissstrahl)
+// Created on:		2008.27.08
+// E-Mail:			chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+// PUZZLES - INCLUDE IF YOU NEED IT'S FEATURES; INCLUDE ONLY TO THE CURRENT LEVEL SCRIPT!!
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2012 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+//USE puzzle_advanced.scr if you do not have the Tricorder-STX to expect for modulation
+//THIS PUZZLE SCRIPT is meant to be as simple as possible to save statments,
+//for advanced operation please only include puzzle_advanced.scr instead!
+
+
+////////////////////////////////////////////////////////////////////////////////
+//DECLARATIONS
+////////////////////////////////////////////////////////////////////////////////
+void globalCoop_puzzle_add(string sTargetname , string sTheadToStart , float fTimeToSolve , vector vOrigin);
+void globalCoop_puzzle_replace(entity ePuzzleObjectToReplace,string sTheadToStart,float fTimeToSolve);
+void globalcoop_puzzle_timer(entity ePlayer,entity ePuzzleObject,float fTime);
+void globalcoop_puzzle_playerCloseIn();
+void globalCoop_puzzle_modulate();
+void globalCoop_puzzle_extendModulatingRange(entity ePuzzle, float fExtend);
+
+
+////////////////////////////////////////////////////////////////////////////////
+//FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+void globalCoop_puzzle_setVars(entity ePuzzleObject,string sTargetname,string sTheadToStart,float fTimeToSolve,float fRange)
+//----------------------------------------------------------------------
+// Adds Puzzle Objets with multiplayer compatible script varaint
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(ePuzzleObject))
+	{
+		ePuzzleObject.setFloatvar("globalCoop_puzzle_solved",0);
+		ePuzzleObject.setFloatvar("globalCoop_puzzle_process",0);
+		ePuzzleObject.setFloatVar("globalCoop_puzzle_range",fRange);
+		ePuzzleObject.setFloatvar("globalCoop_puzzle_timeToSolve",fTimeToSolve);
+		ePuzzleObject.setStringVar("globalCoop_puzzle_targetname",sTargetname);
+		ePuzzleObject.setStringVar("globalCoop_puzzle_solveThread",sTheadToStart);
+	}
+}
+
+
+void globalCoop_puzzle_add(string sTargetname , string sTheadToStart , float fTimeToSolve , vector vOrigin)
+//----------------------------------------------------------------------
+// Adds Puzzle Objets with multiplayer compatible script varaint
+//----------------------------------------------------------------------
+{
+	string sClass,sThreadMethode,sThread;
+	sClass			= "puzzle_object";
+	sThreadMethode	= "puzzleobject_solvedthread";
+	sThread			= sTheadToStart;
+	if(cvar_bool_multiplayer){
+		sClass			= "trigger_multiple";
+		sThreadMethode	= "thread";
+		sThread			= "globalCoop_puzzle_modulate";
+	}
+//Create Vars
+	entity eTriggerMultipleCloseInTricorder;
+//Spawn the new modulator thing
+	eTriggerMultipleCloseInTricorder = spawn(sClass,"targetname",sTargetname,sThreadMethode,sThread,"origin",""+vOrigin);
+	globalCoop_main_waitAFrame();
+//Set correct size on the new entity
+	eTriggerMultipleCloseInTricorder.setSize('-50 -50 -128','50 50 128');
+	if(!cvar_bool_multiplayer)
+	{
+		eTriggerMultipleCloseInTricorder.puzzleobject_timetouse(fTimeToSolve);
+		eTriggerMultipleCloseInTricorder.puzzleobject_itemtouse("Tricorder");
+	}
+//Set vars
+	globalCoop_puzzle_setVars(eTriggerMultipleCloseInTricorder,sTargetname,sTheadToStart,fTimeToSolve,65);
+}
+
+
+void globalCoop_puzzle_replace(entity ePuzzleObjectToReplace,string sTheadToStart,float fTimeToSolve)
+//----------------------------------------------------------------------
+// Replace Puzzle Objets with multiplayer compatible script varaint
+//----------------------------------------------------------------------
+{
+//ONLY MULTIPLAYER, ONLY IF DELIVRED ENTITY EXISTS
+	if(cvar_bool_multiplayer == 1 && doesEntityExist(ePuzzleObjectToReplace) == 1){	
+	entity	ePuzzleObject,
+			eTriggerMultipleCloseIn,
+			eTriggerMultipleCloseInTricorder;
+	vector 	vMins,
+			vMaxs,
+			vOrigin,
+			vAngles;
+	string 	sModel,
+			sTargetname;
+	float	fRange;
+
+		sTargetname		= ePuzzleObjectToReplace.getRawTargetname();
+		vMins			= ePuzzleObjectToReplace.getMins();
+		vMaxs			= ePuzzleObjectToReplace.getMaxs();
+		vAngles			= ePuzzleObjectToReplace.getAngles();
+		sModel			= ePuzzleObjectToReplace.getmodelname();
+		vOrigin			= ePuzzleObjectToReplace.getorigin();
+		globalCoop_level_remove(ePuzzleObjectToReplace);
+		
+
+		
+	//Calculate modulating Range
+		fRange = vMaxs_y;
+		if(fRange > vMaxs_x){
+			fRange = vMaxs_x;
+		}
+
+	//Correct minimum value
+		if(fRange < 65){
+			fRange=65;
+		}
+
+	//CHECK TO SPAWN A VALID MODEL
+		if(sModel == ""){
+			sModel = "fx/fx-dummy.tik";
+		}
+
+		ePuzzleObject						= spawn("script_model","model",sModel,"targetname",sTargetname,"origin",""+vOrigin);
+		eTriggerMultipleCloseIn				= spawn("trigger_multiple","targetname",sTargetname+"MultipleCloseIn","thread","globalcoop_puzzle_playerCloseIn","origin",""+vOrigin);
+		eTriggerMultipleCloseInTricorder	= spawn("trigger_multiple","targetname",sTargetname+"MultipleCloseInTricorder","thread","globalCoop_puzzle_modulate","origin",""+vOrigin);
+		globalCoop_main_waitZeroDot2();
+	//Set correct size on the new entity
+		ePuzzleObject.setSize(vMins,vMaxs);
+		eTriggerMultipleCloseIn.setSize('-140 -140 -128','140 140 128');
+		eTriggerMultipleCloseInTricorder.setSize('-40 -40 -128','40 40 128');		
+	//SET VARS
+		globalCoop_puzzle_setVars(ePuzzleObject,sTargetname,sTheadToStart,fTimeToSolve,fRange);
+		eTriggerMultipleCloseIn.setStringVar("globalCoop_puzzle_targetname",sTargetname);
+		eTriggerMultipleCloseInTricorder.setStringVar("globalCoop_puzzle_targetname",sTargetname);
+	//On Touch
+		if(ePuzzleObject.getModelName() != ""){
+	//SET IDLE ANIM, APPLAY ORGINAL ANGLES
+			ePuzzleObject.anim("idle");
+			ePuzzleObject.angles(vAngles);
+			thread globalCoop_level_onUse(ePuzzleObject,"globalCoop_puzzle_modulate");
+		}
+	}
+}
+
+
+void globalcoop_puzzle_timer(entity ePlayer,entity ePuzzleObject,float fTime)
+//----------------------------------------------------------------------
+// Displays the tricorder modulating-bar at the Modulating Player
+//----------------------------------------------------------------------
+{
+//PLAYER MUST EXIST AND BE ALIVE, ONLY IF DELIVRED ENTITY IS EXISTING
+	if(globalCoop_check_existingLivingEntity(ePlayer) == 1 || doesEntityExist(ePuzzleObject) == 1){
+	//SPAWN TRICORDER, WILL BE ROTATED ABOVE THE PUZZLE WHILE MODULATING
+		ePlayer.setstat("generic",0);
+		ePlayer.setFloatVar("globalCoop_modulatingPuzzle",1);
+
+	//SPEED UP THE PROCESS FOR TECH-CLASS
+		if(ePlayer.getStringVar("globalCoop_className") == "Technician" && cvar_bool_coop_techOnly != 1){
+			fTime=4;
+		}
+	//SEND 100 UPDATES WITHIN THIS MINIMUM TIME (4sec)
+		if(fTime < 4){
+			fTime=4;
+		}
+			
+		float	fCountdownTimer,
+				fCountdownTime;
+
+	//Get the time for adding the next level to the timer hud
+		fCountdownTime	= fTime / 100;
+		
+	//Make Player use Tricorder if he is not allready doing so
+		if(doesEntityExist(ePlayer)){
+			if(	!globalCoop_check_activeWeaponType(ePlayer, "Tricorder") ){
+				ePlayer.use("Tricorder-STX");
+				globalCoop_main_wait1DotZero();//wait(.9);//Waituntil the weapon is ready
+			}
+			if(doesEntityExist(ePlayer)){
+				ePlayer.disableuseweapon(1);
+				//ePlayer.stopfire( "dual" );
+				ePlayer.addhud("timerhud");
+			}
+		}
+//SPAWN FLOATING TRICORDER
+		entity	eFloatingTricorder;
+		eFloatingTricorder = spawn("script_model","model","weapons/worldmodel-tricorder-STX.tik", "scale",".001","angles","-70 0 0");	
+		globalCoop_main_waitAFrame();
+	//Scale Tricorder to become visible
+		eFloatingTricorder.loopSound( "sound/weapons/tricorder/tricord_scan.wav" , 4 , 1024 );
+		eFloatingTricorder.notsolid();
+	//Put a tricoder above the head of the modulating player, as long as the player is modulating this item
+		if(doesEntityExist(ePlayer)){
+			vector 	vPlayerModulating;
+			vPlayerModulating = ePlayer.getOrigin();
+			vPlayerModulating_z += 130;
+			eFloatingTricorder.origin(vPlayerModulating);
+		//animate tricorder
+			ePlayer.weaponcommand("dual","anim","fire");
+		}
+		eFloatingTricorder.rendereffects( "+minlight" );
+		eFloatingTricorder.scale(4);
+		eFloatingTricorder.rotateY(70);
+		
+	//GET DATA	
+		float	fRange;
+		vector	vOriginPlayer,
+				vOriginPuzzle;
+		
+		vOriginPuzzle	= ePuzzleObject.getOrigin();
+		fRange 			= ePuzzleObject.getFloatVar("globalCoop_puzzle_range");
+		fCountdownTimer = ePuzzleObject.getFloatvar("globalCoop_puzzle_process");	
+		
+		while(doesEntityExist(ePlayer))
+		{
+		//retrive information
+			vOriginPlayer	= ePlayer.getOrigin();
+		//correct ofset (player is carring the origin at his feets, and is 128 units height)
+			vOriginPlayer_z += 64;
+	//check distance,timmer is finished,and active weapon
+			if(vectorlength((vOriginPuzzle - vOriginPlayer)) > fRange ||
+				fCountdownTimer >= 100 ||
+				!globalCoop_check_activeWeaponType(ePlayer,"Tricorder"))
+			{
+				if(doesEntityExist(ePlayer)){
+					ePlayer.weaponcommand("dual","anim","idle");
+					ePlayer.removehud("timerhud");
+					ePlayer.disableuseweapon(0);
+					ePuzzleObject.stopLoopSound();
+					ePlayer.setFloatVar("globalCoop_modulatingPuzzle",0);
+				}
+		
+				if(fCountdownTimer >= 100){		
+					if(doesEntityExist(ePuzzleObject)){
+						if(ePuzzleObject.getFloatvar("globalCoop_puzzle_solved") == 0){
+							ePuzzleObject.setFloatvar("globalCoop_puzzle_solved",1);
+							ePlayer.setFloatVar("coop_puzzle_hasSolved_"+ePuzzleObject.getRawTargetname(),1);
+							ePlayer.setFloatVar("globalCoop_puzzle_solvedTime",(getLevelTime() + 12));
+							ePuzzleObject.playsound ( "sound/weapons/tricorder/tri_puzz_success.wav",3,1,394);
+						}
+					}
+				}
+				ePuzzleObject.setFloatvar("globalCoop_puzzle_process",fCountdownTimer);
+				
+			//TIMER STOPPED, REMOVE TRICODER ROTATING MODEL
+				globalCoop_level_remove(eFloatingTricorder);
+			
+			//EXIT THIS FUNCTION NOW
+				return;
+			}
+			
+	//EXIT IF DUDE IS MISSING
+			if(!globalCoop_check_existingLivingEntity(ePlayer)){
+			//TIMER STOPPED, REMOVE TRICODER ROTATING MODEL
+				globalCoop_level_remove(eFloatingTricorder);
+			//EXIT THIS FUNCTION NOW
+				return;
+			}
+				
+			ePlayer.setstat("generic",fCountdownTimer);
+			wait(fCountdownTime);
+			fCountdownTimer++;
+		}
+		
+	//TIMER STOPPED, REMOVE TRICODER ROTATING MODEL
+		globalCoop_level_remove(eFloatingTricorder);
+		
+	//SAVE PUZZLE TIMER STATUS
+		ePuzzleObject.setFloatvar("globalCoop_puzzle_process",fCountdownTimer);
+	//RESET TIMER VAR
+		fCountdownTimer = 0;
+	}
+}
+
+
+void globalcoop_puzzle_playerCloseIn()
+//----------------------------------------------------------------------
+//Animates PuzzleObject on Player Close In
+//----------------------------------------------------------------------
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	
+	if(doesEntityExist(eTrigger))
+	{	
+		eTrigger.nottriggerable();
+		string	sTargetname,
+				sModel;
+		entity	ePuzzleObject;
+		sTargetname		= eTrigger.getStringVar("globalCoop_puzzle_targetname");
+		ePuzzleObject	= getEntity(sTargetname);
+		
+		if(doesEntityExist(ePuzzleObject)){
+	//REMOVE ALL SINGLEPLAYER PUZZLES NOW!
+			removeClass("PuzzleObject");
+			sModel = ePuzzleObject.getmodelname();
+			
+	//PLAY OPENING ANIMATION
+			if(sModel != ""){
+				globalCoop_actor_animateWaitForAnimation(ePuzzleObject,"opening");
+				thread globalCoop_actor_animateWaitForAnimation(ePuzzleObject,"open_idle");
+			}
+			
+	//HOLD
+			while(globalCoop_check_playerInRange(ePuzzleObject,200))
+			{
+				globalCoop_main_waitZeroDotZero5();
+			}
+		
+	//PLAY CLOSING ANIMATION
+			if(sModel != ""){
+				thread globalCoop_actor_animateWaitForAnimation(ePuzzleObject,"closing");//ENTITY:actor,STRING: AniName
+				wait(.9);//use wait to prevent errors
+				thread globalCoop_actor_animateWaitForAnimation(ePuzzleObject,"idle");//ENTITY:actor,STRING: AniName
+			}
+			globalCoop_level_triggerable(eTrigger);
+		}
+	}
+}
+
+
+void globalCoop_puzzle_modulate()
+//----------------------------------------------------------------------
+// Gets all triggers and does all stuff to make the thing modulating
+//----------------------------------------------------------------------
+{
+entity	eTrigger;
+	eTrigger=getCurrentEntity();
+	
+//EXIT IF TRIGGER IS MISSING
+	if(doesEntityExist(eTrigger)){
+		entity	ePlayer,ePuzzleObject/*,eTriggerMultipleCloseIn*/,eTriggerMultipleCloseInTricorder;
+		string	sPuzzleTargetname,/*sTriggerMultipleCloseInTargetname,*/sPuzzleSolveThreadname;
+		ePlayer							= eTrigger.getLastActivatingEntity();
+		sPuzzleTargetname				= eTrigger.getStringVar("globalCoop_puzzle_targetname");
+		ePuzzleObject					= getEntity( sPuzzleTargetname );
+		
+//EXIT IF A COMPONENT IS MISSING
+		if(	!doesEntityExist(ePlayer) ||
+			!doesEntityExist(ePuzzleObject) ||
+			!doesEntityExist(eTrigger))
+			return;
+
+//GET TIME A PLAYER DOES NEED TO MODULATE THIS
+		float fTimeToSolve;
+		fTimeToSolve = ePlayer.getFloatVar("globalCoop_puzzle_solvedTime");
+
+//EXIT IF: PLAYER MOVES,PUZZLE IS DISABLED,PLAYER IS MODULATING
+		if(	ePlayer.getVelocity() != '0 0 0' ||
+			//ePuzzleObject.getFloatVar("globalCoop_puzzle_disabled") == 1 ||
+			ePlayer.getFloatVar("globalCoop_modulatingPuzzle") == 1 ||
+			fTimeToSolve > (getLevelTime() + 0.1))
+			return;
+			
+//ALLOW ONLY TECHNICIANS TO DO PUZZLE STUFF		
+		if(cvar_bool_coop_techOnly == 1 && cvar_bool_coop_disClass == 0 && ePlayer.getStringvar("globalCoop_className") != "Technician")
+		{
+			ePlayer.setFloatVar("globalCoop_modulatingPuzzle",1);
+			globalCoop_huds_textOrHud(ePlayer,"coop_msgNeedTech","^5INFO:^2 You are not a Technician! ^3You need to be a^5 Technician^3 for Modulations");
+			wait(2);
+			ePlayer.setFloatVar("globalCoop_modulatingPuzzle",0);
+			return;
+		}
+//GRAB OTHER DATA
+		string	sModel;
+		//eTriggerMultipleCloseIn			= getEntity( sPuzzleTargetname+"MultipleCloseIn");
+		eTriggerMultipleCloseInTricorder= getEntity( sPuzzleTargetname+"MultipleCloseInTricorder");
+		sModel							= ePuzzleObject.getmodelname();
+		fTimeToSolve					= ePuzzleObject.getFloatvar("globalCoop_puzzle_timeToSolve");
+	//RECYCLE
+		sPuzzleTargetname				= ePlayer.getActiveWeaponName();
+		
+//IF THE PUZZLE OBJECT IS A MODEL, DISABLE THE ONEUSE THREAD, ELSE ASSUME IT'S A TRIGGER AND DISABLE THE TRIGGER
+		ePuzzleObject.noUse();
+		ePuzzleObject.nottriggerable();
+	
+//DISABLE THE CLOSEIN DETECTION TRIGGER
+		globalCoop_level_notTriggerable(eTriggerMultipleCloseInTricorder);	
+		
+//Create vars
+	float	fRange;
+	vector	vOriginPlayer,
+			vOriginPuzzle;
+			
+//GET/GRAB DATA
+		vOriginPuzzle	= ePuzzleObject.getOrigin();
+		vOriginPlayer	= ePlayer.getOrigin();
+		fRange			= ePuzzleObject.getFloatVar("globalCoop_puzzle_range");
+		
+//SET OFFSET (player is carring the origin at his feets, and is [128 MODEL] - [108 Bounding Box] units height)
+		vOriginPlayer_z			+= 64;
+//IF PLAYER IN RANGE, START TIMMER INLINE, 
+		if(vectorlength((vOriginPuzzle - vOriginPlayer)) < fRange){
+			globalcoop_puzzle_timer(ePlayer,ePuzzleObject,fTimeToSolve);//DYNAMIC TIME RANGE!
+		//RESTORE THE PLAYER WEAPON
+			if(doesEntityExist(ePlayer)){
+				ePlayer.stopfire( "dual" );
+				if(sPuzzleTargetname != "None"){
+					ePlayer.use(sPuzzleTargetname);
+				}else{
+					ePlayer.putawayweapon("dual");
+				}
+			}
+		}
+		
+		if(ePuzzleObject.getFloatvar("globalCoop_puzzle_solved") == 0){
+			if(ePuzzleObject.getModelName() != ""){
+				thread globalCoop_level_onUse(ePuzzleObject,"globalCoop_puzzle_modulate");
+			}else{
+				ePuzzleObject.triggerable();
+			}
+			globalCoop_level_triggerable(eTriggerMultipleCloseInTricorder);
+			return;
+		}		
+//KILL CONSOLE ANIMATION MANAGER
+		killThread("globalcoop_puzzle_playerCloseIn");
+		
+//CLOSE SONSOLE
+		globalCoop_actor_animateWaitForAnimation(ePuzzleObject,"closing");
+		
+		if(doesEntityExist(ePuzzleObject)){
+			if(sModel != ""){
+				ePuzzleObject.anim("idle");
+			}
+			
+//SET USED MODEL
+			string	sPuzzleUsedModel;
+			sPuzzleUsedModel = ePuzzleObject.getStringVar("coop_puzzle_used_model");
+			if(sPuzzleUsedModel != ""){
+				ePuzzleObject.model( sPuzzleUsedModel );
+			}
+			sPuzzleSolveThreadname = ePuzzleObject.getStringVar("globalCoop_puzzle_solveThread");
+//CALL NOW THE THREAD THE SAFE WAY :)
+			globalCoop_level_callReliably(sPuzzleSolveThreadname);
+//DISABLE PUZZLE NOW, ALLOWS REEABLING
+			globalCoop_level_remove(ePuzzleObject);
+			//ePuzzleObject.setFloatVar("globalCoop_puzzle_disabled",1);
+		}
+	}
+}
+
+
+void globalCoop_puzzle_extendModulatingRange(entity ePuzzle, float fExtend)
+//----------------------------------------------------------------------
+//Extend the Range of the given puzzle replacement
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(ePuzzle)){
+		vector	vMaxs,
+				vMins;
+	//Set new range on the puzzle
+		ePuzzle.setFloatVar("globalCoop_puzzle_range",((ePuzzle.getFloatVar("globalCoop_puzzle_range")) + fExtend));
+	//recycle entity
+		ePuzzle	= getEntity(ePuzzle.getRawTargetname()+"MultipleCloseInTricorder");
+	//Get bbox size
+		vMaxs = ePuzzle.getMaxs();
+		vMins = ePuzzle.getMins();		
+	//Calculate new bbox size, and set new sizes
+		vMaxs_y += fExtend;
+		vMaxs_x += fExtend;
+		vMaxs_z += fExtend;
+		vMins_x -= fExtend;
+		vMins_y -= fExtend;
+		vMins_z -= fExtend;
+	//Extend trigger
+		ePuzzle.setSize(vMins,vMaxs);
+	}
+}
+

@@ -1,0 +1,85 @@
+$include ai/quad/mdul/M_Aln_Quad_Define.ai
+
+//---------------------------------------------------------
+state ATTACK_CHARGE
+//---------------------------------------------------------
+	{
+	ignoreglobalstate
+	entrycommands
+		{
+		turntowardsenemy
+		}
+	legs
+		{
+		base_to_charge : default
+		}
+	states
+		{
+		NO_PATH_SHOULDERCANNON_START : !HAVE_PATH_TO_ENEMY
+		BEGIN_ATTACK_CHARGE : ANIM_DONE
+		END_ATTACK_CHARGE	: BEHAVIOR_FAILED
+		}
+	}
+
+//---------------------------------------------------------
+state BEGIN_ATTACK_CHARGE
+//---------------------------------------------------------
+	{
+	ignoreglobalstate
+//	behavior generalCombatWithMeleeWeapon ( "base" , "charge-gore" , 768 , 256 , "charge-run" , 1 )
+	behavior CloseInOnPlayer ( "charge_run" , $MELEE_RANGE_MAX$ )
+
+	states
+		{
+		NO_PATH_SHOULDERCANNON_START : !HAVE_PATH_TO_ENEMY
+		END_ATTACK_CHARGE_STUMBLE : PAIN CHANCE ( $CHARGE_STUMBLE_CHANCE$ )
+		AI_OFF		  : BEHAVIOR_SUCCESS
+		END_ATTACK_CHARGE		  : BEHAVIOR_FAILED
+		}
+	}
+
+//---------------------------------------------------------
+state DO_ATTACK_CHARGE
+//---------------------------------------------------------
+	{
+	ignoreglobalstate
+//	behavior generalCombatWithMeleeWeapon ( "base" , "charge-gore" , 768 , 256 , "charge-run" , 1 )
+	behavior doAttack ( "charge_gore" )
+
+	states
+		{
+		NO_PATH_SHOULDERCANNON_START : !HAVE_PATH_TO_ENEMY
+//		END_ATTACK_CHARGE_STUMBLE : PAIN CHANCE ( $CHARGE_STUMBLE_CHANCE$ )
+		END_ATTACK_CHARGE 		  : BEHAVIOR_SUCCESS
+		END_ATTACK_CHARGE 		  : BEHAVIOR_FAILED
+		END_ATTACK_CHARGE			: BEHAVIOR_FAILED
+		}
+	}
+
+//---------------------------------------------------------
+state END_ATTACK_CHARGE
+//---------------------------------------------------------
+	{
+	ignoreglobalstate
+	states
+		{
+		MELEE_BACK_PEDAL	: default
+		BEGIN_ATTACK_CHARGE	: BEHAVIOR_FAILED
+		}
+	}
+
+//---------------------------------------------------------
+state END_ATTACK_CHARGE_STUMBLE
+//---------------------------------------------------------
+	{
+	ignoreglobalstate
+	legs
+		{
+		charge_to_base : default
+		}
+	states
+		{
+		MELEE_BACK_PEDAL : ANIM_DONE
+		END_ATTACK_CHARGE	: BEHAVIOR_FAILED
+		}
+	}		

@@ -1,0 +1,82 @@
+//-----------------------------------------------------------------------------------
+// Script By:	Christian Sebastian Strahl (Chrissstrahl)
+// Created on:	2008.08.21
+// E-Mail:		chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+// CONTAININS CLASSES RELATED FUNCTIONS
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2012 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+void globalCoop_class_setupPlayer(entity ePlayer)
+//------------------------------------------------------------------------------
+//Setup the player for the given class
+//------------------------------------------------------------------------------
+{
+//TELL PLAYER HOW MANY OTHER DUDES HAVE THIS CLASS ALLREADY
+	if(doesEntityExist(ePlayer))
+	{
+//SET (NEW) HUDS
+		globalCoop_huds_setup(ePlayer);
+//GIVE WEAPONS
+		globalCoop_armory_equip(ePlayer);
+//SETUP MODEL - APPLAY CLASS SPECIFIC ATTRIBUTES - RESISTANCE AND SUCH
+		globalCoop_model_setupPlayer(ePlayer);
+//do not show teamhealth hud as it will not be updated!
+		globalCoop_huds_Remove(ePlayer,"coop_teamHealth");
+	}
+}
+
+
+void globalCoop_class_update()
+{}
+
+
+void globalCoop_class_updateInternal()
+{}
+
+
+void globalCoop_class_modulating(entity ePlayer)
+{}
+
+void globalCoop_class_addIndicator(entity ePlayer, string sClassAdd)
+//----------------------------------------------------------------------
+// Adds/removes the ID number sprite to the player
+//----------------------------------------------------------------------
+{
+	float fId;
+	fId = globalCoop_return_integerPlayerId(ePlayer);
+	globalCoop_player_removeSoftlyAttached(ePlayer);
+	if(doesEntityExist(ePlayer)){
+		ePlayer.attachmodel("sysimg/icons/mp/specialty_Technician.spr","tag_head",0,"globalCoop_player"+fId+"Watch",0,-1,-1,-1,-1,'47 0 0');
+	}
+}
+
+void globalCoop_class_autoSelect(entity ePlayer)
+//----------------------------------------------------------------------
+//PRE SELECTS A CLASS FOR THE NEW PLAYER
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(ePlayer))
+	{
+	//stops console spam when warnings are on
+		ePlayer.setStringVar("globalCoop_className","");
+	}
+}
+
+
+void globalCoop_class_medicUpdateTeamHealthStats()
+//------------------------------------------------------------------------------
+//UPDATE TEAM HEALTH STATUS HUD
+//------------------------------------------------------------------------------
+{}
+

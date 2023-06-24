@@ -1,0 +1,194 @@
+void cinematicDrullFatherAndGirlfriend();
+void cinematicDrullFatherAndGirlfriend_SkipThread();
+void cinematicDrullFatherAndGirlfriend_setupObjectives();
+void cinematicDrullSon();
+void cinematicDrullSon_SkipThread();
+
+
+void setupCameras()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		spawn( "Camera", "targetname", "cam1");
+		spawn( "Camera", "targetname", "cam2");
+
+		//	cam.load( "m5l2c_temp1" );
+		//	cam.load( "m5l2c_temp2" );
+
+		// cinematic stuff
+		
+		meetSon = createcinematic( "m5l2c_son" );
+	}
+}
+
+
+
+//---------------------
+// Function: cinematicDrullFatherAndGirlfriend
+// Comments:
+// Drull Father and Girlfriend play out an entire enpisode of the show to the Team
+// this entire scene chould have been shortened to just:
+// MUNRO: We're with the Federation. We're here to get you out.
+// INGOR: I am Doctor Inigor. This is Doctor Kleeya. We are archeologists on an expedition here. My son is trapped below, please help!
+// MUNRO: Stay here and protect them.
+//---------------------
+void cinematicDrullFatherAndGirlfriend()
+{
+	meetScientists = createcinematic( "m5l2c_sci" );
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(1);
+	wait( 1 );
+    forcemusic ("aux1");
+
+	$Kourban.ai_off();
+	$Chell.ai_off();
+	$Telsia.ai_off();
+
+	$Kourban.hide();
+	$Chell.hide();
+	$Telsia.hide();
+	$Kourban.notsolid();
+	$Chell.notsolid();
+	$Telsia.notsolid();
+	
+	$inigor.hide();
+	$kleeya.hide();
+	
+	$inigor.anim( "idle" );
+	
+	// start cinematic
+	meetScientists.setendthread( "cinematicDrullFatherAndGirlfriend_SkipThread" );
+	meetScientists.beginCinematic( "m5l2c_sci" );
+	
+	//set skipthread
+	globalCoop_cin_skipThread("cinematicDrullFatherAndGirlfriend_SkipThread");
+}
+
+//---------------------
+// Functions: cinematicDrullFatherAndGirlfriend_SkipThread
+// Comments:
+// skip thread for cinematic with Drull Father
+//---------------------
+void cinematicDrullFatherAndGirlfriend_SkipThread()
+{
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematicDrullFatherAndGirlfriend" );
+
+	meetScientists.endCinematic();
+
+	wait( .1 );
+
+	//fade to black
+	globalCoop_main_camFadeOut(1);
+	wait ( 1 );
+
+	globalCoop_cin_end();
+
+    music ("normal");
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.origin( '-4512 -1888 8' );
+	}
+
+	$Kourban.show();
+	$Chell.show();
+	$Telsia.show();
+	$Kourban.solid();
+	$Chell.solid();
+	$Telsia.solid();
+
+	$Kourban.origin( '-4480 -2184 8' );
+	$Chell.origin( '-4512 -2248 8' );
+	$Telsia.origin( '-4592 -2232 8' );
+
+	$inigor.show();
+	$kleeya.show();
+
+	globalCoop_main_camFadeIn(1);
+	thread cinematicDrullFatherAndGirlfriend_setupObjectives();
+}
+
+//---------------------
+// Function: cinematicDrullFatherAndGirlfriend_setupObjectives
+// Comments:
+// setups the objectives after the cinematicDrullFatherAndGirlfriend is finally finished
+//---------------------
+void cinematicDrullFatherAndGirlfriend_setupObjectives()
+{
+	$inigor.missionobjective( 0 );
+	
+	//$player.setobjectivecomplete( "FindScientists", 1 );
+	//$player.setobjectiveshow( "FindIdryllSon", 1 );
+	globalCoop_objectives_update("complete",1,0);
+	thread globalCoop_objectives_update("incomplete",6,1);
+	
+	$krindo.missionobjective( 1 );
+}
+
+//---------------------
+// Functions: cinematicDrullSon
+// Comments:
+// Munro talks to Drull son
+//---------------------
+void cinematicDrullSon()
+{
+	meetSon = createcinematic( "m5l2c_son" );
+	//$player.setobjectivecomplete( "FindIdryllSon", 1 );
+	thread globalCoop_objectives_update("complete",6,1);
+	$krindo.missionobjective( 0 );
+	
+	wait( .5 );
+
+	globalCoop_cin_start();
+   	forcemusic ("aux2");
+
+	globalCoop_main_camFadeOut(1);
+	wait( 1 );
+	$krindo.hide();
+	$krindo.notsolid();
+
+
+
+	// start cinematic
+	meetSon.setendthread( "cinematicDrullSon_SkipThread" );
+	meetSon.beginCinematic( "m5l2c_son" ) ;
+	wait( 2 );
+	globalCoop_cin_skipThread( "cinematicDrullSon_SkipThread");
+	wait( 52 );
+
+	thread endExplode();
+}
+
+//---------------------
+// Functions: cinematicDrullSon_SkipThread
+// Comments:
+// skip thread for cinematic with Drull Son
+//---------------------
+void cinematicDrullSon_SkipThread()
+{
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematicDrullSon" );
+
+	meetSon.endCinematic();
+
+	wait( .1 );
+
+	//fade to black
+	globalCoop_main_camFadeOut(1);
+	wait ( 1 );
+    
+    music ("normal");
+
+	
+	globalCoop_cin_end();
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		spawn ( "trigger_changelevel", "targetname", "trigger_endlevel", "map", "ent-deck1_bridge" );
+		setfloatvar ( "game.globalMissionEnterprise", 4 );
+		wait ( 1 );
+		trigger ( "$trigger_endlevel" );
+	}else{
+		thread coop_endLevel();
+	}
+}
+

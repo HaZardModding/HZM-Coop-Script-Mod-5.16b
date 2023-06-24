@@ -1,0 +1,741 @@
+//-----------------------------------------------------------------------------------
+// Script By:		Christian Sebastian Strahl (Chrissstrahl)
+// Created on:		2008.10.09
+// E-Mail:			chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+// CINEMATIC REPLACEMENT
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2012 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+////////////////////////////////////////////////////////////////////////////////
+//FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+void globalCoop_cin_start()
+//----------------------------------------------------------------------
+//Start Cinematics for SP and MP
+//----------------------------------------------------------------------
+{
+//Exit if allready running a instance
+	if(coop_integer_cinematicIsActive > 0){
+		return;
+	}
+	coop_integer_cinematicIsActive	= 1;
+	thread globalCoop_cin_autoLetterBox();
+	
+	if(cvar_bool_multiplayer){//Multiplayer
+//wait for warmuptime to pass by
+		globalCoop_main_waitForWarmupTime();
+//plus delay, so all players have spawned before the cin starts
+		while ((getleveltime() + 4) < (getCvarInt("mp_warmUpTime") + 2) ||
+				coop_string_mp_playerDefaultStartWeaponName == "" )
+		{
+			globalCoop_main_waitZeroDot2();
+		}
+		entity ePlayer;
+		float fPlayerIdInUse;
+		for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++)
+		{
+			ePlayer = getentity("player"+fPlayerIdInUse);
+			if(doesEntityExist(ePlayer))
+			{
+			//fix player view issues
+				if(vectorGetZ(ePlayer.getMaxs()) < 96)
+				{
+					globalCoop_player_warpToSpawn(ePlayer);
+					ePlayer.setFloatVar("coop_cinematic_ducked",1);
+				}
+				if(ePlayer.gethealth() < 1)
+				{
+					ePlayer.respawn();
+					globalCoop_main_waitAFrame();
+				}
+				thread globalCoop_player_transmitter(ePlayer,"exec coop_mod/cfg/cinematic.cfg");
+				ePlayer.nodamage();//avoid player using KILL
+				ePlayer.immobilize(1);
+				ePlayer.flags("+notarget");//follow/attack issue
+				ePlayer.weaponcommand("dual","endZoom");//sniper zoom
+				ePlayer.setVectorVar("coop_cinematic_location",ePlayer.getorigin());
+				ePlayer.setVectorVar("coop_cinematic_viewangles",ePlayer.getAngles());
+				globalCoop_main_waitAFrame();
+			//fix ducked player view, and remember to restore state
+				thread globalCoop_armory_putAwayWeapon(ePlayer);
+			//FIX, only works this way...
+				ePlayer.hide();
+				ePlayer.notsolid();
+			}
+		}
+	}
+	else{//Singleplayer
+	//do not run cinematic before player has joined, otherwise it'll chrash!
+		waitForplayer();
+		cinematic();
+		freezeplayer();
+		globalCoop_level_hideAndNotSolid($player);
+		$player.nodamage();//damage from (hurt)triggers
+	}
+	thread globalCoop_cin_spawnSkipTrigger();
+}
+
+void globalCoop_cin_autoLetterBox()
+//----------------------------------------------------------------------
+//Set letter box as soon as the camk is faded out, have a maximum of 1 sec delay
+//----------------------------------------------------------------------
+{
+	float fTimer=10;
+	while(coop_bool_cameraFadedOut != 1 && fTimer > 0){
+		fTimer--;
+		wait(.1);
+	}
+	letterbox(.01);
+}
+
+
+void globalCoop_cin_end()
+//----------------------------------------------------------------------
+//End Cinematics for SP and MP
+//----------------------------------------------------------------------
+{
+	coop_integer_cinematicIsActive		= 2;
+//end skipthrread
+	killthread("globalCoop_cin_skip");
+//clear skip thread
+	$world.setStringVar("globalCoop_cin_skipThread","");
+//remove the skip trigger	
+	thread globalCoop_level_remove($coop_trigger_cin_skip);
+
+//do this when in multiplayer
+	if(cvar_bool_multiplayer)
+	{
+		entity	ePlayer;
+		float	fPlayerIdInUse;
+		vector	vPreviouseOrigin;
+		vector	vPreviouseAngles;
+		for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++)
+		{
+			ePlayer = getentity("player"+fPlayerIdInUse);
+		//if player exists, grab origin and angle of the player before the cinematic started
+			if(doesEntityExist(ePlayer))
+			{
+			//grab
+				vPreviouseOrigin = ePlayer.getVectorVar("coop_cinematic_location");
+				vPreviouseAngles = ePlayer.getVectorVar("coop_cinematic_viewangles");
+			//restore the player to his previouse position
+				if(vPreviouseOrigin == '0 0 0' && vPreviouseAngles == '0 0 0')
+				{
+					globalCoop_player_warpToSpawn(ePlayer);
+				}
+				else
+				{
+				//position player, back at where he was
+					thread globalCoop_level_warpEntityToVectorSafty(ePlayer,vPreviouseOrigin);
+					ePlayer.playerviewangles(vPreviouseAngles);					
+				}
+			//reset fov
+				ePlayer.fov(0);//default
+			//make visible and a target to the ai
+				ePlayer.show();
+				ePlayer.flags("-notarget");
+				ePlayer.takedamage();
+			//allow to move again
+				ePlayer.immobilize(0);
+			//restore settings
+				thread globalCoop_player_transmitter(ePlayer,"exec coop_mod/cfg/nocinematic.cfg");
+			//if player was ducked before the cinematic started, make him crouch again
+				if(ePlayer.getFloatVar("coop_cinematic_ducked"))
+				{
+					thread globalCoop_cin_handleDuckedPlayer(ePlayer);
+				}
+			//add hud to reset fov
+				thread globalCoop_armory_restoreWeapon(ePlayer);
+			}
+		}
+	}
+//remove hud, if dialog gets killed, the hud might stays
+	thread globalCoop_huds_RemoveAll("coop_dialogheadhud_"+coop_string_dialogNameOfSpeaker);
+//end cinematic
+	globalCoop_cin_clearletterbox();
+	thread globalCoop_cin_cueplayer();	
+//Singleplayer
+	if(!cvar_bool_multiplayer)
+	{
+		noncinematic();
+		releaseplayer();
+		globalCoop_level_showAndSolid($player);
+		$player.takedamage();
+	}
+//Reset vars
+	coop_integer_cinematicIsActive		= 0;
+}
+
+
+void globalCoop_cin_clearletterbox()
+//----------------------------------------------------------------------
+//End Cinematics for SP and MP
+//----------------------------------------------------------------------
+{
+	if(coop_integer_cinematicIsActive > 0)
+	{
+		clearletterbox( .01 );
+	}
+}
+
+
+
+void globalCoop_cin_handleDuckedPlayer(entity ePlayer)
+//----------------------------------------------------------------------
+//End Cinematics for SP and MP
+//----------------------------------------------------------------------
+{
+	globalCoop_player_transmittInstantly(ePlayer,"+movedown");
+	globalCoop_main_waitZeroDot2();
+	globalCoop_player_transmittInstantly(ePlayer,"-movedown");
+}
+
+void globalCoop_cin_skip()
+//----------------------------------------------------------------------
+//Set Cinematics skip thread
+//----------------------------------------------------------------------
+{
+	string	sSkipthread;
+	sSkipthread = $world.getStringVar("globalCoop_cin_skipThread");
+	if(sSkipthread != "")
+	{
+		entity	eTrigger,
+				eActivator,
+				ePlayer;
+		eTrigger = getCurrentEntity();
+		if(!doesEntityExist(eTrigger))
+		{//Direct call, just skip it...
+			thread globalCoop_level_callReliably(sSkipthread);
+		}
+		else
+		{
+			float	fPlayerIdInUse,
+					fVoteSkipYes,
+					fVotedCount;
+					
+			eActivator = eTrigger.getLastActivatingEntity();
+			fVotedCount = eActivator.getFloatVar("coop_"+sSkipthread+"_voteCount");
+			eActivator.setFloatVar("coop_"+sSkipthread+"_voteYes",1);
+			globalCoop_main_waitAFrame();
+			fVotedCount++;
+			eActivator.setFloatVar("coop_"+sSkipthread+"_voteCount",fVotedCount);
+			
+		//COUNT THE VOTES TO SKIP
+			fPlayerIdInUse=1;
+			while(fPlayerIdInUse<=coop_integer_maxPlayers)
+			{
+				ePlayer=getentity("player"+fPlayerIdInUse);
+				if(doesEntityExist(ePlayer))
+				{
+					if(ePlayer.getFloatVar("coop_"+sSkipthread+"_voteYes"))
+					{
+						fVoteSkipYes++;
+					}
+				}
+				fPlayerIdInUse++;
+			}
+			// for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++)
+			// {
+			// ePlayer=getentity("player"+fPlayerIdInUse);
+			// if(doesEntityExist(ePlayer))
+			// {
+			// if(ePlayer.getFloatVar("coop_"+sSkipthread+"_voteYes"))
+			// {
+			// fVoteSkipYes++;
+			// }
+			// }
+			// }
+		//SKIP CINEMATIC, IF More than 50% VOTED YES
+			if( fVoteSkipYes > (globalCoop_return_integerPlayersQuantity(0) / 2) )
+			{
+				$world.setStringVar("globalCoop_cin_skipThread","");
+				globalCoop_level_callReliably(sSkipthread);
+			}
+		//DON'T SKIP, DISPLAY MESSAGE
+			else
+			{
+				if(fVotedCount < 6)
+				{
+					centerprint("^8Skip Cinematic <"+fVoteSkipYes+">\npress: USE\n");
+				}
+			}
+		}
+	}
+}
+
+
+void globalCoop_cin_spawnSkipTrigger()
+//----------------------------------------------------------------------
+//SPAWN SKIP TRIGGER
+//----------------------------------------------------------------------
+{
+	if(cvar_bool_multiplayer){//Multiplayer
+		if(doesEntityExist($coop_trigger_cin_skip))
+		{
+			$coop_trigger_cin_skip.remove();
+			globalCoop_main_waitAFrame();
+		}
+		entity eTrigger,ePlayer;
+		ePlayer		= globalCoop_return_playerClosestPreferActive($world);
+		eTrigger	= spawn("trigger_use","targetname","coop_trigger_cin_skip","thread","globalCoop_cin_skip","origin",vectorToString(ePlayer.getOrigin()));
+		globalCoop_main_waitAFrame();
+		eTrigger.setSize('-999999999 -999999999 -999999999','999999999 999999999 999999999');
+		eTrigger.wait(.05);
+	}
+}
+
+
+void globalCoop_cin_skipThread(string sSkipThread)
+//----------------------------------------------------------------------
+//Set Cinematics skip thread
+//----------------------------------------------------------------------
+{
+	if(!cvar_bool_multiplayer){//If Single Player
+		skipthread(sSkipThread);
+		return;
+	}
+//MP
+//DO NOT ALLOW UNSET-OVERWRITE OF THE SKIP THREAD!!!
+	if(sSkipThread != "null" && sSkipThread != "Null" && sSkipThread != ""){//null->from singleplayer
+		$world.setStringVar("globalCoop_cin_skipThread",sSkipThread);
+	//in case u wana skip multiple sequences u'll consider in keeping this
+		thread globalCoop_cin_spawnSkipTrigger();	
+		centerprint("^8CINEMATIC - press use to skip\n");
+	}
+}
+
+entity globalCoop_cin_returnFakeCamera(entity eCam)
+//----------------------------------------------------------------------
+//return the fake camera, if it does not exist, spawn the damn thing
+//----------------------------------------------------------------------
+{//how about network detail ?
+	if(doesEntityExist(eCam))
+	{
+		if(cvar_bool_multiplayer == 1 && eCam.getModelName() != "models/fx/fx-dummy.tik"){
+		//if(cvar_bool_multiplayer == 1 && eCam.getFloatVar("fakeCam") != 1){
+			string	sTargetname,sWatchTarget;
+			vector	vOrigin;
+			float	fFov,fOrbitHeight,fSpeed;
+		//grab data, NO, not B-4!!!
+			fOrbitHeight 	= eCam.getFloatVar("orbit_height");
+			fSpeed			= eCam.getFloatVar("camera_speed");
+			sTargetname		= eCam.getRawTargetname();
+			vOrigin			= eCam.getOrigin();
+			fFov			= eCam.getFloatVar("fov");
+			sWatchTarget	= eCam.getStringVar("watch");			
+		//remove original camera
+			globalCoop_level_remove(eCam);
+			
+		//spawn the fake camera
+			eCam=spawn("script_model","model","models/fx/fx-dummy.tik","targetname",sTargetname,"origin",""+vOrigin);
+			//eCam=spawn("camera","targetname",sTargetname,"origin",""+vOrigin);
+			globalCoop_main_waitAFrame();
+			//eCam.setFloatVar("fakeCam",1);
+			eCam.setFloatVar("fov",fFov);
+			eCam.setStringVar("watch",sWatchTarget);
+			eCam.setFloatVar("orbit_height",fOrbitHeight);
+			eCam.setFloatVar("camera_speed",fSpeed);
+		}
+		return eCam;
+	}
+	globalCoop_main_print("globalCoop_cin_returnFakeCamera(entity)->Given Cam does NOT exist");
+}
+
+
+void globalCoop_cin_fov(entity eCam, float fFov)
+//----------------------------------------------------------------------
+//set the field of view for the camera
+//----------------------------------------------------------------------
+{
+	if(!cvar_bool_multiplayer){
+		eCam.fov(fFov);
+	}else{
+		globalCoop_cin_fovMultiplayer(eCam,fFov);
+	}
+}
+
+
+void globalCoop_cin_fovMultiplayer(entity eCam, float fFov)
+//----------------------------------------------------------------------
+//Multiplayer only - set the field of view for the players
+//----------------------------------------------------------------------
+{
+	eCam.setFloatVar("fov",fFov);
+}
+
+
+void globalCoop_cin_cueplayer()
+//----------------------------------------------------------------------
+//let the player(s) view from own cam
+//----------------------------------------------------------------------
+{
+	if(!cvar_bool_multiplayer){//sp only !!!
+		cueplayer();//does crash if cl-0 is missing
+	}
+}
+
+void globalCoop_cin_cuecamera(entity eCam)
+//----------------------------------------------------------------------
+//Decide how to manage the camera
+//----------------------------------------------------------------------
+{//issue-noscrit cin does abort when player does commit suicide during cin
+	if(!cvar_bool_multiplayer)//sp only !!!
+	{
+		if(doesEntityExist(eCam))
+		{
+			cuecamera(eCam);
+			return;
+		}
+	}
+//spawn fake camera if it does not exist
+	eCam = globalCoop_cin_returnFakeCamera(eCam);
+	killthread("globalCoop_cin_cuecameraManage");//moved down 1 line in build 16
+//cue fake cam
+	thread globalCoop_cin_cuecameraManage(eCam);
+}
+
+void globalCoop_cin_cuecameraManage(entity eCam)
+//----------------------------------------------------------------------
+// Use players as camera
+//----------------------------------------------------------------------
+{
+	if(!doesEntityExist(eCam)){
+		globalCoop_main_print("globalCoop_cin_cuecameraManage(entity)->Missing Camera");
+		return;
+	}
+//reset data on the last camera
+//if(doesEntityExist(coop_entity_cinematicLastCamera)){
+//coop_entity_cinematicLastCamera.setFloatVar("fov",0);
+//coop_entity_cinematicLastCamera.setStringVar("watch","");}
+//coop_entity_cinematicLastCamera=eCam;
+	vector	vCameraAngle,
+			vCameraOrigin,
+			vWatchOrigin,
+			delta,
+			delta2;
+	float	fPlayerIdInUse,
+			fFov,
+			fWatched,
+			fWatchOffset,
+			fCut,
+			fWatchIsAi,
+			fWatchZ,
+			fViewOffset;
+	entity	ePlayer,
+			eWatch;
+	float	fYaw,
+			fPitch;	
+//to roll or not to roll
+	fWatchZ	=	eCam.getFloatVar("watchZ");
+	eCam.setFloatVar("watchZ",0);
+	fViewOffset 	= getCvarint("sv_defaultviewheight");
+	eWatch 			= getEntity(eCam.getStringVar("watch"));
+	//check if we are watching an ai, look at the head then, not the feet
+	if(doesEntityExist(eWatch))
+	{
+		eCam.setStringVar("watch","");
+		if(eWatch.gethealth() > 0)
+		{
+			if(eWatch.getModelName() != "")//triggers have "*<integer>" model names...
+			{
+				fWatchIsAi = 1;
+			}
+		}
+	}
+	
+	while(coop_integer_cinematicIsActive == 1)
+	{
+		if(!doesEntityExist(eCam))
+		{
+			globalCoop_main_print("globalCoop_cin_cuecameraManage()->Camera was removed");
+			return;
+		}
+		fCut++;//warp only the first 3 frames, or the cam looks jerky on paths
+		vCameraOrigin 		= eCam.getOrigin();
+		fFov				= eCam.getFloatVar("fov");		
+//check if we are watching an ai, look at the head then, not the feet
+		if(doesEntityExist(eWatch))
+		{
+			fWatchOffset = 0;
+			
+			if(fWatchIsAi)
+			{
+				if(eWatch.gethealth() > 0)
+				{
+					fWatchOffset = vectorgetz(eWatch.getMaxs());
+				}
+			}
+	
+		//this rutine is by [dM]Warlord and Cyb3r, thanks guys
+			fWatched			= 1;//remember what you have seen here Sheridan
+			vCameraAngle 		= eCam.getAngles();
+			vWatchOrigin		= eWatch.getOrigin();
+			vWatchOrigin_z		+= fWatchOffset;
+			delta_x 			= (vWatchOrigin_x - vCameraOrigin_x);
+			delta_y 			= (vWatchOrigin_y - vCameraOrigin_y);
+			delta_z 			= (vWatchOrigin_z - vCameraOrigin_z);
+			fYaw				= arctandegrees(delta_y , delta_x);
+			delta2_x			= delta_x;
+			delta2_y			= delta_y;
+			fPitch				= arctandegrees(delta_z , vectorlength(delta2) );
+			fPitch				= (fPitch * -1);
+			vCameraAngle_x		= fPitch;
+			vCameraAngle_y		= fYaw;
+			if(!fWatchZ)//shall not applay camera z(roll)
+			{
+				vCameraAngle_z	= 0;
+			}
+		}
+		else if(!fWatched)//once watched we do no longer grab viewangels from the carmera
+		{
+			vCameraAngle = eCam.getAngles();
+		}
+		
+//correct z offset
+		vCameraOrigin_z -= fViewOffset;
+		
+		for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++)
+		{
+			ePlayer = getentity("player"+fPlayerIdInUse);
+			if(doesEntityExist(ePlayer))
+			{
+			//warp player once he is ready, not before //build 16
+				//if(ePlayer.getFloatVar("globalCoop_playerReady"))
+				//{
+					if(ePlayer.getOrigin() != vCameraOrigin)
+					{
+						ePlayer.hide();
+						ePlayer.notsolid();
+						ePlayer.immobilize(1);//avoid player falling
+						ePlayer.nodamage();//avoid player using KILL
+						if(fCut < 3){//cut between cameras at the first 2 frames only
+							ePlayer.warp(vCameraOrigin);//CUT!!! no interpolation/transition here
+						}else{//camera follow path, keep focus
+							ePlayer.origin(vCameraOrigin);//with interpolation/transiation is better to move along paths and such
+						}
+					}
+					ePlayer.fov(fFov);//force fov
+					ePlayer.playerviewangles(vCameraAngle);//force view dir
+				//}
+			}
+		}
+		//wait(coop_float_oneFrameTime);//changed build 16
+		wait(coop_float_oneFrameTime / 2);//runs more smooth when updated twich per frame
+	}
+}
+
+void globalCoop_cin_follow(entity eCam,entity ePath)
+//----------------------------------------------------------------------
+// Use a entity as fake camera to grab the angles and origin from,
+// real cameras crash when Client 0 is missing while traviling along a path(only on inizial ?)
+//----------------------------------------------------------------------
+{
+	if(cvar_bool_multiplayer)
+	{
+	//call bugfix thread
+		thread globalCoop_cin_followEnd(eCam,ePath);
+	}
+	else
+	{
+		eCam.follow(ePath);
+	}
+}
+
+void globalCoop_cin_followEnd(entity eCam,entity ePath)
+//----------------------------------------------------------------------
+// GAME BUGFIX THREAD!!!
+// Only the follow command for cameras works perfectly exact, followpath fails to reach last node
+//----------------------------------------------------------------------
+{
+	eCam = globalCoop_cin_returnFakeCamera(eCam);
+	eCam.followpath(ePath);
+	
+	entity	eNextPath;
+	eNextPath=ePath;
+	while(doesEntityExist(eNextPath))
+	{
+		eNextPath = eNextPath.getTargetEntity();
+		if(doesEntityExist(eNextPath))
+		{
+			ePath=eNextPath;
+		}
+	}
+	waitFor(eCam);
+	eCam.angles(ePath.getAngles());
+	eCam.moveto(ePath);
+	eCam.time(.3);
+	waitFor(eCam);
+}
+
+void globalCoop_cin_followWatch(entity eCam,entity ePath,entity eWatch)
+//----------------------------------------------------------------------
+// Multiplayer follow replacment for cameras
+//----------------------------------------------------------------------
+{
+	if(cvar_bool_multiplayer)
+	{
+		eCam = globalCoop_cin_returnFakeCamera(eCam);
+		eCam.setStringVar("watch",eWatch.getRawTargetname());
+		eCam.setFloatVar("watchZ",0);
+		thread globalCoop_cin_followEnd(eCam,ePath);
+	}
+	else{
+		eCam.follow(ePath,eWatch);
+	}
+}
+
+void globalCoop_cin_watch(entity eCam,entity eWatch)
+//----------------------------------------------------------------------
+// Multiplayer follow replacment for cameras
+//----------------------------------------------------------------------
+{
+	if(cvar_bool_multiplayer)
+	{
+		eCam = globalCoop_cin_returnFakeCamera(eCam);
+		eCam.setFloatVar("watchZ",0);
+		eCam.setStringVar("watch",eWatch.getRawtargetname());
+	}
+	else{
+		entity eSpawn;
+		eSpawn = spawn("SplinePath","origin",vectortostring(eCam.getOrigin()),"speed","1","fadetime","-1");
+		globalCoop_main_waitAFrame();
+		eCam.follow(eSpawn,eWatch);
+	}
+}
+
+void globalCoop_cin_cut(entity eCam)
+//----------------------------------------------------------------------
+// Cut - no transition
+//----------------------------------------------------------------------
+{
+	if(!cvar_bool_multiplayer){
+		eCam.cut();
+	}
+}
+
+void globalCoop_cin_orbitWatch(entity eCam, entity eOrbit,entity eWatch)
+//----------------------------------------------------------------------
+// Orbit the camera arround a entity and watch an entity
+//----------------------------------------------------------------------
+{
+// if(!doesEntityExist(eCam)){
+// globalCoop_main_printTimeAndString("globalCoop_cin_orbit->Missing Camera\n");
+// return;
+// }
+// if(!doesEntityExist(eOrbit)){
+// globalCoop_main_printTimeAndString("globalCoop_cin_orbit->Missing ORBIT\n");
+// return;
+// }
+// if(!doesEntityExist(eWatch)){
+// globalCoop_main_printTimeAndString("globalCoop_cin_orbit->Missing WATCH\n");
+// return;
+// }
+//ORBIT
+	if(cvar_bool_multiplayer)
+	{
+		//eCam = globalCoop_cin_returnFakeCamera(eCam);
+		thread globalCoop_cin_orbitWatchMultiplayer(eCam,eOrbit,eWatch);
+	}
+	else
+	{
+		eCam.orbit(eOrbit,eWatch);
+	}
+}
+
+
+void globalCoop_cin_orbitWatchMultiplayer(entity eCam, entity eOrbit,entity eWatch)
+{
+//----------------------------------------------------------------------
+// MULTIPLAYER ONLY - Orbit the camera arround a entity and watch an entity
+//----------------------------------------------------------------------
+
+	eCam = globalCoop_cin_returnFakeCamera(eCam);
+	float fOrbitHeight,fSpeed;
+	string sOrbitTargetname;
+	vector vOrigin;
+	vOrigin				= eOrbit.getOrigin();
+	sOrbitTargetname	= eCam.getRawtargetname();
+	sOrbitTargetname	= "coop_orbit"+sOrbitTargetname;
+	
+	entity e;
+	e = spawn("ScriptSlave","targetname",sOrbitTargetname);
+	
+	eCam.setFloatVar("watchZ",0);
+	eCam.setStringVar("watch",eWatch.getRawTargetname());
+	
+	eCam.setStringVar("orbit_name",sOrbitTargetname);
+	fOrbitHeight 	= eCam.getFloatVar("orbit_height");
+	fSpeed			= eCam.getFloatVar("camera_speed");
+	if(fOrbitHeight != 0)
+		vOrigin_z += fOrbitHeight;
+
+	globalCoop_main_waitAFrame();
+	
+	e.origin(vOrigin);
+	vOrigin_x+=96;
+	eCam.origin(vOrigin);
+	eCam.bind(e);
+	
+	if(fSpeed == 0)
+	{
+		e.rotateY(90);//90 is just a value that seams appropirate when orbiting a object
+	}
+	else
+	{
+		e.rotateY( fSpeed * 90 );
+	}
+}
+
+
+void globalCoop_cin_orbitHeight(entity eCam,float fHeight)
+//----------------------------------------------------------------------
+// SET orbit height for camera
+//----------------------------------------------------------------------
+{
+// if(!doesEntityExist(eCam)){
+// globalCoop_main_printTimeAndString("globalCoop_cin_orbitHeight->Missing Camera\n");
+// }
+	if(cvar_bool_multiplayer)
+	{
+		//eCam = globalCoop_cin_returnFakeCamera(eCam);
+		eCam.setFloatVar("orbit_height",fHeight);
+	}
+	else
+	{
+		eCam.orbit_height(fHeight);
+	}
+}
+
+
+void globalCoop_cin_speed(entity eCam,float fSpeed)
+//----------------------------------------------------------------------
+// SET speed for camera
+//----------------------------------------------------------------------
+{
+// if(!doesEntityExist(eCam)){
+// globalCoop_main_printTimeAndString("globalCoop_cin_speed->Missing Camera\n");
+// }
+	if(cvar_bool_multiplayer)
+	{
+		//eCam = globalCoop_cin_returnFakeCamera(eCam);
+		eCam.setFloatVar("camera_speed",fSpeed);
+	}
+	else
+	{
+		eCam.speed(fSpeed);
+	}
+}
+
+

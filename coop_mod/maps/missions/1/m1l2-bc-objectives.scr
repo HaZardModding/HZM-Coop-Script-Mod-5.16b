@@ -1,0 +1,112 @@
+//-----------------------------------------------------------------------------------
+// Script By:		Christian Strahl (Chrissstrahl)
+// Created on:		2009.07.5
+// Website:			www.hazardmodding.chrissstrahl.de
+// Organisation:	HazardModding
+//
+// Containins stuff which is used at the borg missions m1l2b and m1l2c...
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////DECLARATIONS
+////////////////////////////////////////////////////////////////////////////////
+void m1l2bm1l2c_Objectives();
+float fImodShowed;
+float fGeneratorBlown;
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+//---------------------
+// initializeObjectives
+// set objectives at beginning of level
+//---------------------
+void m1l2bm1l2c_Objectives()
+{
+//IMOD, DO ALLWAYS
+	if(!fImodShowed){
+		if(!cvar_bool_multiplayer){
+			waitForPlayer();
+			$player.loadobjectives( "m1l2-borg_sphere" );
+			wait(.1);
+		}
+		fImodShowed=1;
+		if(!cvar_bool_multiplayer){$player.setobjectiveshow( "FindImod", 1 );}
+		globalCoop_objectives_update("inComplete",2,0);
+		globalCoop_objectives_update("inComplete",3,0);
+		globalCoop_objectives_update("inComplete",4,0);
+		globalCoop_objectives_update("complete",1,1);//$player.setobjectivecomplete( "FindImod", 1 );
+	}
+	
+	
+	if(getCvar("mapname") == "m1l2c-borg_sphere"){
+	//OBJECTIVES FROM A TO C
+		if(getCvar("coop_lvlP") == "m1l2aTom1l2c"){
+			if(fGeneratorBlown > 0){
+				globalCoop_objectives_update("complete",2,1);
+			}
+		}
+	//OBJECTIVES FROM A TO B
+		else{
+			globalCoop_objectives_update("complete",2,1);
+			globalCoop_objectives_update("complete",3,1);
+			if(fGeneratorBlown > 1){
+				globalCoop_objectives_update("complete",4,1);
+			}
+		}
+	}
+	else{
+		if(getCvar("coop_lvlP") == "m1l2aTom1l2c"){
+			globalCoop_objectives_update("complete",2,1);
+			if(fGeneratorBlown == 1){
+				globalCoop_objectives_update("complete",3,1);
+			}
+			else if(fGeneratorBlown == 2){
+				globalCoop_objectives_update("complete",4,1);
+			}
+		}
+	//OBJECTIVES FROM A TO B
+		else{
+			if(fGeneratorBlown == 1){
+				globalCoop_objectives_update("complete",2,1);
+			}
+			else if(fGeneratorBlown == 2){
+				globalCoop_objectives_update("complete",3,1);
+			}
+		}
+	}
+/* 	if ( getfloatvar( "game.borgImodObjective" ) >= 1 )
+	{
+		globalCoop_objectives_update("complete",1,1);
+		//$player.setobjectiveshow( "FindImod", 1 );
+	}
+	if( getfloatvar( "game.borgImodObjective" ) == 2 )
+	{
+		$player.setobjectivecomplete( "FindImod", 1 );
+	}
+	if ( getfloatvar( "game.borgGenerator1Objective" ) >= 1 )
+	{
+		$player.setobjectiveshow( "FindGenerator1", 1 );
+	}
+	if( getfloatvar( "game.borgGenerator1Objective" ) == 2 )
+	{
+		$player.setobjectivecomplete( "FindGenerator1", 1 );
+	}
+	if ( getfloatvar( "game.borgGenerator2Objective" ) >= 1 )
+	{
+		$player.setobjectiveshow( "FindGenerator2", 1 );
+	}
+	if( getfloatvar( "game.borgGenerator2Objective" ) == 2 )
+	{
+		$player.setobjectivecomplete( "FindGenerator2", 1 );
+	}
+	if ( getfloatvar( "game.borgGenerator3Objective" ) >= 1 )
+	{
+		$player.setobjectiveshow( "FindGenerator3", 1 );
+	}
+	if( getfloatvar( "game.borgGenerator3Objective" ) == 2 )
+	{
+		$player.setobjectivecomplete( "FindGenerator3", 1 ); 
+	}*/
+}

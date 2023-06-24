@@ -1,0 +1,1504 @@
+//-----------------------------------------------------------------------------------
+// Script By:	Christian Sebastian Strahl (Chrissstrahl)
+// Created on:	2007.09.29
+// E-Mail:		chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+// CONTAINING PLAYER HANDLING RELATED FUNCTIONS FOR THE HZM CO-OP MOD
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2012 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+//ALL WEAPON TIKIS HAVE TO BE EXACTLY LIKE THIS
+//CASE SENSITIVE ("phaser" IS NOT EQUAL TO "Phaser")!
+// models/weapons/worldmodel-Phaser.tik
+// models/weapons/worldmodel-Phaser-stx.tik
+// models/weapons/worldmodel-BurstRifle.tik
+// models/weapons/worldmodel-CompressionRifle.tik
+// models/weapons/worldmodel-FieldAssaultRifle.tik
+// models/weapons/worldmodel-GrenadeLauncher.tik
+// models/weapons/worldmodel-Knife.tik
+// models/weapons/worldmodel-Tricorder-stx.tik
+// models/weapons/worldmodel-Tricorder.tik
+// models/weapons/worldmodel-Batleth.tik
+//
+// models/weapons/worldmodel-sniperrifle.tik
+// models/weapons/worldmodel-imod.tik
+// models/weapons/worldmodel-rom-datapad.tik
+// models/weapons/worldmodel-rom-disruptor.tik
+// models/weapons/worldmodel-tetryon.tik
+// models/weapons/worldmodel-attrex-rifle.tik
+// models/weapons/worldmodel-drull-staff.tik
+// models/weapons/worldmodel-attrex-rifle.tik
+// models/weapons/worldmodel-photon.tik
+// models/weapons/worldmodel-rom-radgun.tik
+// models/weapons/worldmodel-enterprise.tik
+
+
+void globalCoop_player_detectNewPlayers()
+//------------------------------------------------------------------------------
+// This function checks for new players, will not be stared if player Id's have been preprocessed by the game!
+//------------------------------------------------------------------------------
+{
+	entity ePlayer;
+	while(!coop_bool_scriptIsPaused)
+	{
+		ePlayer = getEntity("player");
+		if(doesEntityExist(ePlayer)){
+			ePlayer.resistance("telefrag",100);
+			ePlayer.activateshield();
+		//GIVE PLAYERS INDIVIDUAL TARGETNAMES
+			globalCoop_player_giveIndividualTargetnames();
+		}
+	//BE VERY FAST AT THE GAMESTART
+		if(getLevelTime() < (coop_float_gameStartedTime + 6)){
+			globalCoop_main_waitAFrame();
+		}
+		else{
+			globalCoop_main_waitZeroDot2();
+		}
+	}
+}
+
+
+void globalCoop_player_giveIndividualTargetnames()
+//------------------------------------------------------------------------------
+// Rename the players, give individual Targetnames. Makethis mod possible
+//------------------------------------------------------------------------------
+{
+//EXIT IF FUNCTION IS ACTIVE
+	if(coop_vector_individualtnamesClassautoselActororder_x == 1){
+		return;
+	}
+	coop_vector_individualtnamesClassautoselActororder_x = 1;
+	
+	float	fClientId;
+	float	fPlayerIdInUse;
+	entity	ePlayer;
+	
+	for(fClientId=0;fClientId<cvar_integer_sv_maxClients;fClientId++)
+	{
+		ePlayer=getEntity("*"+fClientId);
+		fPlayerIdInUse=(fClientId + 1);
+		if(doesEntityExist(ePlayer))
+		{
+			if(!globalCoop_check_entityValidPlayerTargetname(ePlayer))
+			{
+				if(fClientId < coop_integer_maxPlayers)
+				{
+					thread globalCoop_player_setup(ePlayer,fPlayerIdInUse);
+				}
+				else
+				{
+					globalCoop_player_transmittInstantly(ePlayer,"globalwidgetcommand OkDialogTitle title $$MaxPlayers$$\npushmenu okdialog\n");
+					globalCoop_level_remove(ePlayer);
+				}
+			}
+		}
+	}
+	coop_vector_individualtnamesClassautoselActororder_x = 0;
+//PRINT CURRENT SERVER STATUS INTO THE SERVER CONSOLE
+	stuffCMD("status\n");
+}
+
+void globalCoop_player_languages(string sLanguage,float fToAdd)
+//------------------------------------------------------------------------------
+// keep track of the player languages for the dialog system
+//------------------------------------------------------------------------------
+{
+	if(sLanguage == "Eng")		{coop_vector_playerLanguage_x = (coop_vector_playerLanguage_x + fToAdd);}
+	else if(sLanguage == "Deu")	{coop_vector_playerLanguage_y = (coop_vector_playerLanguage_y + fToAdd);}
+	else 						{coop_vector_playerLanguage_z = (coop_vector_playerLanguage_z + fToAdd);}
+//KEEP DEV POSTED
+	globalCoop_main_devInfo("globalCoop_player_languages("+sLanguage+","+fToAdd+")");
+}
+
+void  globalCoop_player_setup(entity ePlayer,float fPlayerId)
+//------------------------------------------------------------------------------
+//Handles new players...
+//------------------------------------------------------------------------------
+{
+	if(doesEntityExist(ePlayer))
+	{
+//GIVE A INDIVIDUAL TARGETNAME
+		ePlayer.targetname("player"+fPlayerId);
+//WARP THE PLAYER IF THERE IS NO BSP SPAWN
+		if(!doesEntityExist($ipd1))
+		{
+			vector vAngles,vOrigin;
+			vOrigin = globalCoop_return_vectorPlayerSpawnOrigin(fPlayerId);
+			if(vOrigin != '0 0 0')
+			{
+				vAngles_y = globalCoop_return_floatSpawnAngleForPlayerId(fPlayerId);
+				ePlayer.warp(vOrigin);
+				ePlayer.playerviewangles(vAngles);				
+			}
+		}
+//CHECK IF A NEW PLAYER HAS TO BE SELECTED TO FOLLOW
+		thread globalCoop_level_callReliably("globalCoop_teammate_follow");
+//RUN DATA SETUP
+		thread globalCoop_player_setupInfo(ePlayer,fPlayerId);
+//RUN OPTIONAL CUSTOM THREAD
+		thread globalCoop_level_callReliably("coop_newPlayerEntered");
+//FORCE PLAYER TO SPAWN AT LEAST ONCE
+		globalCoop_player_joinDefaultTeam(ePlayer);
+//WAIT A FRAME, SO THE SERVER CAN PROCESS THE PLAYERs TEAM-SWITCH
+		globalCoop_main_waitAFrame();
+//WAIT UNTIL THE PLAYER HAS ANY WEAPON IN THE HAND
+		string sWeapon,sClass;
+		float fWaitForPlayer;
+		
+		fWaitForPlayer=1;		
+		while(fWaitForPlayer)
+		{
+			if(doesEntityExist(ePlayer))
+			{
+				sWeapon	= ePlayer.getActiveWeaponName();
+				
+				if(sWeapon != "None")
+				{
+					fWaitForPlayer=0;
+				}
+				else
+				{
+					globalCoop_main_waitZeroDotZero5();
+				}
+			}
+			else
+			{
+				return;
+			}
+		}
+//IDENDIFY DEFAULT SPAWN WEAPON
+		thread globalCoop_armory_idendifyDefaultSpawnWeapon(sWeapon);
+//REMAIN AT SPAWN SPOT
+		ePlayer.immobilize(1);	
+//TAKE SPAWN WEAPON - REMEMBER TO RETURN IT AGAIN
+		ePlayer.take(sWeapon);
+		string sSpwanWeapon,sSpwanWeaponTiki;
+		sSpwanWeapon = sWeapon;
+		sSpwanWeaponTiki = globalCoop_armory_returnTikiFromWeaponname(sWeapon);
+//COOP MOD CLIENT INSTALLATION DETECTION ROUTINE
+		globalCoop_player_waitForFreeReliableServerCommand(ePlayer);
+		ePlayer.give("models/weapons/menu.tik");
+		globalCoop_player_transmittInstantly(ePlayer,"exec coop_mod/cfg/detector.cfg");
+		globalCoop_armory_waitForWeapon(ePlayer,"Menu",20);
+		if(!doesEntityExist(ePlayer))
+		{
+			return;
+		}
+		sWeapon	= ePlayer.getActiveWeaponName();
+		if(sWeapon == "Menu")
+		{
+		//MARK PLAYER
+			ePlayer.setFloatVar("coop_hasCoopInstalled",1);
+		//SET CORRECT MODEL
+			globalCoop_player_transmitter(ePlayer,"set coop_pModelReset mp_playermodel "+ePlayer.getModelName()+"\nvstr coop_pModel");
+		}
+//COOP MOD CLIENT INSTALLATION DETECTION ROUTINE
+		ePlayer.give("models/weapons/0.tik");//german
+		ePlayer.give("models/weapons/1.tik");//med
+		ePlayer.give("models/weapons/2.tik");//hw
+		ePlayer.give("models/weapons/3.tik");//tech
+		globalCoop_player_waitForFreeReliableServerCommand(ePlayer);
+//do this only if player has installed coop
+		if(sWeapon == "Menu") 
+		{
+		//KEEP DEV POSTED
+			globalCoop_main_devInfo("coop_hasCoopInstalled: "+ePlayer.getRawTargetname());
+			
+			globalCoop_player_transmittInstantly(ePlayer,"exec coop_mod/cfg/detector_class.cfg");
+			globalCoop_armory_waitForWeaponChange(ePlayer,ePlayer.getActiveWeaponName(),20);
+			if(doesEntityExist(ePlayer))
+			{
+				sClass = "Technician";
+				
+				sWeapon	= ePlayer.getActiveWeaponName();
+				
+				if(sWeapon == "One")
+				{
+					sClass = "Medic";
+				}
+				if(sWeapon == "Two")
+				{
+					sClass = "HeavyWeapons";
+				}
+			//set class, assume technician on default
+				ePlayer.setStringVar("globalCoop_className",sClass);//+""
+			//detect language
+				globalCoop_player_transmittInstantly(ePlayer,"exec coop_mod/cfg/language.cfg");		
+			}
+//check language
+			globalCoop_armory_waitForWeaponChange(ePlayer,sWeapon,20);
+			if(doesEntityExist(ePlayer))
+			{
+				sWeapon	= ePlayer.getActiveWeaponName();
+				
+				if(sWeapon == "Zero")
+				{
+					sClass = "Deu";
+				}
+				if(sWeapon == "One")
+				{
+					sClass = "Eng";
+				}
+			}
+		}	
+		if(!doesEntityExist(ePlayer))
+		{
+			return;
+		}
+//set language, assume english on default
+		ePlayer.setStringVar("globalCoop_language",sClass);//+""
+//RETURN SPAWN WEAPON AGAIN - EQUIP WITH THE "UNIVERSAL-TOOL KNIFE"
+		ePlayer.give(sSpwanWeaponTiki);
+		ePlayer.give("models/weapons/worldmodel-Knife.tik");
+		ePlayer.use(sSpwanWeapon);
+		globalCoop_armory_waitForWeapon(ePlayer,sSpwanWeapon,10);
+//START NOW TO MANAGE THIS PLAYER
+		thread globalCoop_player_managePlayer(ePlayer,fPlayerId);
+//remove all dispensers if option is set
+		if(globalCoop_return_integerPlayersQuantity(2))
+		{
+			if(getCvarInt("coop_disDisp"))
+			{
+				removeclass("Dispenser");
+			}
+		}
+	}
+}
+
+void  globalCoop_player_setupInfo(entity ePlayer,float fPlayerId)
+//------------------------------------------------------------------------------
+//SETS/SENDS ALL REQUIRED INFORAMTIONS ON/TO PLAYER
+//------------------------------------------------------------------------------
+{
+	if(doesEntityExist(ePlayer))
+	{
+//SET/RESET ENTITY VARIABLES
+		ePlayer.setFloatVar("globalCoop_timeEntered",getLevelTime());
+		//save statments :-(
+		//ePlayer.setFloatvar("globalCoop_puzzle_solvedTime",0);
+		//ePlayer.setFloatVar("globalCoop_modulatingPuzzle",0);
+		//ePlayer.setFloatVar("globalCoop_modulatingClass",0);		
+//RESET STATISTICS - HEALTH HUD
+		ePlayer.setstat("shots_fired",0);
+		ePlayer.setstat("shots_hit",0);
+//RESET CVARS ON THE CLIENT
+		globalCoop_player_transmittInstantly(ePlayer,"exec coop_mod/cfg/initialize.cfg");
+		globalCoop_main_singleplayerWait();
+		globalCoop_player_transmitter(ePlayer,	"seta coop_svB "+(coop_float_build * 1000)+
+												"\nglobalwidgetcommand coop_objectivesMap title "+cvar_string_mapname+
+												"\nglobalwidgetcommand coop_objectivesId title player"+fPlayerId);
+		if(coop_string_levelAuthor != "")
+		{
+			globalCoop_player_transmitter(ePlayer,"globalwidgetcommand coop_objectivesMapAuthor title "+coop_string_levelAuthor);
+		}
+		string sStory;
+		sStory = $world.getStringVar("uservar2");
+		if(sStory != "")
+		{
+			globalCoop_player_transmitter(ePlayer,"seta coop_story "+sStory);
+		}
+//SEND MISC INFORMATIONS TO THE CLIENT				
+		globalCoop_objectives_playerSetTacticalInfo(ePlayer);
+		if(cvar_bool_multiplayer)
+		{
+	//RUN MAP SPECIFIC CLIENT CONFIG
+			globalCoop_player_transmitter(ePlayer,"exec coop_mod/cfg/mp/"+cvar_string_mapname+".cfg\n");	
+	//SEND SERVER SETTINGS INFO TO CLIENT
+			globalCoop_server_settingsUpdate();//this is bad, but we have to save statments
+		}
+	}
+}
+
+void globalCoop_player_manageCycle()
+//----------------------------------------------------------------------
+// INFINITY LOOP!
+// Do the following things on all players and then puase for 2 secounds
+// - Check if player is
+//----------------------------------------------------------------------
+{
+//KEEP DEV POSTED
+	globalCoop_main_devInfo("globalCoop_player_manageCycle()");
+//Create vars
+entity	ePlayer;
+float	fPlayerIdInUse,
+		fActivePlayers = 0,
+		fActivePlayersPreviouse = 0;
+	while(1)
+	{
+	//wait 2 secs, for the cycle
+		globalCoop_main_wait2DotZero();
+	//UPDATE MEDICS STATISICS
+		thread globalCoop_class_medicUpdateTeamHealthStats();
+//PLAYER CYCLE
+		for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++)
+		{
+			ePlayer = getentity("player"+fPlayerIdInUse);
+			if(doesEntityExist(ePlayer))
+			{
+			//fix console spam issue [ no such frame ]
+				thread globalCoop_model_validate(ePlayer);
+				fActivePlayers++;
+			}
+		}
+//CHEK FOR ACTIVITY
+//GET STATUS, UPDATE STATISTICS, COMMAND AI, PAUSE
+ 		if(fActivePlayers < fActivePlayersPreviouse)
+		{
+		//Get current status, check who is still on the server
+			stuffCMD("status\n");
+//PAUSE
+			if(fActivePlayers == 0)
+			{
+				globalCoop_main_pause();
+			}
+			else
+			{
+//this forces the medic health status hud to update it self
+				$world.setFloatVar("coop_activePlayersHealth",getLevelTime());
+//NOTE THAT A PLAYER HAS LEFT, UPDATE THE INTERNAL CLASSES
+				thread globalCoop_class_update();
+//CHECK IF A NEW PLAYER HAS TO BE SELECTED TO FOLLOW
+				thread globalCoop_level_callReliably("globalCoop_teammate_follow");
+			}
+		}
+//remember the active players
+		fActivePlayersPreviouse = fActivePlayers;
+		fActivePlayers = 0;
+	}
+}
+
+void globalCoop_player_managePlayer(entity ePlayer,float fPlayerId)
+//------------------------------------------------------------------------------
+// MANAGE PLAYER ACCORDING TO HIS STATUS
+//------------------------------------------------------------------------------
+{
+	string 	sLanguage,sActiveWeapon,sClass,sPreviouseWeapon,sPreviouseClass;
+	float	fHealth,fBlink,fWaitTime,fSpectator;
+	
+	fWaitTime = 0.1;
+	
+	sLanguage = ePlayer.getStringVar("globalCoop_language");
+	
+//add +1 to the language of the player
+	globalCoop_player_languages(sLanguage,1);
+
+	while(doesEntityExist(ePlayer))
+	{
+//PLAYER IS IN SPECTATOR MODE
+		if(globalCoop_check_playerSpectator(ePlayer))
+		{
+			if(!fSpectator)
+			{
+				if(ePlayer.getStringVar("coop_previouseModel") != "")
+				{
+					fSpectator=1;
+					ePlayer.joinmpteam("Spectator");
+					globalCoop_player_setFloatRespawing(fPlayerId,0);
+					globalCoop_player_transmitter(ePlayer,"exec coop_mod/cfg/spectator.cfg");
+				}
+			}
+		}
+		else
+		{
+			if(fSpectator)
+			{
+			//avoid bug that would player not detect as spectator but allow him beeing a spectator
+				globalCoop_player_joinDefaultTeam(ePlayer);
+			}
+	//STORE THIS DATA IN VARS(performace)
+			sClass			= ePlayer.getStringvar("globalCoop_className");
+			sActiveWeapon	= ePlayer.getActiveWeaponName();
+			fHealth			= ePlayer.gethealth();			
+			
+			//ePlayer.hudprint("sActiveWeapon: "+sActiveWeapon+"\n");
+	//PLAYER JUST SPAWNED //PLAYER JUST SPAWNED
+	//PLAYER JUST SPAWNED //PLAYER JUST SPAWNED
+	//PLAYER JUST SPAWNED //PLAYER JUST SPAWNED
+			if(sActiveWeapon == coop_string_mp_playerDefaultStartWeaponName)
+			{
+				fSpectator=0;
+				if(globalCoop_player_equipOnSpawn(ePlayer,fPlayerId))
+				{
+					if(doesEntityExist(ePlayer))
+					{
+	//IF A VOTE IS IN PROGRESS EQUIP VOTE WEAPONS
+						if(coop_bool_voteInProgress==1)
+						{
+							thread globalCoop_voteEquip(ePlayer);
+						}
+	//CALL OPTIONAL CUSTOM THREAD - DO CLIENT SPAWN CONFIGURATIONS
+	//SHOW OBJECTIVES -RESET RESPAWN FLAG - MAKE AVIALABE FOR AI
+						sPreviouseWeapon = ""+getLevelTime();
+						globalCoop_player_setFloatRespawing(fPlayerId,0);
+						globalCoop_player_transmitter(ePlayer,"exec coop_mod/cfg/spawn.cfg");				
+						thread globalCoop_level_callReliably("coop_justSpawnedplayer"+fPlayerId);
+						thread globalCoop_objectives_playerShow(ePlayer);
+						ePlayer.flags("-notarget");	
+	//DO CINEMATIC SETUP - RUN CLIENT CINEMATIC SETUP
+						if(coop_integer_cinematicIsActive == 1)
+						{
+							ePlayer.hide();
+							ePlayer.notsolid();
+							globalCoop_player_transmitter(ePlayer,"exec coop_mod/cfg/cinematic.cfg");
+						}
+						else
+						{
+							ePlayer.immobilize( 0 );
+						}				
+	//SETUP CLASS - SET TIME WHEN THIS PLAYER WAS LAST SUCESSFULLY EQUIPED
+						globalCoop_class_setupPlayer(ePlayer);
+						ePlayer.setFloatVar("globalCoop_timeEquiped",getLevelTime());
+						ePlayer.setFloatVar("globalCoop_playerReady",1);
+					}
+				}
+			}
+	//PLAYER IS DEAD //PLAYER IS DEAD //PLAYER IS DEAD
+	//PLAYER IS DEAD //PLAYER IS DEAD //PLAYER IS DEAD
+	//PLAYER IS DEAD //PLAYER IS DEAD //PLAYER IS DEAD
+			else if(fHealth == 0)
+			{
+	//SPEED UP CHECK INTERVAL
+				fWaitTime = 0.2;
+	//MARK PLAYER AS RESPAWNING
+				if(globalCoop_player_returnFloatRespawing(fPlayerId) != 1)
+				{
+	//CALL CUSTOM PLAYER DEAD THREAD
+					thread globalCoop_level_callReliably("coop_justDiedplayer"+fPlayerId);
+					globalCoop_player_setFloatRespawing(fPlayerId,1);
+	//KILL PLAYER GARANTEE THE SCRIPT THAT HE IS DEAD - MAKE UNINTRESTING FOR THE AI
+	//REMOVE MEDIC HEALTH HUD - REMOVE EVERYTHING THAT HAS BEEN ATTACHED(on death this stops console spam)
+					ePlayer.kill();
+					ePlayer.flags("+notarget");
+					ePlayer.killattach();
+	//WARP PLAYER TO SPAWN ORIGIN IF NO BSP-SPAWN COUD BE FOUND(avoids that players spawn at where they died)
+					if(coop_integer_cinematicIsActive == 0 && doesEntityExist($ipd1) != 1)
+					{
+						ePlayer.warp(globalCoop_return_vectorPlayerSpawnOrigin(fPlayerId));
+					}
+	//RUN CLIENT SIDE DEAD ROUTINE
+					globalCoop_player_transmitter(ePlayer,"exec coop_mod/cfg/dead.cfg");
+				}
+			}
+	//PLAYER IS ALIVE AND EQUIPED //PLAYER IS ALIVE AND EQUIPED
+	//PLAYER IS ALIVE AND EQUIPED //PLAYER IS ALIVE AND EQUIPED
+	//PLAYER IS ALIVE AND EQUIPED //PLAYER IS ALIVE AND EQUIPED
+			else
+			{
+//ACESS SPECIAL MENU
+				if(sActiveWeapon == "Menu")
+				{
+					vector	vOrigin;
+					entity	eTrigger;
+					
+					ePlayer.use(sPreviouseWeapon);
+					ePlayer.immobilize(1);
+					
+					eTrigger = getEntity("globalCoop_menuTrigger"+fPlayerId);
+					if(!doesEntityExist(eTrigger))
+					{
+						eTrigger = spawn("trigger_relay","targetname","globalCoop_menuTrigger"+fPlayerId,"thread","mom_basic");
+						globalCoop_main_waitAFrame();
+						eTrigger.setStringVar("uservar1","coop_menu");
+						eTrigger.setStringVar("uservar2","globalCoop_menu");
+						//eTrigger.setStringVar("uservar3","globalCoop_menu_noMenu");						
+					}					
+					if(doesEntityExist(eTrigger) == 1 && doesEntityExist(ePlayer) == 1)
+					{
+						vOrigin = ePlayer.getOrigin();
+						vOrigin_z += 50;
+						eTrigger.origin(vOrigin);
+						eTrigger.doActivate(ePlayer);		
+					}
+					globalCoop_main_wait1DotZero();
+					ePlayer.immobilize(0);
+				}
+	//NORMALIZE CHECK INTERVAL
+				fWaitTime = 0.25;
+	//PLAYER INJURED
+	//PLAYER INJURED
+	//PLAYER INJURED
+				if(fHealth < 50)
+				{
+					entity eInjured;
+	//IF IT DOES NOT EXIST SPAWN INJURED SYMBOL
+					eInjured = getEntity("globalCoop_player"+fPlayerId+"InjuredIndicator");
+					if(!doesEntityExist(eInjured))
+					{
+						ePlayer.attachmodel("sysimg/icons/items/rune_deathquad.spr","origin",0.2,"globalCoop_player"+fPlayerId+"InjuredIndicator",0,0,-1,-1,-1,'0 14 0');
+					}
+	//SHOW OR HIDE INJURED SYMBOL, MAKE IT BLINK
+					else
+					{
+						if(fBlink==3)
+						{
+							fBlink=1;
+							eInjured.show();
+						}
+						else
+						{
+							eInjured.hide();
+						}
+					}			
+					fBlink++;
+				}
+				else
+				{
+	//PLAYER IS HEALTHY AGAIN, REMOVE THE SYMBOL
+					if(fBlink!=0)
+					{
+						fBlink=0;
+						ePlayer.removeAttachedModelByTargetname("globalCoop_player"+fPlayerId+"InjuredIndicator");
+					}
+				}
+	//NEW WEAPON //NEW WEAPON //NEW WEAPON
+	//NEW WEAPON //NEW WEAPON //NEW WEAPON
+	//NEW WEAPON //NEW WEAPON //NEW WEAPON
+
+				if(sActiveWeapon!=sPreviouseWeapon || coop_bool_settingsChanged == 1 || sClass != sPreviouseClass && sActiveWeapon != "Menu")
+				{
+				//show/hide class
+					globalCoop_huds_setup(ePlayer);
+				//weapon damage setup
+					float fMoveSpeed,fBulletCount,fAutoReload,fBulletDamage;
+					fAutoReload			= 1;
+					fBulletCount		= 1;
+					sPreviouseClass		= sClass;
+					sPreviouseWeapon	= sActiveWeapon;
+					fMoveSpeed			= cvar_float_weapMoveSpeed;
+					if(sActiveWeapon == "FieldAssaultRifle")
+					{
+						fBulletCount=9;
+					}
+					if(sClass == "HeavyWeapons" && cvar_bool_coop_disClass == 0)
+					{
+						fBulletCount=(fBulletCount * 2);//hw makes 2xdamage
+					}
+					if(sActiveWeapon == "Tricorder" || sActiveWeapon == "Tricorder-stx" || sActiveWeapon == "Tricorder-rom" )
+					{
+						fMoveSpeed=1.75;
+					}
+					fBulletDamage=45;
+	//SET DAMAGE AMMOUNT FOR EACH WEAPON
+					if(sActiveWeapon == "Phaser-stx" || sActiveWeapon == "Phaser")
+						{fBulletDamage=globalCoop_return_floatDamageBySkill(3);}//alt is 3
+					if(sActiveWeapon == "FederationSniperRifle")
+						{fBulletDamage=globalCoop_return_floatDamageBySkill(150);}
+					//if(sActiveWeapon == "Batleth" || sActiveWeapon == "I-Mod" || sActiveWeapon == "CompressionRifle")
+						//{fBulletDamage=globalCoop_return_floatDamageBySkill(45);}//alt is 80//alt is 60//alt is projectile
+					if(sActiveWeapon == "RomulanDisruptor" || sActiveWeapon == "FieldAssaultRifle")
+						{fBulletDamage=globalCoop_return_floatDamageBySkill(10);}//alt is projectile
+					if(sActiveWeapon == "AttrexianRifle")
+						{fBulletDamage=globalCoop_return_floatDamageBySkill(15);}//alt is projectile
+					if(sActiveWeapon == "BurstRifle")
+						{fBulletDamage=globalCoop_return_floatDamageBySkill(13);}//alt is projectile
+					if(sActiveWeapon == "EnterpriseCannon")
+						{fBulletDamage=globalCoop_return_floatDamageBySkill(100);}//alt is projectile
+					if(sActiveWeapon == "TetryonGatlingGun")//alt is projectile
+						{fBulletDamage=globalCoop_return_floatDamageBySkill(8);}
+	//AUTO RELOAD ON/OFF DEPENDING ON SKILL LEVEL
+					if(cvar_integer_coop_skill == 3)
+					{
+						fAutoReload=0;
+					}
+					globalCoop_player_waitForFreeReliableServerCommand(ePlayer);
+					ePlayer.weaponcommand("dual","notdroppable",1);
+					ePlayer.weaponcommand("dual","autoReload",fAutoReload);
+					ePlayer.weaponcommand("dual","bulletcount",fBulletCount);
+					ePlayer.weaponcommand("dual","bulletdamage",fBulletDamage);
+					ePlayer.weaponcommand("dual","shootingMoveSpeedModifier",fMoveSpeed);
+					thread globalCoop_level_callReliably("coop_settingClassWeaponChangedplayer"+fPlayerId);
+					//avoid to many weapon entities (entity Limit)
+					//ePlayer.hudprint(cvar_integer_coop_skill+"-Damage: "+fBulletDamage+"\n");
+				}
+	//PLAYER STANDS STILL //PLAYER STANDS STILL
+	//PLAYER STANDS STILL //PLAYER STANDS STILL
+	//PLAYER STANDS STILL //PLAYER STANDS STILL
+				if(ePlayer.getVelocity() == '0 0 0' && coop_integer_cinematicIsActive == 0)
+				{
+					thread globalCoop_class_modulating(ePlayer);
+				}
+				//SAVE STATEMENTS
+				// else if(sActiveWeapon == "Menu")
+				// {
+					// ePlayer.hudprint("^5Coop INFO:^8 You have to stand still to access this menu\n");
+					// ePlayer.use(sPreviouseWeapon);
+				// }
+			}
+		}
+		wait(fWaitTime);
+	}
+//add -1 to the language of the player
+	globalCoop_player_languages(sLanguage,-1);
+}
+
+void globalCoop_applaySpawnOriginOnReSpwanOrigin()
+//----------------------------------------------------------------------
+// Applay spwanOrigins vectors on the reSpawnOrigins
+//----------------------------------------------------------------------
+{
+	if(cvar_bool_multiplayer){//only do this in multiplayer
+		coop_vector_respawnOrigin1	= coop_vector_spawnOrigin1;
+		coop_vector_respawnOrigin2	= coop_vector_spawnOrigin2;
+		coop_vector_respawnOrigin3	= coop_vector_spawnOrigin3;
+		coop_vector_respawnOrigin4	= coop_vector_spawnOrigin4;
+		coop_vector_respawnOrigin5	= coop_vector_spawnOrigin5;
+		coop_vector_respawnOrigin6	= coop_vector_spawnOrigin6;
+		coop_vector_respawnOrigin7	= coop_vector_spawnOrigin7;
+		coop_vector_respawnOrigin8	= coop_vector_spawnOrigin8;	
+//INFORM PLAYERS
+		if(coop_integer_cinematicIsActive == 0)
+		{
+			thread globalCoop_main_globalMessage("^5INFO: ^2Respawn locations have been updated!");
+		}
+	}
+}
+
+
+void globalCoop_player_useAfter(entity ePlayer, string UseThis, float waitTime)
+//----------------------------------------------------------------------
+// forces the Players to usethis weapon now
+//----------------------------------------------------------------------
+{
+	wait(waitTime);
+	if(doesEntityExist(ePlayer))
+	{
+		ePlayer.use(UseThis);
+	}
+}
+
+
+vector globalCoop_player_warpToSpawn(entity ePlayer)
+//----------------------------------------------------------------------
+// warp player to a spawn Origin
+//----------------------------------------------------------------------
+{
+	vector vOrigin;
+	float fPersonalized;
+//Exit if player is missing
+	if(doesEntityExist(ePlayer))
+	{
+		if(coop_bool_mp_warmupTimeOver != 1 || coop_integer_cinematicIsActive == 1)
+		{
+			ePlayer.immobilize(1);
+		}
+		vector vAngles;
+		float fPlayerId,fRespawning;
+//GET THE PLAYER HIS ID
+		fPlayerId = globalCoop_return_integerPlayerId(ePlayer);
+//SPAWN OR RESPAWN?
+		fRespawning = globalCoop_player_returnFloatRespawing(fPlayerId);
+		
+//IF THE PLAYER-ID IS VALID
+		if(fPlayerId > -1){
+//SEE IF PLAYER SPAWNS OR RESPAWNS
+			vOrigin = globalCoop_return_vectorPlayerSpawnOrigin(fPlayerId);
+			if(fRespawning)
+			{
+			//respawn player at default or at customized location
+				vector vOrigin2;
+				vOrigin2 = ePlayer.getVectorVar("globalCoop_respawnHere");
+				
+				vOrigin = globalCoop_return_vectorPlayerReSpawnOrigin(fPlayerId);
+				
+				if(vOrigin2 != '0 0 0')
+				{
+					fPersonalized=1;
+					vOrigin = vOrigin2;
+				}
+			}
+			
+//WARP SAFTLY, to artificial spawn or BSP spawn
+			if(vOrigin != '0 0 0')
+			{
+			//set angle now, the bsp-spawn can mess it up while warping!
+				vAngles_y = globalCoop_return_floatSpawnAngleForPlayerId(fPlayerId);
+				
+				if(fPersonalized)
+				{
+					vAngles_y = vectorGetY(ePlayer.getVectorVar("globalCoop_respawnHereAngles"));
+				}
+				ePlayer.playerviewangles(vAngles);
+			}
+			else{
+				vOrigin = ePlayer.getOrigin();
+			}
+			//warp player to avoid players getting stuck in each other at spawn point, since telefrag is disabled!
+			thread globalCoop_level_warpEntityToVectorSafty(ePlayer,vOrigin);
+		}
+	}
+	return vOrigin;
+}
+
+
+void globalCoop_player_warpToSpawnOriginAll()
+//----------------------------------------------------------------------
+// warp every player to the spawn origin NOW
+//----------------------------------------------------------------------
+{
+
+	float fPlayerIdInUse;
+	fPlayerIdInUse=1;
+	while(fPlayerIdInUse<=coop_integer_maxPlayers)
+	{
+		thread globalCoop_player_warpToSpawn(getentity("player"+fPlayerIdInUse));
+		fPlayerIdInUse++;
+	}
+//SAVE STATEMENTS
+	// for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++)
+	// {
+		// thread globalCoop_player_warpToSpawn(getentity("player"+fPlayerIdInUse));
+	// }
+}
+
+
+void globalCoop_player_warpToSpawnOriginAllBeforeMatchStarts()
+//----------------------------------------------------------------------
+// warp all players to thair origins very shortly before the match starts...
+//----------------------------------------------------------------------
+{
+//Wait shortly before the warmup time is gone
+	while((getLevelTime() + 0.5) < getCvarint("mp_warmUpTime"))
+	{
+		wait(coop_float_oneFrameTime);
+	}
+//KICK PLAYERS IN SPECTATOR AND THEN MAKE THEM JOIN ONE BY ONE
+	entity ePlayer;
+	float fPlayerIdInUse,fRounds;
+//THIS IS CREEPY BUT IT SAVES 5 STATEMENTS COMPARED TO A FOR SOLUTION
+	while(fRounds<2)
+	{
+		if(fRounds==1)
+		{
+			globalCoop_main_wait1DotZero();
+		}
+		fPlayerIdInUse=1;
+		while(fPlayerIdInUse<=coop_integer_maxPlayers)
+		{
+			ePlayer = getentity("player"+fPlayerIdInUse);
+			thread globalCoop_player_warpToSpawn(ePlayer);
+			if(fRounds<1)
+			{
+				if(doesEntityExist(ePlayer))
+				{
+					
+					ePlayer.joinMpTeam("spectator");
+				}
+			}
+			else
+			{
+				globalCoop_player_joinDefaultTeam(ePlayer);
+				globalCoop_main_wait1DotZero();
+			}
+			fPlayerIdInUse++;
+		}
+		fRounds++;
+	}
+}
+
+
+void globalCoop_player_imobilizeAll(float doImmo)
+//----------------------------------------------------------------------
+//Immobilize or Mobilize again
+//----------------------------------------------------------------------
+{
+	//globalCoop_main_devInfo("globalCoop_player_imobilizeAll("+doImmo+")");
+//Singleplayer only
+	if(!cvar_bool_multiplayer)
+	{
+		$player.immobilize(doImmo);
+		return;
+	}
+
+//IF WE HAVE TO IMMOBILIZE AND WE ARE IN COMBAT ONLY, DO NOT IMMOBILIZE!
+	if(doImmo != 1)
+	{
+		entity ePlayer;
+		float fPlayerIdInUse;		
+//IMOBILIZE PLAYERS - WHILE USING A WHILE THIS SAVES US FROM STATEMENT EXCEEDED PROBLEMS FOR A WHILE
+		fPlayerIdInUse=1;
+		while(fPlayerIdInUse<=coop_integer_maxPlayers)
+		{
+			ePlayer = getentity("player"+fPlayerIdInUse);
+			if(doesEntityExist(ePlayer))
+			{
+				ePlayer.immobilize(doImmo);
+			}
+			fPlayerIdInUse++;
+		}
+	}
+}
+
+
+float globalCoop_player_equipOnSpawn(entity ePlayer,float fPlayerId)
+//----------------------------------------------------------------------
+// equip each Player on re/spawn
+//----------------------------------------------------------------------
+{
+	if(globalCoop_check_existingLivingEntity(ePlayer))
+	{
+//VARIABLES
+		string 	sCurrentWeapon,sWeaponToTake;
+		
+//GRAB AND PUT IN VARIABLES (FASTER)
+		sCurrentWeapon	= ePlayer.getActiveWeaponName();
+		sWeaponToTake 	= sCurrentWeapon;
+//PLAYER RESPAWNING? REMEMBER THAT!
+		//float	fRespawn;
+		//fRespawn = globalCoop_player_returnFloatRespawing(fPlayerId);
+//WARP PLAYER TO SPAWN ORIGIN
+		thread globalCoop_player_warpToSpawn(ePlayer);
+//HOLSTER - GIVE BASIC INIZIAL ARMOR - TAKE SPAWN WEAPON
+		ePlayer.safeholster(1);
+		ePlayer.armor("BasicArmor",40);
+		globalCoop_armory_waitForWeaponChange(ePlayer,sCurrentWeapon,20);
+		if(!doesEntityExist(ePlayer))
+		{
+			return 0;
+		}
+		if(ePlayer.getActiveWeaponName() == sCurrentWeapon)
+		{
+			globalCoop_main_printTimeAndString("!!!FAILED: globalCoop_player_equipOnSpawn("+ePlayer.getTargetname()+")");
+			return 0;
+		}
+		//globalCoop_player_warpToSpawn(ePlayer);
+//TAKE SPAWN WEAPON AND SECOUNDARY SPAWN WEAPON - THIS PLAYER IS NOT A SPECTATOR
+		ePlayer.take(coop_string_mp_waponToTakeAwayFromPlayer1);
+		ePlayer.take(coop_string_mp_waponToTakeAwayFromPlayer2);
+//REMOVE EVERY SINGLE ATTACHED MODEL, WHAT EVER THAT MIGHT BE - GIVE MENU
+		ePlayer.killattach();
+		ePlayer.give("models/weapons/menu.tik");
+//FORCE OUT OF SPEC - USE SPAWN WEAPON TO MAKE SURE IT HAS BEEN TAKEN SUCESSFULLY
+		globalCoop_player_joinDefaultTeam(ePlayer);
+		globalCoop_main_waitAFrame();
+		if(doesEntityExist(ePlayer))
+		{
+			ePlayer.use(coop_string_mp_playerDefaultStartWeaponName);
+			globalCoop_main_waitAFrame();
+	//IF CURRENT WEAPON IS NOT THE SPAWN WEAPON THE EQUIP WAS SUCESSFULL
+			if(globalCoop_check_existingLivingEntity(ePlayer))
+			{
+				if(ePlayer.getActiveWeaponName() != coop_string_mp_playerDefaultStartWeaponName)
+				{
+					return 1;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+
+void globalCoop_player_singleplayerEquip()
+//------------------------------------------------------------------------------
+//Equip the player (for the singleplayer mode only!)...
+//------------------------------------------------------------------------------
+{
+	waitForPlayer();
+	string sWeapon;
+	sWeapon = globalCoop_armory_equipWithWeapons($player);
+	//--- check the game variables and give the secret weapons
+	if( getFloatVar( "game.secretWeapon_CompressionRifle" ) ){
+		$player.give("models/weapons/worldmodel-CompressionRifle.tik");
+	}
+	if( getFloatVar( "game.secretWeapon_IMOD" ) ){
+		$player.give("models/weapons/worldmodel-IMod.tik");
+	}
+	if( getFloatVar( "game.secretWeapon_IdryllStaff" ) ){
+		$player.give("models/weapons/worldmodel-drull-staff.tik");
+	}
+	if( getFloatVar( "game.secretWeapon_RomulanExperimental" ) ){
+		$player.give("models/weapons/worldmodel-rom-radgun.tik");
+	}
+	
+	globalCoop_main_wait1DotZero();
+	
+	if(sWeapon != "models/weapons/worldmodel-tricorder-STX.tik")//don't force weapon during IGMs
+	{
+		if($player.getActiveWeaponName() == "None")
+		{
+			$player.use(sWeapon);
+		}
+	}
+}
+
+void globalCoop_player_transmittToAll(string sDataBurst)
+//----------------------------------------------------------------------
+// transmit data to all players
+//----------------------------------------------------------------------
+{
+	float fPlayerIdInUse;
+	fPlayerIdInUse=1;
+	while(fPlayerIdInUse<=coop_integer_maxPlayers){
+		thread globalCoop_player_transmitter(getentity("player"+fPlayerIdInUse),sDataBurst);
+		//globalCoop_main_waitAFrame(); //deactivated in build 16
+		fPlayerIdInUse++;
+	}
+//singleplayer
+	if(!cvar_bool_multiplayer)
+	{
+		thread globalCoop_player_transmitter($player,sDataBurst);
+	}
+}
+
+void globalCoop_player_transmitterLockOrUnlockId(float fPlayerId, float fLock)
+{
+//DO NOT USE IF-ELSE HERE, IF CHECKS WITH VARS GO PRETTY FAST, USE STATMENTS TO EXPAND SCRIPT INSTEAD
+	if(fPlayerId == 1)
+		coop_vector_transmitterinuseforPlayer1Player2Player3_x=fLock;
+	if(fPlayerId == 2)
+		coop_vector_transmitterinuseforPlayer1Player2Player3_y=fLock;
+	if(fPlayerId == 3)
+		coop_vector_transmitterinuseforPlayer1Player2Player3_z=fLock;
+	if(fPlayerId == 4)
+		coop_vector_transmitterinuseforPlayer4Player5Player6_x=fLock;
+	if(fPlayerId == 5)
+		coop_vector_transmitterinuseforPlayer4Player5Player6_y=fLock;
+	if(fPlayerId == 6)
+		coop_vector_transmitterinuseforPlayer4Player5Player6_z=fLock;
+	if(fPlayerId == 7)
+		coop_vector_transmitterinuseforPlayer7Player8_x=fLock;
+	if(fPlayerId == 8)
+		coop_vector_transmitterinuseforPlayer7Player8_y=fLock;
+}
+
+float globalCoop_player_transmitterReturnStringIndexAndUpdateIndex(entity ePlayer,string sFloatVarName)
+{
+	float fIndex;
+	fIndex = ePlayer.getFloatVar(sFloatVarName);
+	fIndex++;
+	ePlayer.setFloatVar(sFloatVarName,fIndex);
+	return fIndex;
+}
+
+
+void globalCoop_player_transmitter(entity ePlayer,string sDataBurst)
+//----------------------------------------------------------------------
+// manage data transmision
+//----------------------------------------------------------------------
+{
+	float fIndex,fPlayerId;
+	fPlayerId = globalCoop_return_integerPlayerId(ePlayer);
+	
+	if(sDataBurst != "" && doesEntityExist(ePlayer) == 1)
+	{
+		fIndex = globalCoop_player_transmitterReturnStringIndexAndUpdateIndex(ePlayer,"globalCoop_playerTransmitterStringIndex");
+		ePlayer.setStringVar("globalCoop_playerTransmitterString"+fIndex,sDataBurst);
+		if(fPlayerId == 1)
+			fIndex = coop_vector_transmitterinuseforPlayer1Player2Player3_x;
+		if(fPlayerId == 2)
+			fIndex = coop_vector_transmitterinuseforPlayer1Player2Player3_y;
+		if(fPlayerId == 3)
+			fIndex = coop_vector_transmitterinuseforPlayer1Player2Player3_z;
+		if(fPlayerId == 4)
+			fIndex = coop_vector_transmitterinuseforPlayer4Player5Player6_x;
+		if(fPlayerId == 5)
+			fIndex = coop_vector_transmitterinuseforPlayer4Player5Player6_y;
+		if(fPlayerId == 6)
+			fIndex = coop_vector_transmitterinuseforPlayer4Player5Player6_z;
+		if(fPlayerId == 7)
+			fIndex = coop_vector_transmitterinuseforPlayer7Player8_x;
+		if(fPlayerId == 8)
+			fIndex = coop_vector_transmitterinuseforPlayer7Player8_y;
+		
+		float ff,fc;
+		fc = getCvarInt("coop_reliable");
+		ff = GetNumFreeReliableServerCommands(ePlayer);
+		if(ff < fc)
+		{
+			stuffcmd("seta coop_reliable "+ff+"\n");
+		}
+//IF NOT ALLREADY RUNNING; CONTINUE
+		if(fIndex != 1)
+		{
+//MARK THIS THREAD AS RUNNING AND LOCK IT DOWN
+			globalCoop_player_transmitterLockOrUnlockId(fPlayerId,1);
+			float	fWhileIsActive = 1,
+					fIndexPreviouse;
+//PROCESS ALL THE STRINGS IN THE INDEX
+			while(fWhileIsActive == 1)
+			{
+				if(doesEntityExist(ePlayer)){
+				//update Current Index
+					fIndex		= globalCoop_player_transmitterReturnStringIndexAndUpdateIndex(ePlayer,"globalCoop_playerTransmitterStringIndexCurrent");
+					sDataBurst	= ePlayer.getStringVar("globalCoop_playerTransmitterString"+fIndex);
+					if(sDataBurst == "" || fIndexPreviouse == fIndex){
+					//exit the while
+						fWhileIsActive = 0;
+					//Correct Index
+						fIndex--;
+						ePlayer.setFloatVar("globalCoop_playerTransmitterStringIndexCurrent",fIndex);
+					}
+					else{
+						globalCoop_player_waitForFreeReliableServerCommand(ePlayer);
+						globalCoop_player_transmittInstantly(ePlayer,sDataBurst);
+					}
+				}
+				else{
+					fWhileIsActive = 0;
+				}
+				fIndexPreviouse = fIndex;
+				//globalCoop_main_waitZeroDotZero5();//changed 18.09.2012
+				globalCoop_main_waitAFrame();//changed 18.09.2012
+			}
+//UNMARK THIS THREAD AS RUNNING
+			globalCoop_player_transmitterLockOrUnlockId(fPlayerId,0);
+		}
+	}
+}
+
+
+void globalCoop_player_transmittInstantly(entity ePlayer,string sDataBurst)
+//----------------------------------------------------------------------
+// this transmits instantly
+//----------------------------------------------------------------------
+{
+	if(
+	doesEntityExist
+	(ePlayer)																	)
+	{
+	sendclientcommand															(
+	ePlayer,
+	sDataBurst																	+
+	"\n"																		)
+;}
+}
+
+void globalCoop_player_reconnectAll()
+//----------------------------------------------------------------------
+//force players to reconnect
+//----------------------------------------------------------------------
+{
+//cl_currentServerAddress
+	float fPlayerIdInUse;
+	for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++){
+		thread globalCoop_player_transmittInstantly(getentity("player"+fPlayerIdInUse),"reconnect");
+	}
+	thread globalCoop_player_transmitter($player,"reconnect");
+}
+
+//ALL WEAPON TIKIS HAVE TO BE EXACTLY LIKE THIS
+//CASE SENSITIVE ("phaser" IS NOT EQUAL TO "Phaser")!
+// models/weapons/worldmodel-Phaser.tik
+// models/weapons/worldmodel-Phaser-stx.tik
+// models/weapons/worldmodel-BurstRifle.tik
+// models/weapons/worldmodel-CompressionRifle.tik
+// models/weapons/worldmodel-FieldAssaultRifle.tik
+// models/weapons/worldmodel-GrenadeLauncher.tik
+// models/weapons/worldmodel-Knife.tik
+// models/weapons/worldmodel-Tricorder-stx.tik
+// models/weapons/worldmodel-Tricorder.tik
+// models/weapons/worldmodel-Batleth.tik
+//
+// models/weapons/worldmodel-sniperrifle.tik
+// models/weapons/worldmodel-imod.tik
+// models/weapons/worldmodel-rom-datapad.tik
+// models/weapons/worldmodel-rom-disruptor.tik
+// models/weapons/worldmodel-tetryon.tik
+// models/weapons/worldmodel-attrex-rifle.tik
+// models/weapons/worldmodel-drull-staff.tik
+// models/weapons/worldmodel-attrex-rifle.tik
+// models/weapons/worldmodel-photon.tik
+// models/weapons/worldmodel-rom-radgun.tik
+// models/weapons/worldmodel-enterprise.tik
+
+void globalCoop_player_giveAll(string toGive, float useItNow)
+//----------------------------------------------------------------------
+// givePlayersomething, to all players
+//----------------------------------------------------------------------
+{
+//If singleplayer
+	if(!cvar_bool_multiplayer){
+		$player.give( toGive );
+		if(useItNow >= 0)
+		{
+			thread globalCoop_player_useAfter($player,toGive,useItNow);
+		}
+		return;
+	}
+//Do not allow that the player gets the weapon he/she spawns with (multiplayer only)
+	toGive = globalCoop_armory_weaponCheckWeaponAndReturnValid(toGive);
+
+//Register the weapon
+	globalCoop_armory_weaponRegister(toGive);
+//Give weapons to the players
+	entity ePlayer;
+	float fPlayerIdInUse=1;
+	
+	while(fPlayerIdInUse<=coop_integer_maxPlayers)
+	{
+		ePlayer = getentity("player"+ fPlayerIdInUse);
+		if(doesEntityExist(ePlayer)){
+			toGive = globalCoop_armory_weaponGiveAndReturnAsString(ePlayer,toGive);
+			if(useItNow >= 0){
+				thread globalCoop_player_useAfter(ePlayer,toGive,useItNow);
+			}
+		}
+		fPlayerIdInUse++;
+		//globalCoop_main_waitAFrame();//build 16 disabled
+	}
+}
+
+
+void globalCoop_player_takeAll(string toTake)
+//----------------------------------------------------------------------
+// takePlayeraway something from each player
+//----------------------------------------------------------------------
+{
+//If singleplayer
+	if(!cvar_bool_multiplayer){
+		$player.take(toTake);
+		return;
+	}	
+//Do not take the players weapon he/she spawns with (multiplayer only)
+	if(toTake == coop_string_mp_waponToTakeAwayFromPlayer1 && cvar_bool_multiplayer == 1){
+		toTake = coop_string_mp_altPlayerStartWeapon;
+	}
+	
+//Take the weapon away from the virtual inventory
+	globalCoop_armory_weaponUnregister( toTake );
+//Take away procedure
+	if(toTake != coop_string_mp_waponToTakeAwayFromPlayer1){
+		entity ePlayer;
+		float fPlayerIdInUse=1;
+		while(fPlayerIdInUse<=coop_integer_maxPlayers)
+		{
+			ePlayer = getentity("player"+ fPlayerIdInUse);
+			if(globalCoop_check_existingLivingEntity(ePlayer)){
+				if(toTake == globalCoop_armory_returnTikiFromWeaponname(ePlayer.getActiveWeaponName())){
+					thread globalCoop_armory_putAwayWeapon(ePlayer);
+				}
+				ePlayer.take(toTake);
+			}
+			fPlayerIdInUse++;
+			//globalCoop_main_waitAFrame();//build 16 disabled
+		}
+	}
+}
+
+
+void globalCoop_player_useAll(string UseThis)
+//----------------------------------------------------------------------
+// forces every player to use this item now
+//----------------------------------------------------------------------
+{
+//GIVE TO PLAYER IN SINGLEPLAYER AND EXIT
+	if(!cvar_bool_multiplayer){
+		$player.use(UseThis);
+		return;
+	}
+//Do not allow that the player UseThis the weapon he/she spawns with (multiplayer only)
+	if(UseThis == coop_string_mp_waponToTakeAwayFromPlayer1){
+		UseThis = coop_string_mp_altPlayerStartWeapon;
+	}
+
+	entity ePlayer;
+	float fPlayerIdInUse=1;
+	
+	while(fPlayerIdInUse<=coop_integer_maxPlayers)
+	{
+		ePlayer = getentity("player"+fPlayerIdInUse);
+		if(doesEntityExist(ePlayer)){
+			ePlayer.use(UseThis);
+		}
+		fPlayerIdInUse++;
+		//globalCoop_main_waitAFrame(); //build 16 disabled
+	}
+}
+
+void globalCoop_player_displayEffectAll(string sEffectName,string sEffect)
+//----------------------------------------------------------------------
+//DISPLAY EFFECT ON PLAYER
+//----------------------------------------------------------------------
+{
+	if(!cvar_bool_multiplayer)
+	{
+		$player.displayEffect(sEffectName,sEffect);
+		return;
+	}
+
+	entity ePlayer;
+	float fPlayerIdInUse;
+	fPlayerIdInUse=1;
+	
+	while(fPlayerIdInUse<=coop_integer_maxPlayers)
+	{
+		ePlayer = getentity("player"+fPlayerIdInUse);
+		//if(globalCoop_check_existingLivingEntity(ePlayer))
+		if(!globalCoop_check_playerSpectator(ePlayer))//build 16
+		{
+			if(sEffect != ""){
+				ePlayer.displayEffect(sEffectName,sEffect);
+			}else{
+				ePlayer.displayEffect(sEffectName);
+			}
+		}
+		fPlayerIdInUse++;
+	}
+	
+	// for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++){
+		// ePlayer = getentity("player"+fPlayerIdInUse);
+		// if(globalCoop_check_existingLivingEntity(ePlayer)){
+			// if(sEffect != ""){
+				// ePlayer.displayEffect(sEffectName,sEffect);
+			// }else{
+				// ePlayer.displayEffect(sEffectName);
+			// }
+		// }
+	// }
+}
+
+
+void globalCoop_player_waitForFreeReliableServerCommand(entity ePlayer)
+//----------------------------------------------------------------------
+// Wait for enugfh free command slots to feed player with network/command/string data again
+//----------------------------------------------------------------------
+{
+	while(coop_vector_mainisactiveLevelcompleteLmslevelend_y != 1 && doesEntityExist(ePlayer) == 1){
+		if(GetNumFreeReliableServerCommands(ePlayer) >= 122){//chnaged build 16 - used to be 120
+			return;
+		}
+		globalCoop_main_waitAFrame();
+	}
+}
+
+
+void globalCoop_player_transporter()
+//----------------------------------------------------------------------
+// TRANSPORT PLAYER FROM A TO B
+//----------------------------------------------------------------------
+{
+//CHECK IF A TRANSPORT IS IN PROGRESS ALLREADY
+	if(!coop_vector_linuxForcerebootTransporting_z){
+//LOCK DOWN THIS THREAD, SIGNAL THE MOD THAT A TRANSPORT IS IN PROGRESS
+		coop_vector_linuxForcerebootTransporting_z = 1;
+		entity eTrigger;
+		eTrigger = getCurrentEntity();
+//TRIGGER CALLED THIS THRAED DOES EXIST
+		if(doesEntityExist(eTrigger)){
+//GET THE ENTITY ACTIVATIN THE TRIGGER
+			entity ePlayer;
+			ePlayer = eTrigger.getLastActivatingEntity();
+			eTrigger = eTrigger.gettargetentity();
+			string sMessage;
+//PLAYER MUST NOT BE DUCKED!
+			if(!globalCoop_check_playerCrouching(ePlayer)){
+//TARGET DESTINATION EXISTS
+				if(doesEntityExist(eTrigger)){
+//DISABLE TRIGGERS NOW, DO NOT BEAL TWO PLAYERS AT ONCE!
+					globalCoop_level_notTriggerable($globalCoop_mobileTransporter1Trigger);
+					globalCoop_level_notTriggerable($globalCoop_mobileTransporter2Trigger);
+//RELOCATE
+					thread globalCoop_level_warpEntityToVectorSafty(ePlayer,eTrigger.getOrigin());
+//DISPLAY BEAM-IN EFFECT
+					ePlayer.forcealpha(1);
+					ePlayer.alpha(.1);
+					ePlayer.fadein(1,1);
+					ePlayer.setcustomshader("transport");
+					globalCoop_playSound_c3v1r60(ePlayer,"sound/environment/transporter/transport_fast.wav");
+					globalCoop_main_wait1DotZero();
+					ePlayer.clearcustomshader("transport");
+					ePlayer.forcealpha(0);
+//ENABLE TRIGGERS AGAIN
+					globalCoop_main_waitZeroDot5();
+					globalCoop_level_triggerable($globalCoop_mobileTransporter1Trigger);
+					globalCoop_level_triggerable($globalCoop_mobileTransporter2Trigger);
+				}
+//TELL THE PASSENGER THAT THE TRAIN IS NOT BUILD YET
+				else{
+					sMessage ="^3WARNING^2: Transporter is ^3not linked^2, can not transport...\n";
+				}
+			}else{
+				sMessage ="^3WARNING^2: Can not transport while crouching!\n";
+			}
+			if(sMessage != ""){
+				ePlayer.hudprint(sMessage);
+			}
+		}
+//UNLOCK THIS THREAD AGAIN, SO SOME ONE ELSE CAN BE DEMATERIALIZED :D
+		coop_vector_linuxForcerebootTransporting_z = 0;
+	}
+}
+
+void globalCoop_player_makeSolidASAP(entity ePlayer)
+//----------------------------------------------------------------------
+// MAKE PLAYER SOLID WHEN CLEAR
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(ePlayer)){
+	//CHECK IF ENTITY IS ALLREADY HANDLED
+		if(!ePlayer.getFloatVar("globalCoop_player_makeSolidASAP"))
+		{
+			ePlayer.setFloatVar("globalCoop_player_makeSolidASAP",1);
+			float	fSolid;
+			float	fRound;
+			float	fInsideAEntity;
+			entity	eCheckInside;
+			string	sRawTargetName1;
+			string	sRawTargetName2;
+		//HANDLE AS LONG AS: EXISTING AND LIVE
+			while(globalCoop_check_existingLivingEntity(ePlayer))
+			{
+				fInsideAEntity=0;
+				for(fRound=1;fRound<29;fRound++)
+				{
+				//not using if else to save statments due to script limitations
+					if(fRound < 9)
+					{
+						if(cvar_bool_multiplayer)
+						{
+							eCheckInside=getEntity("player"+fRound);
+						}
+					}
+					else{
+						if(fRound==9){eCheckInside=$chell;}
+						if(fRound==10){eCheckInside=$jurot;}
+						if(fRound==11){eCheckInside=$chang;}
+						if(fRound==12){eCheckInside=$telsia;}
+						if(fRound==13){eCheckInside=$korban;}
+						if(fRound==14){eCheckInside=$franklin;}
+						if(fRound==15){eCheckInside=$gonzales;}
+						if(fRound==16){eCheckInside=$krindo;}
+						if(fRound==17){eCheckInside=$Chell;}
+						if(fRound==18){eCheckInside=$Jurot;}
+						if(fRound==19){eCheckInside=$Chang;}
+						if(fRound==20){eCheckInside=$Telsia;}
+						if(fRound==21){eCheckInside=$Korban;}
+						if(fRound==22){eCheckInside=$Franklin;}
+						if(fRound==23){eCheckInside=$Gonzales;}
+						if(fRound==24){eCheckInside=$Krindo;}
+						if(fRound==25){eCheckInside=$munro;}
+						if(fRound==26){eCheckInside=$Munro;}
+						if(fRound==27){eCheckInside=$kourban;}
+						if(fRound==28){eCheckInside=$Kourban;}
+					}		
+				//ENTIYT INSIDE A OTHER IMPORTANT ENTITY
+					if(globalCoop_check_existingLivingEntity(eCheckInside))
+					{
+						sRawTargetName1 = ePlayer.getRawTargetName();//must be put in a var to be checked
+						sRawTargetName2 = eCheckInside.getRawTargetName();//must be put in a var to be checked
+				//DO NOT CHECK IF THE ENTITY IT SELF IS INSIDE IT SELF
+						if(sRawTargetName1 != sRawTargetName2)
+						{
+							if(globalCoop_check_isEntityInsideOfEntity(eCheckInside,ePlayer,0))
+							{
+								thread globalCoop_player_makeSolidASAP(eCheckInside);
+								fInsideAEntity=1;
+							}
+						}
+					}
+				}
+		//NO ENTITY IS INSIDE THIS ENTITY
+				if(!fInsideAEntity)
+				{
+					if(globalCoop_check_existingLivingEntity(ePlayer))
+					{
+						if(!globalCoop_check_playerSpectator(ePlayer))
+						{
+							globalCoop_player_joinDefaultTeam(ePlayer);
+							ePlayer.solid();
+							ePlayer.setFloatVar("globalCoop_player_makeSolidASAP",0);
+							return;//exit insitantly, no delay or a bug can be created in the next frame!
+						}
+					}
+				}
+				else
+				{
+					ePlayer.notsolid();
+				}
+		//WAIT A MOMENT
+				globalCoop_main_waitAFrame();
+			}
+			if(doesEntityExist(ePlayer))
+			{
+				ePlayer.setFloatVar("globalCoop_player_makeSolidASAP",0);
+			}
+		}
+	}
+}
+
+void globalCoop_player_joinDefaultTeam(entity ePlayer)
+//----------------------------------------------------------------------
+// To have a global function and saves us 1 statment per call
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(ePlayer))
+	{
+		ePlayer.joinMpTeam(coop_string_forceOneTeamColor);
+	}
+}
+
+float globalCoop_player_returnFloatRespawing(float fPlayerId)
+//------------------------------------------------------------------------------
+//Check if player has is spawning for the first time or respawning. Don't use if else, saves statments!!!
+//------------------------------------------------------------------------------
+{
+float fRespawned = 0;
+	if(fPlayerId  == 1)
+		fRespawned = coop_vector_player123Respawned_x;
+	if(fPlayerId  == 2)
+		fRespawned = coop_vector_player123Respawned_y;
+	if(fPlayerId  == 3)
+		fRespawned = coop_vector_player123Respawned_z;
+	if(fPlayerId  == 4)
+		fRespawned = coop_vector_player123Respawned_x;
+	if(fPlayerId  == 5)
+		fRespawned = coop_vector_player123Respawned_y;
+	if(fPlayerId  == 6)
+		fRespawned = coop_vector_player123Respawned_z;
+	if(fPlayerId  == 7)
+		fRespawned = coop_vector_player123Respawned_x;
+	if(fPlayerId  == 8)
+		fRespawned = coop_vector_player123Respawned_y;
+	return fRespawned;
+}
+
+void globalCoop_player_setFloatRespawing(float fPlayerId,float fValue)
+//------------------------------------------------------------------------------
+//Set that player is respawnig. Don't use if else, saves statments!!!
+//------------------------------------------------------------------------------
+{
+	//wait(fDelay);
+	if(fPlayerId  == 1)
+		coop_vector_player123Respawned_x = fValue;
+	if(fPlayerId  == 2)
+		coop_vector_player123Respawned_y = fValue;
+	if(fPlayerId  == 3)
+		coop_vector_player123Respawned_z = fValue;
+	if(fPlayerId  == 4)
+		coop_vector_player456Respawned_x = fValue;
+	if(fPlayerId  == 5)
+		coop_vector_player456Respawned_y = fValue;
+	if(fPlayerId  == 6)
+		coop_vector_player456Respawned_z = fValue;
+	if(fPlayerId  == 7)
+		coop_vector_player78Respawned_x = fValue;
+	if(fPlayerId  == 8)
+		coop_vector_player78Respawned_y = fValue;
+}
+
+void globalCoop_player_removeSoftlyAttached(entity ePlayer)
+//------------------------------------------------------------------------------
+// REMOVE ATTACHED, don't use kill attach during spawn equip, this is a solution to do others setups(class/playerModel) while equiping the player without interupting the equip procedure
+//------------------------------------------------------------------------------
+{
+	float fPlayerId;
+	fPlayerId = globalCoop_return_integerPlayerId(ePlayer);
+	if(fPlayerId > -1){
+		ePlayer.removeAttachedModelByTargetname("globalCoop_playerClassIndicator");
+		ePlayer.removeAttachedModelByTargetname("globalCoop_playerId"+fPlayerId+"Watch");
+	}
+}
+
+

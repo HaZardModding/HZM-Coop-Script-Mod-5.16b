@@ -1,0 +1,306 @@
+void informantCinematic();
+void endCinematicInformant();
+void informantFound();
+void endInformantFound();
+
+void informantCinematic()
+{
+	spawn ( "Camera" , "targetname" , "munroCam" );
+	spawn ( "Camera" , "targetname" , "munroCloseCam" );
+	spawn ( "Camera" , "targetname" , "informantCam" );
+	spawn ( "Camera" , "targetname" , "farshotCam" );
+	spawn ( "Camera" , "targetname" , "beam1Cam" );
+	spawn ( "Camera" , "targetname" , "beam2Cam" );
+
+	cam.load ( "m10l2a_introFarshot" );
+	cam.load ( "m10l2a_introInformant" );
+	cam.load ( "m10l2a_introMunro" );
+	cam.load ( "m10l2a_introMunroClose" );
+	cam.load ( "m10l2a_beam1" );
+	cam.load ( "m10l2a_beam2" );
+	
+	globalCoop_main_camFadeOut(.5);
+	wait ( .5 );
+	
+	spawn ("Actor","model","models/char/hazardteam_munro-rom-uniform.tik","targetname","munro","ai_off","1");
+	wait(.1);
+	$munro.ai_off();
+	$munro.notarget();//do not alert ai
+	$munro.notsolid();//do not allow the indicator to show
+	
+	globalCoop_cin_start();
+	
+    allowMusicDucking( 0 );
+    music ("aux1","normal");
+
+	globalCoop_cin_follow($informantCam, $m10l2a_introInformant );
+	globalCoop_cin_cut($informantCam);
+
+	globalCoop_cin_follow($munroCam, $m10l2a_introMunro );
+	globalCoop_cin_cut($munroCam);
+
+	globalCoop_cin_follow($munroCloseCam, $m10l2a_introMunroClose );
+	globalCoop_cin_cut($munroCloseCam);
+
+	globalCoop_cin_follow($farshotCam, $m10l2a_introFarshot );
+	globalCoop_cin_cut($farshotCam);
+
+	wait ( .1 );
+	$munro.warpto ( "fakeplayerNode1" );
+	$munro.model( "models/char/hazardteam_munro-rom-uniform.tik" );
+	globalCoop_cin_skipThread( "endCinematicInformant" );
+
+	$romulan_informant.headwatch ( $munro );
+	wait ( .5 );
+	$munro.removeattachedmodel ( "tag_rhand" );
+
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+	globalCoop_cin_cuecamera ( $informantCam );
+	thread globalCoop_dialog_play($munro,"m10l2/munro_goodtiming.mp3", 1, 80000 , 0 );
+	thread animActor ( $munro , "conv-gestureL" , "idle" );
+	globalCoop_dialog_waitForDialog( $munro  );
+
+	thread globalCoop_dialog_play($romulan_informant,"m10l2/info_dataneed.mp3", 1, 80000 , 0);
+	wait ( .5 );
+	thread animActor ( $romulan_informant , "conv-gestureL" , "idle" );
+	wait ( 3.0 );
+
+	globalCoop_cin_follow($beam1Cam, $m10l2a_beam1 );
+	globalCoop_cin_cut($beam1Cam);
+	globalCoop_cin_cuecamera ( $beam1Cam );
+	wait ( 3.0 );
+
+	globalCoop_cin_follow($beam2Cam, $m10l2a_beam2 );
+	globalCoop_cin_cut($beam2Cam);
+	globalCoop_cin_cuecamera ( $beam2Cam );
+	wait ( 3.0 );
+
+	globalCoop_cin_cuecamera ( $informantCam );
+
+	globalCoop_dialog_waitForDialog( $romulan_informant  );
+
+	wait ( .5 );
+	globalCoop_cin_cuecamera ( $informantCam );
+	thread globalCoop_dialog_play($romulan_informant,"m10l2/info_afterdata.mp3", 1, 80000 , 0);
+	wait ( .75 );
+	thread animActor ( $romulan_informant , "conv-shakehead" , "idle" );
+	globalCoop_dialog_waitForDialog( $romulan_informant );
+
+	globalCoop_cin_cuecamera ( $munroCam );
+	$munro.morph ( "exp_brows_up" );
+	thread globalCoop_dialog_play($munro,"m10l2/munro_whatwhere.mp3", 1, 80000 , 0);
+	$munro.anim ( "conv-wtf" );
+	globalCoop_dialog_waitForDialog( $munro );
+
+	globalCoop_cin_cuecamera ( $informantCam );
+	$munro.anim ( "idle" );
+	thread globalCoop_dialog_play($romulan_informant,"m10l2/info_difference.mp3", 1, 80000 , 0);
+	thread animActor ( $romulan_informant , "conv-shrug" , "idle" );
+	globalCoop_dialog_waitForDialog( $romulan_informant  );
+
+	globalCoop_cin_cuecamera ( $munroCloseCam );
+	thread globalCoop_dialog_play($munro,"m10l2/munro_mypri.mp3", 1, 80000 , 0);
+	thread animActor ( $munro , "conv-poundfist" , "idle" );
+	globalCoop_dialog_waitForDialog( $munro );
+
+	globalCoop_cin_cuecamera ( $farshotCam );
+	thread globalCoop_dialog_play($romulan_informant,"m10l2/info_risk.mp3", 1, 80000 , 0);
+	wait ( .75 );
+	thread animActor ( $romulan_informant , "conv-wtf" , "idle" );
+	globalCoop_dialog_waitForDialog( $romulan_informant );
+
+	thread globalCoop_dialog_play($munro,"m10l2/munro_yes.mp3", 1, 80000 , 0);
+	$munro.animateonce ( "conv-idle-look" );
+	globalCoop_dialog_waitForDialog( $munro );
+
+	globalCoop_cin_cuecamera ( $informantCam );
+	wait ( .5 );
+	$romulan_informant.headwatch ( $informantFloorwatch );
+	wait ( 2 );
+	$romulan_informant.headwatch ( $munro );
+	thread animActor ( $romulan_informant , "conv-idle-look" , "idle" );
+	wait ( .5 );
+	globalCoop_dialog_play($romulan_informant,"m10l2/info_verywell.mp3", 1, 80000 , 0);
+
+	thread endCinematicInformant ();
+}
+
+void endCinematicInformant ()
+{
+	cam_fadeout( .5, 0, 0, 0, 1, 0 );
+	wait(.5);
+	killthread ( "informantCinematic" );
+	$munro.stopdialog();
+	$munro.hide();
+	$romulan_informant.stopdialog ();
+	globalCoop_level_removePath($m10l2a_introFarshot);
+	globalCoop_level_removePath($m10l2a_introInformant);
+	globalCoop_level_removePath($m10l2a_introMunro);
+	globalCoop_level_removePath($m10l2a_introMunroClose);
+	globalCoop_level_removePath($m10l2a_beam1);
+	globalCoop_level_removePath($m10l2a_beam2);
+	globalCoop_level_remove($munroCam);
+	globalCoop_level_remove($munroCloseCam);
+	globalCoop_level_remove($informantCam);
+	globalCoop_level_remove($farshotCam);
+	globalCoop_level_remove($beam1Cam);
+	globalCoop_level_remove($beam2Cam);
+	
+	globalCoop_cin_end();
+
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+	$romulan_informant.forcealpha ( 1 );
+	$romulan_informant.anim ( "idle" );
+	$romulan_informant.displayeffect ( "FadeOut" ,"Slow" );
+	$romulan_informant.notsolid ();
+
+	$securityAccessPuzzleObject.missionobjective ( 1 );
+
+//Update Objectives
+	//$player.setobjectiveshow ( "RescueGonzalez" , 1 );
+	thread globalCoop_objectives_update("incomplete",3,1);
+}
+
+
+//---------------------
+// MainStorageInformantTrigger_Events
+// Informant shows player to exit with player and shows him exit
+//---------------------
+void informantFound()
+{
+    music ("aux1","normal");
+	entity e;
+	e = getcurrententity ();
+	e.nottriggerable ();
+
+	endOfLevel = 1;	//get the remaining soldiers running around to beam out
+
+	globalCoop_main_camFadeOut(.25);
+	wait ( .25 );
+	
+	globalCoop_cin_start();
+	
+	if(!doesEntityExist($munro))
+	{
+		spawn ("Actor","model","models/char/hazardteam_munro-rom-uniform.tik","targetname","munro","ai_off","1");
+		wait(.1);
+		$munro.ai_off();
+		$munro.notarget();//do not alert ai
+		$munro.notsolid();//do not allow the indicator to show
+		$munro.removeattachedmodel ( "tag_rhand" );
+	}
+	
+	$munro.immortal(1);
+	$romulan_informant.show ();
+	$romulan_informant.immortal (1);
+	$romulan_informant.nodamage ();
+	$romulan_informant.origin('3095 148 -191');
+	wait ( .1 );
+	
+	killclass ( "Actor" );
+	wait ( .2 );
+	
+	$romulan_informant.fadein(1);
+	$romulan_informant.immortal (0);
+	$romulan_informant.takedamage ();
+	$romulan_informant.health ( 100 );
+
+	spawn ( "Camera" , "targetname" , "cam1");
+	cam.load ( "m10l2a_extro" );
+	wait ( .05 );
+
+	$munro.show();
+	$munro.origin ( '3069 183 -191' );
+	$munro.angles ( '0 303 0' );
+
+	globalCoop_cin_follow($cam1, $m10l2a_extro );
+	wait(.1);
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+	cam_fadein( .25, 0, 0, 0, 1, 0 );
+	
+	globalCoop_cin_skipThread( "endInformantFound" );
+
+	$romulan_informant.angle(135);
+	$romulan_informant.headwatch ( $munro );
+	$romulan_informant.anim ( "idle" );
+	$romulan_informant.displayeffect ( "FadeIn" ,"Slow" );
+	$romulan_informant.solid ();
+	$romulan_informant.show();
+//Update Objectives
+	//$player.setobjectiveshow ( "FollowInformant" , 1 );
+	thread globalCoop_objectives_update("incomplete",4,1);
+
+	globalCoop_dialog_play($romulan_informant,"m10l2/info_found.mp3", 1, 80000 , 0);
+
+	wait(.1);
+	
+	thread globalCoop_dialog_play($munro,"m10l2/munro_thank.mp3", 1, 100000 , 0);
+	thread animActor ( $fakeMunro , "conv-affirmative" , "idle" );
+	globalCoop_dialog_waitForDialog( $fakeMunro );
+	
+	wait(.1);
+
+	thread globalCoop_dialog_play($romulan_informant,"m10l2/info_risking.mp3", 1, 80000 , 0);
+	thread animActor ( $romulan_informant , "conv-idle-look" , "idle" );
+	globalCoop_dialog_waitForDialog( $romulan_informant );
+
+	wait(.2);
+	
+	thread endInformantFound();
+}
+
+void endInformantFound ()
+{
+	killthread ( "informantFound" );
+	cam_fadeout( .25, 0, 0, 0, 1, 0 );
+	
+	globalCoop_cin_end();
+	
+	$munro.remove();
+
+	wait ( .5 );
+	cam_fadein( .25, 0, 0, 0, 1, 0 );
+	$romulan_informant.anim ( "idle" );
+
+	thread globalCoop_dialog_play($romulan_informant,"m10l2/info_input.mp3", 1, 80000 , 0);
+	//$romulan_informant.walkto ( "informantNode" , "walk" );
+	$romulan_informant.walkto ( "$informantNode" , "walk" );
+	waitfor ( $romulan_informant );
+
+	$informantPanel.time ( 2 );
+	$informantPanel.moveDown ( 20 );
+	$informantPanel.rotateYDown ( 45 );
+	$informantPanel.moveNorth ( 20 );
+	$informantPanel.playsound ( "sound/doors/klingon_jtube.wav", 6, .6, 232 );
+	$romulan_informant.turntoangle ( 330 );
+	waitfor ( $informantPanel );
+
+	$romulan_informant.anim ( "panel_pushbutton" );
+	waitforanimation ( $informant , "panel-pushbutton" );
+	$romulan_informant.playsound ( "sound/ships/romulan/rom_beep_yes.wav" , 7, .3, 10000 );
+	globalCoop_dialog_waitForDialog( $romulan_informant );
+	wait ( 1 );
+
+	$liftForcefield.remove ();
+	$liftForcefield.stoploopsound ();
+
+	$liftForcefieldClip.remove ();
+	wait ( .5 );
+
+	$romulan_informant.walkto ( "informantNode2" , "run" );
+
+	$informantPanel.time ( 2 );
+	$informantPanel.moveSouth ( 20 );
+	$informantPanel.rotateYUp ( 45 );
+	waitfor ( $informantPanel );
+
+	//waitfor( $romulan_informant );
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$romulan_informant.alias ( "informantDialog1" , "localization/sound/dialog/m10l2/info_risking.mp3" );
+		$romulan_informant.dialog ( "informantDialog" );
+		//$ExitEventsTrigger.triggerable();
+	}
+}
+

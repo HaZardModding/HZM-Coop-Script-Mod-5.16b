@@ -1,0 +1,161 @@
+//badezimmer related functions - purpose is to keep the scripts simple
+//$fedOutpostDoorBadezimmer
+
+void badezimmerWaschbecken()
+{//toggle wasser
+	if(!float_badezimmerWaschbecken){
+		float_badezimmerWaschbecken=1;
+		if(float_basementWasserAbgestellt != 1){
+			$badezimmerWasserStrahl.forceAlpha(0);
+			$badezimmerWasserStrahl.fadein(.2,1);
+			$badezimmerWaschbeckenWaterOrigin.loopsound("sound/environment/water/fount1.wav",1,64);
+			thread badezimmerWaschbeckenWasserUp();
+		}else{
+			$badezimmerWasserTropfen.forceAlpha(0);
+			$badezimmerWasserTropfen.fadein(.2,1);
+			$badezimmerWaschbeckenWaterOrigin.loopsound("sound/environment/water/drip.wav",1,64);
+		}
+	}else{
+		float_badezimmerWaschbecken=0;
+		if(float_basementWasserAbgestellt != 1){
+			$badezimmerWasserStrahl.forceAlpha(1);
+			$badezimmerWasserStrahl.fade(.2,0);
+		}else{
+			$badezimmerWasserTropfen.forceAlpha(1);
+			$badezimmerWasserTropfen.fade(.2,0);
+		}
+		$badezimmerWaschbeckenWaterOrigin.stopLoopSound();
+		thread badezimmerWaschbeckenWasserDown();
+	}
+}
+
+void badezimmerWaschbeckenWasserUp()
+{
+	if(float_basementWasserAbgestellt != 1){
+		killthread("badezimmerWaschbeckenWasserDown");
+		float fZaxis,fTime = 3;
+		vector v1,v2;
+		v1=$badezimmerWaschbeckenWaterOrigin.getOrigin();
+		v1_x = 0;
+		v1_y = 0;
+		v2='0 0 -29';
+		fZaxis = vectorLength(v1 - v2);
+		fTime = (fTime * fZaxis);
+		$badezimmerWaschbeckenWaterOrigin.movetopos('2602 -1558 -29');
+		$badezimmerWaschbeckenWaterOrigin.time(fTime);
+		waitfor($badezimmerWaschbeckenWaterOrigin);
+	//turn off water
+		if(float_badezimmerWaschbecken){
+			thread badezimmerWaschbecken();
+		}
+	}
+}
+
+void badezimmerWaschbeckenWasserDown()
+{
+	if(float_badezimmerWaschbecken != 1 || float_basementWasserAbgestellt == 1){
+		killthread("badezimmerWaschbeckenWasserUp");
+		float fZaxis,fTime = 3;
+		vector v1,v2;
+		v1=$badezimmerWaschbeckenWaterOrigin.getOrigin();
+		v1_x = 0;
+		v1_y = 0;
+		v2='0 0 -34';
+		fZaxis = vectorLength(v1 - v2);
+		fTime = (fTime * fZaxis);
+		$badezimmerWaschbeckenWaterOrigin.movetopos('2602 -1558 -34');
+		$badezimmerWaschbeckenWaterOrigin.time(fTime);
+	}
+}
+
+void badezimmerDynlight()
+//activated when a player enters a room which has a trigger_multiple inside
+{
+return;
+	entity e;
+	e=getCurrentEntity();
+	if(doesEntityExist(e)){
+		e.nottriggerable();
+//check now if the lights are on allready
+		if($world.getlightintensity("fedOutpostBadezimmer") !=  0){
+			return;
+		}
+//turn on lights
+		$world.light_fade("fedOutpostBadezimmer",1,1);
+//close and lock door
+		$fedOutpostDoorBadezimmer.lock();
+//open toilet
+		$badezimmerExit.nottriggerable();
+		badezimmerTolietOpen();
+		$badezimmerExit.triggerable();
+//CHEK IF PLAYER IS INSIDE THE TRIGGER-FIELD/ROOM
+		while(globalCoop_check_isEntityInsideOfEntity(globalCoop_return_playerClosestActive(e),e,0))
+		{
+			wait(1);
+		}
+//unlock door, close toilet and flush it
+		$fedOutpostDoorBadezimmer.unlock();
+		badezimmerTolietClose();
+//turn off lights
+		$world.light_fade("fedOutpostBadezimmer",0,.5);
+		if(doesEntityExist(e)){
+			e.triggerable();
+		}
+	}
+}
+
+void badezimmerToilet()
+{
+	entity e;
+	e=getCurrentEntity();
+	if(doesEntityExist(e)){
+		e.nottriggerable();
+		entity ePlayer;
+		ePlayer = e.getLastActivatingEntity();
+		if(doesEntityExist(ePlayer)){
+			badezimmerTolietOpen();
+			float fInside=1;
+			while(fInside)
+			{
+				if(!globalCoop_check_isEntityInsideOfEntity(ePlayer,e,20)){
+					fInside=0;
+				}
+				wait(2);
+			}
+			badezimmerTolietClose();
+		}
+		wait(1);
+		if(doesEntityExist(e)){
+			e.triggerable();
+		}
+	}
+}
+
+void badezimmerTolietOpen()
+{
+	if(!float_badezimmerTolietState){
+		$badezimmerToliletCapOrigin.angles('0 0 0');
+		float_badezimmerTolietState=1;
+		$badezimmerToliletCapOrigin.rotateZ(-180);
+		wait(.5);
+		$badezimmerToliletCapOrigin.rotateZ(0);
+		wait(1);
+		$badezimmerToliletCapOrigin.angles('0 0 270');
+	}
+}
+
+void badezimmerTolietClose()
+{
+	if(float_badezimmerTolietState){
+		$badezimmerToliletCapOrigin.angles('0 0 270');
+		float_badezimmerTolietState=0;
+		$badezimmerToliletCapOrigin.rotateZ(180);
+		wait(.5);
+		$badezimmerToliletCapOrigin.rotateZ(0);
+		$badezimmerToliletCapOrigin.playsound("sound/ships/enterprise/ent_replicator.wav",2,2,128);
+		$badezimmerToliletCapOrigin.angles('0 0 0');
+	}
+}
+
+
+

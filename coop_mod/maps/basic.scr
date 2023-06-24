@@ -1,0 +1,635 @@
+//m2l2,m3l1a,m4l1a
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////Functions
+////////////////////////////////////////////////////////////////////////////////
+void globalCoop_main()
+//------------------------------------------------------------------------------
+// Inizial Thread
+//------------------------------------------------------------------------------
+//Do primary rutines, ready the mod and continue once a player entered
+{
+//If the main thread is allready running exit
+	if(coop_vector_mainisactiveLevelcompleteLmslevelend_x != 1)
+	{	
+//MAKE SURE MULTIPLAYER IS ALLWAYS 1	
+		if(getCvarInt("g_gametype") != 0){//0=sp,1=mp,2=sm
+			cvar_bool_multiplayer = 1;
+		}
+//precache for singleplayer		
+		else{
+			cam.load("cache_singleplayerGeneral");//cache all weapons, precache=nolag
+		}
+		coop_vector_mainisactiveLevelcompleteLmslevelend_x=1;
+		cvar_string_mapname				= getCvar("mapname");
+		cvar_string_localLanguage		= getCvar("local_language");
+		cvar_bool_coop_developer		= getCvarInt("coop_dev");
+		coop_string_dialogPath			= "loc/"+cvar_string_localLanguage+"/sound/dialog/";
+//SERVER FRAME SETTING
+		coop_float_oneFrameTime			= ((1 / (getCvarInt("sv_fps"))));
+		if(coop_float_oneFrameTime < .016)
+		{
+			coop_float_oneFrameTime = .016;
+		}
+//AVOID OVERLOADS, THE MOD WILL PUSH THE LIMIT UP - disabled: there are issues with comercial server providers
+		//if(getCvarInt("g_eventlimit") <= 5000){
+			//stuffCmd("g_eventlimit 8000 \n");
+		//}
+//detect if this is a linux server
+		if(getCvar("version") == "Elite Force II 1.10 linux-i386 Oct 17 2003")
+		{
+			coop_vector_linuxForcerebootTransporting_x = 1;
+		}
+//Multiplayer
+		if(cvar_bool_multiplayer)
+		{
+			removeclass("TriggerChangeLevel");
+//Reset health status
+			$world.setFloatVar("coop_activePlayersHealth",0);
+//Retrive settings
+			cvar_float_maxSpeed			= getCvarInt("coop_maxSpeed");
+			if(!cvar_bool_coop_disClass)
+				{cvar_bool_coop_disClass= getCvarInt("coop_disClass");}
+			cvar_integer_mp_gameType	= getCvarInt("mp_gametype");
+			cvar_float_dedicated		= getCvarInt("dedicated");
+			cvar_integer_mp_timeLimit	= getCvarInt("temp_dedicated");//recycle
+			
+//let the server rest for a moment or it will cycle out commands
+			globalCoop_main_waitAFrame();
+			
+//FORCE LINUX SERVERS TO DEDICATED 2, AS THEY HAVE NO OTHER USE
+			if(coop_vector_linuxForcerebootTransporting_x == 1)
+			{
+				cvar_float_dedicated=2;
+			}
+			else
+			{
+				if(	cvar_float_dedicated == 1 || cvar_integer_mp_timeLimit == 1)
+				{
+					cvar_float_dedicated = 1;
+				}
+				else if(cvar_float_dedicated == 2 || cvar_integer_mp_timeLimit == 2)
+				{
+					cvar_float_dedicated = 2;
+				}
+			}
+//retrive the rest of the settings
+			cvar_integer_mp_timeLimit	= getCvarInt("mp_timelimit");
+		
+//GET cVars and store them in vars, wich makes the script much more economic
+		////PLAYER LIMIT
+			float fMaxPlayers;
+			cvar_integer_sv_maxClients		= getCvarInt("sv_maxClients");
+			fMaxPlayers						= getCvarInt("coop_maxPlayers");
+			
+//let the server rest for a moment or it will cycle out commands
+			globalCoop_main_waitAFrame();
+			
+			//globalCoop_server_listenServerControll();//removed build 16
+		//Make sure server is for more than just 1 player
+			if(fMaxPlayers < 2)
+			{
+				fMaxPlayers = cvar_integer_sv_maxClients;
+			}
+		//make sure we don't exceed the limit
+			else if(fMaxPlayers > coop_integer_maxPlayers)
+			{
+				fMaxPlayers = coop_integer_maxPlayers;
+			}
+		//applay to real varaiable
+			coop_integer_maxPlayers = fMaxPlayers;
+		//if max players is higher as client slots are aviable
+			if(coop_integer_maxPlayers > cvar_integer_sv_maxClients)
+			{
+				coop_integer_maxPlayers = cvar_integer_sv_maxClients;
+			}
+		//FORCE TEAM, if not DM
+			if(cvar_integer_mp_gameType != 0)
+			{
+				coop_string_forceOneTeamColor = "blue";//TINA1979xy LIKES BLUE :)
+			}
+//let the server rest for a moment or it will cycle out commands
+			globalCoop_main_waitAFrame();
+			
+//wait for a player to join and perform further actions
+//manage warmuptime
+//fix the master server ignoring this server after reboot
+			thread globalCoop_main_playerJoined();
+			thread globalCoop_main_warmupTimeMaster();
+			stuffCMD("heartbeat\n");
+		}
+//SINGLEPLAYER
+		else{
+			thread globalCoop_main_singleplayer();
+		}
+//SET GLOBAL VARS
+		$world.setFloatVar("globalCoop_mission_failWithReason_isRunning",0);
+//make sure the server is running with the correct settings(fix issues in sp as well)
+		globalCoop_server_setup();
+		globalCoop_level_world();
+//Print default status info
+		thread globalCoop_main_printTimeAndString("HZM Coop MOD "+coop_float_build+" - $$WaitMinPlayers$$ (1)");
+		thread globalCoop_main_printTimeAndString(cvar_string_mapname+".bsp | cheats: "+getCvarInt("cheats")+"| FRAMETIME: "+coop_float_oneFrameTime);
+//EXECUTE CHEK ALL MAPS ROUTINE		
+		globalCoop_server_checkAllMaps();
+//let the server rest for a moment or it will cycle out commands
+		globalCoop_main_waitAFrame();
+//CHECK IF SERVER SHOULD REBOOT
+		stuffCmd("seta coop_lvlL "+globalCoop_server_checkRebootByMap(cvar_string_mapname)+" \n");
+	}
+}
+
+void globalCoop_main_singleplayerWait()
+//------------------------------------------------------------------------------
+// Wait in Singleplayer due event limits game skipping code
+//------------------------------------------------------------------------------
+{
+	wait(0.5);
+}
+
+void globalCoop_main_singleplayer()
+//------------------------------------------------------------------------------
+// For Singleplayer Setup
+//------------------------------------------------------------------------------
+{
+//Equip player with weapons
+//reset Objective
+	//globalCoop_main_executeInSp("coop_mod/cfg/sp/initialize.cfg");
+	thread globalCoop_player_singleplayerEquip();
+//show coop objectives hud when custom objectives are active
+	stuffCMD("seta coop_oExc \"\"\n");
+	
+	if(coop_string_objectiveLoc == "")
+	{
+		stuffCMD("seta coop_oExc \"pushmenu coop_objectives\"\n");
+		
+	}
+	globalCoop_player_setupInfo($player,0);
+	stuffcmd(	"exec coop_mod/cfg/sp/initialize.cfg\nexec coop_mod/cfg/sp/"+cvar_string_mapname+".cfg\n");
+	stuffcmd(	"exec coop_mod/cfg/sp/"+cvar_string_mapname+".cfg\n"+
+				"set coop_skill "+getCvarInt("skill"));
+}
+
+void globalCoop_main_waitForPlayer()
+//------------------------------------------------------------------------------
+// 
+//------------------------------------------------------------------------------
+{//called IN-LINE, not as Thread
+	waitForPlayer();
+	coop_float_gameStartedTime=getLevelTime();
+//Avoid telefrag, falling and other damage
+	$player.activateshield();
+	$player.resistance("telefrag",100);
+//warp all players, if nessesary
+	thread globalCoop_player_warpToSpawnOriginAllBeforeMatchStarts();
+//if game was lurking arround for 4 minutes without a player, restart the match, so player don't run out of time when just entering
+	thread globalCoop_server_restartDelayed();
+}
+
+void globalCoop_main_waitForWarmupTime()
+//------------------------------------------------------------------------------
+// Wait until the warmuptime is over
+//------------------------------------------------------------------------------
+{
+	if(cvar_bool_multiplayer){//Multiplayer
+		float fWaitTime;
+		fWaitTime = getCvarInt("mp_warmUpTime");
+		fWaitTime -= getLevelTime();
+		wait(fWaitTime);
+	}
+}
+
+//globalCoop_check_teamInsideArea(vector vOrigin,vector vMins,vector vMaxs)
+
+void globalCoop_main_waitForTeam(vector vOrigin,vector vMins,vector vMaxs)
+//------------------------------------------------------------------------------
+// Seta Area at wich the team is suppose to gather
+//------------------------------------------------------------------------------
+{
+//MULTIPLAYER ONLY
+	if(cvar_bool_multiplayer){
+		if(coop_vector_svnextmaporrebootDoloadnextmimapWaitingForTeam_z != 1){
+			coop_vector_svnextmaporrebootDoloadnextmimapWaitingForTeam_z = 1;
+			coop_vector_svnextmaporrebootDoloadnextmimapWaitingForTeam_y=1;//allow loading next mission on timeranout
+//CHECK GIVEN DATA
+			if(vOrigin != '0 0 0'){
+				if(vectorlength(vMins) > 100 || vectorlength(vMaxs) > 100){
+					entity ePlayer;
+					float fExit,fPlayerIdInUse,fPlayerQuantity,fPreviouse,fRequired,fPreviouserequired,fTimeleft,fTimeleftPreviouse;
+					fTimeleft=30;
+					while(fExit == 0)
+					{
+//CHECK FOR TIME
+						//GRAB TIME LIMIT
+						float mp_timeLimit;
+						mp_timeLimit = cvar_integer_mp_timeLimit;
+						//DON'T GET FOOLED
+						if(mp_timeLimit < 1){
+							mp_timeLimit = 0;
+						}
+						//MINUTES TO SECOUNDS
+						
+						mp_timeLimit *= 60;
+						mp_timeLimit = (mp_timeLimit - getLevelTime());
+						mp_timeLimit = floor(mp_timeLimit);
+						if(mp_timeLimit < 11 && cvar_integer_mp_timeLimit != 0){
+							return;
+						}
+//CHEK ARE THE MOST PLAYERS IN RANGE
+						fExit = 0;
+						fPlayerQuantity = 0;
+						for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++){
+							ePlayer = getentity("player"+fPlayerIdInUse);
+							if(globalCoop_check_existingLivingEntity(ePlayer)){
+								if(ePlayer.getFloatVar("globalCoop_lmsPlayerIsOut") != 1){
+									if(!globalCoop_check_playerSpectator(ePlayer)){
+										if(globalCoop_check_isBoundingBox2InsideOfBoundingBox1(
+										ePlayer.getOrigin(),//ORIGIN BBOX1
+										'-22 -22 0',//e.getMins()
+										'22 22 96',//e.getMaxs()
+										vOrigin,//ORIGIN BBOX2
+										vMins,//e.getMins()
+										vMaxs,//e.getMaxs()
+										0)
+										){
+											fExit++;
+										}
+									}
+								}
+								fPlayerQuantity++;
+							}
+						}
+
+//IF 2 or 3 players, require 2
+						if(fPlayerQuantity == 1){
+							fRequired = 1;
+						}
+						if(fPlayerQuantity == 2){
+							fRequired = 2;
+						}else{
+							fRequired = (fPlayerQuantity / 2);
+							fRequired = ceil(fRequired);						
+						}
+//CHECK FOR CHANGES
+						if(fExit != fPreviouse || fRequired != fPreviouserequired || fTimeleft != fTimeleftPreviouse){
+							fPreviouse			= fExit;
+							fPreviouserequired	= fRequired;
+							fTimeleftPreviouse	= fTimeleft;
+							if(fExit != 0){
+								centerPrint("^3Waiting for players:^5 "+fExit+"^2 of^5 "+fRequired+" ^2required are at the zone. ^3Auto ending in:^5 "+fTimeleft+"\n");
+							}
+						}
+//Do countdown only if a player is waiting at the level end
+						if(fExit != 0){
+							fTimeleft=(fTimeleft+ -2);
+							if(fExit >= fRequired || fTimeleft <= 0){
+								fExit = 1;
+							}
+							else{
+								fExit = 0;
+							}
+						}
+						else{
+							fExit = 0;
+						}
+						globalCoop_main_wait2DotZero();
+					}
+				}
+			}
+		}
+	}
+}
+
+
+void globalCoop_main_playerJoined()
+//------------------------------------------------------------------------------
+// Do stuff only if a player has entred
+//------------------------------------------------------------------------------
+{
+//Wait (pause script) for a player entering the game
+//Return current status of the Script
+	globalCoop_main_waitForPlayer();
+//GET DATA FROM CVARS NOW(this way we avoid accessing to many cvars at mapstart)
+	cvar_float_weapMoveSpeed = getCvarInt("coop_weapSpeed");
+	if(cvar_float_weapMoveSpeed < 35)
+	{
+		cvar_float_weapMoveSpeed=65;
+	}
+	cvar_float_weapMoveSpeed	= (cvar_float_weapMoveSpeed/100);
+	cvar_bool_coop_techOnly		= getCvarInt("coop_techOnly");
+	cvar_integer_coop_skill		= getCvarInt("coop_skill");
+//RUN PLAYER DETECTION ROUTINE
+	if(!doesEntityExist($player))
+		{globalCoop_main_countDown("^1FATAL ERROR: ^3HZM Coop Mod was unable to grab a player by targetname, ^1MOD functionality suspended^3! ",5000);}
+	thread globalCoop_player_detectNewPlayers();
+//Print default status info
+	globalCoop_main_printTimeAndString("=== $$MatchStarted$$ - A player has joined ===");
+//START VITAL COOP MOD RUTINES
+	thread globalCoop_player_manageCycle();
+}
+
+
+void globalCoop_main_warmupTimeMaster()
+//------------------------------------------------------------------------------
+//Sets the state to the warmup time check variable: coop_bool_mp_warmupTimeOver
+//------------------------------------------------------------------------------
+{
+	globalCoop_main_waitForWarmupTime();
+//SET VARS, RUN RUTINES
+	coop_bool_mp_warmupTimeOver = 1;
+//CHECK IF SERVER NEEDS URGENT RESTART (callvoting)
+	if(globalCoop_server_checkRebootByMap(cvar_string_mapname) > 8){//loadad maps limit hit		
+//THIS DOES FIX THE PROBLEM OF MESSED UP MODELS DURING extensive "CALLVOTING"
+		if(cvar_float_dedicated >= 1)//USED TO LAG DURING LISTEN SERVER HOSTINGS (FLUSHTIKIS)
+		{
+			coop_string_objectiveLoc			= "";//no localstrings ($$$$)
+			coop_string_objectiveTacticalInfo3	= "Server Is Going To Reboot";
+			//coop_string_objectiveItem1			= "Server Is Going To Reboot";
+			wait(30 - getLevelTime());
+			globalCoop_server_reboot();
+		}
+	}
+}
+
+
+void globalCoop_main_pause()
+//------------------------------------------------------------------------------
+// Pause the Mod as long as no player is on the server (disable AI, etc...)
+//------------------------------------------------------------------------------
+{
+//EXIT IF PAUSE IS ALLREADY ACTIVE
+	if(coop_bool_scriptIsPaused == 0 || ((getLevelTime() + 4) > (getCvarInt("mp_warmUpTime")) ) ){
+//NOTIFY OTHER THREADS SCRIPT IS PAUSED
+		coop_bool_scriptIsPaused = 1;
+//PRINT INFO
+		globalCoop_main_printTimeAndString("Co-Op Pause ($$PauseGame$$)");
+//DISABLE THE LEVEL AI
+		level_ai(0);
+//FADE OUT THE CAM, 'PAINT IT BLACK'!
+		globalCoop_main_camFadeOut(.01);
+//CHEK EVERY SECOUND FOR ACTIVITY
+		while(!doesEntityExist($player) && !doesEntityExist($player1))
+		{
+			wait(3);//Piano, Piano as 'Holger Hasenmaile' says allways!
+		}
+//FADE CAM IN :), AHHH I CAN SEE AGAIN!!!
+		globalCoop_main_camFadeIn(2);
+//ENABLE THE LEVEL AI
+		level_ai(1);
+//NOTIFIE OTHER THREADS SCRIPT IS NOT PAUSED
+		coop_bool_scriptIsPaused = 0;
+//RECALL FUNCTIONS
+		thread globalCoop_player_detectNewPlayers();	
+//KEEP DEV POSTED
+		globalCoop_main_printTimeAndString("Co-Op Pause ($$ResumeButton$$)");
+	}
+}
+
+
+void globalCoop_main_globalMessage(string sGlobalMessage)
+//----------------------------------------------------------------------
+// Send a Message to all Players at once
+//----------------------------------------------------------------------
+{	
+//DO ONLY IN MULTIPLAYER
+	if(cvar_bool_multiplayer){
+//PLAY SOUND
+		$world.playsound("sound/player/CommunicatorBeep.wav", 3, 3, 800000);
+//PRINT TO CONSOLE
+		globalCoop_main_print(sGlobalMessage);
+//SHOW MESSAGE TO ALL PLAYERS
+		centerprint(sGlobalMessage+"\n");
+	}
+}
+
+
+void globalCoop_main_globalCommand(string coopGlobalCmd)
+//----------------------------------------------------------------------
+// A lot commands wich applay to each player
+// ->droptofloor,kill,notsolid,solid,hide,show,nodamage,takedamage,putaway,health,ammo,amor,disable,enable,spectator,join
+//----------------------------------------------------------------------
+{//used to be else if based, removed else to save staments
+	entity ePlayer;
+	float COOP_COMMAND_IMMOBILIZE,coop_playerIdInUse;
+	coop_playerIdInUse=1;
+	while(coop_playerIdInUse<=coop_integer_maxPlayers)
+	{
+		ePlayer = getentity("player"+coop_playerIdInUse);
+//DO ONLY ONCE IN SINGLEPLYER, BUT DO IT!
+		if(!cvar_bool_multiplayer)
+		{
+			ePlayer = getentity("player");
+			coop_playerIdInUse=coop_integer_maxPlayers;
+		}
+		if(globalCoop_check_existingLivingEntity(ePlayer))
+		{
+		//drop
+			if(coopGlobalCmd == "droptofloor")
+			{
+				ePlayer.droptofloor();
+				ePlayer.anim("idle_dm");
+			}
+		//KILL
+			if(coopGlobalCmd == "kill")
+			{
+				ePlayer.kill();
+			}
+		//nodamage
+			if(coopGlobalCmd == "nodamage")
+			{
+				ePlayer.nodamage();
+			}
+		//takedamage
+			if(coopGlobalCmd == "takedamage")
+			{
+				ePlayer.takedamage();
+			}
+		//putaway weapon
+			if(coopGlobalCmd == "putaway")
+			{
+				thread globalCoop_armory_putAwayWeapon(ePlayer);
+			}
+			if(coopGlobalCmd == "health")
+			{
+				ePlayer.health(100);
+			}
+			if(coopGlobalCmd == "ammo")
+			{
+				globalCoop_armory_giveAmmo(ePlayer,400);
+			}
+			if(coopGlobalCmd == "amor"){
+				ePlayer.armor("BasicArmor",100);
+			}
+		}
+		coop_playerIdInUse++;
+	}
+}
+
+
+void globalCoop_main_print(string sText)
+//----------------------------------------------------------------------
+// Print the text, for linux servers we need echo instead
+// do not use ";", echo does not work with that!!!
+//----------------------------------------------------------------------
+{
+	sText = sText+"\n";
+	if(coop_vector_linuxForcerebootTransporting_x){
+		print(sText);
+	}else{
+		stuffCMD("echo "+sText);
+	}
+}
+
+
+void globalCoop_main_printTimeAndString(string sText)
+//----------------------------------------------------------------------
+// Print the Leveltime and a text with it...
+//----------------------------------------------------------------------
+{
+	globalCoop_main_print(getLevelTime()+"	|"+sText);
+}
+
+
+void globalCoop_main_devInfo(string sDeveloperInfo)
+//----------------------------------------------------------------------
+// Print info to the console for the Developer
+//----------------------------------------------------------------------
+{
+//Check if developer var is true
+	if(cvar_bool_coop_developer)
+	{
+		globalCoop_main_printTimeAndString(sDeveloperInfo);
+	}
+}
+
+
+void globalCoop_main_countDown(string sMessage,float fTime)
+//----------------------------------------------------------------------
+// Basic Countdown Function, is needed more than once internal,
+// so we use this function to save statments...
+// (Prime directive: SAVE STATMENTS)
+//----------------------------------------------------------------------
+{
+	while(fTime > 0)
+	{
+		centerprint(sMessage+""+fTime+" \n");
+		globalCoop_main_wait1DotZero();
+		fTime--;
+	}
+}
+
+
+void globalCoop_main_executeInSp(string sConfigPath)
+//----------------------------------------------------------------------
+// Execute the given configfile only in singleplayer
+//----------------------------------------------------------------------
+{
+	if(getCvarInt("g_gameType") == 0)
+	{
+		waitForPlayer();
+		globalCoop_server_listenServerControll();
+		stuffCMD("exec "+sConfigPath+" \n");
+		globalCoop_main_waitAFrame();
+	}
+}
+
+
+void globalCoop_main_waitAFrame()
+//----------------------------------------------------------------------
+// wait a frame
+//----------------------------------------------------------------------
+{
+	wait(coop_float_oneFrameTime);
+}
+
+
+void globalCoop_main_waitZeroDotZero5()
+//----------------------------------------------------------------------
+// wait .05 sec, statment saver (saves 1 statment per call, parameters count as own statment besides the function call it self)
+//----------------------------------------------------------------------
+{
+	wait(.05);
+}
+
+
+void globalCoop_main_waitZeroDot2()
+//----------------------------------------------------------------------
+// wait .2 sec, statment saver
+//----------------------------------------------------------------------
+{
+	wait(.2);
+}
+
+
+void globalCoop_main_waitZeroDot5()
+//----------------------------------------------------------------------
+// wait .5 sec, statment saver
+//----------------------------------------------------------------------
+{
+	wait(.5);
+}
+
+
+void globalCoop_main_wait1DotZero()
+//----------------------------------------------------------------------
+// wait 1 sec, statment saver
+//----------------------------------------------------------------------
+{
+	wait(1);
+}
+
+
+void globalCoop_main_wait1Dot5()
+//----------------------------------------------------------------------
+// wait 1.5 sec, statment saver
+//----------------------------------------------------------------------
+{
+	wait(1.5);
+}
+
+
+void globalCoop_main_wait2DotZero()
+//----------------------------------------------------------------------
+// wait 2 sec, statment saver
+//----------------------------------------------------------------------
+{
+	wait(2);
+}
+
+void globalCoop_main_camFadeOut(float fTime)
+//----------------------------------------------------------------------
+// fade cam, this saves enourmous statments each use
+//----------------------------------------------------------------------
+{
+	coop_bool_cameraFadedOut=0;
+	cam_fadeOut(fTime, 0, 0, 0,1);
+	thread globalCoop_main_camFadeOutTimer(fTime);
+}
+
+void globalCoop_main_camFadeOutTimer(float fTime)
+//----------------------------------------------------------------------
+// fade cam out timer
+//----------------------------------------------------------------------
+{
+	wait(fTime);
+	coop_bool_cameraFadedOut=1;
+}
+
+void globalCoop_main_camFadeIn(float fTime)
+//----------------------------------------------------------------------
+// fade cam, this saves enourmous statments each use
+//----------------------------------------------------------------------
+{
+	coop_bool_cameraFadedOut=0;
+	cam_fadeIn(fTime, 0, 0, 0,1);
+}
+
+void globalCoop_playSound_c3v1r60(entity e,string sSound)
+//----------------------------------------------------------------------
+// PlaySound, save us statments
+//----------------------------------------------------------------------
+{
+	e.playsound(sSound,3,1,60);
+}
+
+

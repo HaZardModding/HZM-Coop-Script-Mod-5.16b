@@ -1,0 +1,690 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	      ent-deck8 - Enterprise Deck 8 - Transporter, Armory, SickBay 
+//  Script By:    Luke W, Kenny T
+//  Geometry By:  Kenny T, Benson R
+//  Created on:   07/08/2002
+//	Last Edited:  09/22/2002 - Benson R
+//-----------------------------------------------------------------
+
+
+/***
+coop_igm		//ente mission num
+coop_igmT		//turbolift
+coop_igmR		//rooms visited
+*/
+
+void setupExo180Notsolid(entity eExo);
+void main();
+void init();
+void camfadeout(float fFadeTime);
+void camfadeout05();
+void camfadeout01();
+void wait_01();
+void wait_025();
+void wait_06();
+void wait_3();
+void wait_3d5();
+void wait_45();
+
+void camfadein(float fFadeTime);
+void camfadein1();
+void camfadein05();
+
+void checkMissionNumber();
+void initArmory();
+
+void justLoadedDeckThread();
+
+//void ArmoryCabinet1(float fOpen);
+void openArmoryCabinet1();
+void closeArmoryCabinet1();
+
+void openArmoryCabinet2();
+void closeArmoryCabinet2();
+
+void openArmoryCabinet3();
+void closeArmoryCabinet3();
+
+void openArmoryCabinet4();
+void closeArmoryCabinet4();
+
+void lockHoloDoor();
+void unlockHoloDoor();
+void setupSecretRoom();
+void makeWeaponBob( entity weaponToBob );
+void holoMissionIGM1Over();
+
+void coop_freeinventoryHealth100AndGive(string sGive);
+void coop_SpawnActorWithAlpha0(string sModel,string sTargetname,vector vOrigin,float fAngle);
+void coop_SpawnActorRandomAnimPushable0(string sModel,string sTargetname,vector vOrigin,float fAngle,string sAnim);
+void coop_ambientActorDialog(entity eActor,string sDialog,string sAnim,float fTurn);
+void coop_playerLoadObjectives(string sObjectives);
+void coop_playDialogNoHead_64(entity e,string sDialog);
+void coop_playDialogNoHead_128(entity e,string sDialog);
+void coop_playDialogNoHead_20000(entity e,string sDialog);
+void coop_playersSpawnInsideHolodeck();
+float coop_float_playersSpawnInsideHolodeck = 0;
+float coop_bool_AlmosenFuerEinenKlingoTen = 0;
+
+//-----------------------------------------------------------
+//-----------------------------------------------------------
+//--- variables
+float currentDeck = 8;
+float missionEnterprise = 0;
+float developerMode = 1; //--- Ship with 0
+
+
+string sNextLevelToLoadForCoop;
+void coop_endLevel();
+
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  INCLUDES
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/igm_main.scr"
+#include "coop_mod/maps/global/global_common.scr"
+#include "coop_mod/maps/global/igm_dialog.scr"
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "maps/global_scripts/global_math.scr"
+#include "coop_mod/maps/global/global_acceleratedmovement.scr"
+#include "maps/global_scripts/global_cinematicFX.scr"
+#include "maps/global_scripts/global_archetype.scr"
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/missions/igm_common/igm_turbolift.scr"
+#include "coop_mod/maps/missions/igm_common/ent_cin_igm168.scr"
+#include "coop_mod/maps/missions/igm1/ent-deck8-mission1.scr"
+//#include "coop_mod/maps/missions/igm2/ent-deck8-mission2.scr"
+#include "coop_mod/maps/missions/igm3/ent-deck8-mission3.scr"
+#include "coop_mod/maps/missions/igm4/ent-deck8-mission4.scr"
+//#include "coop_mod/maps/missions/igm5/ent-deck8-mission5.scr"
+#include "coop_mod/maps/missions/igm6/ent-deck8-mission6.scr"
+#include "coop_mod/maps/missions/igm7/ent-deck8-mission7.scr"
+#include "coop_mod/maps/missions/igm8/ent-deck8-mission8.scr"
+//#include "coop_mod/maps/missions/igm1/holodeck_igm1.scr" //movedTo:ent-deck8-mission1.scr
+#include "coop_mod/maps/missions/igm4/holodeck_igm4.scr"
+#include "coop_mod/maps/missions/igm6/holodeck_igm6.scr"
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+void coop_playersSpawnInsideHolodeck(){coop_float_playersSpawnInsideHolodeck = 1;}
+void wait_01(){wait(.1);}
+void wait_025(){wait(.25);}
+void wait_06(){wait(.6);}
+void wait_3(){wait(3);}
+void wait_3d5(){wait(3.5);}
+void wait_45(){wait(45);}
+void camfadeout(float fFadeTime)
+//FADE CAM OUT
+{
+	cam_fadeout(fFadeTime,0,0,0,1);
+}
+void camfadeout05()
+//FADE CAM OUT
+{
+	camfadeout(.5);
+}
+void camfadeout01()
+//FADE CAM OUT
+{
+	camfadeout(.1);
+}
+void camfadein(float fFadeTime)
+//FADE CAM IN
+{
+	cam_fadeIn(fFadeTime,0,0,0,1,0);
+}
+void camfadein1()
+//FADE CAM IN
+{
+	camfadein(1);
+}
+void camfadein05()
+//FADE CAM IN
+{
+	camfadein(.5);
+}
+
+void coop_playDialogNoHead_64(entity e,string sDialog)
+//saves us 3 statments each call (takes once 9 statments)
+{
+	globalCoop_dialog_play(e,sDialog,1,64,0);
+}
+
+void coop_playDialogNoHead_128(entity e,string sDialog)
+//saves us 3 statments each call (takes once 9 statments)
+{
+	globalCoop_dialog_play(e,sDialog,1,128,0);
+}
+
+void coop_playDialogNoHead_20000(entity e,string sDialog)
+//saves us 3 statments each call (takes once 9 statments)
+{//20000 should broadcast on the entire map for all players
+	globalCoop_dialog_play(e,sDialog,1,20000,0);
+}
+
+void coop_playerLoadObjectives(string sObjectives)
+//use this so we save 2 statments each time
+{
+	if(getCvarInt("g_gameType") == 0){
+		$player.loadobjectives(sObjectives);	
+	}
+}
+
+void coop_freeinventoryHealth100AndGive(string sGive)
+{
+	$player.freeinventory();
+	$player.health(100);
+	globalCoop_player_giveAll(sGive,.2);
+}
+
+void coop_SpawnActorWithAlpha0(string sModel,string sTargetname,vector vOrigin,float fAngle)
+{
+	globalCommon_SpawnActor(sModel,sTargetname,vOrigin,fAngle);
+	entity eActor;
+	eActor = getentity(sTargetname);
+	globalCommon_AiDummy(eActor, "" );
+	eActor.forceAlpha( 1 );
+	eActor.alpha( 0 );
+}
+
+void coop_SpawnActorRandomAnimPushable0(string sModel,string sTargetname,vector vOrigin,float fAngle,string sAnim)
+{
+	globalCommon_SpawnActor(sModel,sTargetname,vOrigin,fAngle);
+	entity eActor;
+	eActor = getentity(sTargetname);
+	eActor.pushable( 0 );
+	if(sAnim != ""){
+		thread randomlyAnimateActor(eActor,sAnim);
+	}
+}
+
+void coop_ambientActorDialog(entity eActor,string sDialog,string sAnim,float fTurn)
+{
+	eActor.setFloatVar("pauseRandomAnimate",1);
+	 wait_025();
+	if(sAnim != ""){
+		eActor.anim(sAnim);
+	}
+	entity ePlayer;
+	ePlayer = globalCoop_return_playerClosestPreferActive(eActor);
+	eActor.headwatch(ePlayer,10);
+	if(fTurn){
+		globalCoop_main_waitZeroDot2();
+		eActor.turntowardsEntity(ePlayer);
+	}
+	coop_playDialogNoHead_128(eActor,sDialog);
+	fTurn = eActor.getFloatVar("currentDialogInteger");//recycled variable!!!
+	if(fTurn < 1)
+	{
+		fTurn=1;
+	}
+	fTurn++;//recycled variable!!!
+	setNextDialog(eActor,fTurn);//recycled variable!!!
+	eActor.setFloatVar("currentDialogInteger",fTurn);//recycled variable!!!
+	eActor.resethead();
+	setDialogFinished(eActor);
+	eActor.setFloatVar("pauseRandomAnimate",0);
+}
+//===================================================================================================================
+// Main Stuff 
+//===================================================================================================================
+
+//---------------------
+// main	
+// do start up stuff
+//---------------------
+void main()
+{
+//spawn cams for all igms - spawing em here instead in each script saves statements
+	spawn( "Camera", "targetname", "cam1" );	
+	spawn( "Camera", "targetname", "cam2" );
+	spawn( "Camera", "targetname", "cam3" );
+	spawn( "Camera", "targetname", "cam4" );
+	spawn( "Camera", "targetname", "cam5" );
+//Lock Secret Door. Unlocked In IGM 8
+	$secretDoor.lock();
+//stop deny/lock sound to be played
+	$turboLift.sound_locked("");
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_string_playerModelResetTiki = "models/char/munro_sf.tik";
+	globalCoop_main_camFadeOut(.01);
+	coop_string_nextMapToCheck			= "ent-deck11";//set the map we gona load next while we are in testmode
+//DEFINIE SPAWNS
+	//position players on the transporter
+	coop_float_spawnAngle0 				= 270;
+	coop_vector_spawnOrigin1 			= '-9758 -1235 32';
+	coop_vector_spawnOrigin2 			= '-9644 -1237 32';
+	coop_vector_spawnOrigin3 			= '-9835 -1145 32';
+	coop_vector_spawnOrigin4 			= '-9575 -1145 32';
+	coop_vector_spawnOrigin5 			= '-9647 -1063 32';
+	coop_vector_spawnOrigin6 			= '-9754 -1063 32';
+	coop_vector_spawnOrigin7 			= '-9659 -1144 32';
+	coop_vector_spawnOrigin8 			= '-9744 -1155 32';
+//definie weapons
+	coop_string_weapon1 = "models/weapons/worldmodel-Tricorder-stx.tik";
+//Start the Co-Op Script
+	globalCoop_main();
+//SETUP FOR THE MISSION
+	missionEnterprise = getCvarInt("coop_igm");
+	if(!cvar_bool_multiplayer){
+		missionEnterprise=getfloatvar("game.globalMissionEnterprise");
+	}
+	if(missionEnterprise < 1){
+		missionEnterprise=1;
+		setfloatvar("game.globalMissionEnterprise",1);
+	}
+	checkMissionNumber();
+	globalCoop_level_callReliably("setupMission"+missionEnterprise+"Deck8");
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	//--- set the sky portal
+	$sky.rendereffects( "+skyorigin" );
+	
+	dontSaveOrientation();
+	init();
+	
+	waitforplayer();
+	if(!cvar_bool_multiplayer){//SP
+		$player.health( 100 );
+		$player.model("models/char/munro.tik");
+	}
+	$world.clearAvailableViewModes();
+	$world.addAvailableViewMode( "none" );
+}
+
+//---------------------
+// init	
+// nonthread init stuff
+//---------------------
+void init()
+{
+//SETUP MULTIPLAYER/////////////////////////////////////////////////////////////
+
+	if(cvar_bool_multiplayer){//MP
+		globalCoop_level_remove($turboLiftPlayerClip);//REMOVE CLIP, only makes troubles in mp
+	}
+////////////////////////////////////////////////////////////////////////////////
+
+	//Archetypes
+	globalArchetype_Setup ( $elevatorButtonArchetype, "TurboLiftControls" );
+	globalArchetype_Setup ( $elevatorButtonArchetype0, "TurboLiftControls" );
+	
+	globalArchetype_Setup ( $holoDoorPanelArchetype, "DoorPanel" );
+	globalArchetype_Setup ( $holoDoorPanelArchetype0, "DoorPanel" );
+	
+	//Turn Exit Triggers Off
+	$triggerExit.nottriggerable();
+
+	//Hide force fields
+	globalCoop_level_hideAndNotSolid($brigCellFeild1);
+	globalCoop_level_hideAndNotSolid($brigCellFeild2);
+	globalCoop_level_hideAndNotSolid($brigCellFeild3);
+
+	//checkMissionNumber();
+	
+	entTurboLiftSetup();
+	//ent_turboliftInit();
+	
+	initArmory();
+}
+
+//---------------------
+// checkMissionNumber	
+// checks to see mission number runs approprite script
+//---------------------
+void checkMissionNumber()
+{
+	if(cvar_bool_multiplayer)
+	{
+		if(getcvarint("coop_igmH") == 1)
+		{
+			coop_float_playersSpawnInsideHolodeck=1;
+		}
+	}
+ 	if( missionEnterprise == 1 ||
+		missionEnterprise == 4 ||
+		missionEnterprise == 6)
+	{
+		if(cvar_bool_multiplayer)
+		{
+			if(getcvarint("coop_igmH") == 1)
+			{
+				coop_float_playersSpawnInsideHolodeck=1;
+			//required if level gets restarted in mp, otherwise script goes with coop_igmR=6
+				if(missionEnterprise==6)
+				{
+					stuffCMD("seta coop_igmR 5\n");//rooms visited
+				}
+			}
+		}
+		else{
+			if(getfloatvar("game.holoDeckIGM1Done") > 0)
+			{
+				coop_float_playersSpawnInsideHolodeck=1;
+			}
+		}
+	}
+/*	
+//spawn inside turbolift near to Armory
+coop_float_spawnAngle0 				= 139;
+coop_float_spawnAngle1 				= 51;
+coop_float_spawnAngle2 				= 28;
+coop_vector_spawnOrigin1 			= '-10190 -2548 0';
+coop_vector_spawnOrigin2 			= '-10212 -2471 0';
+coop_vector_spawnOrigin3 			= '-9884 -2507  0';
+coop_vector_spawnOrigin4 			= '-9939 -2572 0';
+coop_vector_spawnOrigin5 			= '-9895 -2618 0';
+coop_vector_spawnOrigin6 			= '-9843 -2555 0';
+coop_vector_spawnOrigin7 			= '-9793 -2611 0';
+coop_vector_spawnOrigin8 			= '-9843 -2670 0';
+*/
+	if( missionEnterprise == 4 ){
+		coop_float_spawnAngle0 				= 140;
+		coop_float_spawnAngle1 				= 54;
+		coop_vector_spawnOrigin1 			= '-10233 -2525 0';
+		coop_vector_spawnOrigin2 			= '-9956 -2511 0';
+		coop_vector_spawnOrigin3 			= '-9918 -2465 0';
+		coop_vector_spawnOrigin4 			= '-9866 -2529 0';
+		coop_vector_spawnOrigin5 			= '-9904 -2576 0';
+		coop_vector_spawnOrigin6 			= '-9830 -2635 0';
+		coop_vector_spawnOrigin7 			= '-9783 -2592 0';
+		coop_vector_spawnOrigin8 			= '-9956 -2511 0';
+	}	
+	if( missionEnterprise == 6 ){
+		//spawn inside turbolift near to Armory
+		coop_float_spawnAngle0 				= 43;
+		coop_float_spawnAngle1 				= 315;
+		coop_vector_spawnOrigin1 			= '-12242 -2216 0';
+		coop_vector_spawnOrigin2 			= '-12305 -2661 0';
+		coop_vector_spawnOrigin3 			= '-12359 -2622 0';
+		coop_vector_spawnOrigin4 			= '-12296 -2563 0';
+		coop_vector_spawnOrigin5 			= '-12249 -2614 0';
+		coop_vector_spawnOrigin6 			= '-12288 -2543 0';
+		coop_vector_spawnOrigin7 			= '-12233 -2602 0';
+		coop_vector_spawnOrigin8 			= '-12168 -2537 0';
+	}	
+//SPAWN inside the holodeck after a HOLO SESSION
+	if(coop_float_playersSpawnInsideHolodeck == 1){
+	//overwrite - spawn inside the holodeck
+		coop_float_spawnAngle0 				= 270;
+		coop_vector_spawnOrigin8 			= '-12360 -152 0';
+		coop_vector_spawnOrigin7 			= '-12420 -152 0';
+		coop_vector_spawnOrigin6 			= '-12480 -152 0';
+		coop_vector_spawnOrigin5 			= '-12540 -152 0';
+		coop_vector_spawnOrigin4 			= '-12360 -230 0';
+		coop_vector_spawnOrigin3 			= '-12420 -230 0';
+		coop_vector_spawnOrigin2 			= '-12480 -230 0';
+		coop_vector_spawnOrigin1 			= '-12540 -230 0';
+	}
+	
+	string stringSoundTrack;
+	
+	stringSoundTrack = "music/igm" + missionEnterprise + ".mus";
+	
+	//--- set the soundtrack
+ 	soundtrack( stringSoundTrack );
+}
+
+//---------------------
+// justLoadedDeckThread	
+// creats a trigger to call the approiate deckJustLoadedThreadIGMx thread
+//---------------------
+void justLoadedDeckThread()
+{
+	thread entTurboLiftCheck();
+	waitforplayer();
+	
+//OBJECTIVES - SINGLEPLAYER
+	if(missionEnterprise == 4){
+		if( getfloatvar("game.IGM4GoToTelsia") >= 1 ){
+			coop_playerLoadObjectives("IGM4alt");	
+		}
+		else{
+			coop_playerLoadObjectives("IGM4");
+		}	
+	}else if( missionEnterprise == 6 ){
+		if( getfloatvar("game.IGM6MeetTelsia") >= 1 ){
+			coop_playerLoadObjectives("IGM6alt");
+		}
+		else{
+			coop_playerLoadObjectives("IGM6");
+		}
+	}else{
+		coop_playerLoadObjectives("IGM" + missionEnterprise);
+	}
+	
+//LOAD SPECIFIC SETUP
+	if( missionEnterprise != 2 && missionEnterprise != 5)
+	{
+		globalCoop_level_callReliably("justLoadedDeckThreadIGM"+missionEnterprise);
+	}
+}
+
+//------------------------
+// initArmory
+//------------------------
+void initArmory()
+{
+	$armoryDoor1.bind( $armoryDoorOrigin1 );
+	$armoryDoor2.bind( $armoryDoorOrigin2 );
+	
+	$armoryDoor3.bind( $armoryDoorOrigin3 );
+	$armoryDoor4.bind( $armoryDoorOrigin4 );
+	
+	$armoryDoor5.bind( $armoryDoorOrigin5 );
+	$armoryDoor6.bind( $armoryDoorOrigin6 );
+	
+	$armoryDoor7.bind( $armoryDoorOrigin7 );
+	$armoryDoor8.bind( $armoryDoorOrigin8 );
+	
+	unlockHoloDoor();
+	globalCoop_level_hideAndNotSolid($holoDeckWeaponStand);
+}
+
+void coop_armoryCabinet(float fOpen,entity e1,entity e2)
+{
+	e1.time(2);
+	e2.time(2);
+	if(fOpen){
+		fOpen = 90;
+	}
+	else{
+		fOpen = -90;
+	}
+	e1.rotateYdown( fOpen );
+	e2.rotateYup( fOpen );
+	waitfor( e1 );
+}
+
+//---------------------
+// openArmoryCabinet1
+//------------------------
+void openArmoryCabinet1()
+{	
+	coop_armoryCabinet(1,$armoryDoorOrigin1,$armoryDoorOrigin2);
+}
+
+//---------------------
+// closeArmoryCabinet1
+//------------------------
+void closeArmoryCabinet1()
+{	
+	coop_armoryCabinet(0,$armoryDoorOrigin1,$armoryDoorOrigin2);
+}
+
+//---------------------
+// openArmoryCabinet2
+//------------------------
+void openArmoryCabinet2()
+{	
+	coop_armoryCabinet(1,$armoryDoorOrigin3,$armoryDoorOrigin4);
+}
+
+//---------------------
+// closeArmoryCabinet2
+//------------------------
+void closeArmoryCabinet2()
+{	
+	coop_armoryCabinet(0,$armoryDoorOrigin3,$armoryDoorOrigin4);
+}
+
+//---------------------
+// openArmoryCabinet3
+//------------------------
+void openArmoryCabinet3()
+{	
+	coop_armoryCabinet(1,$armoryDoorOrigin5,$armoryDoorOrigin6);
+}
+
+//---------------------
+// closeArmoryCabinet3
+//------------------------
+void closeArmoryCabinet3()
+{	
+	coop_armoryCabinet(0,$armoryDoorOrigin5,$armoryDoorOrigin6);
+}
+
+//---------------------
+// openArmoryCabinet4
+//------------------------
+void openArmoryCabinet4()
+{	
+	coop_armoryCabinet(1,$armoryDoorOrigin7,$armoryDoorOrigin8);
+}
+
+//---------------------
+// closeArmoryCabinet4
+//------------------------
+void closeArmoryCabinet4()
+{	
+	coop_armoryCabinet(0,$armoryDoorOrigin7,$armoryDoorOrigin8);
+}
+
+//---------------------
+// Locks / Unlocks HoloDoor
+//------------------------
+void lockHoloDoor()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$holoDeckDoors.close();
+		$holoDeckDoors.lock();
+		$holoDoorPanelRed.show();
+		$holoDoorPanelGreen.hide();
+	}
+}
+void unlockHoloDoor()
+{
+	$holoDeckDoors.unlock();
+	$holoDoorPanelRed.hide();
+	$holoDoorPanelGreen.show();
+}
+
+void setupSecretRoom()
+{
+	cam.load("coop_ent-deck8_exocess1");
+	globalCoop_main_waitZeroDot2();
+	
+	$chessactor2.killattach();
+	$chessactor2.turnTowardsEntity( $chessactor1 );
+	$chessactor2.anim( "ent-seta_sit-idle1" );
+	$chessactor1.anim( "ent-seta_sit-idle1" );
+	globalCoop_main_waitZeroDot2();
+	
+	cam.load("coop_ent-deck8_exocess2");
+	globalCoop_main_waitZeroDot2();
+	
+//set angle 180 + notsolid
+	setupExo180Notsolid($castle3);
+	setupExo180Notsolid($castle4);
+	setupExo180Notsolid($knight2);
+	setupExo180Notsolid($bishop2);
+	setupExo180Notsolid($bishop3);
+	setupExo180Notsolid($king2);
+	setupExo180Notsolid($pawn5);
+	setupExo180Notsolid($pawn6);
+	setupExo180Notsolid($pawn7);
+	setupExo180Notsolid($pawn8);
+	
+	cam.load("coop_ent-deck8_exocess3");
+	globalCoop_main_waitZeroDot2();
+	$bishop1.archetype("");
+	$bishop1.notsolid();
+	
+/* 
+//swaped into the cam file
+	globalCommon_SpawnScriptModel( "char/starfleet_picard.tik", "chessactor1", '-9614 -220 8', 0 );
+	globalCommon_SpawnScriptModel( "char/romulan-igm-commander-secret-m.tik", "chessactor2", '-9553 -220 8', 180 );
+	globalCommon_SpawnScriptModel( "char/alien-type1c-basher-igm.tik", "castle1", '-9612 -192 60', 0 );
+	globalCommon_SpawnScriptModel( "char/alien-type1c-basher-igm.tik", "castle2", '-9612 -248 60', 0 );
+	globalCommon_SpawnScriptModel( "char/alien-type1b-chewer-igm.tik", "knight1", '-9604 -240 60', 0 );
+	globalCommon_SpawnScriptModel( "char/alien-type4-predator-igm.tik", "bishop1", '-9612 -208 60', 0 );
+	globalCommon_SpawnScriptModel( "char/alien-type3-quad-igm.tik", "king1", '-9612 -216 60', 0 );
+	globalCommon_SpawnScriptModel( "char/alien-type5-commander-igm.tik", "queen1", '-9612 -224 60', 0 );
+	globalCommon_SpawnScriptModel( "char/alien-type1a-lurker-igm.tik", "pawn1", '-9588 -216 60', 0 );
+	globalCommon_SpawnScriptModel( "char/alien-type1a-lurker-igm.tik", "pawn2", '-9612 -232 60', 0 );
+	globalCommon_SpawnScriptModel( "char/alien-type1a-lurker-igm.tik", "pawn3", '-9604 -208 60', 0 );
+	globalCommon_SpawnScriptModel( "char/alien-type1a-lurker-igm.tik", "pawn4", '-9604 -224 60', 0 );
+	globalCommon_SpawnScriptModel( "char/alien-type1c-basher-igm.tik", "castle3", '-9564 -248 60', 180 );
+	globalCommon_SpawnScriptModel( "char/alien-type1c-basher-igm.tik", "castle4", '-9556 -208 60', 180 );
+	globalCommon_SpawnScriptModel( "char/alien-type3-quad-igm.tik", "king2", '-9556 -192 60', 180 );
+	globalCommon_SpawnScriptModel( "char/alien-type4-predator-igm.tik", "bishop2", '-9556 -224 60', 180 );
+	globalCommon_SpawnScriptModel( "char/alien-type4-predator-igm.tik", "bishop3", '-9572 -232 60', 180 );
+	globalCommon_SpawnScriptModel( "char/alien-type1b-chewer-igm.tik", "knight2", '-9564 -216 60', 180 );
+	globalCommon_SpawnScriptModel( "char/alien-type1a-lurker-igm.tik", "pawn5", '-9572 -200 60', 180 );
+	globalCommon_SpawnScriptModel( "char/alien-type1a-lurker-igm.tik", "pawn6", '-9580 -208 60', 180 );
+	globalCommon_SpawnScriptModel( "char/alien-type1a-lurker-igm.tik", "pawn7", '-9580 -224 60', 180 );
+	globalCommon_SpawnScriptModel( "char/alien-type1a-lurker-igm.tik", "pawn8", '-9580 -240 60', 180 );
+*/
+}
+
+///////////////////////////
+// makeWeaponBob
+// Function used to make the weapon bob until removed.
+///////////////////////////
+void makeWeaponBob( entity weaponToBob )
+{
+	weaponToBob.scale( 2 );
+	
+	while( doesEntityExist( weaponToBob ) )
+	{
+		weaponToBob.time( 1 );
+		weaponToBob.moveUp( 4 );
+		waitfor( weaponToBob );
+		weaponToBob.time( 1 );
+		weaponToBob.moveDown( 4 );
+		waitfor( weaponToBob );
+	}
+}
+
+void setupExo180Notsolid(entity eExo)
+{
+	if(doesEntityExist(eExo))
+	{
+		eExo.notsolid();
+		eExo.angle(180);
+		//eExo.archetype("");
+		globalCoop_main_waitAFrame();
+	}
+}
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed(sNextLevelToLoadForCoop);
+}
+

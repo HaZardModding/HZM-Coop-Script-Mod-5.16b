@@ -1,0 +1,2318 @@
+//-----------------------------------------------------------------
+//  EF2 Level Script File
+//
+//  Level:		m3l2-forever - USS Dallas 
+//  Script By:		Kenny T., Benson R., Richard H., Adam B.
+//  Geometry By:	Adam 'Senn' Bellefeuil
+//  Created on:		02/05/2002
+//
+//  Last Edited:  01/28/2003 - Adam
+//-----------------------------------------------------------------
+
+void main();
+void init();
+void SetupHazardTeam();
+void setup_sounds();
+
+void cinematicDeadCaptain();
+//void cinematicDeadCaptain_SkipThread();
+//void cinematicDeadCaptain_end();
+
+void miscDynamicLight();
+void setup_cameras();
+void setup_archetypes();
+void triggers_setup();
+void bridge_setup(); 
+void brokehall_setup();
+void exploding_setup();
+void deadcrew_setup();
+
+void sequenceAlienAttack1_1();
+void TransporterRoomLockedDialog();
+void brokehall1_fields_button1_wait();
+void brokehall_hiddenroom_ab();
+void brokehall_hiddenroom_ab_2();
+
+void crewDeadMoving1_move1();
+void crewDeadMoving1_move2();
+void crewDeadMoving1_move3();
+void crewDeadMoving1_move4();
+void crewDeadMoving1_move5();
+void crewDeadMoving1_move6();
+
+void JTubeFloorDoor1_Open();
+void JTubeFloorDoor2_Open();
+
+void BridgeRescueSequence();
+void cinematicBridgeRescueCompleted();	
+void bridgeRescueSequenceTimerCount();
+void BridgeRescueAlien_Killed();
+
+void dialogTubeEntrance();
+void franklinAttack();
+void franklinAttackAftermath();
+void franklinAttackWait();
+void brokenHallFranklin_explode();
+void dialogFranklinAttack();
+void dialogDoorBridgeLocked();
+void cinematicTransporterRoom();
+void cinematicTransporterRoom_SkipThread();
+void cinematicTransporterRoom_End();
+void cinematicBridge();
+void cinematicBridge_SkipThread();
+void cinematicBridge_End();
+void cinematicBridgeRescueCompleted();
+void cinematicBridgeRescueCompleted_endthread();
+void cinematicBridgeRescueCompleted_skipthread();
+
+void bridgeRescueSequenceFailedCinematic();
+void bridgeRescueSequenceFailedCinematic_end();
+
+void BridgeUnlockedEvents();
+
+void PanelExplosionThread1();
+void PanelExplosionThread2();
+void PanelExplosionThread3();
+void PanelExplosionThread4();
+void HallwayWall1Thread();
+void forcefieldUnfuckery();
+void coop_endLevel();
+
+//Misc Stuff
+void lurkerAttackDoor();
+
+
+//--- variables
+float chellHasBeenEaten = 0;
+float BridgeRescueAlienDeadCount = 0;
+float playerHasSeenForcefield = 0;
+float float_cinematicBridgeRescueCompleted;
+
+float bridgeRescueSequenceTimer = 0;
+float bridgeRescueSequenceTimerCounting = 0;
+float bridgeRescueSequenceTimerMax = 180;
+
+float franklinAttackWaiting = 1;
+float onBridgeWait = 0;
+
+float secretShipGalaxySpawned = 0;
+
+float teamFollow = 2;
+
+entity cin_franklin,cin_transporter,cin_chell;
+
+
+//=============================================================================
+// Includes
+//=============================================================================
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/optional_modules/contextM3.scr"
+#include "coop_mod/maps/optional_modules/puzzles.scr"
+#include "coop_mod/maps/optional_modules/lights.scr"
+#include "coop_mod/maps/optional_modules/forcefields.scr"
+#include "coop_mod/maps/optional_modules/teammateM3.scr"
+#include "coop_mod/maps/global/global_common.scr"
+#include "coop_mod/maps/global/global_tubeDoor.scr"
+#include "coop_mod/maps/global/global_soundPan.scr"
+#include "coop_mod/maps/missions/3/m3l2_dialog.scr"
+#include "maps/global_scripts/global_archetype.scr"
+#include "maps/global_scripts/global_math.scr"
+#include "coop_mod/maps/global/global_cinematicFX.scr"
+
+void coop_newPlayerEntered()
+//----------------------------------------------------------------------
+//add breathing sound to each player
+//----------------------------------------------------------------------
+{
+//LET THE BATTLE COMMENCE
+	entity ePlayer;
+	float fPlayerIdInUse = 1;
+	while(fPlayerIdInUse<=coop_integer_maxPlayers)
+	{
+		globalCoop_main_waitAFrame();
+		ePlayer = getentity("player"+fPlayerIdInUse);
+		if(doesEntityExist(ePlayer)){
+			if(ePlayer.getFloatVar("coop_newPlayerEnteredPROCESSED") != 1){
+				ePlayer.setFloatVar("coop_newPlayerEnteredPROCESSED",1);
+				ePlayer.setStringVar("coop_loopSoundName","sound/player/player_rebreath.wav");
+				ePlayer.setFloatVar("coop_loopSoundVolume",7);
+				ePlayer.setFloatVar("coop_loopSoundRange",75);
+				ePlayer.loopsound ( "sound/player/player_rebreath.wav",7,75);
+			}
+		}
+		fPlayerIdInUse++;
+	}
+}
+
+//---------------------
+// Function: main	
+// Comments:
+// i...don't....know
+//---------------------
+void main()
+{
+	globalCoop_server_precacheSingleplayer();
+//--- set the soundtrack
+	soundtrack( "music/m3l2-forever.mus" );
+	forcemusic ("normal");
+//Coop
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_string_nextMapToCheck			= "ent-deck7b";//set the map we gona load next while we are in testmode
+//Show Mission Sucess Hud when this mission ends ?
+	coop_bool_showMissionSucessHud = 1;
+//Set Tactical information, to be added at the Objectives hud
+	coop_string_objectiveTacticalInfo1 = "UseNightVision";
+//spawnorigins, Spawn Players on those locations, at map start
+	//coop_vector_spawnOrigin1 			= '-65 331 0';
+	//coop_vector_spawnOrigin2 			= '-65 261 0';
+//isnide-lift
+	coop_vector_spawnOrigin1 			= '108 -233 0';
+	coop_vector_spawnOrigin1 			= '157 -215 0';
+//eof inside-lift
+	coop_vector_spawnOrigin3			= '-65 191 0';
+	coop_vector_spawnOrigin4 			= '-65 121 0';
+	coop_vector_spawnOrigin5 			= '-65 51 0';
+	coop_vector_spawnOrigin6 			= '-65 -21 0';
+	coop_vector_spawnOrigin7 			= '-65 -91 0';
+	coop_vector_spawnOrigin8 			= '-65 -161 0';
+	
+//Set spawnangles for this level
+	coop_float_spawnAngle0 			= 90;//SpawnOrigin0 Angle
+
+//Definie Objective
+	coop_string_objectiveItem1			= "RetrieveCaptainLogsOnBridge";//RetrieveLogs
+	coop_string_objectiveItem2			= "RescueDallasCrew";//
+	coop_string_objectiveItem3			= "RescueChell";//
+//Setup the Set of Weapons for the players
+	coop_string_weapon1				= "models/weapons/worldmodel-BurstRifle.tik";
+	coop_string_weapon3				= "models/weapons/worldmodel-Tricorder-stx.tik";
+	coop_string_weapon2				= "models/weapons/worldmodel-Phaser-stx.tik";	
+	string sExtraWeapon;
+	sExtraWeapon = getCvar("coop_eWtik");
+	if("models/weapons/worldmodel-imod.tik" == sExtraWeapon)
+	{
+		coop_string_weapon4	= sExtraWeapon;
+	}
+	
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	if(cvar_bool_multiplayer){
+		stuffcmd("seta coop_igm 2\n");
+		stuffcmd("seta coop_igmT 0\n");
+		$triggerAlienGroup2Spawn_bb.thread("AlienGroup2SpawnMultiplayer");
+		$AlienGroup2Spawn.spawntargetname("kaffeeverfaerbtdiezaehne");
+	}else{
+		setfloatvar("game.globalMissionEnterprise",2);
+	}
+
+	$world.entity_fade_dist( 8000 );
+	$sky.rendereffects( "+skyorigin" );
+
+
+	$stardome.rotateX( 0.2 );
+	$stardome.rotateY( 0.7 );
+	//stuffcmd ( "r_light_emphasizePercent 40\n" );// temp brightness stuff
+	//stuffcmd ( "r_light_emphasize 30\n" );// temp brightness stuff
+	
+	thread init();
+	waitForPlayer();
+	
+	$world.clearAvailableViewModes();
+	$world.addAvailableViewMode( "none" );
+	
+	if(!cvar_bool_multiplayer){
+		$player.model("models/char/munro_evosuit.tik");
+		$player.loopsound ( "sound/player/player_rebreath.wav", .7, 50);
+		$player.loadobjectives("m3l2-forever");
+		$player.setobjectiveshow( "RetrieveLogs", 1 );
+		cam_fadeIn( 1.5, 0, 0, 0, 1, 0 );
+	}
+}
+
+//---------------------
+// Function: init	
+// Comments:
+// stuff that doesn't go in main
+//---------------------
+void init()
+{
+	thread initDialog();
+	thread SetupHazardTeam();
+	thread miscDynamicLight();
+	thread setup_cameras();
+	thread setup_archetypes();
+	thread triggers_setup();
+	thread bridge_setup();
+	thread brokehall_setup();
+	thread exploding_setup();
+	thread setup_sounds();
+	thread deadcrew_setup();
+	$ForeverCrewMale.model( "char/starfleet_crew-male2-dallas.tik" );
+	globalCommon_AiDummyHide( $Telsia );
+	globalCommon_AiDummyHide( $ForeverEngineer );
+	globalCommon_AiDummyHide( $ForeverCrewMale );
+	globalCommon_AiDummyHide( $ForeverCrewFemale );
+	// misc stuff
+	$doorAlienAttack1.solid();
+	
+	// cinematic entities
+	cin_franklin 	= createcinematic( "franklin_attack" );	
+	cin_transporter = createcinematic( "m3l2-trans" );
+	cin_chell 		= createcinematic( "m3l2-chell" );
+	if(cvar_bool_multiplayer){
+	//spawn Class Selection
+		thread globalCoop_class_setup("Medic",'-100 979 0');//520 1425 10
+		thread globalCoop_class_setup("HeavyWeapons",'-100 1107 0');//520 1500 10
+		thread globalCoop_class_setup("Technician",'-100 1231 0');//520 1350 10
+	}
+
+	//--- setup teammate killthreads
+	$ForeverEngineer.immortal( 1 );
+	$Telsia.immortal( 1 );
+	$Jurot.immortal( 1 );
+	$Chell.immortal( 1 );
+	$Franklin.immortal( 1 );
+	// start the insanity
+	thread franklinAttack();
+
+	globalCommon_AiDummyHide( $Picard );
+
+	// setting up jeffries tube doors
+	thread globalCommon_OnUse ( $buttonFieldsBigHole , "buttonFieldsBigHole_Use" );
+	wait(1);
+	$JTubeFloorDoor1.bind( $JTubeFloorDoor1Origin );
+	$JTubeFloorDoor2.bind( $JTubeFloorDoor2Origin );
+
+	thread globalTubeDoor_Setup( "doorJTubeAccessWest", "normal", 36, "east_west" , 0 );
+	thread globalTubeDoor_AddComponent( "button", "button1JTubeAccessWest", "doorJTubeAccessWest" );
+	thread globalTubeDoor_AddComponent( "button", "button2JTubeAccessWest", "doorJTubeAccessWest" );
+	
+	thread globalTubeDoor_Setup( "doorJTubeAccessEast", "normal", 36, "east_west" , 0 );
+	thread globalTubeDoor_AddComponent( "button", "button1JTubeAccessEast", "doorJTubeAccessEast" );
+	thread globalTubeDoor_AddComponent( "button", "button2JTubeAccessEast", "doorJTubeAccessEast" );
+	
+	thread globalTubeDoor_Setup( "doorJTubeBridgeAccessWest", "normal", 36, "east_west" , 0 );
+	thread globalTubeDoor_AddComponent( "button", "button1JTubeBridgeAccessWest", "doorJTubeBridgeAccessWest" );
+	thread globalTubeDoor_AddComponent( "button", "button2JTubeBridgeAccessWest", "doorJTubeBridgeAccessWest" );
+	wait(1);
+	thread globalTubeDoor_Setup( "doorJTubeBridgeAccessEast", "normal", 36, "east_west" , 0 );
+	thread globalTubeDoor_AddComponent( "button", "button1JTubeBridgeAccessEast", "doorJTubeBridgeAccessEast" );
+	thread globalTubeDoor_AddComponent( "button", "button2JTubeBridgeAccessEast", "doorJTubeBridgeAccessEast" );
+
+	thread globalTubeDoor_Setup( "doorJTubeMiddleCorridorWest", "normal", 36, "north_south" , 0 );
+	thread globalTubeDoor_AddComponent( "button", "button1JTubeMiddleCorridorWest", "doorJTubeMiddleCorridorWest" );
+	thread globalTubeDoor_AddComponent( "button", "button2JTubeMiddleCorridorWest", "doorJTubeMiddleCorridorWest" );
+	wait(1);
+	thread globalTubeDoor_Setup( "doorJTubeMiddleCorridorEast", "normal", 36, "north_south" , 0 );
+	thread globalTubeDoor_AddComponent( "button", "button1JTubeMiddleCorridorEast", "doorJTubeMiddleCorridorEast" );
+	thread globalTubeDoor_AddComponent( "button", "button2JTubeMiddleCorridorEast", "doorJTubeMiddleCorridorEast" );
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		spawn ( "char/starfleet_dead-captain.tik", "targetname", "galloway" );
+		wait( .1 );
+		$galloway.warp('234 -83 48');
+	}
+	
+	$BridgeDoorWest.noise( "sound/doors/door_locked.wav" );
+	
+//Setup interactive FF
+	thread globalCoop_forcefield_makeInteractive($brokehall1_fields1);
+	thread globalCoop_forcefield_makeInteractive($TransporterRoomFieldClip);
+	wait(2);
+//Spawn ente in skybox
+	spawn("script_model","model","vehicle/enterprise-e-01.tik","targetname","coop_ent1","origin","-1441 -2100 100");//-1741 -1656 128
+	spawn("script_model","model","vehicle/enterprise-e-02.tik","targetname","coop_ent2","origin","-1441 -2100 100");
+	spawn("script_model","model","vehicle/enterprise-e-03.tik","targetname","coop_ent3","origin","-1441 -2100 100");
+	wait(2);
+	$coop_ent1.angle(90);
+	$coop_ent2.angle(90);
+	$coop_ent3.angle(90);
+	$coop_ent1.rendereffects("minlight");//fullbright
+	$coop_ent2.rendereffects("minlight");
+	$coop_ent3.rendereffects("minlight");
+}
+
+//===================================================================================================================
+// Setup Stuff
+//===================================================================================================================
+
+//---------------------
+// Function: miscDynamicLight	
+// Comments:
+// setups all the dynamic lights at the beginning of the map
+//---------------------
+void miscDynamicLight()
+{
+	$world.light_lightstyle( "light_broken_os1", "aaaammmmzzzzmmmm", 0 );
+	$world.light_lightstyle( "light_broken_os2", "mmmmzzzzmmmmaaaa", 0 );
+	$world.light_lightstyle( "light_broken_os3", "zzzzmmmmaaaammmm", 0 );
+	$world.light_lightstyle( "light_broken_flicker", "cccchhhhaaaarrrroooonnnnwwwwaaaaasssshhhheeeerrrrreeee", 0 );
+	$world.light_lightstyle( "light_broken_flicker2", "zzzzzzzzzzzzzcgazzzzzzzzzzzzzzcahaaazzzzzzzzzzzzzzzzzzzzzzzzzzzzzdghdzzzzzzzzzzzzzzzzzzzz", 0 );
+	//$world.light_lightstyle( "lightsTransporterAreaFlicker", "aazzaazzjjaaazzaajaajzzzazazazajjzaazzkahjszwufkjaz", 0 );
+	$world.light_lightstyle( "lightBridgeDoorWest_green", "a", 0 );
+
+	$world.light_lightstyle( "franklin_hall_lights", "a", 0 );
+	$world.light_lightstyle( "brokehall_light1", "a", 0 );
+	
+	globalCoop_dynLight_change("lightBridgeDoorWest_red","z","lightBridgeDoorWest_green","a");
+	$world.light_lightstyle( "blownout", "a", 0 );
+}
+
+//-----------------------------------
+void setup_sounds()
+{
+	globalSoundPan_Init();
+	globalSoundPan_AddSound ( "sound/environment/metal/metal_scrape1.wav", 1, 0.7, 1000, 0.5, 3, 200, randomint( 5 ) + 5 );
+	globalSoundPan_AddSound ( "sound/environment/metal/metal_scrape2.wav", 2, 0.7, 1000, 0.5, 3, 200, randomint( 5 ) + 5 );
+	globalSoundPan_AddSound ( "sound/environment/metal/metal_scrape3.wav", 3, 0.7, 1000, 0.5, 3, 200, randomint( 5 ) + 5 );
+	globalSoundPan_AddSound ( "sound/environment/metal/metal_scrape4.wav", 4, 0.7, 1000, 0.5, 3, 200, randomint( 5 ) + 5 );
+	globalSoundPan_AddSound ( "sound/chars/lurker/lurk_amb1.wav", 1, 0.7, 1000, 0.5, 3, 200, randomint( 5 ) + 5 );
+	globalSoundPan_AddSound ( "sound/chars/lurker/lurk_amb2.wav", 2, 0.7, 1000, 0.5, 3, 200, randomint( 5 ) + 5 );
+	globalSoundPan_AddSound ( "sound/chars/lurker/lurk_amb3.wav", 3, 0.7, 1000, 0.5, 3, 200, randomint( 5 ) + 5 );
+	globalSoundPan_AddSound ( "sound/chars/lurker/lurk_amb4.wav", 4, 0.7, 1000, 0.5, 3, 200, randomint( 5 ) + 5 );
+	globalSoundPan_AddSound ( "sound/ships/forever/ship_creak_low1.wav", 1, 0.7, 1000, 0.5, 3, 200, randomint( 5 ) + 5 );
+	globalSoundPan_AddSound ( "sound/ships/forever/ship_creak_low2.wav", 2, 0.7, 1000, 0.5, 3, 200, randomint( 5 ) + 5 );
+	globalSoundPan_AddSound ( "sound/ships/forever/ship_creak_low3.wav", 3, 0.7, 1000, 0.5, 3, 200, randomint( 5 ) + 5 );
+	globalSoundPan_AddSound ( "sound/ships/forever/ship_creak_low4.wav", 4, 0.7, 1000, 0.5, 3, 200, randomint( 5 ) + 5 );
+	globalSoundPan_AddSound ( "sound/ships/forever/ship_creak_low5.wav", 5, 0.7, 1000, 0.5, 3, 200, randomint( 5 ) + 5 );
+	globalSoundPan_AddSound ( "sound/ships/forever/ship_creak_medium1.wav", 1, 0.7, 1000, 0.5, 3, 200, randomint( 5 ) + 5 );
+	globalSoundPan_AddSound ( "sound/ships/forever/ship_creak_medium2.wav", 2, 0.7, 1000, 0.5, 3, 200, randomint( 5 ) + 5 );
+	globalSoundPan_AddSound ( "sound/ships/forever/ship_creak_medium3.wav", 3, 0.7, 1000, 0.5, 3, 200, randomint( 5 ) + 5 );
+	thread globalSoundPan_Start(); 
+}
+
+
+//---------------------
+// Function: setup_cameras
+// Comments:
+// setups the cameras
+//---------------------
+void setup_cameras()
+{
+	cam.load( "m3l2_forever_bridgecam1" );        
+	cam.load( "m3l2_forever_transportercam1" );
+	cam.load( "m3l2_deadcaptaincam1" );
+	cam.load( "m3l2_deadcaptaincam2" );
+	cam.load( "m3l2_deadcaptaincam3" );
+	cam.load( "m3l2_deadcaptaincam4" );
+	cam.load( "m3l2_deadcaptaincam5" );
+	cam.load( "m3l2_deadcaptaincam6" );
+	cam.load( "m3l2_deadcaptaincam7" );
+	cam.load( "m3l2_deadcaptaincam8" );
+	cam.load( "m3l2_deadcaptaincam9" );
+	cam.load( "m3l2_deadcaptaincam10" );
+	cam.load( "m3l2_deadcaptaincam11" );
+	cam.load( "m3l2_deadcaptaincam12" );
+	cam.load( "m3l2_deadcaptaincam13" );
+	cam.load( "m3l2_deadcaptaincam14" );
+
+	cam.load( "m3l2_bridge1_adam1" );
+	cam.load( "m3l2_bridge1_adam2" );
+	cam.load( "m3l2_bridge1_adam3" );
+	cam.load( "m3l2_bridge1_adam4" );	
+	cam.load( "m3l2_bridge1_adam5" );
+	cam.load( "m3l2_bridge1_adam6" );
+	cam.load( "m3l2_bridge1_adam7" );
+	cam.load( "m3l2_bridge1_adam8" );
+	cam.load( "m3l2_bridge1_adam9" );	
+	cam.load( "m3l2_bridge1_adam10" );
+	cam.load( "m3l2_bridge1_adam11" );	
+	
+	spawn( "Camera", "targetname", "cam1");
+	spawn( "Camera", "targetname", "cam2");
+	spawn( "Camera", "targetname", "cam3");
+	spawn( "Camera", "targetname", "cam4");
+	spawn( "Camera", "targetname", "cam5");
+}
+
+void setupArchetypeObject( entity e, string theArchetype )
+{
+	e.contents( "targetable" );
+	e.archetype( theArchetype );
+}
+
+//---------------------
+// Function: setup_archetypes
+// Comments:
+// setting up the archetypes
+//---------------------
+void setup_archetypes()
+{
+	globalArchetype_Setup( $TransporterRoomButton_archetype, "TransporterControls" );
+	globalArchetype_Setup( $brokehall1_fields1_archetype, "DallasForcefieldControl" );
+
+	// stupid jtubes
+	globalArchetype_Setup( $jdoor1_p_archetype1, "DoorPanel" );
+	globalArchetype_Setup( $jdoor1_p_archetype2, "DoorPanel" );
+	
+	globalArchetype_Setup( $jdoor2_p_archetype1, "DoorPanel" );
+	globalArchetype_Setup( $jdoor2_p_archetype2, "DoorPanel" );
+	
+	globalArchetype_Setup( $jdoor3_p_archetype1, "DoorPanel" );
+	globalArchetype_Setup( $jdoor3_p_archetype2, "DoorPanel" );
+	
+	globalArchetype_Setup( $jdoor4_p_archetype1, "DoorPanel" );
+	globalArchetype_Setup( $jdoor4_p_archetype2, "DoorPanel" );
+	
+	globalArchetype_Setup( $jdoor5_p_archetype1, "DoorPanel" );
+	globalArchetype_Setup( $jdoor5_p_archetype2, "DoorPanel" );
+	
+	globalArchetype_Setup( $jdoor6_p_archetype1, "DoorPanel" );
+	globalArchetype_Setup( $jdoor6_p_archetype2, "DoorPanel" );
+	
+	setupArchetypeObject( $doorarchetype,"DoorPanel" );
+}
+
+//---------------------
+// Function: triggers_setup
+// Comments:
+// setup for all the triggers
+//---------------------
+void triggers_setup()
+{
+	globalCoop_level_notTriggerable($triggerAlienGroup1Spawn);
+	globalCoop_level_notTriggerable($triggerAlienGroup1_spawn_ab);
+	globalCoop_level_notTriggerable($triggerAlienGroup2_spawn_ab);
+	globalCoop_level_notTriggerable($triggerAlienGroup3_spawn_ab);
+	globalCoop_level_notTriggerable($triggerAlienGroup4_spawn_ab);
+	globalCoop_level_notTriggerable($triggerAlienGroup5_spawn_ab);
+	globalCoop_level_notTriggerable($triggerAlienGroup6_spawn_ab);
+	globalCoop_level_notTriggerable($triggerAlienGroup7_spawn_ab);
+	globalCoop_level_notTriggerable($temp_levelend);
+}
+
+//---------------------
+// bridge_setup
+// setup for the bridge sequence
+//---------------------
+void bridge_setup()
+{
+	$bridgeDoorDamagedEast_fracture.viewmode( "structuralintegrity" );
+	$bridgeDoorDamagedWest_fracture.viewmode( "structuralintegrity" );
+
+	$BridgeDoorWest.lock();
+	//$BridgeDoorEast.lock();
+
+	$BridgeDoorWest_clip.solid();
+
+	//$BridgeRescueTriggers.nottriggerable();
+	$BridgeRescueDebrisOn.hide();
+	$TransporterRoomFieldClip.solid();
+	
+	//--- hide approate transporter bridge panel switch
+	$BridgeTransporterRoomButtonOff.hide();
+	
+	//--- hide approate transporter buffer panel switch
+	$TransporterRoomButtonOff.hide();
+	//$ContainmentFields.hide();
+			
+	//$BridgeRescueWestSpawnTrigger.nottriggerable();
+	//$BridgeRescueEastSpawnTrigger.nottriggerable();
+}
+
+//---------------------
+// brokehall_setup
+// setup for the brokenhallway
+//---------------------
+void brokehall_setup()
+{
+	$brokehall1_fields1.solid();
+	$brokehall1_fields1.loopsound ( "sound/ships/enterprise/ent_forcefield.wav", .35, 70 );
+	$brokehall1_hiddenroom1_wall1.solid();
+	$brokehall1_hiddenroom1_door1.lock();
+
+	//$crewSign_1.bind( $brokehall1_hiddenroom1_door1 );
+	//$crewSign_2.bind( $brokehall1_hiddenroom1_door2 );
+
+	//$brokehall_hiddenroom_door2.solid();
+	$brokehall_hiddenroom_door3.hide();
+	$brokehall_hiddenroom_door3.notsolid();
+	$brokehall_brokehall_fires2.hide();
+	
+	$brokehall_brokehallwalls1.solid();
+	$brokehall_brokehallwalls2.notsolid();
+	$brokehall_brokehallwalls2.hide();
+	$brokehall_brokehall_transstuff1.hide();
+	$brokehall_brokehall_transstuff1.notsolid();
+	$brokehall_brokehall_transstuff1.nottriggerable();
+
+ 	$brokenHallFranklin_fires2.hide();
+
+	thread brokehall1_fields_button1_wait();
+}
+
+//---------------------
+// exploding_setup
+// setup for the random explosion stuff
+//---------------------
+void exploding_setup()
+{
+	$PanelExplode2_wires.hide();
+	$HallwayWall1_wall2.hide();
+	$HallwayWall1_wall2.notsolid();
+}
+
+//---------------------
+// deadcrew_setup
+// setup for the dead crew members
+//---------------------
+void deadcrew_setup()
+{
+	// i setup dead people
+	if(doesEntityExist($crewDeadFloating2)){
+		$crewDeadFloating2.ai_off();
+		$crewDeadFloating2.anim ( "hunched_dead_floating2");
+		$crewDeadFloating2.notsolid();
+	}
+	$crewDead1.ai_off();
+	$crewDead2.ai_off();
+	$crewDead3.ai_off();
+	$crewDead4.ai_off();
+	$crewDeadCaptain.ai_off();
+	$crewDeadFloating1.ai_off();
+	
+	wait(.5);
+	
+	//if(doesEntityExist($crewDeadFloating1)){}
+	$crewDeadFloating1.anim( "hunched_dead_floating1");
+	$crewDead1.anim ( "hunched_dead1" );
+	$crewDead2.anim ( "hunched_dead2" );
+	$crewDead3.anim ( "hunched_dead3" );
+	$crewDead4.anim ( "hunched_dead4" );
+	$crewDeadCaptain.anim ( "dead_in_captain_chair" );
+	
+	$crewDeadFloating1.notsolid();
+	$crewDead1.notsolid();
+	$crewDead2.notsolid();
+	$crewDead3.notsolid();
+	$crewDead4.notsolid();
+	$crewDeadCaptain.notsolid();
+}
+
+
+//===================================================================================================================
+// Doors
+//===================================================================================================================
+
+//---------------------
+// JTubeFloorDoor1_Open	
+// north western jefferies tube floor door opens
+//---------------------
+void JTubeFloorDoor1_Open()
+{
+	$JTubeFloorDoor1.nouse();
+	
+	$JTubeFloorDoor1.playsound ( "sound/ships/forever/for_floorhatch.wav" , 21 , 1 , 250 );
+	$JTubeFloorDoor1Origin.time( .5 );
+	$JTubeFloorDoor1Origin.rotateZup( 110 );
+	$JTubeFloorDoor1Origin.moveSouth( 2 );
+	$JTubeFloorDoor1Origin.moveUp( 13 );
+	waitfor( $JTubeFloorDoor1Origin );
+}
+
+//---------------------
+// JTubeFloorDoor2_Open	
+// North Eastern jefferies tube floor door opens
+//---------------------
+void JTubeFloorDoor2_Open()
+{
+	$JTubeFloorDoor2.nouse();
+	
+	$JTubeFloorDoor2.playsound ( "sound/ships/forever/for_floorhatch.wav" , 21 , 1 , 250 );
+	$JTubeFloorDoor2Origin.time( .5 );
+	$JTubeFloorDoor2Origin.rotateZup( 110 );
+	$JTubeFloorDoor2Origin.moveSouth( 2 );
+	$JTubeFloorDoor2Origin.moveUp( 13 );
+	waitfor( $JTubeFloorDoor2Origin );
+}
+
+
+
+//===================================================================================================================
+// Hallway Stuff
+//===================================================================================================================
+
+//---------------------
+// sequenceAlienAttack1	
+// Aliens break down door and attack
+//---------------------
+void sequenceAlienAttack1_1()
+{
+	if(cvar_bool_multiplayer){
+		entity	e;
+		float	fEntity;
+		for(fEntity=0;fEntity<1023;fEntity++){
+			e=getEntity("*"+fEntity);
+			if(doesEntityExist(e)){
+				if(e.getOrigin() == '-420 2268 2')
+				{
+					e.remove();
+				}
+			}
+		}
+		$AlienGroup1Spawn_1.spawntargetname( "lukriPurki" );
+	}
+	globalCoop_level_triggerEntity($AlienGroup1Spawn_1);
+
+	$explosionAlienAttack1_1.spawntargetname( "exploderAlienGroup1Spawn_1" );
+	$explosionAlienAttack1_1.modelname( "fx-explosion-door-forever.tik" );	
+	
+	globalCoop_level_triggerEntity($explosionAlienAttack1_1);
+	
+	
+	if(cvar_bool_multiplayer){
+		wait(0.15);
+		float fRounds,fPlayerz;
+		fPlayerz = globalCoop_return_integerPlayersQuantity(2);//0=all,1=alive,2=nospectators
+		for(fRounds=0;fRounds<=fPlayerz;fRounds++)
+		{
+			while(globalCoop_check_existingLivingEntity($lukriPurki))
+			{
+				wait(0.25);
+			}
+			globalCoop_level_triggerEntity($AlienGroup1Spawn_1);
+			wait(0.25);
+		}
+	}
+}
+
+//---------------------
+// TransporterRoomLockedDialog	
+// talk about needing to find way to disable field
+//---------------------
+void TransporterRoomLockedDialog()
+
+{
+//Once we have been on the brige and galloway told us about the Crew in the Transporterbuffer
+//This Dialog does no longer have a logical reason to be spoken
+	if(playerHasSeenForcefield){
+		return;
+	}
+	music( "mystery");
+
+	//That's odd. Why would a forcefield be blocking the transporter room?
+	globalCoop_dialog_play($Chell,"dallas02/chell_odd.mp3", 1, 11111, 1 );
+	//The aliens don't seem to have the intelligence to do that.
+	globalCoop_dialog_play($Jurot,"dallas02/jurot_aliens.mp3", 1, 11111, 1 );
+	//Unless someone is controlling them
+	globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($Chell),"dallas02/munro_control.mp3", 1, 11111, 0);
+	
+	playerHasSeenForcefield = 1;
+}
+
+//---------------------
+// brokehall1_fields_button1_wait
+// wait thread for button that turns of forcefields in broken-up hallway
+//---------------------
+void brokehall1_fields_button1_wait()
+{
+	$brokehall1_fields1_button1.onuse( "brokehall1_fields_button1_use" );
+	pause();
+}
+
+//---------------------
+// brokehall1_fields_button1_use
+// thread that turns off the forcefields in the broken-up hallway
+//---------------------
+void brokehall1_fields_button1_use()
+{
+	if(doesEntityExist($brokehall1_fields1_button1)){
+		if(doesEntityExist($brokehall1_fields1)){
+		//Disable button for now, play use sound
+			$brokehall1_fields1_button1.nouse();
+			killthread("brokehall1_fields_button1_wait");
+		
+			float fFFHallw;
+			fFFHallw = $brokehall1_fields1_button1.getFloatVar("coop_thisLevelFfIsNotActive");
+			if(fFFHallw != 0 && fFFHallw != 1){
+			//Set inizial data
+				$brokehall1_fields1_button1.setFloatVar("coop_thisLevelFfIsNotActive",0);
+			}
+			wait( .1 );
+			$brokehall1_fields1_button1.playsound ( "sound/ships/forever/for_doorbeep.wav", 1, 1, 400);
+		//Check if the field is now activated or deactivated!!!
+
+			if(fFFHallw == 1){//FF not active
+				$brokehall1_fields1_button1.setFloatVar("coop_thisLevelFfIsNotActive",0);
+				$brokehall1_fields1_button1.playsound ( "sound/environment/computer/lcars_yes.wav", 3, 1, 400);
+				$brokehall1_fields1.playsound ( "sound/ships/enterprise/ent_forcefield_down.wav", 1, 1, 400);
+				globalCoop_level_showAndSolid($brokehall1_fields1);
+				globalCoop_forcefield_makeInteractive($brokehall1_fields1);
+				$brokehall1_fields1.loopsound ( "sound/ships/enterprise/ent_forcefield.wav", .35, 70 );
+			}
+			else if(fFFHallw == 0){//FF Active
+				$brokehall1_fields1_button1.setFloatVar("coop_thisLevelFfIsNotActive",3);//Fake int to block this function
+				$brokehall1_fields1.stoploopsound();
+				$brokehall1_fields1.playsound ( "sound/ships/enterprise/ent_forcefield_down.wav", 1, 1, 400);	
+				$brokehall1_fields1.playsound ( "sound/ships/forever/for_powerdown.wav", 2, 1, 400);
+				$brokehall1_fields1.playsound ( "sound/environment/computer/lcars_yes.wav", 3, 1, 400);
+				$brokehall1_fields1.hide();
+				wait (.1);
+				$brokehall1_fields1.show();
+				wait (.1);
+				$brokehall1_fields1.hide();
+				wait (.1);
+				$brokehall1_fields1.show();
+				globalCoop_forcefield_disable($brokehall1_fields1);
+				$brokehall1_fields1_button1.setFloatVar("coop_thisLevelFfIsNotActive",1);
+				
+				globalCoop_dialog_play($brokehall1_fields1_button1,"dallas01/comp_secfield.mp3",1,512,0);
+			}
+			thread brokehall1_fields_button1_wait();
+		//globalCoop_level_remove($forcefieldTrigger1);
+		//globalCoop_level_remove($forcefieldTrigger2);
+		}
+	}
+}
+
+//---------------------
+// brokehall1_hiddenroom_ab()
+// hallway explodes and forces player down alternate path back to bridge
+//---------------------
+void brokehall_hiddenroom_ab()
+{
+	entity e;
+	e = spawn("trigger_hurt","damage","12","origin","-1634 2066 0","damagetype","lava");
+	globalCoop_dynLight_setup("brokehall_light1", "z");
+	thread globalCoop_level_hideAndNotSolid($brokehall_brokehallwalls1);
+	thread globalCoop_level_showAndSolid($brokehall_brokehallwalls2);
+	$brokehall_brokehall_transstuff1.show();
+	$brokehall_brokehall_transstuff1.triggerable();
+	e.setSize('-40 -200 -100','145 200 300');
+	$brokehall1_hiddenroom1_door1.unlock();
+	globalCoop_level_remove($brokehall1_hiddenroom1_use);
+	
+	$brokehall_brokehall_fires1.playsound ( "sound/impact/explosion/explo_neonsign.wav", 2, 1, 10001);	
+	$brokehall_brokehall_fires1.spawntargetname( "brokehall_brokehall_fires1_exploder" );
+	$brokehall_brokehall_fires1.modelname( "fx/fx-explosion-fire-directional-metaldebris.tik" );	
+	
+	$world.light_lightstyle( "blownout", "zzzzzzasaasfsfasfazzzzzzzzaaaaaaaaaaaaazzzzzzsdfjavsfjasfaafbasfiabsfzzzzzadam", 0 );
+	
+	globalCoop_level_triggerEntity($brokehall_brokehall_fires1);
+	$brokehall_brokehall_fires2.show();
+	
+	wait( 1 );
+	
+	//Trigger forceField
+	if(doesEntityExist($brokehall1_fields1_button1) == 1 && cvar_bool_multiplayer == 1){
+		if($brokehall1_fields1_button1.getFloatVar("coop_thisLevelFfIsNotActive") == 1){
+			brokehall1_fields_button1_use();
+		}
+	}
+	
+	globalCoop_level_triggerEntity($brokehall_hiddenroom_door2);
+	globalCoop_level_remove($brokedickdoor1);
+	
+	globalCoop_level_showAndSolid($brokehall_hiddenroom_door3);
+	wait( 1 );
+	globalCoop_level_remove($brokehall_hiddenroom_door2);
+	
+	globalCoop_level_hideAndNotSolid($brokehall1_hiddenroom1_wall1);
+	globalCoop_level_remove($brokehall1_hiddenroom1_wall1);
+}
+
+//---------------------
+// brokehall1_hiddenroom_ab_2()
+// opens door in hiddenroom during last aliens attack
+//---------------------
+void brokehall_hiddenroom_ab_2()
+{
+	wait( .5 );
+	
+	globalCoop_level_triggerEntity($brokehall_hiddenroom_door1);
+}
+
+//---------------------
+// crewDeadMoving1_move1()
+// dead crew member being drug into hole near hallblocking forcefields
+// this is a sequence of 6 used to move the dead body into the hole as the player progresses forward and encounters multiple triggers
+//---------------------
+void crewDeadMoving1_move1()
+{
+	if(doesEntityExist($crewDeadMoving1)){
+		$crewDeadMoving1.playsound ( "sound/chars/lurker/lurk_draggore.wav" , 8 , 1 , 1000 );
+		
+		$crewDeadMoving1.time(.5);
+		$crewDeadMoving1.moveNorth( 32 );
+		waitfor( $crewDeadMoving1 );
+	}
+}
+
+//---------------------
+// crewDeadMoving1_move2()
+// dead crew member being drug into hole near hallblocking forcefields
+//---------------------
+void crewDeadMoving1_move2()
+{
+	//$crewDeadMoving1.playsound ( "sound/chars/lurker/lurk_draggore.wav" , 8 , 1 , 2000 );
+	
+	$crewDeadMoving1.time(.5);
+	$crewDeadMoving1.moveNorth( 32 );
+	waitfor( $crewDeadMoving1 );
+}
+
+//---------------------
+// crewDeadMoving1_move3()
+// dead crew member being drug into hole near hallblocking forcefields
+//---------------------
+void crewDeadMoving1_move3()
+{
+	//$crewDeadMoving1.playsound ( "sound/chars/lurker/lurk_draggore.wav" , 8 , 1 , 2000 );
+	$crewDeadMoving1.time(.5);
+	$crewDeadMoving1.moveNorth( 32 );
+	waitfor( $crewDeadMoving1 );
+}
+
+//---------------------
+// crewDeadMoving1_move4()
+// dead crew member being drug into hole near hallblocking forcefields
+//---------------------
+void crewDeadMoving1_move4()
+{	
+	//$crewDeadMoving1.playsound ( "sound/chars/lurker/lurk_draggore.wav" , 8 , 1 , 2000 );
+	$crewDeadMoving1.time(.5);
+	$crewDeadMoving1.moveNorth( 32 );
+	waitfor( $crewDeadMoving1 );
+}
+
+//---------------------
+// crewDeadMoving1_move5()
+// dead crew member being drug into hole near hallblocking forcefields
+//---------------------
+void crewDeadMoving1_move5()
+{
+	//$crewDeadMoving1.playsound ( "sound/chars/lurker/lurk_draggore.wav" , 8 , 1 , 2000 );
+	$crewDeadMoving1.time(.5);
+	$crewDeadMoving1.moveNorth( 64 );
+	waitfor( $crewDeadMoving1 );
+}
+
+//---------------------
+// crewDeadMoving1_move6()
+// dead crew member being drug into hole near hallblocking forcefields
+//---------------------
+void crewDeadMoving1_move6()
+{
+	//$crewDeadMoving1.playsound ( "sound/chars/lurker/lurk_draggore.wav" , 8 , 1 , 2000 );
+	$crewDeadMoving1.time(.5);
+	$crewDeadMoving1.moveNorth( 64 );
+	waitfor( $crewDeadMoving1 );
+
+	$crewDeadMoving1.playsound ( "sound/chars/lurker/lurk_dragstop.wav" , 9 , 1 , 2000 );
+}
+
+
+//===================================================================================================================
+// AI
+//===================================================================================================================
+
+//---------------------
+// SetupHazardTeam	
+// setting up the hazard team
+//---------------------
+void SetupHazardTeam()
+{
+	$Chell.ai_off();
+	$Jurot.ai_off();
+	$Franklin.ai_off();
+	
+	globalCoop_contextM3_setup($Chell , "chell");
+	globalCoop_contextM3_setup($Jurot , "jurot");
+	globalCoop_contextM3_setup($Franklin , "franklin");
+	
+	globalCoop_teammate_register($Chell);
+	globalCoop_teammate_register($Jurot);
+	globalCoop_teammate_register($Franklin);
+	
+	$Chell.setnodeid( 999 );
+	$Jurot.setnodeid( 999 );
+	$Franklin.setnodeid( 999 );
+
+	$Chell.health( 9999 );
+	$Jurot.health( 9999 );
+	$Franklin.health( 9999 );
+	$Telsia.health( 9999 );
+	$ForeverEngineer.health( 9999 );
+	
+	thread globalCommon_AiDummyHide ( $Munro );
+	
+	//$Chell.removeactorweapon( "models/weapons/worldmodel-CompressionRifle.tik" );
+	//$Jurot.removeactorweapon( "models/weapons/worldmodel-CompressionRifle.tik" );
+	//$Franklin.removeactorweapon( "models/weapons/worldmodel-CompressionRifle.tik" );
+	
+	$Chell.giveactorweapon( "models/actorweapons/fed-fieldassaultrifle.tik", 1.0 );
+	//$Jurot.giveactorweapon( "models/actorweapons/fed-fieldassaultrifle.tik", 1.0 );
+	$Franklin.giveactorweapon( "models/actorweapons/fed-fieldassaultrifle.tik", 1.0 );
+	
+	wait( .05 );
+	
+	$Chell.useactorweapon( "fieldassaultrifle" );
+	//$Jurot.useactorweapon( "fieldassaultrifle" );	
+	$Franklin.useactorweapon( "fieldassaultrifle" );
+}
+
+
+//===================================================================================================================
+// Bridge and Transporter Room Events
+//===================================================================================================================
+
+//---------------------
+// BridgeUnlockedEvents
+// Does stuff after player opens door with phaser
+//---------------------
+void BridgeUnlockedEvents()
+{
+	globalCoop_level_remove($triggerDialogDoorBridgeLocked);
+	globalCoop_level_remove($triggerBridgeDoorWest);
+	globalCoop_level_remove($BridgeDoorWest_clip);
+	$BridgeDoorWest.unlock();
+	$BridgeDoorWest.noise( "sound/ships/forever/for_doorbeep.wav" );
+	
+	//change the door indicator lights from red to green
+	$bridgeDoorWestLight_green.show();
+	globalCoop_level_remove($bridgeDoorWestLight_red);
+	globalCoop_dynLight_change(
+	"lightBridgeDoorWest_red", "a",
+	"lightBridgeDoorWest_green", "z");	
+	$Chell.ai_off();
+	$Chell.warp( '-1624 3784 0' );
+	$Chell.lookat( $BridgeDoorWest );
+		
+	$Jurot.ai_off();
+	$Jurot.warp( '-1488 3784 0' );
+	$Jurot.lookat( $BridgeDoorWest );
+		
+	wait( 1 );	
+
+	thread cinematicBridge();
+}
+
+void BridgeRescueSequence()
+{
+	forcemusic ("aux5");
+
+// setup for lurkers to spawn on the way back to the bridge
+	$triggerAlienGroup1_spawn_ab.triggerable();
+	$triggerAlienGroup2_spawn_ab.triggerable();
+	$triggerAlienGroup3_spawn_ab.triggerable();
+	if(!cvar_bool_multiplayer){
+		$triggerAlienGroup4_spawn_ab.triggerable();
+	}
+	$triggerAlienGroup5_spawn_ab.triggerable();
+	$triggerAlienGroup6_spawn_ab.triggerable();
+	$triggerAlienGroup7_spawn_ab.triggerable();
+
+
+
+//Set rescue Crew to complete
+	if(cvar_bool_multiplayer){
+	//Spawn aliens at the door
+		globalCoop_level_triggerEntity($triggerAlienGroup7_spawn_ab);
+		globalCoop_objectives_update("complete",2,0);
+	}
+	else{
+		$player.setobjectivecomplete( "RescueCrew", 1 );
+	}
+	
+//set Rescue Chell objective to incomplete, here we can use only the coop function :)
+//Identy strings are global set to the same content as the $$translationword$$
+	thread globalCoop_objectives_update("incomplete" ,3,1);
+	
+// start Chell's death clock
+	thread bridgeRescueSequenceTimerCount();
+	
+// Chell is the man
+	$Chell.missionobjective( 1 );
+
+	$BridgeRescueDebrisOn.show();
+	globalCoop_level_remove($BridgeRescueDebrisOff);
+	globalCoop_level_remove($BridgeRescueDebris_use);
+	
+//Do not allow to end the level before the sequence is startet completly
+	wait(3);
+	
+	// not sure what this is for
+	$temp_levelend.triggerable();
+}
+
+//---------------------
+// Function: bridgeRescueSequenceTimerCount
+// Comments:
+// this starts a timer that counts up to predetermined number
+// when this timer reaches the predetermined number chell dies and the mission fails
+//---------------------
+void bridgeRescueSequenceTimerCount()
+{
+//Exit if rescued allready
+	if(bridgeRescueSequenceTimer == -1){
+		return;
+	}
+	
+	//dissallow ai to attack
+	$Chell.notarget();
+
+	bridgeRescueSequenceTimerCounting = 1;
+	bridgeRescueSequenceTimer = 0;
+	music("suspense");
+
+	thread globalCoop_huds_AddAll("m3ChellTimer");
+	
+	while( bridgeRescueSequenceTimerCounting == 1 )
+	{
+		float fStat;
+		fStat =  100 * ( ( bridgeRescueSequenceTimerMax - bridgeRescueSequenceTimer ) / bridgeRescueSequenceTimerMax );
+		if(cvar_bool_multiplayer){
+			
+			entity	ePlayer;
+			float	fPlayerId;
+			for(fPlayerId=1;fPlayerId<coop_integer_maxPlayers;fPlayerId++)
+			{
+				ePlayer = getentity("player"+fPlayerId);
+				if(doesEntityExist(ePlayer))
+				{
+					ePlayer.setstat( "generic",fStat);
+				}
+			}
+		//make timer go twiche as fast away
+			bridgeRescueSequenceTimer += 2;
+		}
+		else{
+			$player.setstat( "generic",fStat);
+			bridgeRescueSequenceTimer++;
+		}
+		
+	//wait a sec
+		wait( 1 );
+		
+		
+		if( bridgeRescueSequenceTimer == ( bridgeRescueSequenceTimerMax * 0.5 ) )
+		{
+		//Exit if rescued allready
+			if(bridgeRescueSequenceTimer == -1){
+				return;
+			}
+		//Munro? They're almost through the wall!
+			globalCoop_dialog_play($Chell,"dallas02/chell_throughwall.mp3", 1, 11111, 1);
+		}
+		else if( bridgeRescueSequenceTimer >= bridgeRescueSequenceTimerMax )
+		{
+			wait( .25 );
+		//Exit if rescued allready
+			if(bridgeRescueSequenceTimer == -1){
+				return;
+			}
+			thread bridgeRescueSequenceFailedCinematic();
+			return;
+		}
+	}
+	globalCoop_huds_RemoveAll("m3ChellTimer");
+}
+
+//---------------------
+void bridgeRescueSequenceFailedCinematic()
+{
+//Chell has been rescued
+	if(float_cinematicBridgeRescueCompleted)
+	{
+		return;
+	}
+	
+//set vars to let the threads know whats up
+	chellHasBeenEaten=1;
+	bridgeRescueSequenceTimerCounting = 0;
+	
+	entity chelldeathcam;
+	entity lurker;
+	cam.load( "m3l2_chelldeath" );
+	chelldeathcam = spawn( "camera", "targetname", "chelldeathcam" );
+	globalCoop_main_waitAFrame();
+	
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.25);
+	
+    forcemusic( "aux3" );
+
+	wait( 0.5 );
+	
+	$Chell.ai_off();
+	$Chell.show();
+	$Chell.origin( '-1088 3800 -10' );
+	$Chell.angles( '0 90 0' );
+	$Chell.useactorweapon( "none" );
+	$Chell.anim( "conv-talk3" );
+	
+	lurker = spawn( "char/alien-type1a-lurker.tik" );
+	globalCoop_main_waitAFrame();
+	lurker.ai_off();
+	globalCoop_main_waitAFrame();
+	lurker.warp( '-913 3924 -20' );
+	lurker.angles( '0 180 0' );
+	lurker.anim( "taunt" );
+	
+	lurker = spawn( "char/alien-type1a-lurker.tik" );
+	globalCoop_main_waitAFrame();
+	lurker.ai_off();
+	globalCoop_main_waitAFrame();
+	lurker.warp( '-1273 3847 -20' );
+	lurker.angles( '0 0 0' );
+	lurker.anim( "attackcombo3" );
+
+	lurker = spawn( "char/alien-type1a-lurker.tik" );
+	globalCoop_main_waitAFrame();
+	lurker.ai_off();
+	globalCoop_main_waitAFrame();
+	lurker.warp( '-1193 4105 -20' );
+	lurker.angles( '0 270 0' );
+	lurker.anim( "spotted_target" );
+	globalCoop_main_waitAFrame();
+	
+	
+	globalCoop_cin_fov($chelldeathcam,140 );
+	globalCoop_cin_follow($chelldeathcam, $m3l2_chelldeath );
+	globalCoop_cin_cut($chelldeathcam);	
+	globalCoop_main_waitAFrame();
+	globalCoop_cin_cuecamera($chelldeathcam);
+	globalCoop_main_waitAFrame();
+	globalCoop_main_camFadeIn(0.5);
+	wait( 5.1 );
+	//Aargh!, Gack!, Clurp. -- Klingon ?	
+	thread globalCoop_dialog_play($Chell,"dallas02/chell_death.mp3", 1, 11111, 1);
+	
+	wait(0.7);
+	cam_fadeout( 1, 1, 0, 0, 1, 0 );
+	wait( 1 );
+	thread bridgeRescueSequenceFailedCinematic_end();
+}
+
+//---------------------
+void bridgeRescueSequenceFailedCinematic_end()
+{
+	skipthread( "null" );
+	if(!cvar_bool_multiplayer){//singleplayer
+		globalCoop_cin_end();
+		$player.missionfailed( "ChellKilled" );
+		return;
+	}
+	thread globalCoop_mission_failWithReason("ChellKilled");
+	wait(0.45);
+	cam_fadein( 0.1, 1, 0, 0, 1, 0 );
+	wait(0.11);
+	globalCoop_main_camFadeOut(0.1);
+}
+
+//---------------------
+// BridgeRescueAlien_Killed	
+// aliens checks to see if all are dead and if chell is saved.
+//---------------------
+void BridgeRescueAlien_Killed()
+{
+	BridgeRescueAlienDeadCount ++;
+	if ( BridgeRescueAlienDeadCount == 11 ) // change this number if aliens added/removed
+	{
+		wait (2);
+		thread cinematicBridgeRescueCompleted();		
+	}
+}
+
+
+//===================================================================================================================
+// Exploding Cool Stuff
+//===================================================================================================================
+
+//---------------------
+// PanelExplosionThread1 
+// Panel Explodes
+//---------------------
+void PanelExplosionThread1()
+{
+	$PanelExplosion1.playsound ( "sound/impact/explosion/explo_console1.wav", 11, 1, 10001);
+
+	$PanelExplosion1.spawntargetname( "PanelExploder1" );
+	$PanelExplosion1.modelname( "fx/fx-explosion-debris-metal-forever-ceiling.tik" );	
+
+	globalCoop_level_triggerEntity($PanelExplosion1);
+	
+	globalCoop_level_remove($PanelExplode1);
+	
+	$PanelExplosion1.modelname( "fx/fx-sparks-random-blue-medium.tik" );	
+}
+
+//---------------------
+// PanelExplosionThread2 
+// Panel Explodes
+//---------------------
+void PanelExplosionThread2()
+{
+	$PanelExplosion2.spawntargetname( "PanelExploder2" );
+	$PanelExplosion2.modelname( "fx/fx-explosion-debris-metal-forever-ceiling.tik" );	
+	$PanelExplosion2.playsound ( "sound/impact/explosion/explo_console1.wav", 11, 1, 10001);
+
+	globalCoop_level_triggerEntity($PanelExplosion2);
+	
+	globalCoop_level_remove($PanelExplode2);
+	$PanelExplode2_wires.show();
+	
+	$PanelExplosion2.modelname( "fx/fx-sparks-random-blue-medium.tik" );	
+}
+
+//---------------------
+// PanelExplosionThread3 
+// Panel Explodes
+//---------------------
+void PanelExplosionThread3()
+{
+	$PanelExplosion3.spawntargetname( "PanelExploder3" );
+	$PanelExplosion3.modelname( "fx/fx-explosion-debris-metal-forever-ceiling.tik" );	
+	$PanelExplosion3.playsound ( "sound/impact/explosion/explo_console1.wav", 11, 1, 10001);
+
+	globalCoop_level_triggerEntity($PanelExplosion3);
+	
+	$bustedceiling.show();
+	globalCoop_level_remove($PanelExplode3);
+	
+	wait( .25 );
+	globalCoop_level_triggerEntity( $AlienGroup2Spawn0 );
+}
+
+//---------------------
+// PanelExplosionThread4 
+// Panel Explodes
+//---------------------
+void PanelExplosionThread4()
+{
+	$PanelExplosion4.spawntargetname( "PanelExploder4" );
+	$PanelExplosion4.modelname( "fx/fx-explosion-debris-metal-forever-ceiling.tik" );	
+	$PanelExplosion4.playsound ( "sound/impact/explosion/explo_console1.wav", 11, 1, 10001);
+
+	globalCoop_level_triggerEntity($PanelExplosion4);
+	
+	globalCoop_level_remove($PanelExplode4);
+	
+	$PanelExplosion4.modelname( "fx/fx-sparks-random-blue-medium.tik" );	
+}
+
+//---------------------
+// HallwayWall1Thread
+// Hole blows through wall in hallway after transporter room
+//---------------------
+void HallwayWall1Thread()
+{
+	$HallwayWall1_explosion1.spawntargetname( "HallwayWall1_exploder1" );
+	$HallwayWall1_explosion1.modelname( "fx/fx-explosion-console-blue.tik" );	
+	$HallwayWall1_explosion1.playsound ( "sound/impact/explosion/explo_neonsign.wav", 11, 1, 10001);
+
+	globalCoop_level_triggerEntity($HallwayWall1_explosion1);
+	globalCoop_level_hideAndNotSolid($HallwayWall1_wall1);
+	thread globalCoop_level_remove($HallwayWall1_wall1);
+	globalCoop_level_showAndSolid($HallwayWall1_wall2);
+}
+
+
+//===================================================================================================================
+// Cinematics and Dialog
+//===================================================================================================================
+
+//---------------------
+// Function: dialogTubeEntrance
+// Comments:
+// called when player goes to enter the jeffries tubes
+//---------------------
+void dialogTubeEntrance()
+{
+	globalCoop_level_remove($triggerDialogTubeEntrance);
+	// FIXME: REMOVE THIS FROM THE MAP
+}
+
+//---------------------
+// Function: franklinAttack
+// Comments:
+// Franklin finds out where he fits in the plot development
+//---------------------
+void franklinAttack()
+{
+	$Jurot.ai_off();
+	$Chell.ai_off();
+	$Franklin.ai_off();
+	$Jurot.pushable( 0 );
+	$Chell.pushable( 0 );
+	
+	if(cvar_bool_multiplayer){
+		thread globalCoop_objectives_update("inComplete",1,1);
+	}
+	waitForPlayer();
+	wait(1);
+	if(cvar_bool_multiplayer){
+		globalCoop_main_waitForWarmupTime();
+	}
+	wait( .1 );
+	//We're on the bridge deck. The transporter room is down the corridor.
+	thread globalCoop_dialog_play($Chell,"dallas02/chell_bridgedeck.mp3", 1, 11111, 1 );
+	wait( .1 );
+	globalCoop_level_triggerEntity( $turboliftdoors_entrance );
+	globalCoop_actor_walkToVector($Franklin,'-17 -32 5',"walk");
+	$Franklin.turntowardsEntity(globalCoop_return_playerClosestPreferActive($Franklin));
+	//I know these Excelsior class ships well. I'll show you the way to the bridge.
+	thread globalCoop_dialog_play($Franklin,"dallas02/frank_showway.mp3", 1, 11111, 1 );
+	wait(.4);
+	$Jurot.pushable( 1 );
+	$Chell.pushable( 1 );
+	thread globalCoop_actor_walkTo($Jurot,"$node_franklin_die1_jurot","walk");
+	globalCoop_actor_walkToVector($Franklin,'-3 478 0',"run");
+	globalCoop_actor_walkToVector($Franklin,'-79 763 0',"run");
+	thread globalCoop_actor_walkToVector($Chell,'65 116 0',"walk");
+	globalCoop_actor_walkTo($Franklin,"$node_franklin_die2","run");
+	while( franklinAttackWaiting == 1 )
+	{
+		wait( .1 );
+	}
+	$Jurot.ai_on();
+	$Chell.ai_on();
+	wait( .05 );	
+//	$Franklin.remove();
+	wait( .05 );	
+	cin_franklin.beginCinematic( "FranklinAttack" ) ;
+	wait( .6 );
+	$Franklin.playsound ( "sound/chars/lurker/lurk_spottarget.wav", 12, 1, 10001);
+	wait( 0.5 );
+	//Ahhhh!
+	thread globalCoop_dialog_play($Franklin,"dallas02/frank_death.mp3", 1, 11111, 1 );
+	wait( 1.5 );
+	franklinAttackAftermath();
+}
+
+//---------------------
+// Function: franklinAttackAftermath
+// Comments:
+// called immediately after franklin dies
+// explodes hallway
+// spawns aliens
+//---------------------
+void franklinAttackAftermath()
+{
+	globalCoop_level_triggerEntity( $franklinblast_explosion2);
+	wait( .5 );
+
+	$spawnFranklinAttackAliens.spawntargetname( "hansPeterDiethrich" );
+	globalCoop_level_triggerEntity( $spawnFranklinAttackAliens );
+	dialogFranklinAttack();
+
+	//wait( 5 ) ;
+
+	globalCoop_level_triggerEntity($AlienGroup1Spawn);
+	
+	
+	$doorAlienAttack1_explosion.spawntargetname( "doorAlienAttack1_exploder" );
+	$doorAlienAttack1_explosion.modelname( "fx/fx-explosion-door-forever.tik" );	
+	$doorAlienAttack1_explosion.playsound ( "sound/impact/explosion/explo_neonsign.wav", 13, .8, 10001);
+	globalCoop_level_triggerEntity($doorAlienAttack1_explosion);
+
+	wait( .1 );
+
+	globalCoop_level_remove($doorAlienAttack1);
+	globalCoop_level_remove($doorAlienAttack1_use);
+	
+	
+	if(cvar_bool_multiplayer){
+		vector vOrigin;
+		vOrigin = $AlienGroup1Spawn.getOrigin();
+		vOrigin_x += 60;
+		$AlienGroup1Spawn.origin(vOrigin);
+		
+		globalCoop_level_triggerEntity($AlienGroup1Spawn);
+	}
+	
+	wait( 2 );
+	 //Poor Franklin…
+	globalCoop_dialog_play($Jurot,"dallas02/jurot_poorf.mp3", 1, 11111, 1 );
+	
+	//Stay sharp. I don't want to lose anyone else.
+	globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($Chell),"dallas02/munro_sharp.mp3", 1, 11111, 0);
+	
+	if(cvar_bool_multiplayer){
+		float fRounds,fPlayerz;
+		fPlayerz = globalCoop_return_integerPlayersQuantity(2);//0=all,1=alive,2=nospectators
+		for(fRounds=0;fRounds<=fPlayerz;fRounds++)
+		{
+			while(globalCoop_check_existingLivingEntity($hansPeterDiethrich))
+			{
+				wait(0.25);
+			}
+			globalCoop_level_triggerEntity( $spawnFranklinAttackAliens );
+			wait(0.25);
+		}
+	}
+}
+
+//---------------------
+// Function: franklinAttackWait
+// Comments:
+// waits for player to catch up with franklin and then it sucks him into the cieling
+//---------------------
+void franklinAttackWait()
+{
+	franklinAttackWaiting = 0;
+}
+
+//---------------------
+// Function: Franklin_explode
+// Comments:
+// explodes the franklin death hall(of pain) when player steps into trigger
+//---------------------
+void brokenHallFranklin_explode()
+{
+	forcemusic( "surprise" );
+
+	wait( .25 );
+	$brokenHallFranklin_fires1.spawntargetname( "brokenHallFranklin_fires1_exploder" );
+	$brokenHallFranklin_fires1.modelname( "fx-explosion-debris-metal-forever.tik" );	
+	globalCoop_level_triggerEntity( $brokenHallFranklin_fires2 );
+	$doorAlienAttack1_explosion.playsound ( "sound/impact/explosion/explo_wall1.wav", 14, .8, 10001);
+	globalCoop_level_triggerEntity( $franklinblast_explosion );
+	globalCoop_level_remove($franklinblast_nobusted);
+	$franklinblast_busted.show();
+	$brokenHallFranklin_fires2.show();
+	globalCoop_level_show($franklinblast_sparks1);
+	$franklinblast_sparks2.show();
+	globalCoop_dynLight_setup("franklin_hall_lights","z");
+}
+
+//---------------------
+// Function: dialogFranklinAttack
+// Comments:
+// Team talks about a dead franklin during battle
+//---------------------
+void dialogFranklinAttack()
+{
+	//Franklin!!! 
+	globalCoop_dialog_play($Jurot,"dallas02/jurot_frank.mp3", 1, 11111, 1);
+	wait( 1 );
+	//Damn.
+	globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($Chell),"dallas02/munro_damn.mp3", 1, 11111, 0);
+	//Here they come!
+	thread globalCoop_dialog_play($Chell,"dallas02/chell_herecome.mp3", 1, 11111, 1);
+}
+
+//---------------------
+// dialogDoorBridgeLocked
+// Team talks about dead franklin during battle
+//---------------------
+void dialogDoorBridgeLocked()
+{
+	//We'll need another way in.
+	globalCoop_dialog_play($Chell,"dallas02/chell_wayin.mp3", 1, 11111, 1);
+}
+
+//---------------------
+// cinematicTransporterRoom
+// Transporter room, rescue Dallas crew cinematic
+//---------------------
+void cinematicTransporterRoom()
+{
+//Remove archetype
+	globalCoop_level_remove($TransporterRoomButton_archetype);
+	globalCoop_level_remove($TransporterRoomButtonOn);	
+	$TransporterRoomButton_archetype.missionobjective( 0 );
+	$TransporterRoomButtonOff.show();	
+
+	globalCoop_main_camFadeOut(.5);
+	wait( .5 );	
+	globalCoop_cin_start();
+
+	// get rid of ALL the stupid lurkers
+	removeActorsNamed( "Lurker" );
+	
+	$Jurot.ai_off();
+	$Jurot.hide();
+	$Jurot.origin('-1520 918 4');
+	$Jurot.pushable( 0 );
+	$Jurot.mass( 99999999 );
+	$Jurot.settendency( "follow" , 0 );	
+	
+    forcemusic ("aux2");
+
+//Start cinematic, load it from a *.cin file
+	cin_transporter.setendthread( "cinematicTransporterRoom_End" );
+	cin_transporter.beginCinematic( "m3l2-trans" );
+
+	globalCoop_main_camFadeIn(3);
+	
+	globalCoop_cin_skipThread( "cinematicTransporterRoom_SkipThread" );
+}
+
+//---------------------
+// cinematicTransporterRoom_SkipThread
+// skip thread for transporter room cinematic
+//---------------------
+void cinematicTransporterRoom_SkipThread()
+{
+	skipthread( "null" );
+	globalCoop_main_camFadeOut(1);
+	wait( 1 );
+	killthread( "cinematicTransporterRoom" );
+	
+	cin_transporter.endCinematic( FALSE );
+
+	thread cinematicTransporterRoom_End();
+}
+
+void cinematicTransporterRoom_End()
+{
+	skipthread( "null" );
+	$Jurot.stopdialog();
+	$Munro.stopdialog();
+	$Chell.stopdialog();
+	$ForeverEngineer.stopdialog();
+	$Telsia.stopdialog();
+
+	$Jurot.resethead();
+	$Telsia.resethead();
+	$Munro.resethead();
+	$Chell.resethead();
+
+	// put up monster clips so the idiots dont wander outside the room
+	$transporterRoomClip.solid();
+
+	globalCoop_level_hideAndNotSolid($Munro);
+	wait (.1);
+
+	if(!cvar_bool_multiplayer){
+		$player.warp( '-1296 640 30' );
+	}
+	
+	$Jurot.warpto( "$jurot_busyNode" );
+	$Jurot.show();	
+	$Jurot.angle( 45 );
+	$Jurot.anim( "tricorder_fire" );
+
+	$Telsia.notsolid();
+	$Telsia.pushable( 0 );
+	$Telsia.show();
+	$Telsia.anim( "cin-m7m8_crash_Sydney" );
+	$Telsia.settalkwatchmode ( "headwatchonly", 0 );
+
+	$ForeverEngineer.notsolid();
+	$ForeverEngineer.pushable( 0 );
+	$ForeverEngineer.show();
+	$ForeverEngineer.anim( "ent-lounge-idle" );
+	$ForeverEngineer.settalkwatchmode ( "headwatchonly", 0 );
+
+	$ForeverCrewMale.notsolid();
+	$ForeverCrewMale.pushable( 0 );
+	$ForeverCrewMale.show();
+	$ForeverCrewMale.anim( "cin-m3_idle-collapse" );
+	$ForeverCrewMale.settalkwatchmode ( "headwatchonly", 0 );
+
+	//$ForeverCrewFemale.notsolid();
+	//$ForeverCrewFemale.pushable( 0 );
+	//$ForeverCrewFemale.show();
+	//$ForeverCrewFemale.anim( "cin-m3_idle-collapse" );
+
+	wait( .5 );
+
+	$Jurot.useactorweapon( "Tricorder" );
+	$ForeverEngineer.useactorweapon( "none" );
+	$ForeverCrewMale.useactorweapon( "none" );
+	$Telsia.useactorweapon( "none" );
+	
+//end cinematic
+	globalCoop_cin_end();
+	
+	if(!cvar_bool_multiplayer){//SP	
+		globalCommon_Autosave();
+	}
+
+//start chell rescue sequence
+	thread BridgeRescueSequence();
+	
+	globalCoop_main_camFadeIn(1);
+}
+
+//---------------------
+// cinematicBridge
+// Cinematic at bridge, chell stays behind
+//---------------------
+void cinematicBridge_Munro1()
+{
+	//Jurot, find out how he died. Chell, access the Captain's logs.
+	globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($Chell),"dallas02/munro_howdie.mp3", 1, 11111, 0);
+}
+
+void cinematicBridge_Munro2()
+{
+	//Play it.
+	globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($Chell),"dallas02/munro_playit.mp3", 1, 11111, 0);
+}
+
+void cinematicBridge_Jurot1()
+{
+	//Their security chief is Telsia.
+	globalCoop_dialog_play($Jurot,"dallas02/jurot_secchief.mp3", 1, 11111, 0);
+}
+
+void cinematicBridge()
+{
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.1);
+	
+	$BridgeDoorWest.lock();
+	removeActorsNamed( "Lurker" );
+	
+//Remove Trigger, we don't need the force field dialog anymore now
+	globalCoop_level_remove($TransporterRoomLockedDialog_Trigger);
+	
+	//--- Set up Scene
+	$Jurot.ai_off();
+	$Chell.ai_off();	
+	
+	$Munro.origin( '-1304 3976 0' );
+	$Munro.angle( 45 );
+	$Munro.useactorweapon( "none" );
+	$Munro.show();
+
+	$Jurot.origin( '-1135 4168 -12' );
+	$Jurot.angle( 290 );
+	
+	$Chell.useactorweapon( "none" );
+	$Chell.origin( '-1183 4120 -12' );
+	$Chell.angle( 345 );
+	
+	$Jurot.anim( "idle" );
+	$Jurot.useactorweapon( "Tricorder" );
+	wait( .1 );
+	
+	$Munro.headwatch( $crewDeadCaptain );
+	$Jurot.headwatch( $crewDeadCaptain );
+	$Chell.headwatch( $crewDeadCaptain );
+	
+	$viewscreen_blank.hide();
+	$viewscreen_galloway.show();
+	
+	forcemusic( "aux1");
+
+// SHOT 1 --------------------------------------------------------------------------
+	globalCoop_cin_follow($cam1, $m3l2_bridge1_adam1 );
+	wait( .5 );
+	globalCoop_cin_cuecamera ( $cam1 );
+	
+	globalCoop_main_camFadeIn(1);
+	
+	globalCoop_cin_skipThread("cinematicBridge_SkipThread");
+	wait( 5 );
+
+	$Chell.headwatch( $Jurot );
+	//It's Captain Galloway.
+	globalCoop_dialog_play($Chell,"dallas02/chell_gall.mp3", 1, 11111, 0);
+
+	wait( .25 );
+
+	$Chell.resethead();
+
+	globalCoop_cin_follow($cam3, $m3l2_bridge1_adam3 );
+	wait( .25 );
+	
+// SHOT 2 --------------------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam3 );
+	$Munro.headwatch( $Jurot );
+
+	//Jurot, find out how he died. Chell, access the Captain's logs.
+	thread globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($Chell),"dallas02/munro_howdie.mp3", 1, 11111, 0);
+
+	wait( 1.75 );
+
+	$Munro.headwatch( $Chell );
+	$Chell.headwatch( $Munro );
+
+	wait( 2.25 );
+
+	$Chell.resethead();
+	thread globalCoop_actor_walkTo($Chell,"$bridge_panel_chell_node","walk");
+
+	globalCoop_cin_follow($cam2, $m3l2_bridge1_adam2 );
+	
+	$Jurot.angle( 270  );
+	wait( .25 );
+
+// SHOT 3 --------------------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam2 );
+	$Munro.headwatch( $Jurot );
+
+	// Jurot does some stuff
+	globalCoop_actor_animateWaitForAnimation($Jurot,"tricorder_fire");
+	$Jurot.anim( "idle" );
+
+	//There are no wounds on him. He died from asphyxiation. Presumably when the Dallas lost life support.
+	thread globalCoop_dialog_play($Jurot,"dallas02/jurot_nowounds.mp3", 1, 11111, 0);
+	wait( .5 );
+
+	$Jurot.headwatch( $Munro );
+	wait( 1 );
+
+	$Jurot.headwatch( $deadcapitan );
+	wait( 3.5 );
+	
+// SHOT 4 --------------------------------------------------------------------------
+	globalCoop_cin_follow($cam1, $m3l2_bridge1_adam3 );
+	globalCoop_cin_follow($cam2, $m3l2_bridge1_adam4 );
+	wait( 4.5 );
+	
+	wait( 2.5 );
+	
+	//The Captain's log is online.
+	globalCoop_dialog_play($Chell,"dallas02/chell_log.mp3", 1, 11111, 0);
+	
+	wait(.25 );
+
+// SHOT 5 --------------------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( .25 );
+
+	//Play it.
+	thread globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($Chell),"dallas02/munro_playit.mp3", 1, 11111, 0);
+
+	$Jurot.angle( 60 );
+	$Jurot.useactorweapon( "none" );
+	$Jurot.anim( "idle" );
+	$Jurot.headwatch( $viewscreen_lookatnode );
+	$Chell.headwatch( $viewscreen_lookatnode );
+	wait( 1 );
+	
+	globalCoop_cin_follow($cam2, $m3l2_bridge1_adam6 );
+	wait( .5 );
+
+// SHOT 6 --------------------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam2 );
+	$Munro.headwatch( $viewscreen_lookatnode );
+
+	//Captain's log, Stardate. We're responding to a distress call from a space station outside Federation Space. A race called the Attrexians. The Federation lacks a diplomatic arrangement with them, so this could be an opportunity to establish cordial relations…
+	globalCoop_dialog_play($crewDeadCaptain,"dallas02/gall_log1.mp3", 1, 11111, 0);
+
+	globalCoop_cin_follow($cam1, $m3l2_bridge1_adam5 );
+	wait( .5 );
+
+// SHOT 7 --------------------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam1 );
+
+	//The attack crippled us! I've sent most of my crew to the space station. I hope they can protect the Attrexians there. I've kept a small skeleton crew led by my security chief. We're going to try to salvage the ship by getting it away from the space station…
+	globalCoop_dialog_play($crewDeadCaptain,"dallas02/gall_log2.mp3", 1, 11111, 0);
+
+	globalCoop_cin_follow($cam4, $m3l2_bridge1_adam4 );
+	globalCoop_cin_follow($cam2, $m3l2_bridge1_adam7 );
+	
+	globalCoop_main_camFadeOut(1);
+	wait( 1 );
+
+// SHOT 8 --------------------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam2 );
+	wait( .5 );
+	globalCoop_main_camFadeIn(1);
+
+	//I miscalculated. There were too many of them! My security force can't handle them all. Our only hope is to try to destroy them by shutting off life-support. Oxygen reserve will last about an hour. Looks like I'll go down with the ship.
+	thread globalCoop_dialog_play($crewDeadCaptain,"dallas02/gall_log3.mp3", 1, 11111, 0);
+
+	wait( 9 );
+
+	globalCoop_cin_follow($cam1, $m3l2_bridge1_adam11 );
+	
+	globalCoop_main_camFadeOut(1);
+	cam_fadeout( 1 , 0, 0, 0, 1, 0  );
+	wait( 1 );
+		
+// SHOT 10 --------------------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( .5 );
+
+	globalCoop_main_camFadeIn(1);
+	wait( 3 );//10
+
+	//But not the last of my security crew. My chief engineer is trying an experimental procedure. She'll encode them in the transporter pattern buffer. It's risky, and their signals might degrade. But it's our only hope.
+	thread globalCoop_dialog_play($crewDeadCaptain,"dallas02/gall_log4.mp3", 1, 11111, 0);
+
+	globalCoop_cin_follow($cam2, $m3l2_bridge1_adam10 );
+	globalCoop_main_camFadeOut(.5);
+	wait( .5 );
+
+// SHOT 11 --------------------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam2 );
+	wait( .5 );
+
+	globalCoop_main_camFadeIn(.5);
+	wait(16);
+	thread cinematicBridge_End();
+}
+
+//-------------------------------------------------------------------------------------------------
+void cinematicBridge_SkipThread()
+{
+	skipthread( "null" );
+	killthread( "cinematicBridge" );
+	
+	$Jurot.stopdialog();
+	$Munro.stopdialog();
+	$deadcapitan.stopdialog();
+	$Chell.stopdialog();
+	
+    forcemusic ("normal");
+	thread cinematicBridge_End();
+}
+
+//-------------------------------------------------------------------------------------------------
+void cinematicBridge_End()
+{	
+	globalCoop_main_camFadeOut(.5);
+	wait( 0.5 );
+
+	$viewscreen_blank.show();
+	globalCoop_level_remove($viewscreen_galloway);
+
+	$Jurot.resethead();
+	$deadcapitan.resethead();
+	$Chell.resethead();
+	$Munro.resethead();
+
+	$Jurot.useactorweapon( "fieldassaultrifle" );
+	$Jurot.ai_on();
+
+	globalCoop_level_hideAndNotSolid($Munro);
+		
+	if(!cvar_bool_multiplayer)
+	{
+		$player.warp( '-1200 4008 0' );
+	}
+	
+//activate chell, so he stops looking/turning towards at the door
+	$Chell.ai_on();
+	$BridgeDoorWest.unlock();
+	$Chell.ai_off();
+	$Chell.origin( '-1088 3880 0' );
+	$Chell.angle( 90 );
+	
+	globalCoop_cin_end();
+	globalCoop_main_camFadeIn(1);
+	
+	//music( "normal" );
+
+	$Chell.playsound ( "sound/ships/forever/for_poweron.wav", 4, 1, 10001);
+	wait( .5);
+
+	//Telsia
+	globalCoop_dialog_play($Chell,"dallas02/chell_telsia.mp3", 1, 11111, 0);
+	
+	wait( .25 );
+
+	if( playerHasSeenForcefield == 1 )
+	{
+		// Chell, can you disable the green forcefield from here?
+		globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($Chell),"dallas02/munro_disgreen.mp3", 1, 11111, 1);
+		//Done.
+		globalCoop_dialog_play($Chell,"dallas02/chell_done.mp3", 1, 11111, 1);
+	}
+//Remove Force Field	
+	globalCoop_level_remove($TransporterRoomField);
+	globalCoop_level_remove($TransporterRoomFieldClip);
+
+	// Jurot, let's head back to the transporter room!
+	globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($Chell),"dallas02/munro_jurback.mp3", 1, 11111, 1);
+	
+	
+	if(cvar_bool_multiplayer)
+	{
+		globalCoop_objectives_update("complete",1,0);
+		thread globalCoop_objectives_update("" ,2,1);
+	}
+	else
+	{
+		$player.setobjectivecomplete( "RetrieveLogs", 1 );
+		$player.setobjectiveshow( "RescueCrew", 1 );
+		$TransporterRoomButton_archetype.missionobjective( 1 );
+	}
+	
+	teamFollow = 1;
+	$Jurot.ai_on();
+	
+	$BridgeTransporterRoomButtonOn.hide();
+	$BridgeTransporterRoomButtonOff.show();
+	
+	wait( 2 );
+	
+	if(!cvar_bool_multiplayer){
+		globalCommon_Autosave();
+	}
+}
+
+
+//---------------------
+// cinematicBridgeRescueCompleted
+// End cinematic for level
+//---------------------
+void cinematicBridgeRescueCompleted()
+{
+entity eTrigger;
+	eTrigger = getCurrentEntity();
+	globalCoop_level_notTriggerable(eTrigger);
+	globalCoop_level_remove(eTrigger);
+	
+//Exit if timer is allready on zero, avoid multiple thread calls
+	if(float_cinematicBridgeRescueCompleted == 1){
+		return;
+	}
+	
+	// stop the chell death countdown
+	bridgeRescueSequenceTimerCounting		= 0;
+	float_cinematicBridgeRescueCompleted	= 1;
+	
+	globalCoop_main_camFadeOut(.5);
+	wait(.5);
+	
+//exit if chell is dead
+	if(chellHasBeenEaten)
+	{
+		return;
+	}
+	
+	globalCoop_cin_start();
+	
+	// make everyone cooperate
+	$Chell.hide(); 
+	$Munro.hide(); 
+	$Telsia.hide();
+	$Jurot.hide();
+	$ForeverEngineer.hide(); 
+//complete the objective
+	thread globalCoop_objectives_update("complete" ,3,1);	
+//	$player.setobjectivecomplete( "RescueChell", 1 );
+	$Chell.missionobjective( 0 );
+    forcemusic ("aux2");
+	
+//Setup cin
+	cin_chell.setendthread( "cinematicBridgeRescueCompleted_endthread" );
+	cin_chell.beginCinematic( "m3l2-chell" );
+	
+	removeActorsNamed("Lurker");
+	
+	globalCoop_main_camFadeIn(.5);
+
+	globalCoop_cin_skipThread( "cinematicBridgeRescueCompleted_skipthread" );
+}
+
+void cinematicBridgeRescueCompleted_skipthread()
+{
+	skipthread( "null" );
+	killthread( "cinematicBridgeRescueCompleted" );
+	$Picard.stopdialog();
+	thread cinematicBridgeRescueCompleted_endthread();
+}
+
+//---------------------
+// cinematicBridgeRescueCompleted_endthread
+//---------------------
+void cinematicBridgeRescueCompleted_endthread()
+{
+	skipthread( "null" );
+	
+	globalCoop_main_camFadeOut(.5);
+	wait( .5 );	
+	killthread( "cinematicBridgeRescueCompleted" );	
+	setfloatvar ( "game.globalMissionEnterprise", 2 );
+	
+//If Multiplayer Player
+	if(cvar_bool_multiplayer){
+		thread coop_endLevel();
+	}
+//Else, in singleplayer
+	else{
+		spawn ( "trigger_changelevel", "targetname", "trigger_endlevel", "map", "ent-deck1_bridge" );
+		wait( .2 );
+		globalCoop_level_triggerEntity($trigger_endlevel);
+	}
+}
+
+//---------------------
+ void cinematicDeadCaptain()
+{
+//arrrr, a nice empty function, let us surprice the players here, MUHAHAHHAHAHA
+	//$crewDeadCaptain.anim("idle");
+	$crewDeadCaptain.playsound("sound/chars/lurker/lurk_alert_amb.wav",8,1,512);
+	//wait(.2);
+	//$crewDeadCaptain.anim("dead_in_captain_chair");
+	//$crewDeadCaptain.stopanimating();
+}
+
+
+//===================================================================================================================
+// Misc and Sound Stuff
+//===================================================================================================================
+
+//---------------------
+// soundAlienSounds2
+// Aliens scratching in ducts
+//---------------------
+void soundAlienSounds2()
+{
+	if( secretShipGalaxySpawned == 0)
+	{
+		secretShipGalaxySpawned = 1;
+		$secretShipGalaxy.origin( '-1912 4224 -8' );
+	}
+}
+
+//---------------------
+// soundAlienSounds3
+// Aliens scratching in ducts
+//---------------------
+void soundAlienSounds3()
+{
+	if( secretShipGalaxySpawned == 0)
+	{
+		secretShipGalaxySpawned = 1;
+		$secretShipGalaxy.origin( '-256 4224 -8' );
+	}
+}
+
+
+//-----------------------------------
+void inaccessible_sound()
+{
+	entity e;
+	e = getcurrententity();
+	e.playsound( "sound/doors/door_locked.wav", 1, 1, 190 );
+}
+
+//-----------------------------------
+void onTheBridge()
+{
+	while( onBridgeWait )
+	{
+		wait( 1 );
+	}
+	wait( .25 );
+	BridgeUnlockedEvents();
+}
+
+//-----------------------------------
+float inaccessible_secret1 = 0;
+float inaccessible_secret2 = 0; 
+float inaccessible_secret3 = 0;
+
+//-----------------------------------
+void doInaccessibleSecret()
+{
+	if( inaccessible_secret1 && inaccessible_secret2 && inaccessible_secret3 )
+	{
+		music( "mystery" );
+		$inaccessible_secret_door.playsound( "sound/environment/computer/holo_yes.wav", 1, .7, 90 );
+		$secret_jtube_door.unlock();
+		globalCoop_level_triggerEntity( $secret_jtube_door );	
+	}
+}
+
+//-----------------------------------
+void inaccessible_sound_secret1()
+{
+	entity e;
+	e = getcurrententity();
+	e.playsound( "sound/environment/rock/rock_powerup.wav", 1, 1, 90 );
+	inaccessible_secret1 = 1;
+	doInaccessibleSecret();
+	globalCoop_level_remove(e);
+}
+
+//-----------------------------------
+void inaccessible_sound_secret2()
+{
+	entity e;
+	e = getcurrententity();
+	e.playsound( "sound/environment/rock/rock_powerup.wav", 1, 1, 90 );
+	inaccessible_secret2 = 1;
+	doInaccessibleSecret();
+	globalCoop_level_remove(e);
+}
+
+//-----------------------------------
+void inaccessible_sound_secret3()
+{
+	entity e;
+	e = getcurrententity();
+	e.playsound( "sound/environment/rock/rock_powerup.wav", 1, 1, 90 );
+	inaccessible_secret3 = 1;
+	doInaccessibleSecret();
+	globalCoop_level_remove(e);
+}
+
+//-----------------------------------
+float transporterSecretStartTime;
+void transporterSecretEnter()
+{
+	music( "mystery" );
+	transporterSecretStartTime = getLevelTime();
+}
+
+//-----------------------------------
+void transporterSecretExit()
+{
+	float timeNow;
+	timeNow = getLevelTime();
+	if( (timeNow - transporterSecretStartTime) > 5 )
+	{
+		spawn( "script_origin", "targetname", "flyorigin" );
+		wait( 0.25 );
+		
+		globalCoop_level_remove($transporterSecretTrigger);
+		$flyorigin.origin( $transporterSecretPath.getorigin() );
+		$transporterSecretStarshipModel.origin( $transporterSecretPath.getorigin() );
+		$transporterSecretStarshipModel.bind( $flyorigin );
+		wait( 0.25 );
+
+		$flyorigin.followpath( $transporterSecretPath, "normalangles" );
+		waitfor( $flyorigin );
+
+		$transporterSecretStarship.origin( $transporterSecretStarshipModel.getorigin() );		
+		globalCoop_level_remove($transporterSecretStarshipModel);
+	}
+}
+
+/* void temp1()
+{
+	//The attack crippled us! I've sent most of my crew to the space station. I hope they can protect the Attrexians there. I've kept a small skeleton crew led by my security chief. We're going to try to salvage the ship by getting it away from the space station…
+	globalCoop_dialog_play($crewDeadCaptain,"dallas02/gall_log2.mp3", 1, 11111, 0);
+}
+
+void temp2()
+{
+	//I miscalculated. There were too many of them! My security force can't handle them all. Our only hope is to try to destroy them by shutting off life-support. Oxygen reserve will last about an hour. Looks like I'll go down with the ship.
+	globalCoop_dialog_play($crewDeadCaptain,"dallas02/gall_log3.mp3", 1, 11111, 0);
+}
+
+void temp3()
+{
+	//But not the last of my security crew. My chief engineer is trying an experimental procedure. She'll encode them in the transporter pattern buffer. It's risky, and their signals might degrade. But it's our only hope.
+	globalCoop_dialog_play($crewDeadCaptain,"dallas02/gall_log4.mp3", 1, 11111, 0);
+} */
+
+void lurkerAttackDoor()
+{
+	wait( .25 );
+
+	$AlienGroup7_spawn1.ai_off();
+	$AlienGroup7_spawn2.ai_off();
+	
+	$AlienGroup7_spawn1.anim( "attack_charge_pounce" );
+	$AlienGroup7_spawn2.anim( "attackcombo3" );
+	waitForAnimation( $AlienGroup7_spawn1 , "attack_charge_pounce" );
+	waitForAnimation( $AlienGroup7_spawn2 , "attackcombo3" );
+	
+	$AlienGroup7_spawn1.ai_on();
+	$AlienGroup7_spawn2.ai_on();
+
+	$AlienGroup7_spawn1.aggressive(1);
+	$AlienGroup7_spawn2.aggressive(1);
+}
+
+void secret_strew()
+{
+	globalCoop_level_remove($crewSign_1);
+	globalCoop_level_remove($crewSign_2);
+
+	$strewSign_1.show();
+	$strewSign_2.show();
+
+	$strewSign_1.bind( $brokehall1_hiddenroom1_door1 );
+	$strewSign_2.bind( $brokehall1_hiddenroom1_door2 );
+
+	$secret_strew.show();
+	$secret_strew.rotateX( 15 );
+	$secret_strew.rotateY( 15 );
+	$secret_strew.rotateZ( 15 );
+}
+
+void bridgeDoorWestBreak()
+{
+	globalCoop_level_remove($bridgeDoorDamagedWest_fracture);
+	globalCoop_level_triggerEntity( $bridgeDoorWestExplosion );
+}
+
+void bridgeDoorEastBreak()
+{
+	globalCoop_level_remove($bridgeDoorDamagedEast_fracture);
+	globalCoop_level_triggerEntity( $bridgeDoorEastExplosion );
+}
+
+
+
+
+void AlienGroup2SpawnMultiplayer()
+{
+	wait(0.15);
+	float fEntity;
+	entity e;
+	for(fEntity=0;fEntity<1023;fEntity++){
+		e=getEntity("*"+fEntity);
+		if(doesEntityExist(e)){
+			if(e.getOrigin() == '-812 2928 232'){
+				e.targetname("AlienGroup2SpawnMultiplayer");
+			}
+		}
+	}
+	
+	float fRounds,fPlayerz;
+	fPlayerz = globalCoop_return_integerPlayersQuantity(2);//0=all,1=alive,2=nospectators
+	
+	fPlayerz = (fPlayerz * 2);
+	
+	for(fRounds=0;fRounds<=fPlayerz;fRounds++)
+	{
+		while(globalCoop_check_existingLivingEntity($kaffeeverfaerbtdiezaehne))
+		{
+			wait(0.2);
+		}
+		globalCoop_level_triggerEntity($AlienGroup2SpawnMultiplayer);
+		wait(0.1);
+	}
+}
+
+
+
+void forcefieldUnfuckery()
+{
+//Reactivate ?
+	//$forcefieldTrigger1.nottriggerable();
+	//$forcefieldTrigger2.triggerable();
+
+	// if( teamFollow = 2 )
+	// {
+		// $Chell.settendency( "follow" , 0 );
+		// $Jurot.settendency( "follow" , 0 );
+	// }
+	// else if( teamFollow = 1 )
+	// {
+		// $Jurot.settendency( "follow" , 0 );
+	// }
+}
+
+void forcefieldUnfuckery2()
+{
+//Reactivate ?
+	//$forcefieldTrigger2.nottriggerable();
+	//$forcefieldTrigger1.triggerable();
+
+	// if( teamFollow = 2 )
+	// {
+		// $Chell.settendency( "follow" , 1 );
+		// $Jurot.settendency( "follow" , 1 );
+	// }
+	// else if( teamFollow = 1 )
+	// {
+		// $Jurot.settendency( "follow" , 1 );
+	// }
+}
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed("ent-deck1_bridge");
+}
+

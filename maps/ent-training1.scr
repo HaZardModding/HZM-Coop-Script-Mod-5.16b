@@ -1,0 +1,860 @@
+//-----------------------------------------------------------------
+//  EF2 Level Script File
+//
+//  Level:	      ent-training1
+//  Script By:    R. Heath, J. Keehan
+//  Geometry By:  R. Heath, J. Keehan
+//  Created on:   09/16/2002
+//
+//	Updated for Co-Op:  Chrissstrahl 2007.04.10
+//	Last Edited:  		Chrissstrahl 2007.04.15
+//-----------------------------------------------------------------
+
+void main();
+void worldSetup();
+void init();
+
+void area1ConfirmSound();
+void area1Start();
+void area1StartDialog();
+void area1WalkAround();
+
+void area1Jumping();
+void area1JumpingDialog();
+void area1ConfirmJump();
+void area1JumpingEnd();
+
+void area1Crouching();
+void area1CrouchingDialog();
+void area1ConfirmCrouch();
+void area1CrouchingEnd();
+
+void area1Combo();
+void area1ComboDialog();
+void area1ConfirmCombo();
+void area1ComboEnd();
+
+void area1Ladder();
+void area1LadderDialog();
+void area1LadderComplete();
+
+void area1DuckJump();
+void area1DuckJumpDialog();
+void area1DuckJumpEnd();
+
+void area1Jtube();
+void area1JtubeDialog();
+void area1End();
+
+void threadLockedDoor();
+void coop_endLevel();
+
+//-------------------
+//--- variables
+//-------------------
+
+float area1WalkAroundCounter = 0;
+float jumpTraining = 0;
+float crouchTraining = 0;
+float comboTraining = 0;
+float temp_bool;				//Co-Op
+float temp_selectAPlayer = 1;	//Co-Op
+entity temp_e;					//Co-Op
+
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/optional_modules/puzzles.scr"
+#include "coop_mod/maps/missions/training/tuvok.scr"
+#include "maps/global_scripts/global_common.scr"
+#include "maps/global_scripts/global_debugUtils.scr"
+#include "maps/global_scripts/global_math.scr"
+
+
+
+//================================================================================
+// Main
+//================================================================================
+
+//---------------------
+// Function: main
+// Comments:
+// the main thread run at the start of the level
+//---------------------
+void main()
+{
+soundtrack( "music/training1.mus" );
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_float_spawnAngle0 			= 270;//Spawn angles
+	coop_string_nextMapToCheck		= "ent-training2";//set the map we gona load next while we are in testmode
+//Definie Objective
+	coop_string_objectiveItem1			= "moveAroundT1";
+	coop_string_objectiveItem2			= "jumpUpT1";
+	coop_string_objectiveItem3			= "duckT1";
+	coop_string_objectiveItem4			= "jumpDuckT1";
+	coop_string_objectiveItem5			= "ladderT1";
+	coop_string_objectiveItem6			= "crouchJumpT1";
+	coop_string_objectiveItem7			= "jefferysT1";
+//spawnorigins, Spawn Players on those locations, at map start
+	coop_vector_spawnOrigin7 			= '1700 1760 174';
+	coop_vector_spawnOrigin6 			= '1780 1760 174';
+	coop_vector_spawnOrigin4 			= '1860 1760 174';
+	coop_vector_spawnOrigin2			= '1940 1760 174';
+	coop_vector_spawnOrigin1 			= '2020 1760 174';
+	coop_vector_spawnOrigin3 			= '2100 1760 174';
+	coop_vector_spawnOrigin5 			= '2180 1760 174';
+	coop_vector_spawnOrigin8 			= '1937 1857 174';
+//Set spawnangles for this level
+	coop_float_spawnAngle0 			= 270;//SpawnOrigin0 Angle
+//Start the Co-Op Script
+	thread globalCoop_main();
+
+//Start setup
+	thread worldSetup();
+	thread init();
+	
+	waitforplayer();
+	if(!cvar_bool_multiplayer){//Not in Multi Player Mode
+		$player.loadobjectives( "ent-training1" );
+		$player.model("models/char/munro_voyager.tik");
+	}
+//Set viewModes
+	$world.clearAvailableViewModes();
+	$world.addAvailableViewMode( "structuralintegrity" );
+	thread globalCoop_main_camFadeIn(1);
+	
+//Multi Player Mode
+	//Remove Jump BlockClip, sux in Multiplayer
+	if(cvar_bool_multiplayer){
+		removeclass("puzzle_object");
+		thread globalCoop_puzzle_add("coop_trainingSecret","trainingSecret",5,'5858 -154 192');
+		$jumpBlockClip.remove();
+	//Give each player a Item/weapon
+		thread globalCoop_player_giveAll("models/weapons/worldmodel-Tricorder.tik",0);
+	}
+	
+//$player.origin( '704 1216 0' );
+	thread globalCoop_player_imobilizeAll( 1 );
+
+}
+
+//---------------------
+// Function: worldSetup
+// Comments:
+// setup objects in the world
+//---------------------
+void worldSetup()
+{
+	//$door1.lock();
+	$door2.lock();
+	$door3.lock();
+	$door4.lock();
+	$door5.lock();
+	$door6.lock();
+	$door8.lock();
+	$door9.lock();
+	$secret_jtubedoor.lock();
+	
+	$area1LadderCompleteTrigger.nottriggerable();
+}
+
+//---------------------
+// Function: init
+// Comments:
+// the initilization thread called at the start of the level via main
+//---------------------
+void init()
+{	
+	initTuvok();
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////CO-OP
+	$tuvok.origin('1952 1576 172');
+	$tuvok.angle( 90 );
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+	$holoDeckWall.forcealpha( 1 );
+	$holoDeckWall.alpha( 1 );
+	
+	$area1JumpPipes.forcealpha( 1 );
+	$area1JumpPipes.alpha( 0 );
+	$area1DuckPipes.forcealpha( 1 );
+	$area1DuckPipes.alpha( 0 );
+	$area1DuckJumpPipes.forcealpha( 1 );
+	$area1DuckJumpPipes.alpha( 0 );
+		
+		//$area1DuckJumpCrates.hide();
+	$area1DuckJumpCrates.forcealpha( 1 );
+	$area1DuckJumpCrates.alpha( 0 );
+	
+	waitforplayer();
+	thread area1Start();
+}
+
+//================================================================================
+// Area 1
+//================================================================================
+
+//---------------------
+// Function: area1Start
+// Comments:
+// very beginning of the level where player is introduced to the training mission
+//---------------------
+void area1Start()
+{
+	wait( 1 );
+	globalCoop_main_waitForWarmupTime();
+	fadeTuvokIn();
+	wait( 2 );
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train1/tuvok_elate.mp3",2,500,0);//Vol,range,time,head
+	//Lieutenant.  Starfleet regulations specifically state that all personnel are to undergo fitness
+	//and combat readiness training at least once per earth year
+	
+	//I'm ready
+	globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($tuvok),"train1/munro_dothis.mp3",2,30000,0);//Vol,range,time,head
+	
+//Show Objective
+	thread globalCoop_objectives_update("incomplete",1,1);//State,Item,ShowIt
+	
+//Co-Op Relase the players
+	thread globalCoop_player_imobilizeAll( 0 );
+
+//--begin basic movement explanatory dialog	
+	thread area1StartDialog(); 
+	
+	while( area1WalkAroundCounter <= 2 ){
+		wait( .5 );
+	}
+	//Stop all dialogs
+	killAllTalking();
+	
+	wait(.5);
+	
+//Set Objectives Complete
+	thread globalCoop_objectives_update("complete",1,1);//State,Item,ShowIt
+//Tuvok Dialog -> Very Good
+	thread globalCoop_dialog_play($tuvok,"train1/tuvok_verygpr.mp3",2,500,0);//Vol,range,time,head
+
+//Fadeout tuvi
+	fadeTuvokOut();
+		
+//--remove wall
+	wait ( 1 );
+	
+	//Play holochange sound
+	$tuvok.playsound( "sound/environment/computer/holo_change.wav", 3 ,1 ,10000 );
+	
+	$holoDeckWall.fade( 2 , 0 );
+	wait( 2 );	
+	//Remove the wall
+	$holoDeckWall.remove();
+}
+
+
+//---------------------
+// Function: area1StartDialog
+// Comments:
+// dialog for player to walk around room
+//---------------------
+void area1StartDialog()
+{
+	globalCoop_dialog_play($tuvok,"train1/tuvok_indeed.mp3",2,500,0);//Vol,range,time,head
+//As you wish.  These exercises are designed to be rigorous, Lieutenant.  I recommend you warm up before we commence.  Take a few moments to move around the holodeck.  By pressing your Move Forward, Move Backward, Strafe Left, and Strafe Right keys, you should be able to freely maneuver about
+}
+
+
+//---------------------
+// Function: area1WalkAround
+// Comments:
+// player walks around
+//---------------------
+void area1WalkAround()
+{
+	area1WalkAroundCounter++;
+}
+
+
+//---------------------
+// Function: area1Jumping
+// Comments:
+// player is introduced to the ability to jump
+//---------------------
+void area1Jumping()
+{
+	//Immobilize all players, in singleplayer only
+	if(!cvar_bool_multiplayer){
+		thread globalCoop_player_imobilizeAll( 1 );
+	}
+	
+//Set new Objective
+	thread globalCoop_objectives_update("incomplete",2,1);//State,Item,ShowIt
+	killAllTalking();
+	
+	$tuvok.origin( '1832 1064 172' );
+	$tuvok.angles( '0 45 0' );
+	
+	$area1JumpPipes.playsound( "sound/environment/computer/holo_changesml2.wav", 3 ,.4 ,400 );
+	
+	//Fadein Pipes
+	$area1JumpPipes.fadeIn(2,1);
+	$area1DuckPipes.fadeIn(2,1);
+	$area1DuckJumpPipes.fadeIn(2,1);
+	$area1DuckJumpCrates.fadeIn(2,1);
+	
+	fadeTuvokIn();
+	wait(1);
+
+	thread area1JumpingDialog();
+	wait( 2 );
+
+	//Mobilize Player(s)
+	if(!cvar_bool_multiplayer){
+		thread globalCoop_player_imobilizeAll( 0 );
+	}
+}
+
+
+//---------------------
+// Function: area1JumpingDialog
+// Comments:
+// dialog for jump training
+//---------------------
+void area1JumpingDialog()
+{
+//play dialogs, and wait until each one of it did end
+	globalCoop_dialog_play($tuvok,"train1/tuvok_jumping.mp3",2, 20000,0);//vol,dist,time,head
+//Jumping, Lieutenant, plays a key role in maneuvering around your environment.  Successful maneuvering is the first and most important step to survival.	
+	globalCoop_dialog_play($tuvok,"train1/tuvok_jumpex.mp3",2, 20000,0);//vol,dist,time,head
+//A jump is executed by pressing the Jump Key.  If a jump is executed in conjunction with any of the movement keys, you will jump in that direction.  Pressing the Jump Key and the Move Forward key, for example, will make you jump forward.  	
+	globalCoop_dialog_play($tuvok,"train1/tuvok_clearob.mp3",2, 20000,0);//vol,dist,time,head
+//Clear the obstacles ahead by jumping over them.  Jump over all 3 obstacles and we will continue the exercise
+}
+
+//---------------------
+// Function: area1ConfirmJump
+// Comments:
+// increment variable after jumping each object and run ending thread
+//---------------------
+void area1ConfirmJump()
+{
+	jumpTraining++;
+	thread area1ConfirmSound();
+	
+	if ( jumpTraining > 2 )
+	{
+		killthread( "area1JumpingDialog" );
+		thread area1JumpingEnd();
+	}
+}
+//---------------------
+// Function: area1JumpingEnd
+// Comments:
+// player completes the jumping exercise
+//---------------------
+void area1JumpingEnd()
+{
+	killAllTalking();
+	//Set New Objective
+		thread globalCoop_objectives_update("incomplete",3,0);//State,Item,ShowIt	
+	//Set Objective Complete
+		thread globalCoop_objectives_update("complete",2,1);//State,Item,ShowIt
+	//Play Dialog
+		globalCoop_dialog_play($tuvok,"train1/tuvok_excelgo.mp3",2, 20000,0);//vol,dist,time,head
+	$door3.unlock();
+	$door2.unlock();
+	$door2.open( $tuvok );
+	fadeTuvokOut();
+}
+
+//---------------------
+// Function: area1Crouching
+// Comments:
+// player is introduced to the ability to crouch
+//---------------------
+void area1Crouching()
+{
+	killAllTalking();
+	
+	//SinglePlayer
+	if(!cvar_bool_multiplayer){
+	//Imobilize Players
+		thread globalCoop_player_imobilizeAll( 1 );
+	}
+	$tuvok.origin( '1876 40 172' );
+	$tuvok.angles( '0 45 0' );
+	
+	
+	fadeTuvokIn();	
+	thread area1CrouchingDialog();
+	
+	wait( 1.5 );
+	
+	//Singleplayer
+	if(!cvar_bool_multiplayer){
+		
+		thread globalCoop_player_imobilizeAll( 0 );
+	}
+}
+
+//---------------------
+// Function: area1CrouchingDialog
+// Comments:
+// dialog for crouch training
+//---------------------
+void area1CrouchingDialog()
+{
+
+//Play Dialogs
+	globalCoop_dialog_play($tuvok,"train1/tuvok_crouchwlk.mp3",2, 20000,0);//vol,dist,time,head
+	//Crouching and walking allow you access to areas that are too small for you to normally maneuver
+	//--  A duct, or Jefferies tube, for example.  A mission's success or failure may hinge on your
+	//ability to move through tight spaces.
+	globalCoop_dialog_play($tuvok,"train1/tuvok_crchex.mp3",2, 20000,0);//vol,dist,time,head
+	//A crouch is executed by pressing the Crouch Key.  As with a jump, you can combine movement with your Crouch.
+	//To perform a Crouch Walk, press and hold the crouch key while you press and hold a movement key. Take note,
+	//Lieutenant, that while crouch walking will allow you to maneuver in tight spaces, it does compromise your speed.
+	globalCoop_dialog_play($tuvok,"train1/tuvok_movethruob.mp3",2, 20000,0);//vol,dist,time,head
+	//Clear the obstacles ahead by crouch walking under them.  Maneuver through all three, and we can continue the exercise.
+}
+
+//---------------------
+// Function: area1ConfirmCrouch
+// Comments:
+// increment variable after crouching under each object and run ending thread
+//---------------------
+void area1ConfirmCrouch()
+{
+	crouchTraining++;
+	thread area1ConfirmSound();
+	
+	if ( crouchTraining > 2 )
+	{
+		killthread( "area1CrouchingDialog" );
+		thread area1CrouchingEnd();
+	}
+}
+//---------------------
+// Function: area1CrouchingEnd
+// Comments:
+// player completes the crouching exercise
+//---------------------
+void area1CrouchingEnd()
+{
+	killAllTalking();
+
+//Set Objective Complete
+	thread globalCoop_objectives_update("complete",3,1);//State,Item,ShowIt
+//Play Dialog
+	thread globalCoop_dialog_play($tuvok,"train1/tuvok_vgltc.mp3",2, 20000,0);//vol,dist,time,head
+	//Very good, Lieutenant, let's continue.
+//Unlock next room
+	$door5.unlock();
+	$door4.unlock();
+	$door4.open( $tuvok );
+		
+	fadeTuvokOut();
+}
+
+//---------------------
+// Function: area1Combo
+// Comments:
+// player must use both jumping and crouching to complete course
+//---------------------
+void area1Combo()
+{
+
+//Set New Objective
+	thread globalCoop_objectives_update("incomplete",4,1);//State,Item,ShowIt	
+//Immobilize all players, in singleplayer only
+	if(!cvar_bool_multiplayer){
+		thread globalCoop_player_imobilizeAll( 1 );
+	}
+	killAllTalking();
+
+	$tuvok.origin( '3608 -280 392' );
+	$tuvok.angles( '0 180 0' );
+	
+	fadeTuvokIn();
+	
+	//$area1DuckJumpPipes.fadein( 2 , 1 );
+	//$area1DuckJumpPipes.playsound( "sound/environment/computer/holo_changesml2.wav", 3 ,.4 ,400 );
+	thread area1ComboDialog();
+	wait( 1.5 );
+//mobilize all players, in singleplayer only
+	if(!cvar_bool_multiplayer){
+		thread globalCoop_player_imobilizeAll( 0 );
+	}
+}
+
+//---------------------
+// Function: area1ComboDialog
+// Comments:
+// dialog for combo training
+//---------------------
+void area1ComboDialog()
+{
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train1/tuvok_usebothcrju.mp3",2, 20000,0);//vol,dist,time,head
+	//Now Use both your crouching and jumping skills to clear the following obstacles. 
+	//Proceed to the ladder after you clear this portion of the course.
+}
+
+//---------------------
+// Function: area1ConfirmCombo
+// Comments:
+// increment variable after crouching under each object and run ending thread
+//---------------------
+void area1ConfirmCombo()
+{
+	comboTraining++;
+	thread area1ConfirmSound();
+	
+	if ( comboTraining > 2 )
+	{
+		killthread( "area1ComboDialog" );
+		thread area1ComboEnd();
+		
+		$area1LadderCompleteTrigger.triggerable();
+	}
+}
+
+//---------------------
+// Function: area1ComboEnd
+// Comments:
+// player completes the combo exercise
+//---------------------
+void area1ComboEnd()
+{
+	//$area1Combo_clip1.notsolid();
+
+//Set Objective Complete
+	thread globalCoop_objectives_update("complete",4,0);//State,Item,ShowIt
+	
+	killAllTalking();
+
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train1/tuvok_excewrk.mp3",1.1, 20000,0);//vol,dist,time,head
+	//Excellent work.
+
+//Next Objective
+	thread area1Ladder();
+}
+
+//---------------------
+// Function: area1Ladder
+// Comments:
+// player must use the ladder
+//---------------------
+void area1Ladder()
+{
+	killAllTalking();
+
+	thread area1LadderDialog();
+}
+
+//---------------------
+// Function: area1LadderDialog
+// Comments:
+// dialog for ladder training
+//---------------------
+void area1LadderDialog()
+{
+//Set New Objective
+	thread globalCoop_objectives_update("incomplete",5,1);//State,Item,ShowIt	
+	globalCoop_dialog_play($tuvok,"train1/tuvok_inadd.mp3",2, 20000,0);//vol,dist,time,head
+	//To climb a ladder, look up while pressing the forward movement key.  Conversely, looking
+	//down while pressing the forward movement key will allow you to descend.
+	globalCoop_dialog_play($tuvok,"train1/tuvok_climblad.mp3",2, 20000,0);//vol,dist,time,head
+	//Now, Lieutenant, climb the ladder, and exit through the door to continue our exercise.
+}
+
+//---------------------
+// Function: area1LadderComplete
+// Comments: 
+// play dialog after climbining ladder
+//---------------------
+void area1LadderComplete()
+{
+//Stop all talking
+	killAllTalking();
+//Stop Dialog Thread wich fires up new Dialogs
+	killthread( "area1LadderDialog" );
+
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train1/tuvok_ex2.mp3",2, 20000,0);//vol,dist,time,head
+	//Very good. Lets move on.
+
+//Set Objective Complete
+	thread globalCoop_objectives_update("complete",5,1);//State,Item,ShowIt	
+
+//Unlock next Room
+	$door8.unlock();
+
+//Fade Tuvok Out	
+	thread fadeTuvokOut();
+}
+
+//---------------------
+// Function: area1DuckJump
+// Comments:
+// player must use both jumping and duck-jumping to complete course
+//---------------------
+void area1DuckJump()
+{
+	if(cvar_bool_multiplayer){//Multi Player Mode
+	//Clear old objectives
+		coop_string_objectiveItemState1="";
+		coop_string_objectiveItemState2="";
+		coop_string_objectiveItemState3="";
+		coop_string_objectiveItemState4="";
+		coop_string_objectiveItemState5="";
+	}
+	
+//Set New Objective
+	thread globalCoop_objectives_update("incomplete",6,1);//State,Item,ShowIt	
+//Immobilize all players, in singleplayer only
+	if(!cvar_bool_multiplayer){
+		thread globalCoop_player_imobilizeAll( 1 );
+	}
+//Stop all talking	
+	killAllTalking();
+	
+//Warp Tuvok to new destination
+	$tuvok.origin( '4824 -256 392' );
+//Set tuvoks facing direction
+	$tuvok.angles( '0 180 0' );
+//Fade Tuvok in (again)
+	fadeTuvokIn();
+	
+//Start Next Dialog Function as thread
+	thread area1DuckJumpDialog();	
+	//$area1DuckJumpCrates.fadein( 2 , 1 );
+	//$area1DuckJumpCrates.playsound( "sound/environment/computer/holo_changesml2.wav", 3 ,.4 ,400 );
+	wait( 1 );
+	
+//mobilize all players, in singleplayer only
+	if(!cvar_bool_multiplayer){
+		thread globalCoop_player_imobilizeAll( 0 );
+	}
+}
+
+//---------------------
+// Function: area1DuckJumpDialog
+// Comments:
+// dialog for duck-jump training
+//---------------------
+void area1DuckJumpDialog()
+{
+	threadname( "area1DuckJumpDialog" );
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train1/tuvok_noticehigh.mp3",2, 20000,0);//vol,dist,time,head
+	//Notice that some obstacles are too high for a standard jump.  To clear obstacles such as these,
+	//you will need to execute a crouch jump.  This is done by pressing and holding the jump key. 
+	//The crouch jump permits you greater vertical displacement, allowing you to clear taller obstructions.
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train1/tuvok_utilcr.mp3",2, 20000,0);//vol,dist,time,head
+	//Utilize both the standard and crouch jump to navigate these obstacles and advance to the next exercise.
+}
+
+//---------------------
+// Function: area1DuckJumpEnd
+// Comments:
+// player completes the duck-jump exercise
+//---------------------
+void area1DuckJumpEnd()
+{
+	//$area1Combo_clip1.notsolid();
+//Set Objective Complete
+	thread globalCoop_objectives_update("complete",6,1);//State,Item,ShowIt
+
+//Immobilize all players, in singleplayer only
+	if(!cvar_bool_multiplayer){
+		thread globalCoop_player_imobilizeAll( 1 );
+	}
+//Stop all active dialogs
+	killAllTalking();
+//Kill Dialog Thread
+	killthread( "area1DuckJumpDialog" );
+
+//Tuvok Turn towards the player
+	$tuvok.turntowardsplayer();
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train1/tuvok_excewrk.mp3",2, 20000,0);//vol,dist,time,head
+	//Excellent work.
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train1/tuvok_corrmain.mp3",2, 20000,0);//vol,dist,time,head
+	//At the end of the corridor, you will see a maintenance door leading to a Jefferies tube -
+	
+	//playerLabersack = globalCoop_return_playerPlayDialog("ent_m8/munro_yeah.mp3", 5, 350,1.1);
+
+//Unlock next Room
+	$door9.unlock();
+	
+//Fade Out Tuvok
+	fadeTuvokOut();
+
+//mobilize all players, in singleplayer only
+	if(!cvar_bool_multiplayer){
+		thread globalCoop_player_imobilizeAll( 0 );
+	}
+}
+
+//---------------------
+// Function: area1Jtube
+// Comments:
+// player must crawl through the jefferies tube
+//---------------------
+void area1Jtube()
+{
+
+
+//Set New Objective
+	thread globalCoop_objectives_update("incomplete",7,1);//State,Item,ShowIt	
+//Immobilize all players, in singleplayer only
+	if(!cvar_bool_multiplayer){
+		thread globalCoop_player_imobilizeAll( 1 );
+	}
+	
+//Warp Tuvok to new Destination
+	$tuvok.origin( '5096 -232 396' );
+//Set Faceing Direction for Tuvok
+	$tuvok.angles( '0 135 0' );
+
+//Fade In tuvok
+	fadeTuvokIn();
+	
+//Kill all dialogs
+	killAllTalking();
+//Satart New Dialog(s)
+	thread area1JtubeDialog();
+
+//Immobilize all players, in singleplayer only
+	if(!cvar_bool_multiplayer){
+		thread globalCoop_player_imobilizeAll( 0 );
+	}
+
+//Unlock the next Room
+	$door6.unlock();
+//Open the Door per script by the Entity $tuvok
+	$door6.open( $tuvok );
+}
+
+//---------------------
+// Function: area1JtubeDialog
+// Comments:
+// dialog for J-Tube
+//---------------------
+void area1JtubeDialog()
+{
+//Play Dialog
+		globalCoop_dialog_play($tuvok,"train1/tuvok_asyouapp.mp3",2, 20000,0);//vol,dist,time,head
+		//As you approach the maintenance door, execute a crouch walk to enter the jefferies tube. 
+		//Once inside, follow the tube down the ladder to the maintenance door below. 
+		//We will continue with the second set of examinations when you complete this exercise.
+//Fade Out Tuvok
+	fadeTuvokOut();
+}
+
+//---------------------
+// Function: area1End
+// Comments:
+// player completes area 1 and is transported to area 2
+//---------------------
+void area1End()
+{
+//Stop all Dialogs
+	killAllTalking();
+
+//Set New Objective
+	thread globalCoop_objectives_update("complete",7,1);//State,Item,ShowIt
+	globalCoop_dialog_play($tuvok,"train1/tuvok_excps.mp3",2, 20000,0);//vol,dist,time,head
+	//Excellent, Lieutenant… Your performance was satisfactory.
+
+	if(!cvar_bool_multiplayer){//Not in Multi Player Mode
+		//--setup the holodeck
+		$holoDeck.bind( $nodeHoloDeckCenter );
+		$holoDeck.rendereffects( "+depthhack" );
+		$holoDeck.notSolid();
+		$holoDeck.forcealpha( 1 );
+		$holoDeck.alpha( 0 );
+		$holoDeck.show();
+		wait( .5 );
+	
+		$nodeHoloDeckCenter.origin( $player.getOrigin() );
+		$nodeHoloDeckCenter.angles( $player.getAngles() );
+		wait( .1 );
+		
+		$holoDeck.fadein( 1, 1 );
+		$world.playsound( "sound/environment/computer/holo_change.wav", 3 ,1 ,10000 );
+		wait( 1 );
+	}
+	
+	if(cvar_bool_multiplayer){//Multi Player Mode
+		thread globalCoop_mission_completed("ent-training2");
+		return;
+	}
+	
+	//--- tell the game to not translate the player's orientation
+	dontSaveOrientation();
+	
+	spawn ( "trigger_changelevel", "targetname", "endLevel_trigger", "map", "ent-training2" );
+	wait ( 1 );
+	trigger ( "$endLevel_trigger" );
+}
+
+//---------------------
+// Function: area1ConfirmSound
+// Comments:
+// plays a confirmation sound each time the player completes a task
+//---------------------
+void area1ConfirmSound()
+{
+	$world.playsound( "sound/ships/enterprise/ent_beep_confirm.wav", 3 ,8 ,9000000 );
+}
+
+//----------------------
+// threadLockedDoor
+// comments:
+// Makes doors play locked sound
+//----------------------
+void threadLockedDoor()
+{
+	$triggerLockedDoor.nottriggerable();
+	$triggerLockedDoor.playsound ( "sound/environment/computer/lcars_no.wav", 3, 1, 10000 );
+	wait( .5 );
+	$triggerLockedDoor.triggerable();
+}
+
+//---------------------
+// Function: trainingSecret
+// Comments:
+// open unlock jtube door
+//---------------------
+void trainingSecret()
+{
+	$world.playsound( "sound/ships/enterprise/ent_beep_confirm.wav" , 8 , 1 , 200000 );
+	centerprint( "$$FoundSecretDoor$$" );	
+	$secret_jtubedoor.unlock();
+}
+
+//---------------------
+// Function: removeClip
+// Comments:
+// removes player clip once player falls onto floor
+//---------------------
+void removeClip()
+{
+	if(doesEntityExist($jumpBlockClip)){
+		$jumpBlockClip.remove();
+	}
+}
+
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed("ent-training2");
+}

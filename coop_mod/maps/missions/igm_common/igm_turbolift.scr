@@ -1,0 +1,451 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	  ent-deck
+//  Script By:    Kenny "Gullie" Thompson
+//  Created on:   6/28/2002
+//
+//  Last Edited:  7/10/02 - LW
+//
+//-----------------------------------------------------------------
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  DEFINE SCRIPT
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+void coop_TurboLiftPlayErrorSound();
+void entTurboLiftSetup();
+
+void entTurboLiftCheck();
+void endTurboliftRide();
+
+void turboLiftDeckChangeWait();
+
+//Defined in each deck's IGM script
+// void checkForDeckChangeIGM1();
+// void checkForDeckChangeIGM2();
+// void checkForDeckChangeIGM3();
+// void checkForDeckChangeIGM4();
+// void checkForDeckChangeIGM5();
+// void checkForDeckChangeIGM6();
+// void checkForDeckChangeIGM7();
+// void checkForDeckChangeIGM8();
+
+void turboLiftDeckChangeGo();
+
+void turboLiftLeave();
+
+void gotoDeck1();
+void gotoDeck7a();
+void gotoDeck7b();
+void gotoDeck7c();
+void gotoDeck8();
+void gotoDeck11();
+void gotoDeck16();
+void gotoDeck666();
+
+void randomlyAnimateActor( entity actorToAnimate, string animationToUse );
+void randomlyAnimateActorOnce( entity actorToAnimate, string animationToUse );
+void makeActorUseTricorder( entity actorToAnimate );
+
+void threadLockedDoor();
+
+//-----------------------------------------------------------
+//-----------------------------------------------------------
+//--- variables
+
+float checkTurboLiftRide = 0;
+float checkTurboLiftActivated = 0;
+
+void coop_TurboLiftPlayErrorSound()
+//PLAYS ERROR SOUND, CALLING THIS FUNCTION INSTEAD OF THE SOUND DIRECTLY, SAVES US 4 STATEMENTS EACH TIME, takes once 6 statments
+{
+	$turboLift.playsound ( "sound/environment/computer/lcars_error.wav", 3, .5, 10000);
+}
+
+void coop_turboLiftLeaveAndLoadMap(string sMap)
+{
+	thread turboLiftLeave();
+	wait(1);
+	sNextLevelToLoadForCoop = sMap;
+	nointermission();
+	coop_endLevel();
+}
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+
+/////////////////////////////
+// setup stuff
+/////////////////////////////
+void entTurboLiftSetup()
+{
+	entTurboLiftCheck();
+	globalCoop_level_hideAndNotSolid($turboLiftPlayerClip);//check if exist
+	thread turboLiftDeckChangeWait();
+}
+
+//////////////////////////////
+// Check to see if the turbolift ride just ended
+//////////////////////////////
+void entTurboLiftCheck()
+{	
+	float fTurboRide;
+	fTurboRide = getFloatVar("game.globalTurboliftRide");
+	setFloatVar("game.globalTurboliftRide",0);	
+	
+	
+	if(cvar_bool_multiplayer)
+	{
+		fTurboRide = getCvarInt("coop_igmTr");
+		stuffCmd("seta coop_igmTr 0\n");
+	}
+//play ride sound, lock dor
+	if (fTurboRide == 1 )
+	{
+		thread endTurboliftRide();
+	}
+}
+
+//////////////////////////////
+//---Make it sound like you just rode the lift to the level
+//////////////////////////////
+void endTurboliftRide()
+{
+	//Kills thread so player can't retrigger lift untill elevator stops.
+	killthread( "turboLiftDeckChangeWait" );
+	
+	$turboLift.sound_locked("");//stop deny sound to be played
+	$turboLift.lock();
+	globalCoop_level_showAndSolid($turboLiftPlayerClip);
+	
+	$turboLift.loopsound( "sound/ships/enterprise/ent_turbolift_runloop.wav", .5, 256 );
+	globalCoop_main_wait2DotZero();
+	
+	$turboLift.stoploopsound();
+	$turboLift.playsound ( "sound/ships/enterprise/ent_turbolift_stop.wav", 3, .5, 256 );
+	wait(3);//keep neutral to be included in all different scripts
+	
+	//open door
+	$turboLift.unlock();
+	globalCoop_level_hideAndNotSolid($turboLiftPlayerClip);//check if exist
+	
+	//might cause issues with one door opening only, if so try something else
+	$turboLift.open( $world );
+	
+	//Re-call this thread now that it is ok.
+	thread turboLiftDeckChangeWait();
+}
+
+//////////////////////////////
+// Wait for player to use button
+//////////////////////////////
+void turboLiftDeckChangeWait()
+{
+	$elevatorButton.onuse( "turboLiftDeckChangeGo" );
+	pause();
+}
+
+//////////////////////////////
+// check to see if anything is going to happen
+//////////////////////////////
+void turboLiftDeckChangeGo()
+{
+	$elevatorButton.nouse();	
+	float validTurboLiftButtonRange = 80;//set valid range, we hack this for multiplayer
+	float enterpriseMissionNumber;
+	float sendPlayerToNewDeckNumber;
+//SINGLEPLAYER ONLY/////////////////////////////////////////////////////////////
+	if(!cvar_bool_multiplayer)
+	{		
+		vector playerPos, buttonPos, dist;
+		entity currentElevatorButton;
+		currentElevatorButton = getcurrententity();
+		playerPos = $player.getorigin();
+		buttonPos = currentElevatorButton.getorigin();
+
+		dist = playerPos - buttonPos;
+		dist = vectorsetz( dist, 0 );
+		
+		validTurboLiftButtonRange = vectorlength( dist );
+		enterpriseMissionNumber		= getFloatVar( "game.globalMissionEnterprise");
+	}
+	else
+	{
+		enterpriseMissionNumber		= getCvarInt("coop_igm");
+	}
+	
+
+	
+////////////////////////////////////////////////////////////////////////////////
+	//If you are close enough 
+	if( validTurboLiftButtonRange <= 84 )
+	{
+		if(checkTurboLiftActivated)
+		{
+			return;
+		}
+		globalCoop_level_callReliably("checkForDeckChangeIGM"+enterpriseMissionNumber);
+		wait(.05);
+		if(!cvar_bool_multiplayer)
+		{
+			sendPlayerToNewDeckNumber	= getfloatvar("level.deckToChangeToIGM");
+		}
+		else
+		{			
+			sendPlayerToNewDeckNumber	= getCvarInt("coop_igmT");			
+		}
+		
+		if( enterpriseMissionNumber <= 1 )
+		{
+			enterpriseMissionNumber = 1;
+		}
+		if(getcvar("username") == "Chrissstrahl")
+		{
+			centerPrint("::checkForDeckChangeIGM"+enterpriseMissionNumber+"->level.deckToChangeToIGM::"+sendPlayerToNewDeckNumber);
+		}
+
+	//CHECK THE DECK, we need to go to diffreent deck, then we do so
+		if(sendPlayerToNewDeckNumber != currentDeck  && sendPlayerToNewDeckNumber != 0)
+		{
+			checkTurboLiftActivated=1;
+			//---Lock Turbolift door
+			globalCoop_level_showAndSolid($turboLiftPlayerClip);
+			$turboLift.lock();
+			$turboLift.close();
+			
+			// sets flag for checking next level if the turbolift should be moving
+			if(cvar_bool_multiplayer)
+			{
+				stuffCmd("seta coop_igmTr 1\n");
+			}
+			else
+			{
+				setFloatVar("game.globalTurboliftRide",1);
+			}
+						
+			if( sendPlayerToNewDeckNumber == 1  ) gotoDeck1();
+			if( sendPlayerToNewDeckNumber == 71 ) gotoDeck7a();
+			if( sendPlayerToNewDeckNumber == 72 ) gotoDeck7b();
+			if( sendPlayerToNewDeckNumber == 73 ) gotoDeck7c();
+			if( sendPlayerToNewDeckNumber == 8  ) gotoDeck8();
+			if( sendPlayerToNewDeckNumber == 11 ) gotoDeck11();
+			if( sendPlayerToNewDeckNumber == 16 ) gotoDeck16();
+//dev test
+			if( sendPlayerToNewDeckNumber == 666 ) gotoDeck666();
+		}
+		//else you are on the correct deck, have a nice error sound returned
+		else{
+			coop_TurboLiftPlayErrorSound();
+			globalCoop_level_hideAndNotSolid($turboLiftPlayerClip);
+		}
+	}	
+	globalCoop_main_waitZeroDot5();
+	thread turboLiftDeckChangeWait();
+}
+
+void turboLiftLeave()
+{
+	globalCoop_main_wait2DotZero();
+	$turboLift.stoploopsound();
+	$turboLift.playsound( "sound/ships/enterprise/ent_turbolift_run.wav", 3, .5, 10000);
+	wait( 2.5 );
+	
+	$turboLift.loopsound( "sound/ships/enterprise/ent_turbolift_runloop.wav", .5, 100000 );
+	globalCoop_main_wait2DotZero();
+	$turboLift.stoploopsound();
+}
+
+void gotoDeck1()
+{
+	if( currentDeck == 1 ){
+		coop_TurboLiftPlayErrorSound();
+	}
+	else{
+		coop_turboLiftLeaveAndLoadMap("ent-deck1_bridge");
+	}
+}
+
+void gotoDeck7a()
+{
+	if( currentDeck == 71 ){
+		coop_TurboLiftPlayErrorSound();
+	}
+	else{	
+		//globalCoop_dialog_playSimple($turboLift,"ent_m1/munro_hazcrew.mp3", 1, 10000, 0); //Hazard Crew Quarters
+		coop_turboLiftLeaveAndLoadMap("ent-deck7a");	
+	}
+}
+
+void gotoDeck7b()
+{
+	if( currentDeck == 72 ){
+		coop_TurboLiftPlayErrorSound();
+	}
+	else{
+		//globalCoop_dialog_playSimple($turboLift,"ent_m1/munro_d7shutt.mp3", 1, 10000, 0); //Deck 7: Shuttle Bay
+		coop_turboLiftLeaveAndLoadMap("ent-deck7b");	
+	}
+}
+
+void gotoDeck7c()
+{
+	if( currentDeck == 73 ){
+		//globalCoop_dialog_playSimple($turboLift,"ent_m1/munro_hazcrew.mp3", 1, 10000, 0); //Hazard Crew Quarters
+		coop_TurboLiftPlayErrorSound();
+	}
+	else{
+		coop_turboLiftLeaveAndLoadMap("ent-deck7c");	
+	}
+}
+
+void gotoDeck8()
+{
+	if( currentDeck == 8 ){
+		coop_TurboLiftPlayErrorSound();
+	}
+	else{
+		coop_turboLiftLeaveAndLoadMap("ent-deck8");	
+	}
+}
+
+void gotoDeck11()
+{
+	if( currentDeck == 11 ){
+		coop_TurboLiftPlayErrorSound();
+	}
+	else{
+		
+		coop_turboLiftLeaveAndLoadMap("ent-deck11");	
+	}
+}
+
+void gotoDeck16()
+{
+	if( currentDeck == 16 ){
+		coop_TurboLiftPlayErrorSound();
+	}
+	else{
+		coop_turboLiftLeaveAndLoadMap("ent-deck16_engineering");	
+	}
+}
+
+void gotoDeck666()
+{
+	coop_turboLiftLeaveAndLoadMap("secret1");
+}
+
+///////////////////////////
+// randomlyAnimateActor
+// Keeps an actor animating
+///////////////////////////
+void randomlyAnimateActor( entity actorToAnimate, string animationToUse )
+{
+	while(doesEntityExist(actorToAnimate))
+	{
+		if ( actorToAnimate.doesVarExist( "pauseRandomAnimate" ) )
+		{
+			while( 1 == actorToAnimate.getFloatVar( "pauseRandomAnimate" ) )
+			{
+				wait(.25);//keep neutral to be included in all different scripts
+			}
+		}
+		//This will make the actor use the tricorder; set > 1 for longer use.
+		if ( actorToAnimate.doesVarExist( "actorToUseTricorder" ) )
+		{
+			if( actorToAnimate.getfloatVar( "actorToUseTricorder" ) >= 1 )
+			{
+				makeActorUseTricorder( actorToAnimate );
+			}
+		}
+		randomlyAnimateActorOnce( actorToAnimate, animationToUse );
+	}
+}
+
+///////////////////////////
+// randomlyAnimateActorOnce
+// Make an Actor Animate a random animation once
+///////////////////////////
+void randomlyAnimateActorOnce( entity actorToAnimate, string animationToUse )
+{
+	if(doesEntityExist(actorToAnimate))
+	{
+		float randomNumber;
+		string appendedAnimationName;
+		
+		//This will make the actor randomly use his tricorder instead of other animation if set.
+		if ( actorToAnimate.doesVarExist( "actorToRandomlyUseTricorder" ) )	
+		{
+			if( 1 == actorToAnimate.getfloatVar( "actorToRandomlyUseTricorder" ) )
+			{
+				randomNumber = randomint( 18 ) + 1;
+				//uncomment to make them tricorder more
+				//randomNumber = randomint( 4 ) + 15;
+			}
+		}else
+		{
+			randomNumber = randomint( 16 ) + 1;
+		}
+		
+		if( randomNumber <=8 ){ appendedAnimationName = animationToUse + "-idle"; }
+		else if( randomNumber <= 10 ){ appendedAnimationName = animationToUse + "-idle-look"; }
+		else if( randomNumber <= 14 ){ appendedAnimationName = animationToUse + "-gesture"; }		
+		else if( randomNumber <= 16 ){ appendedAnimationName = animationToUse + "-gesture1"; }
+		else if( randomNumber <= 17 )
+		{
+			actorToAnimate.setfloatVar( "actorToUseTricorder", 1 );
+			return;
+		}
+		else if( randomNumber <= 18 )
+		{
+			actorToAnimate.setfloatVar( "actorToUseTricorder", 2 );
+			return;
+		}
+
+		actorToAnimate.anim( appendedAnimationName );
+		waitforanimation( actorToAnimate, appendedAnimationName );
+	}
+}
+
+///////////////////////////
+// makeActorUseTricorder
+// Make an Actor use the tricorder
+///////////////////////////
+void makeActorUseTricorder( entity actorToAnimate )
+{
+	if(doesEntityExist(actorToAnimate))
+	{
+		float actorToUseTricorderFloat;
+		
+		actorToUseTricorderFloat = actorToAnimate.getfloatVar( "actorToUseTricorder" );
+
+		globalCommon_AiActorUseWeapon( actorToAnimate, "tricorder" );
+		
+		while( actorToUseTricorderFloat >= 1 )
+		{
+			actorToAnimate.anim( "tricorder_use_loop" );
+			waitforanimation( actorToAnimate, "tricorder_use_loop" );
+
+			actorToUseTricorderFloat--;
+		}
+		
+		actorToAnimate.setfloatVar( "actorToUseTricorder", actorToUseTricorderFloat );
+		
+		globalCommon_AiActorUseWeapon( actorToAnimate, "none" );
+	}
+}
+
+///////////////////////////
+// threadLockedDoor
+// Makes doors play locked sound
+///////////////////////////
+void threadLockedDoor()
+{
+	$triggerLockedDoor.nottriggerable();
+	$triggerLockedDoor.playsound ( "sound/environment/computer/lcars_no.wav", 3, 1, 10000 );
+	globalCoop_main_waitZeroDot5();
+	$triggerLockedDoor.triggerable();
+}
+
+

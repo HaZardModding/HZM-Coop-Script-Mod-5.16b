@@ -1,0 +1,243 @@
+/*
+	cam.load( "m8l1b_capturecam" );
+	cinematicArm_MunroCaptured = createCinematic( "m8l1b_knockout" );
+	cinematicArm_MunroCaptured.setendthread( "cinematicArm_MunroCaptured_ArmEnd" );
+*/
+
+void cutsceneLeviathan1();
+void cutsceneLeviathan1_SkipThread();
+void cutsceneLeviathan2();
+void cutsceneLeviathan2_SkipThread();
+void cinematicArm_MunroCaptured_Start();
+void cinematicArm_MunroCaptured_ArmEnd();
+
+//---------------------
+// cutsceneLeviathan1
+// first cutscene intro to leviathan battle
+//---------------------
+void cutsceneLeviathan1()
+{
+	spawn( "Camera", "targetname", "cam1");
+	cam.load( "m8l1b_leviathan1" );
+	//--- start cinematic commands
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	allowMusicDucking( 0 );
+    forcemusic ("aux1");
+
+	//--------------------------------------------------------
+	//shot1 leviathan wakes up
+	
+	//--- set music
+	music ("aux1","normal");
+	wait( .2 );
+	
+	//--- set camera
+	globalCoop_cin_fov($cam1, 60 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_follow($cam1, $m8l1b_leviathan1 );
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( .1 );
+
+	//--set skipthread
+	globalCoop_cin_skipThread("cutsceneLeviathan1_SkipThread");
+
+	//--- fade in
+	globalCoop_main_camFadeIn(1);
+	wait( 6.5 );
+		
+	//--- wake up mr. sleepy head.....
+	$leviathan1.takedamage();
+	$leviathan1.immortal( 0 );
+	globalCoop_level_triggerEntity($waterExplode1);
+	$leviathan1.anim( "idle1" );
+	waitForAnimation( $leviathan1, "idle1" );
+
+	//--- end the cutscene	
+	thread cutsceneLeviathan1_SkipThread();
+}
+
+//---------------------
+// cutsceneLeviathan1_SkipThread
+// cutsceneLeviathan1 end cinematic and skip thread
+//---------------------
+void cutsceneLeviathan1_SkipThread()
+{
+	skipthread( "null" );
+	killthread( "cutsceneLeviathan1" );
+	wait(.1);
+	globalCoop_main_camFadeOut(1);
+	wait(1);
+	globalCoop_cin_end();
+	globalCoop_main_camFadeIn(1);
+	wait ( 1 );
+	
+	globalCoop_actor_healthMultiplicatePerPlayer($leviathan1);
+	$leviathan1.maxbosshealth( $leviathan1.gethealth() );
+	$leviathan1.updatebosshealth( 1, 1 );
+	
+	thread globalCoop_level_removePath($m8l1b_leviathan1);
+	
+	$leviathan1.ai_on();
+    forcemusic ("suspense");
+	//---set players next objective
+	//$player.setobjectiveshow ( "defeatLeviathan" , 1 );
+}
+
+//---------------------
+// cutsceneLeviathan2
+// first cutscene intro to leviathan battle
+//---------------------
+void cutsceneLeviathan2()
+{
+	//--- NOTE: I had to change this cinematic from the leviathans originally running out
+	//--- NOTE: to them being in their alcoves because the player could be on one of their spots
+	//--- NOTE: that they run to, and thus after the cinematic the player could be stuck inside one of them
+	//--- start cinematic commands
+	wait ( 2 );
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.5);
+	cam.load( "m8l1b_leviathan2" );
+	wait( .6 );
+	
+	allowMusicDucking( 0 );
+   	forcemusic ("aux2");
+
+	//--------------------------------------------------------
+	//shot1 leviathan in cubby alcove......awwwwwww.....isn't he soooo cuuute!!!!!!
+	
+	//--- set music
+	music ("aux1","normal");
+	wait( .2 );
+	
+	//--- set the fx
+	$waterExplode1.origin( $leviathan3.getOrigin() );
+	
+	//--- set camera
+	globalCoop_cin_fov($cam1, 60 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_follow($cam1, $m8l1b_leviathan2 );
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( .1 );
+
+	//--- fade in
+	globalCoop_main_camFadeIn(1);
+	
+	//--set skipthread
+	skipthread( "cutsceneLeviathan2_SkipThread");
+	wait( 3 );
+
+	$leviathanDoor2.open( $world );
+	$leviathanDoor3.open( $world );
+	wait ( 4 );
+
+	$leviathan3.anim( "idle1" );
+	globalCoop_level_triggerEntity( $waterExplode1 );
+	wait( 2 );
+
+	thread cutsceneLeviathan2_SkipThread();
+}
+
+//---------------------
+// cutsceneLeviathan2_SkipThread
+// cutsceneLeviathan2 end cinematic and skip thread
+//---------------------
+void cutsceneLeviathan2_SkipThread()
+{
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "cutsceneLeviathan2" );
+
+	//fade to black
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	//--- put them in idle in case the player skipped the cutscene
+	$leviathan2.anim( "idle1" );
+	$leviathan3.anim( "idle1" );
+
+	//--- open the doors incase the player skipped the cutscene
+	$leviathanDoor2.open( $world );
+	$leviathanDoor3.open( $world );
+	
+	//--- release the cinematic
+	globalCoop_cin_end();	
+	
+	thread globalCoop_actor_healthMultiplicatePerPlayer($leviathan2);
+	thread globalCoop_actor_healthMultiplicatePerPlayer($leviathan3);	
+	wait( .3 );
+	
+	thread globalCoop_level_removePath($m8l1b_leviathan1);
+
+	//--- fade in	
+	globalCoop_main_camFadeIn(.5);
+	wait( .3 );
+	
+	//--- run the leviathans forward and activate them
+	$leviathan2.walkto( "$leviathan2_position" , "run");
+	$leviathan3.walkto( "$leviathan3_position" , "run");
+	wait( 2 );
+		
+	$leviathan2.ai_on();
+	$leviathan3.ai_on();
+    forcemusic ("suspense");
+	//---set players next objective
+	//$player.setobjectiveshow ( "defeatLeviathan" , 1 );
+}
+
+//---------------------
+// cinematicArm_MunroCaptured_Start
+// munro getting captured
+//---------------------
+void cinematicArm_MunroCaptured_Start()
+{
+	cinematicArm_MunroCaptured = createCinematic( "m8l1b_knockout" );
+	cinematicArm_MunroCaptured.setendthread( "cinematicArm_MunroCaptured_ArmEnd" );
+	//--- starting cinematic commands
+	globalCoop_cin_start();
+	
+	//--- fade out
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+	
+	//--- start the armature
+	cinematicArm_MunroCaptured.beginCinematic( "m8l1b_knockout" );
+	wait( .2 );
+    forcemusic ("aux2");
+	//--- fade in
+	globalCoop_main_camFadeIn(.5);
+
+	//--- set the skipthread
+	globalCoop_cin_skipThread( "cinematicArm_MunroCaptured_ArmEnd" );
+
+	thread globalAccelMove( $pit_door1, '0 0 128', 4, "rampupdown", "" );
+}
+
+//---------------------
+// cinematicArm_MunroCaptured_ArmEnd
+// end cinematic
+//---------------------
+void cinematicArm_MunroCaptured_ArmEnd()
+{
+	//kill the cinematic
+	skipthread( "null" );
+
+	//fade to black
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	//--- end the armature cinematics, FALSE means don't launch the end thread
+	cinematicArm_MunroCaptured.endCinematic( FALSE );
+
+	killthread( "cinematicArm_MunroCaptured_Start" );
+
+	//--- end the level
+	thread levelTransition();
+}
+

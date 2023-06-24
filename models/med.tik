@@ -1,0 +1,37 @@
+TIKI
+
+setup
+	{
+	scale 1
+	fade_dist_mod 1
+	lod 350 1 6000 0.75 25000
+	radius 20
+	
+	path models/item/backpacks
+	surface material1 shader medical.tga
+	}
+init
+	{
+	server
+		{
+		setsize "-12 -11 -2" "1 10 27"
+		targetname coop_Medic
+		}
+      client
+		{
+		}
+
+	}
+animations 
+	{
+
+	idle	medical.tan
+		{
+		}
+	}
+   
+/*QUAKED    coop_class_medic    (0.5 0.25 0.25)    (0 0 0)    (0 0 0)
+Co-op Mod Class Selection for Medic
+Used to allow Players selecting Medic Class by walking over this.
+Do NOT make static!
+*/

@@ -1,0 +1,2484 @@
+//-----------------------------------------------------------------------------------
+// Script By:	Christian Sebastian Strahl (Chrissstrahl)
+// Created on:	2009.12.26
+// E-Mail:		chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+//THIS FILE ALLOWS MAPPERS TO CREATE CO-OP MAPS WITHOUT SCRIPTING
+
+//CALL THEM BY A TRIGGER OR CONSOLE ONLY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//CALL THEM BY A TRIGGER OR CONSOLE ONLY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//CALL THEM BY A TRIGGER OR CONSOLE ONLY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//CALL THEM BY A TRIGGER OR CONSOLE ONLY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//CALL THEM BY A TRIGGER OR CONSOLE ONLY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//CALL THEM BY A TRIGGER OR CONSOLE ONLY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//CALL THEM BY A TRIGGER OR CONSOLE ONLY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2012 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+//INCLUDE - Loads all other scripts which shall be avialable in the no-script extension
+//-----------------------------------------------------------------------------------
+#include "coop_mod/maps/main.scr" //load co-op mod
+#include "coop_mod/maps/global/global_common.scr" //load global-common incase player decides to try with any else tutorials to learn scripting
+#include "coop_mod/maps/optional_modules/puzzles_advanced.scr" //load puzzles ability
+#include "coop_mod/maps/optional_modules/teammate.scr" //load teammate command ability
+#include "coop_mod/maps/optional_modules/forcefields.scr" //load forcefields ability
+#include "coop_mod/maps/optional_modules/callVolume.scr" //load forcefields ability
+//-----------------------------------------------------------------------------------
+
+//DECLARE - Only declare the functions which are expected to be called by script
+//-----------------------------------------------------------------------------------
+void	coop_tryToReMoveTheGivenEntity(entity e);
+void	coop_pintMessageIfEntityExists(entity e,string s);
+float	coop_checkAllUserVarsAreEmpty(entity e);
+float	coop_checkIsNotPlayerHasModel(entity eActor);
+float	coop_checkExistHasModelPrintWithTargetname(entity eActor,string s);
+float	coop_checkExistHasModel(entity e);
+float	coop_checkExistHasModelAndHealth(entity e);
+float	coop_checkIsNpcOrPlayer(entity e);
+void	coop_setHealth(entity e,float fAdd,float fMax);
+void	coop_enableFF(entity e);
+void	coop_disableFF(entity e);
+void	coop_bindToOrigin(entity eSlave,entity eMaster);
+void	coop_unbindThisEntity(entity eSlave);
+void	coop_unbindAllFromOrigin(entity eMaster);
+void	coop_setuplevel();
+void	coop_selectionmovereset(entity e);
+vector	coop_returnOrigin(entity eGetMyOrigin);
+//-----------------------------------------------------------------------------------
+void coop_tryToReMoveTheGivenEntity(entity e)
+//not meant to be called by a trigger! This will chrash the game!
+//Does not remove the entiy if noremove is set in a uservar
+{
+	float fCounter;
+	string sString;
+	if(doesEntityExist(e)){
+		while(fCounter<4){
+			fCounter++;
+			sString=e.getStringVar("uservar"+fCounter);
+			if(sString == "noremove"){
+				fCounter=100;
+			}
+		}
+		if(fCounter != 100){
+			if(!globalCoop_check_entityValidPlayerTargetname(e)){//do not allow to remove players
+				globalCoop_level_remove(e);
+			}
+		}
+	}
+}
+
+void coop_pintMessageIfEntityExists(entity e,string s)
+//not meant to be called by a trigger! This will chrash the game!
+{
+	if(doesEntityExist(e)){
+		globalCoop_main_print(s);
+	}
+}
+
+float coop_checkAllUserVarsAreEmpty(entity e)
+//not meant to be called by a trigger! This will chrash the game!
+{
+	if(doesEntityExist(e)){
+		if(	e.getStringVar("uservar1") == "" &&
+			e.getStringVar("uservar2") == "" &&
+			e.getStringVar("uservar3") == "" &&
+			e.getStringVar("uservar4") == "")
+		{
+			return 1;
+		}
+	}
+	return 0;
+}
+
+float coop_checkIsNotPlayerHasModel(entity eActor)
+//not meant to be called by a trigger! This will chrash the game!
+{
+//EXITS AND HAS MODEL, we assume it is a NPC or PLAYER
+	if(coop_checkExistHasModel(eActor)){
+//NOT A PLAYER
+		if(!globalCoop_check_entityValidPlayerTargetname(eActor)){
+			return 1;
+		}
+	}
+	return 0;
+}
+
+float coop_checkExistHasModelPrintWithTargetname(entity eActor,string s)
+//not meant to be called by a trigger! This will chrash the game!
+{
+	if(coop_checkIsNotPlayerHasModel(eActor)){
+		globalCoop_main_print(s+": "+eActor.getTargetname());
+		return 1;
+	}
+	return 0;
+}
+
+float coop_checkExistHasModel(entity e)
+//not meant to be called by a trigger! This will chrash the game!
+{
+//EXITS AND HAS MODEL, we assume it is a NPC or PLAYER
+	if(doesEntityExist(e)){
+		if(e.getModelName() != ""){
+			return 1;
+		}
+	}
+	return 0;
+}
+
+float coop_checkExistHasModelAndHealth(entity e)
+//not meant to be called by a trigger! This will chrash the game!
+{
+//EXISTS, HAS MODEL, HAS HEALTH, OR IS A PLAYER
+	if(coop_checkExistHasModel(e)){
+		if(e.getHealth() != 0){
+			return 1;
+		}
+	}
+	return 0;
+}
+
+float coop_checkIsNpcOrPlayer(entity e)
+//not meant to be called by a trigger! This will chrash the game!
+{
+//EXISTS, HAS MODEL, HAS HEALTH, OR IS A PLAYER
+	if(coop_checkExistHasModel(e)){
+		if(e.getHealth() != 0 || globalCoop_check_entityValidPlayerTargetname(e) == 1){
+			return 1;
+		}
+	}
+	return 0;
+}
+
+void coop_unbindThisEntity(entity eSlave)
+//not meant to be called by a trigger! This will chrash the game!
+{
+	if(doesEntityExist(eSlave)){
+		eSlave.unbind();
+		eSlave.setStringVar("coop_bindMaster","");
+		globalCoop_main_print("coop_~()->UNBOUND: "+eSlave.getTargetname());
+	}
+}
+
+void coop_unbindAllFromOrigin(entity eMaster)
+//not meant to be called by a trigger! This will chrash the game!
+{
+	if(doesEntityExist(eMaster)){
+		entity eSlave;
+		float fBoundIndex;
+		string sSlaveTargetname;
+		do
+		{
+			fBoundIndex++;
+			if(!doesEntityExist(eMaster)){
+				return;
+			}
+			sSlaveTargetname = eMaster.getStringVar("coop_boundEntity"+fBoundIndex);
+			thread coop_unbindThisEntity(getEntity(sSlaveTargetname));
+			globalCoop_main_waitAFrame();
+		}while(sSlaveTargetname != "" || fBoundIndex <= 10);
+	}
+}
+
+void coop_bindToOrigin(entity eSlave,entity eMaster)
+//not meant to be called by a trigger! This will chrash the game!
+{
+	if(doesEntityExist(eMaster) == 1 && doesEntityExist(eSlave) == 1){
+		float fBoundIndex;
+		float fBoundIndexCheck;
+		string sSlaveRawTargetname;
+		sSlaveRawTargetname = eSlave.getRawTargetname();
+		fBoundIndex = eMaster.getFloatVar("coop_boundIndex");
+		fBoundIndex++;
+		eMaster.setFloatVar("coop_boundIndex",fBoundIndex);
+		eSlave.bind(eMaster);
+//CHECK IF TARGETNAME IS ALLREADY IN INDEX, DO NOT PUT SAME TARGETNAME IN INDEX ALL OVER AGAIN
+		for(fBoundIndexCheck=0;fBoundIndexCheck < 11;fBoundIndexCheck++){
+			if(sSlaveRawTargetname == eMaster.getStringVar("coop_boundEntity"+fBoundIndexCheck)){
+				return;
+			}
+		}
+//WRITE TARGETNAME IN INDEX
+		eMaster.setStringVar("coop_boundEntity"+fBoundIndex,sSlaveRawTargetname);
+		eSlave.setStringVar("coop_bindMaster",eMaster.getRawTargetname());
+		globalCoop_main_print("coop_bind()->BOUND: $"+sSlaveRawTargetname+" to "+eMaster.getTargetname());
+	}
+}
+
+void coop_setHealth(entity e,float fAdd,float fMax)
+//not meant to be called by a trigger! This will chrash the game!
+{
+	if(doesEntityExist(e)){
+		float fCurrent;
+		fCurrent = e.gethealth();
+		if(fCurrent < fMax){
+			fAdd += fCurrent;
+			if(fAdd > fMax){
+				fAdd = fMax;
+			}
+			e.health(fAdd);
+		}
+	}
+}
+
+void coop_enableFF(entity e)
+//not meant to be called by a trigger! This will chrash the game!
+{
+	if(doesEntityExist(e)){
+		e.setFloatvar("coop_doloopsound",1);
+		globalCoop_forcefield_enable(e);
+		globalCoop_main_print("coop_forcefieldon()->ENABLED FORCEFIELD: "+e.getTargetname());
+	}
+}
+
+void coop_disableFF(entity e)
+//not meant to be called by a trigger! This will chrash the game!
+{
+	if(doesEntityExist(e)){
+		globalCoop_forcefield_disable(e);
+		globalCoop_main_print("coop_forcefieldoff()->DISABLED FORCEFIELD: "+e.getTargetname());
+	}
+}
+
+void coop_lockThisDoor(entity e)
+//not meant to be called by a trigger! This will chrash the game!
+{
+	if(doesEntityExist(e)){
+		e.lock();
+		globalCoop_main_print("coop_lock()->LOCKED: "+e.getTargetname());
+	}
+}
+
+void coop_unlockThisDoor(entity e)
+//not meant to be called by a trigger! This will chrash the game!
+{
+	if(doesEntityExist(e)){
+		e.unlock();
+		globalCoop_main_print("coop_unlock()->UNLOCKED: "+e.getTargetname());
+	}
+}
+
+void coop_triggerEntity(entity e)
+//not meant to be called by a trigger! This will chrash the game!
+{
+	if(doesEntityExist(e)){
+		triggerEntity(e);
+		globalCoop_main_print("coop_triggerable()->TRIGGRED: "+e.getTargetname());
+	}
+}
+
+void coop_triggerableThis(entity e)
+//not meant to be called by a trigger! This will chrash the game!
+{
+	if(doesEntityExist(e)){
+		e.triggerable();
+		globalCoop_main_print("coop_triggerable()->ENABLED: "+e.getTargetname());
+	}
+}
+
+void coop_notTriggerableThis(entity e)
+//not meant to be called by a trigger! This will chrash the game!
+{
+	if(doesEntityExist(e)){
+		e.nottriggerable();
+		globalCoop_main_print("coop_triggerable()->DISABLED: "+e.getTargetname());
+	}
+}
+
+void coop_selectionmovereset(entity e)
+{
+//ALLOW SELECTION AGAIN, ALLOW ALL TRIGGERS AGAIN
+		e.setFloatVar("coop_noscript_selectionActive",0);
+		e.setFloatVar("coop_noscript_selectionDisable",0);
+		e.setFloatVar("coop_noscript_selectionTriggerIdendity",0);
+		e.setFloatVar("coop_noscript_selectionIndex",0);
+}
+
+vector coop_returnOrigin(entity eGetMyOrigin)
+//returns the vector of the given entity if exist, otherwise it returns ZERO ZERO ZERO
+{
+	if(doesEntityExist(eGetMyOrigin)){
+		return eGetMyOrigin.getOrigin();
+	}
+	return '0 0 0';
+}
+
+
+void coop_setuplevel()
+{
+//spawn class selection
+	thread globalCoop_class_setup("Medic",coop_returnOrigin($coop_Medic));
+	thread globalCoop_class_setup("HeavyWeapons",coop_returnOrigin($coop_HeavyWeapons));
+	thread globalCoop_class_setup("Technician",coop_returnOrigin($coop_Technician));
+	
+	coop_string_levelAuthor = $world.getStringVar("uservar1");
+	if(coop_string_levelAuthor==""){
+		coop_string_levelAuthor="^7>>uservar1 of world is was empty<<";
+	}
+	if($world.getStringVar("uservar2") == ""){
+		globalCoop_main_print("WARNING: $world->uservar2 was empty, is suppose to have the Background Story");
+	}
+	coop_tryToReMoveTheGivenEntity($coop_Medic);
+	coop_tryToReMoveTheGivenEntity($coop_HeavyWeapons);
+	coop_tryToReMoveTheGivenEntity($coop_Technician);
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////CINEMATIC//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void coop_cinstart()
+{
+	coop_bool_cameraFadedOut=1;//hack to instantly show teh letter box
+	thread globalCoop_cin_start();
+}
+void coop_cinend()
+{
+	thread globalCoop_cin_end();
+}
+void coop_cincuecamera()
+{
+	entity	eTrigger;
+	eTrigger=getCurrentEntity();
+	if(!doesEntityExist(eTrigger))
+	{
+		globalCoop_main_print("coop_cincuecamera()->Call Trigger is missing, this does not work from console!");
+		return;
+	}
+	
+	string sString1;
+	string sString2;
+	sString1	= eTrigger.getStringvar("uservar1");
+	sString2	= eTrigger.getStringvar("uservar2");
+	
+	eTrigger=getEntity(sString1);
+	if(!doesEntityExist(eTrigger))
+	{
+		globalCoop_main_print("coop_cincuecamera()->Couldn't find Camera specified in uservar1");
+		return;
+	}
+	
+	entity	eTarget,eSpawn;
+	float	fFov;
+	fFov		= eTrigger.getFloatVar("uservar1");
+	eTarget		= eTrigger.getTargetEntity();
+	
+	if(!cvar_bool_multiplayer)
+	{
+		eSpawn = spawn("camera");
+	}
+	else
+	{
+		eSpawn = spawn("script_model","model","fx/fx-dummy.tik");
+	}
+	
+	globalCoop_main_waitAFrame();
+	eSpawn.origin(eTrigger.getOrigin());
+	eSpawn.angles(eTrigger.getangles());
+	eSpawn.targetname(eTrigger.getRawTargetname());
+	
+	if(doesEntityExist(eTarget))
+	{
+		globalCoop_cin_watch(eSpawn,eTarget);
+	}
+	
+	globalCoop_cin_fov(eSpawn,fFov);
+	globalCoop_cin_cuecamera(eSpawn);
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////PLAYER//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////MISSION//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void coop_map()
+//Load a Map, used for level change on missions
+//Specify map on uservar1
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		string sMap;
+		sMap = eTrigger.getStringVar("uservar1");
+		if(sMap == ""){
+			globalCoop_main_print("coop_map()->No mapname specified, specify mapname in uservar1");
+			centerprint("^1coop_map()^5->^3No mapname specified, specify mapname in uservar1\n");
+			return;
+		}
+		globalCoop_server_loadGivenMapNow(sMap);
+	}
+}
+
+void coop_accomplished()
+//Marks the current Level/Mission to be sucessfull.
+//Use this if you want to load the next Map or Display Mission Sucess Screen Instead of Mission Failure if the Time runs out before you the Mission Completed screen is shown/next level is loadad
+//EXAMPLE: Objectives are complete, and Level-End Cinematic is running while level time runs out.
+{
+	thread globalCoop_mission_accomplished();
+}
+
+void coop_complete()
+//End the Level/Mission Sucessfully
+//uservar1 allows you to specify a map to load
+//If uservar2 is set to noscreen the sucess -screen is not displayed (Multiplayer only)
+{
+//mark sucessfull right now
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	thread globalCoop_mission_accomplished();
+	if(doesEntityExist(eTrigger)){
+	//OVERWRITE CO-OP DEFAULT SETTINGS
+		coop_bool_showMissionSucessHud = 1;//show sucess hud at the end of the mission	
+		coop_string_nextMapToCheck=eTrigger.getStringVar("uservar1");
+		if(coop_string_nextMapToCheck == ""){
+			globalCoop_main_print("coop_complete()->No mapname specified, specify mapname in uservar1");
+		}
+		if(	eTrigger.getStringVar("uservar2") == "noscreen")
+		{
+			coop_bool_showMissionSucessHud = 0;
+		}
+	}
+	thread coop_endLevel();
+}
+
+void coop_fail()
+//Fail the Mission
+//Specify reason on uservar1
+//EXAMPLE: Key=uservar1 Value=You did fail a important mission objective!
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		globalCoop_mission_failWithReason(eTrigger.getStringVar("uservar1"));
+	}
+}
+
+void coop_savegame()
+//Saves the Mission on Singleplayer
+//Specify savegame-name on uservar1
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();	
+	
+	if(doesEntityExist(eTrigger)){
+		string sSaveName;
+		sSaveName = eTrigger.getStringVar("uservar1");
+	
+		if(!cvar_bool_multiplayer){
+			if(sSaveName==""){sSaveName=cvar_string_mapname;}
+			stuffcmd("ui_savegamewithname \""+sSaveName+"\"\n");
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////DIALOGS//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void coop_dialogstop()
+//Stops playing Dialog, set current to stop current speaker set all to stop alldialogs
+//Specify entities in uservar1 to uservar2
+//EXAMPLE1: uservar1 current
+//EXAMPLE2: uservar1 all
+//EXAMPLE3: uservar1 current - uservar2 munro
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		entity eShutUp;
+		float fCounter;
+		float fTargeted;
+		string sString;
+		eShutUp=eTrigger.getTargetEntity();
+		thread globalCoop_dialog_stop(eShutUp);
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				if(sString == "current"){
+					thread globalCoop_dialog_stop(coop_entity_dialogSpeaker);
+				}else if(sString == "all"){
+					thread globalCoop_dialog_stopAll();
+				}
+				else{
+					eShutUp=getEntity(sString);
+					thread globalCoop_dialog_stop(eShutUp);
+				}
+			}
+		}
+	}
+}
+
+void coop_dialog()
+//Plays a Dialog at the given Entity or the Player closest to the trigger
+//uservar1 = NPC targetname without $, set player to play dialog on a player
+//uservar2 = Dialog to play, Syntax is: folder/dialog.mp3
+//EXAMPLE: train2/tuvok_yourrec.mp3
+//DO NOT USE deu/sound/dialog/
+//DO NOT USE eng/sound/dialog/
+//DO NOT USE localization/dialog/
+//uservar3 = MUST BE A NUMBER! Volume of the dialog 1 is default and best to be used
+//uservar4 = MUST BE A NUMBER! Minimum Range of full Dialog volume, use 1000 or above to display the head hud
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		float fCounter;
+		float fVolume;
+		float fRange;
+		float fHeadHud;
+		float fTargeted;
+		string sString1;
+		string sString2;
+		entity eActor;
+		entity eTargeted;
+		sString1	= eTrigger.getStringvar("uservar1");
+		sString2	= eTrigger.getStringvar("uservar2");
+		fVolume		= eTrigger.getFloatvar("uservar3");
+		fRange		= eTrigger.getFloatVar("uservar4");
+		eTargeted=eTrigger.getTargetEntity();
+		if(doesEntityExist(eTargeted)){
+			if(eTargeted.getStringvar("uservar1") == "" && eTargeted.getStringvar("uservar2") == ""){
+				fTargeted=1;
+				eActor=eTargeted;
+			}
+		}
+		if(sString1 != "" || fTargeted == 1){
+			if(!fTargeted){
+				if(sString1 == "player"){
+					eActor=globalCoop_return_playerClosestActive(eTrigger);
+				}else{
+					eActor=getEntity(sString1);
+				}
+			}
+			if(doesEntityExist(eActor)){
+				if(sString2 == ""){
+					globalCoop_main_print("coop_playdialog()->uservar2 must contain the Dialog to play, was->EMPTY");
+					return;
+				}
+//check range setting
+				if(fRange >= 1000){fHeadHud = 1;}
+				else if(fRange < 64){fRange=64;}
+//check dialog volume settings
+				if(fVolume < 1){fVolume=1;}
+//play the dialog now
+				//globalCoop_dialog_play(eActor,sString2,fVolume,fRange,fHeadHud);
+				globalCoop_dialog_play(eActor,sString2,5,400,0);
+			}else{
+				globalCoop_main_print("coop_playdialog()->uservar1 must contain NPC targetname without $ or value player\nValue was->"+eTrigger.getStringvar("uservar1"));
+			}
+		}else{
+			globalCoop_main_print("coop_playdialog()->uservar1 must contain NPC targetname without $ or value player\nValue was->EMPTY");
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////TEAMMATES//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void coop_teammateadd()
+//Make a >>Hazard Team NPC<< controllable and follwoing the player (press use on NPC)
+//uservar1 = Targetname of Hazard Team Member to follow you
+//uservar2 = Targetname of Hazard Team Member to follow you
+//uservar3 = Targetname of Hazard Team Member to follow you
+//uservar4 = Targetname of Hazard Team Member to follow you
+//EXAMPLE: Key=uservar1 Value=chell
+
+//Grabs also Targetentity
+//Grabs alos entity triggering the Trigger if it is not a player
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		float fCounter;
+		string sString;
+		entity eActor;
+		eActor=eTrigger.getLastActivatingEntity();
+		if(coop_checkExistHasModelPrintWithTargetname(eActor,"coop_teammateadd()->ADDED TEAMMATE")){
+			thread globalCoop_teammate_register(eActor);
+		}
+		eActor=eTrigger.getTargetEntity();
+		if(coop_checkExistHasModelPrintWithTargetname(eActor,"coop_teammateadd()->ADDED TEAMMATE")){
+			thread globalCoop_teammate_register(eActor);
+		}
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				eActor=getEntity(sString);
+				if(coop_checkExistHasModelPrintWithTargetname(eActor,"coop_teammateadd()->ADDED TEAMMATE")){
+					thread globalCoop_teammate_register(eActor);
+				}
+			}
+		}
+	}
+}
+
+void coop_teammateremove()
+//Removes the ability to control a >>Hazard Team NPC<< on the NPC
+//uservar1 = Targetname of Hazard Team Member to make normal again
+//uservar2 = Targetname of Hazard Team Member to make normal again
+//uservar3 = Targetname of Hazard Team Member to make normal again
+//uservar4 = Targetname of Hazard Team Member to make normal again
+//EXAMPLE: Key=uservar1 Value=chell
+
+//Grabs also Targetentity
+//Grabs alos entity triggering the Trigger if it is not a player
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		float fCounter;
+		float fExisting;
+		string sString;
+		entity eActor;
+		eActor=eTrigger.getLastActivatingEntity();
+		if(coop_checkExistHasModelPrintWithTargetname(eActor,"coop_teammateremove()->REMOVED TEAMMATE")){
+			thread globalCoop_teammate_unregister(eActor);
+		}
+		eActor=eTrigger.getTargetEntity();
+		if(coop_checkExistHasModelPrintWithTargetname(eActor,"coop_teammateremove()->REMOVED TEAMMATE")){
+			thread globalCoop_teammate_unregister(eActor);
+		}
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				eActor=getEntity(sString);
+				if(coop_checkExistHasModelPrintWithTargetname(eActor,"coop_teammateremove()->REMOVED TEAMMATE")){
+					thread globalCoop_teammate_unregister(eActor);
+				}
+			}
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////ALLPLAYERS//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void coop_everyone()
+//Executes a Command on all players.
+//Specify in uservar1 to uservar4
+//EXAMPLE: uservar1 ammo
+//droptofloor	= Drops all players to the ground
+//kill			= Kills every player
+//hide			= Hides all players
+//show			= Shows all players
+//nodamage		= Makes players invinceble
+//takedamage	= Makes players take damage as usual again
+//putaway		= Puts player weapons away
+//disable		= Disable Player Weapons
+//enable		= Enable Player Weapons again
+//health		= Restores health to maximum
+//ammo			= gives some ammo
+//armor			= gives some armor to all players
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		float fCounter;
+		string sString;
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				globalCoop_main_print("coop_everyone()->ALL PLAYERS: "+sString);
+				thread globalCoop_main_globalCommand(sString);
+			}
+		}
+	}
+}
+
+
+void coop_immobilize()
+//Immobilizes ALL PLAYERS, disables moving and fireing weapon
+{
+	globalCoop_player_imobilizeAll(1);
+}
+
+void coop_mobilize()
+//Mobilizes ALL PLAYERS again, so they can move and fire again
+{
+	globalCoop_player_imobilizeAll(0);
+}
+
+void coop_weapongive()
+//Gives a weapon to all players and makes them "use" the last specified.
+//Specify weapons in uservar1 to uservar4
+//EXAMPLE: uservar1 burstrifle
+//AVIALABLE WEAPONS ARE:
+//attrex-rifle
+//batleth
+//burstrifle
+//compressionrifle
+//drull-staff
+//enterprise
+//fieldassaultrifle
+//grenadelauncher
+//IMod
+//phaser
+//phaser-STX
+//photon
+//rom-datapad
+//rom-radgun
+//rom-disruptor
+//sniperrifle
+//tetryon
+//tricorder
+//tricorder-STX
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		float fCounter;
+		string sString;
+		string sLast;	
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				sLast = sString;
+				globalCoop_main_print("coop_weapongive()->Given: "+sString);
+				sLast = "models/weapons/worldmodel-"+sString+".tik";
+				thread globalCoop_player_giveAll(sLast,0.5);//give,useafterdelayof
+			}
+		}
+	}
+}
+
+
+void coop_weapontake()
+//TAKES a weapon FROM all players.
+//Specify weapons in uservar1 to uservar4
+//EXAMPLE: uservar1 burstrifle
+//AVIALABLE WEAPONS ARE:
+//attrex-rifle
+//batleth
+//burstrifle
+//compressionrifle
+//drull-staff
+//enterprise
+//fieldassaultrifle
+//grenadelauncher
+//IMod
+//phaser
+//phaser-STX
+//photon
+//rom-datapad
+//rom-radgun
+//sniperrifle
+//tetryon
+//tricorder
+//tricorder-STX
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		float fCounter;
+		string sString;	
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				globalCoop_main_print("coop_weapontake()->TAKEN: "+sString);
+				thread globalCoop_player_takeAll("models/weapons/worldmodel-"+sString+".tik");
+			}
+		}
+	}
+}
+
+
+void coop_hudadd()
+//Adds Specified Huds to all Players
+//Specify Hud-names in uservar1 to uservar4
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		float fCounter;
+		string sString;	
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				globalCoop_main_print("coop_hudadd()->ADDED: "+sString);
+				thread globalCoop_huds_manageAll(sString,1,1);
+			}
+		}
+	}
+}
+
+void coop_hudremove()
+//Removes Specified Huds on all Players
+//Specify Hud-names in uservar1 to uservar4
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		float fCounter;
+		string sString;	
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				globalCoop_main_print("coop_hudremove()->REMOVED: "+sString);
+				thread globalCoop_huds_manageAll(sString,0,1);
+			}
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////OBJECTIVES//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void coop_objective()
+//Set a mission Objective text in the Mission Objective Hud
+//uservar1 = Item Number, range: 1 to 8
+//uservar2 = Objective State, valid: complete,failed,active
+//uservar3 = Objective Item Text, specify your Objective text
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		string sString1;
+		string sString2;
+		string sString3;
+		string sString4;
+		sString1 = eTrigger.getstringvar("uservar1");
+		sString2 = eTrigger.getstringvar("uservar2");
+		sString3 = eTrigger.getstringvar("uservar3");
+		sString4 = eTrigger.getRawTargetname();
+		float fObjectiveItem;		
+		if(sString1 == "1"){fObjectiveItem=1;}
+		if(sString1 == "2"){fObjectiveItem=2;}
+		if(sString1 == "3"){fObjectiveItem=3;}
+		if(sString1 == "4"){fObjectiveItem=4;}
+		if(sString1 == "5"){fObjectiveItem=5;}
+		if(sString1 == "6"){fObjectiveItem=6;}
+		if(sString1 == "7"){fObjectiveItem=7;}
+		if(sString1 == "8"){fObjectiveItem=8;}
+		if(fObjectiveItem < 1){
+			globalCoop_main_print("No Objective Item NUMBER Specified, specify on uservar1, range is 1 to 8");
+			return;
+		}
+		
+		if(	sString2 != "complete" &&
+			sString2 != "failed" &&
+			sString2 != "active" )
+		{
+			sString2 = "active";
+		}
+		if(fObjectiveItem==1){coop_string_objectiveItem1=globalCoop_return_string1IfString2IsEmpty(sString3,coop_string_objectiveItem1);}
+		if(fObjectiveItem==2){coop_string_objectiveItem2=globalCoop_return_string1IfString2IsEmpty(sString3,coop_string_objectiveItem2);}
+		if(fObjectiveItem==3){coop_string_objectiveItem3=globalCoop_return_string1IfString2IsEmpty(sString3,coop_string_objectiveItem3);}
+		if(fObjectiveItem==4){coop_string_objectiveItem4=globalCoop_return_string1IfString2IsEmpty(sString3,coop_string_objectiveItem4);}
+		if(fObjectiveItem==5){coop_string_objectiveItem5=globalCoop_return_string1IfString2IsEmpty(sString3,coop_string_objectiveItem5);}
+		if(fObjectiveItem==6){coop_string_objectiveItem6=globalCoop_return_string1IfString2IsEmpty(sString3,coop_string_objectiveItem6);}
+		if(fObjectiveItem==7){coop_string_objectiveItem7=globalCoop_return_string1IfString2IsEmpty(sString3,coop_string_objectiveItem7);}
+		if(fObjectiveItem==8){coop_string_objectiveItem8=globalCoop_return_string1IfString2IsEmpty(sString3,coop_string_objectiveItem8);}
+		
+		thread globalCoop_objectives_update(sString2,fObjectiveItem,1);
+		coop_tryToReMoveTheGivenEntity(eTrigger);
+	}
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////PUZZLES//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void coop_modulate()
+//Make this trigger to a Puzzle (Modulate Bar), trigger class must be trigger_multiple
+//->>>>WORKS ONLY IN MULTIPLAYER
+//Specify entity targetname in uservar1, triggers the given entity
+//Specify thread to call in uservar2
+//Specify time in uservar3 in (seconds)
+//Set nodisable in uservar4 to allow the puzzle to be modulated multiple times
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		entity eTarget;
+		float fTime;
+		string sString1;
+		string sString2;
+		string sString3;
+		string sString4;
+		sString1	= eTrigger.getRawTargetname();
+		sString2	= eTrigger.getStringVar("uservar1");
+		sString3	= eTrigger.getStringVar("uservar2");
+		fTime		= eTrigger.getFloatVar("uservar3");
+		sString4	= eTrigger.getStringVar("uservar4");
+		if(sString2 != ""){
+			eTarget=getEntity(sString2);
+			if(!doesEntityExist(eTarget)){
+				globalCoop_main_print("coop_modulate()->Entity with Targetname: "+sString2+", was not found, will try to call thread");
+			}
+		}else{
+			globalCoop_main_print("coop_modulate()->No targetname was set in uservar1, will try to call thread");
+		}
+		globalCoop_puzzle_add(sString1+"_puzzle",sString3,fTime,eTrigger.getOrigin());
+		eTarget=getEntity(sString1+"_puzzle");
+		eTarget.setStringVar("globalCoop_puzzle_fireTarget",sString2);
+		if(sString4 == "nodisable"){
+			eTarget.setFloatVar("coop_puzzle_doNotDisable",1);
+		}
+	}
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////NPC - ARTIFICIAL INTELEGENCE//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void coop_hurt()
+//Hurt the entity, basicly substracts health and gives pain to the entity
+//uservar1 = Entity Targetname
+//uservar2 = Entity Targetname
+//uservar3 = Entity Targetname
+//uservar4 = Ammount of damage
+//Grabs also target entity
+//To hurt entity entering a trigger please use a trigger_hurt
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		float fCounter;
+		float fHurt;
+		string sString;
+		entity eHurt;
+		fHurt=eTrigger.getFloatVar("uservar4");
+		if(fHurt == 0){
+			fHurt=5;
+		}
+		eHurt=eTrigger.getTargetEntity();
+		if(coop_checkExistHasModelAndHealth(eHurt)){
+			eHurt.hurt(fHurt);
+			globalCoop_main_print("coop_hurt()->HURT: "+eHurt.getTargetname());
+		}
+		while(fCounter<3){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				eHurt=getEntity(sString);
+				if(coop_checkExistHasModelAndHealth(eHurt)){
+					globalCoop_main_print("coop_hurt()->HURT: "+eHurt.getTargetname());
+					eHurt.hurt(fHurt);
+				}
+			}
+		}
+		if(!doesEntityExist(eHurt)){
+			globalCoop_main_print("coop_hurt()->Coud not hurt targets, entities do not or nolonger exist!");
+		}
+	}
+}
+
+void coop_heal()
+//Heal the entity, basicly adds health to the entity
+//uservar1 = Entity Targetname
+//uservar2 = Entity Targetname
+//uservar3 = Ammount of healing
+//uservar4 = Max Health
+//Heals also Entity Activating the trigger
+//Heals also targetentity
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		float fCounter;
+		float fHeal;
+		float fHealMax;
+		string sString;
+		entity eHeal;
+		eHeal=eTrigger.getLastActivatingEntity();
+		fHeal=eTrigger.getFloatVar("uservar3");
+		fHealMax=eTrigger.getFloatVar("uservar4");
+		if(fHeal == 0){
+			fHeal=5;
+		}
+		if(fHealMax == 0){
+			fHealMax=200;
+		}
+		if(coop_checkExistHasModelAndHealth(eHeal)){
+			globalCoop_main_print("coop_heal()->HEALING: "+eHeal.getTargetname());
+			thread coop_setHealth(eHeal,fHeal,fHealMax);
+		}
+		eHeal=eTrigger.getTargetEntity();
+		if(coop_checkExistHasModelAndHealth(eHeal)){
+			globalCoop_main_print("coop_heal()->HEALING: "+eHeal.getTargetname());
+			thread coop_setHealth(eHeal,fHeal,fHealMax);
+		}
+		while(fCounter<3){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				eHeal=getEntity(sString);
+				if(coop_checkExistHasModelAndHealth(eHeal)){
+					globalCoop_main_print("coop_heal()->HEALING: "+eHeal.getTargetname());
+					thread coop_setHealth(eHeal,fHeal,fHealMax);
+				}
+			}
+		}
+	}
+}
+
+
+void coop_bind()
+//Binds a Entity To a Entity
+//uservar1 = MASTER/Origin Entity Targetname
+//uservar2 = SLAVE Entity to be bound to MASTER
+//uservar3 = SLAVE Entity to be bound to MASTER
+//uservar4 = SLAVE Entity to be bound to MASTER
+//MAXIUMUM to bind to one MASTER/origin is 10 Objects
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		entity eMaster;
+		eMaster = getEntity(eTrigger.getstringvar("uservar1"));
+		thread coop_bindToOrigin(getEntity(eTrigger.getstringvar("uservar2")),eMaster);		
+		thread coop_bindToOrigin(getEntity(eTrigger.getstringvar("uservar3")),eMaster);		
+		thread coop_bindToOrigin(getEntity(eTrigger.getstringvar("uservar4")),eMaster);		
+	}
+}
+
+
+void coop_unbind()
+//Unbinds a Entity from a Entity
+//uservar1 = SLAVE Entity to Unbind
+//uservar2 = SLAVE Entity to Unbind
+//uservar3 = SLAVE Entity to Unbind
+//uservar3 = SLAVE Entity to Unbind
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		thread coop_unbindThisEntity(getEntity(eTrigger.getstringvar("uservar1")));
+		thread coop_unbindThisEntity(getEntity(eTrigger.getstringvar("uservar2")));
+		thread coop_unbindThisEntity(getEntity(eTrigger.getstringvar("uservar3")));
+		thread coop_unbindThisEntity(getEntity(eTrigger.getstringvar("uservar4")));
+	}
+}
+
+
+void coop_unbindall()
+//Unbinds ALL Entities which have been bound to the MASTER
+//uservar1 = MASTER Entity to Unbind all entities from
+//uservar2 = MASTER Entity to Unbind all entities from
+//uservar3 = MASTER Entity to Unbind all entities from
+//uservar4 = MASTER Entity to Unbind all entities from
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		thread coop_unbindAllFromOrigin(getEntity(eTrigger.getstringvar("uservar1")));
+		thread coop_unbindAllFromOrigin(getEntity(eTrigger.getstringvar("uservar2")));
+		thread coop_unbindAllFromOrigin(getEntity(eTrigger.getstringvar("uservar3")));
+		thread coop_unbindAllFromOrigin(getEntity(eTrigger.getstringvar("uservar4")));
+	}
+}
+
+void coop_move()
+{
+//uservar1 = keyword -> target-entity-targetname/up/down/left/right/west/north/south/east
+//uservar2 = keyword -> up/down/left/right/west/north/south/east
+//uservar3 = if no target -> travel speed
+//uservar4 = travel time
+	centerprint("coop_move()->Not Working Yet\n");
+}
+
+
+void coop_updatespawnlocations()
+{
+//set new Origin to a object
+//uservar1 = Spawnlocation set (targetname ipdX_?)
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		entity eTarget;
+		string fFloat1;
+		float fLocation;
+		entity eSpawn;
+		entity eLocation;
+		fFloat1	= eTrigger.getStringVar("uservar1");
+		while(fLocation <= 12){
+			fLocation++;
+			eSpawn		= getEntity("ipd"+fLocation);
+			eLocation 	= getEntity("ipd"+fLocation+"_"+fFloat1);
+			if(doesEntityExist(eSpawn) == 1 && doesEntityExist(eLocation) == 1){
+				eSpawn.origin(eLocation.getOrigin());
+			}
+		}
+	}
+}
+
+
+void coop_updateclasses()
+{
+//set new Origin to a object
+//uservar1 = relocate the classes (targetname class_x_?)
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		string fFloat1;
+		entity eLocation;
+		fFloat1	= eTrigger.getStringVar("uservar1");
+		eLocation=getEntity("coop_Medic_"+fFloat1);
+		if(doesEntityExist(eLocation)){
+			$coop_class_MedicModel.moveToPos(eLocation.getOrigin());
+			$coop_class_MedicModel.time(coop_float_oneFrameTime);
+		}
+		eLocation=getEntity("coop_Technician_"+fFloat1);
+		if(doesEntityExist(eLocation)){
+			$coop_class_TechnicianModel.moveToPos(eLocation.getOrigin());
+			$coop_class_TechnicianModel.time(coop_float_oneFrameTime);
+		}
+		eLocation=getEntity("coop_HeavyWeapons_"+fFloat1);
+		if(doesEntityExist(eLocation)){
+			$coop_class_HeavyWeaponsModel.moveToPos(eLocation.getOrigin());
+			$coop_class_HeavyWeaponsModel.time(coop_float_oneFrameTime);
+		}
+	}
+}
+
+
+void coop_aion()
+//Activate NPC AI, Make them think on their own
+//uservar1 = Targetname of NPC of which you want to turn on it's AI
+//uservar2 = Targetname of NPC of which you want to turn on it's AI
+//uservar3 = Targetname of NPC of which you want to turn on it's AI
+//uservar4 = Targetname of NPC of which you want to turn on it's AI
+//Grabs also Targetentity
+//Grabs also entity activating the Trigger
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+	
+		float fCounter;
+		string sString;
+		entity eAi;
+		eAi = eTrigger.getLastActivatingEntity();
+		if(coop_checkExistHasModelPrintWithTargetname(eAi,"coop_aion()->AI_ON")){
+			eAi.ai_on();
+		}
+		eAi = eTrigger.getTargetEntity();
+		if(coop_checkExistHasModelPrintWithTargetname(eAi,"coop_aion()->AI_ON")){
+			eAi.ai_on();
+		}
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				eAi=getEntity(sString);
+				if(coop_checkExistHasModelPrintWithTargetname(eAi,"coop_aion()->AI_ON")){
+					eAi.ai_on();
+				}
+			}
+		}
+	}
+}
+
+void coop_aioff()
+//Deactivate NPC AI, NPC will stand arround and do nothing
+//uservar1 = Targetname of NPC of which you want to turn off it's AI
+//uservar2 = Targetname of NPC of which you want to turn off it's AI
+//uservar3 = Targetname of NPC of which you want to turn off it's AI
+//uservar4 = Targetname of NPC of which you want to turn off it's AI
+//Grabs also Targetentity
+//Grabs also entity activating the Trigger
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		float fCounter;
+		string sString;
+		entity eAi;
+		eAi = eTrigger.getLastActivatingEntity();
+		if(coop_checkExistHasModelPrintWithTargetname(eAi,"coop_aioff()->AI_OFF")){
+			eAi.ai_off();
+		}
+		eAi = eTrigger.getTargetEntity();
+		if(coop_checkExistHasModelPrintWithTargetname(eAi,"coop_aion()->AI_OFF")){
+			eAi.ai_off();
+		}
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				eAi = getEntity(sString);
+				if(coop_checkExistHasModelPrintWithTargetname(eAi,"coop_aioff()->AI_OFF")){
+					eAi.ai_off();
+				}
+			}
+		}
+	}
+}
+
+void coop_animate()
+//Makes a AI do a Animation and leave the AI turned off
+//Specify targetname in uservar1 and Animatiosn in uservar2 to userver4
+//If no targetname is specified the NPC triggering the trigger will be handled
+//This repeats animation, to play animation only once you must set idle or stopanimating in a uservar
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		entity eAi;
+		float fUseUservar1;
+		string sString1;
+		string sString2;
+		string sString3;
+		string sString4;
+		string sTargetname;
+		sString1=eTrigger.getStringVar("uservar1");
+		sString2=eTrigger.getStringVar("uservar2");
+		sString3=eTrigger.getStringVar("uservar3");
+		sString4=eTrigger.getStringVar("uservar4");
+//CHECK ACTIVATOR
+		eAi = eTrigger.getLastActivatingEntity();
+		if(coop_checkIsNotPlayerHasModel(eAi)){
+			sTargetname = eAi.getRawtargetname();
+			if(sTargetname != "world"){
+				globalCoop_main_print("coop_aianimate()->Triggered by ACTIVATOR: "+sTargetname);
+				fUseUservar1=1;
+			}
+		}
+//CHECK TARGET
+		else{
+			eAi = eTrigger.getTargetEntity();
+			if(coop_checkIsNotPlayerHasModel(eAi)){
+				fUseUservar1=1;
+			}
+		}
+//CHECK USERVARS
+		if(doesEntityExist(eAi) == 0 || fUseUservar1 == 0 ){
+//GRAB USERVAR1 ENTITY
+			eAi = getEntity(sString1);
+//EXIT WHEN MISSING
+			if(!doesEntityExist(eAi)){
+				globalCoop_main_print("coop_aianimate()->Coudn't find the NPC! Set: uservar1 or target");
+				return;	
+			}
+		}
+		eAi.ai_off();
+		globalCoop_main_print("coop_aianimate()->ANIMATING ENTITY: "+eAi.getRawtargetname());
+		float fIndexCurrent,fIndexCalled;
+		fIndexCurrent = eAi.getFloatvar("coop_animationIndex");
+		fIndexCalled = fIndexCurrent;
+		fIndexCalled++;
+		eAi.setFloatvar("coop_animationIndex",fIndexCalled);
+		if(fUseUservar1 == 1 && sString1 != ""){
+			globalCoop_actor_animateWaitForAnimation(eAi,sString1);
+		}
+		if(sString2 != ""){
+			if(eAi.getFloatvar("coop_animationIndex") == fIndexCalled){
+				globalCoop_actor_animateWaitForAnimation(eAi,sString2);
+			}
+		}
+		if(sString3 != ""){
+			if(eAi.getFloatvar("coop_animationIndex") == fIndexCalled){
+				globalCoop_actor_animateWaitForAnimation(eAi,sString3);
+			}
+		}
+		if(sString4 != ""){
+			if(eAi.getFloatvar("coop_animationIndex") == fIndexCalled){
+				globalCoop_actor_animateWaitForAnimation(eAi,sString4);
+			}
+		}
+		if(	sString1 == "stopanimating" ||
+			sString2 == "stopanimating" ||
+			sString3 == "stopanimating" ||
+			sString4 == "stopanimating" )
+		{
+			if(eAi.getFloatvar("coop_animationIndex") == fIndexCalled){
+				eAi.stopAnimating();
+			}
+		}
+	}
+}
+
+
+void coop_animateaion()
+//Makes a AI do a Animation and tunrs AI ON again
+//Specify targetname in uservar1 and Animatiosn in uservar2 to userver4
+//If no targetname is specified the NPC triggering the trigger will be handled
+//This repeats animation, to play animation only once you must set idle or stopanimating in a uservar
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		entity eAi;
+		entity eTargeted;
+		float fTriggered;
+		float fTargeted;
+		string sString1;
+		string sString2;
+		string sString3;
+		string sString4;
+		sString1=eTrigger.getStringVar("uservar1");
+		sString2=eTrigger.getStringVar("uservar2");
+		sString3=eTrigger.getStringVar("uservar3");
+		sString4=eTrigger.getStringVar("uservar4");
+		eTargeted = eTrigger.getTargetEntity();
+//ASSUME IT IS A MODEL OR NPC, SINCE TRIGGERS USUALLY HAVE A VALUE SET IN uservars!
+		if(coop_checkIsNotPlayerHasModel(eTargeted)){
+			fTargeted=1;
+			eAi=eTargeted;
+		}
+		if(!doesEntityExist(eAi)){
+			eAi = eTrigger.getLastActivatingEntity();
+			if(coop_checkExistHasModelPrintWithTargetname(eAi,"coop_animate()->")){//could only be a ai
+				eAi=getEntity(sString1);
+				if(!doesEntityExist(eAi)){//can be anything
+					globalCoop_main_print("coop_aianimate()->Coudn't find the NPC by targetname or trigger activity");
+					return;
+				}
+			}else{
+				fTriggered=1;
+			}
+		}
+		eAi.ai_off();
+		float fIndexCurrent,fIndexCalled;
+		fIndexCurrent = eAi.getFloatvar("coop_animationIndex");
+		fIndexCalled = fIndexCurrent;
+		fIndexCalled++;
+		eAi.setFloatvar("coop_animationIndex",fIndexCalled);
+		if(fTriggered == 1 || fTargeted == 1){
+			globalCoop_actor_animateWaitForAnimation(eAi,sString1);
+		}
+		if(sString2 != ""){
+			if(eAi.getFloatvar("coop_animationIndex") == fIndexCalled){
+				globalCoop_actor_animateWaitForAnimation(eAi,sString2);
+			}
+		}
+		if(sString3 != ""){
+			if(eAi.getFloatvar("coop_animationIndex") == fIndexCalled){
+				globalCoop_actor_animateWaitForAnimation(eAi,sString3);
+			}
+		}
+		if(sString4 != ""){
+			if(eAi.getFloatvar("coop_animationIndex") == fIndexCalled){
+				globalCoop_actor_animateWaitForAnimation(eAi,sString4);
+			}
+		}
+		if(	sString1 == "stopanimating" ||
+			sString2 == "stopanimating" ||
+			sString3 == "stopanimating" ||
+			sString4 == "stopanimating" )
+		{
+			if(eAi.getFloatvar("coop_animationIndex") == fIndexCalled){
+				eAi.stopAnimating();
+			}
+		}
+		if(doesEntityExist(eAi)){
+			eAi.ai_on();
+		}
+	}
+}
+
+/* void coop_spawneffectname()
+//uservar1 = Target Entity
+//uservar2 = Effect Name
+//uservar3 = If set to group, all entities of the group will be processed, ie: spawn1 spawn2 spawn3 spawn4 and so on
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		string s1;
+		string s2;
+		string s3;		
+		entity eTarget;
+		s1 = eTrigger.getStringVar("uservar1");
+		s2 = eTrigger.getStringVar("uservar2");
+		s3 = eTrigger.getStringVar("uservar3");
+		if(s3 == "Group" || s3 == "GROUP"){
+			s3 = "group";
+		}
+		eTarget = getEntity(s1);
+		if(doesEntityExist(eTarget)){
+			eTarget.spawneffectname(s2);
+		}else{
+			globalCoop_main_print("coop_spawneffectname()->MISSING ["+s1+"] using targetname for groupname now.");
+			s3 = "group";
+		}
+		if(s3 = "group"){
+			float fIndex;
+			for(fIndex=0;fIndex<101;fIndex++){
+				eTarget = getEntity(s1+fIndex);
+				if(doesEntityExist(eTarget)){
+					eTarget.spawneffectname(s2);
+				}
+			}
+		}
+	}
+} */
+
+void coop_respawn()
+//Makes the ai respawn when death
+//Needs to be set at a func_spawn entity!
+//uservar1 = how many times the ai should respawn 0=Infinity
+//SETTINGS:
+//KEY=setspawngroupdeaththread
+//VALUE=coop_respawn
+
+//KEY=setspawngroupID
+//VALUE=ANY_UNIQE_NUMBER_HERE
+
+//KEY=targetname
+//VALUE=A_UNIQE_TARGETNAME_HERE
+
+//KEY=spawntargetname
+//VALUE=TARGETNAME_OF_THE_func_spawn_ENTITY
+{
+	entity e;
+	e=getCurrentEntity();
+	string sModel;
+	string sTargetname;
+	entity eSpawner;
+	if(coop_checkExistHasModelPrintWithTargetname(e,"coop_respawn->Trying to RESPAWN at")){
+		sModel = e.getModelName();
+		sTargetname = e.getRawtargetname();
+		eSpawner = getEntity(sTargetname);
+		float fHasModel=1;
+		while(fHasModel){
+			if(doesEntityExist(eSpawner)){
+				if(eSpawner.getModelName() == ""){
+					fHasModel=0;
+				}else{
+					eSpawner = getNextEntity(e);
+				}
+			}else{
+				globalCoop_main_print("ERROR: coop_respawn->func_spawn with targetname "+sTargetname+"does not exist!");
+				fHasModel=0;
+			}
+			globalCoop_main_waitAFrame();
+		}
+		if(doesEntityExist(eSpawner)){
+			float fRespawns;
+			fRespawns = eSpawner.getFloatvar("coop_noscript_respawns");
+//STOP RESPAWING WHEN LIMIT IS HIT, SPAWN INFINITY IF NO LIMIT IS SET
+			if(eSpawner.getFloatvar("uservar1") < 1){
+				eSpawner.setFloatvar("uservar1",0);
+			}else if(fRespawns == eSpawner.getFloatvar("uservar1")){
+				globalCoop_main_print("coop_respawn->Reached Maximum("+eSpawner.getFloatvar("uservar1")+") spawns for: "+sTargetname+", specified in uservar1");
+				return;
+			}
+			fRespawns++;
+			eSpawner.setFloatvar("coop_noscript_respawns",fRespawns);
+			globalCoop_level_triggerEntity(eSpawner);
+		}
+	}else{
+		centerprint("USE: func_spawn, set: KEY setspawngroupdeaththread VALUE coop_respawn & KEY setspawngroupID VALUE INTEGER!\n");
+	}
+}
+
+void coop_walkto()
+//Make the ai walk to the specified locations
+//uservar1 = NPC targetname
+//uservar2 = Animation Name, walk/run not all NPCs can run, preferably use walk
+//uservar3 = Targetname of the location to walk to
+//uservar4 = Targetname of the additional location to walk to
+//uservar4 = If allowfall is set as value, makes the actor ignore falls when trying to move.
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		entity eAi;
+		string sString1;
+		string sString2;
+		string sString3;
+		string sString4;
+		sString4=eTrigger.getStringVar("uservar1");
+		eAi=getEntity(sString4);
+		sString1=eTrigger.getStringVar("uservar2");
+		sString2=eTrigger.getStringVar("uservar3");
+		sString3=eTrigger.getStringVar("uservar4");
+		if(doesEntityExist(eAi)){
+			eAi.ai_off();
+			if(sString3 == "allowfall"){
+				eAi.allowFall(1);
+			}
+			globalCoop_main_print("coop_aiwalkto()::"+sString4+"->"+sString2+"animation:"+sString1);
+			eAi.walkto(sString2,sString1);
+			waitFor(eAi);
+			if(sString3 != "allowfall" && sString3 != ""){
+				globalCoop_main_print("coop_aiwalkto()::"+sString4+"->"+sString3+"animation:"+sString1);
+				eAi.walkto(sString3,sString1);
+			}
+		}else{
+			globalCoop_main_print("coop_aiwalkto()->uservar1->No NPC with the given targetname found!");
+		}
+		coop_tryToReMoveTheGivenEntity(eTrigger);
+	}
+}
+
+void coop_turntowardsentity()
+//Make the ai turn towards a specified entity
+//uservar1 = NPC targetname
+//uservar2 = Entity Targetname to turn towrads
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		entity eAi;
+		entity eObject;
+		string sString1;
+		string sString2;
+		sString1=eTrigger.getStringVar("uservar1");
+		sString2=eTrigger.getStringVar("uservar2");
+		eAi=getEntity(sString1);
+		eObject=getEntity(sString2);
+		if(doesEntityExist(eAi)){
+			if(doesEntityExist(eObject)){
+				eAi.ai_off();
+				eAi.turntowardsentity(eObject);
+			}
+		}else{
+			globalCoop_main_print("coop_turntowardsentity()->uservar1 or uservar2 invalid entity targetname");
+		}
+		coop_tryToReMoveTheGivenEntity(eTrigger);
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////LEVEL-INTERAVION//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void coop_trigger()
+//This triggers/fires the given entities, works with doors,triggers,sound_speaker
+//Example: Use it if you want to trigger multiple events at once on seperated trigger_relay triggers
+//uservar1 = Targetname of Entity to trigger
+//uservar2 = Targetname of Entity to trigger
+//uservar3 = Targetname of Entity to trigger
+//uservar4 = Targetname of Entity to trigger
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		thread coop_triggerEntity(getEntity(eTrigger.getStringVar("uservar1")));
+		thread coop_triggerEntity(getEntity(eTrigger.getStringVar("uservar2")));
+		thread coop_triggerEntity(getEntity(eTrigger.getStringVar("uservar3")));
+		thread coop_triggerEntity(getEntity(eTrigger.getStringVar("uservar4")));
+	}
+}
+
+
+void coop_triggerable()
+//Make trigger able to be activated, like ON/OFF
+//uservar1 targetname of trigger to enable
+//uservar2 targetname of trigger to enable
+//uservar3 targetname of trigger to enable
+//uservar4 targetname of trigger to enable
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		thread coop_triggerableThis(getEntity(eTrigger.getStringVar("uservar1")));
+		thread coop_triggerableThis(getEntity(eTrigger.getStringVar("uservar2")));
+		thread coop_triggerableThis(getEntity(eTrigger.getStringVar("uservar3")));
+		thread coop_triggerableThis(getEntity(eTrigger.getStringVar("uservar4")));
+	}
+}
+
+void coop_nottriggerable()
+//Make trigger UNable to be activated, like ON/OFF set to ->OFF
+//uservar1 targetname of trigger to disable
+//uservar2 targetname of trigger to disable
+//uservar3 targetname of trigger to disable
+//uservar4 targetname of trigger to disable
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		thread coop_notTriggerableThis(getEntity(eTrigger.getStringVar("uservar1")));
+		thread coop_notTriggerableThis(getEntity(eTrigger.getStringVar("uservar2")));
+		thread coop_notTriggerableThis(getEntity(eTrigger.getStringVar("uservar3")));
+		thread coop_notTriggerableThis(getEntity(eTrigger.getStringVar("uservar4")));
+	}
+}
+
+void coop_lock()
+//Locks doors
+//uservar1 targetname of door to Lock
+//uservar2 targetname of door to Lock
+//uservar3 targetname of door to Lock
+//uservar4 targetname of door to Lock
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		thread coop_lockThisDoor(getEntity(eTrigger.getStringVar("uservar1")));
+		thread coop_lockThisDoor(getEntity(eTrigger.getStringVar("uservar2")));
+		thread coop_lockThisDoor(getEntity(eTrigger.getStringVar("uservar3")));
+		thread coop_lockThisDoor(getEntity(eTrigger.getStringVar("uservar4")));
+	}
+}
+
+void coop_unlock()
+//Unlocks doors
+//uservar1 targetname of door to Unlock
+//uservar2 targetname of door to Unlock
+//uservar3 targetname of door to Unlock
+//uservar4 targetname of door to Unlock
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		thread coop_unlockThisDoor(getEntity(eTrigger.getStringVar("uservar1")));
+		thread coop_unlockThisDoor(getEntity(eTrigger.getStringVar("uservar2")));
+		thread coop_unlockThisDoor(getEntity(eTrigger.getStringVar("uservar3")));
+		thread coop_unlockThisDoor(getEntity(eTrigger.getStringVar("uservar4")));
+	}
+}
+
+void coop_message()
+//Prints a message to all plyers screen center, specify your text in uservar1
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+	//PLAY SOUND
+			$world.playsound("sound/player/CommunicatorBeep.wav", 3, 3, 800000);
+	//SHOW MESSAGE TO ALL PLAYERS
+			centerprint(eTrigger.getStringVar("uservar1")+"\n");
+	}
+}
+
+void coop_kill()
+//Kills specified targets
+//Kills specified entities in uservar1 to uservar4
+//If all uservars are empty the entity activating the trigger will be killed
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		entity eKillMe;
+		float fAllEmpty=1;
+		float fCounter;
+		string sString;	
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				eKillMe = getEntity(sString);
+				if(doesEntityExist(eKillMe)){
+					fAllEmpty=0;
+					eKillMe.kill();
+				}
+			}
+		}
+		if(fAllEmpty){
+			eKillMe=eTrigger.getTargetEntity();
+			if(doesEntityExist(eKillMe)){
+				eKillMe.kill();
+			}
+		}
+//DELETE THE TRIGGER IT SELF, UNLESS IT IS MARKED NOT TO BE DELETED
+		coop_tryToReMoveTheGivenEntity(eTrigger);//can only be killed once
+	}
+}
+
+void coop_remove()
+//Removes specified targets
+//Removes specified entities in uservar1 to uservar4
+//Entities with the value noremove in a uservar will NOT be removed
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		entity eRemove;
+		float fCounter;
+		string sString;	
+		eRemove=eTrigger.getTargetEntity();
+		thread coop_tryToReMoveTheGivenEntity(eRemove);
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				eRemove = getEntity(sString);
+				thread coop_tryToReMoveTheGivenEntity(eRemove);
+			}
+		}
+//DELETE THE TRIGGER IT SELF, UNLESS IT IS MARKED NOT TO BE DELETED
+		coop_tryToReMoveTheGivenEntity(eTrigger);//can only be removed once
+	}
+}
+
+void coop_explode()
+//Spawn a explosion
+//Remove target entity
+//Remove objects set in uservar1 to uservar4
+//Entities with the value noremove in a uservar will NOT be removed
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){//TRY TO DELETE THE TARGET ENTITY	
+	entity eTarget;
+	float fCounter;
+	string sString;	
+		eTarget=eTrigger.getTargetEntity();
+		eTarget.selfdetonate();
+		thread coop_tryToReMoveTheGivenEntity(eTarget);
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				eTarget = getEntity(sString);
+				eTarget.selfdetonate();
+			}
+			thread coop_tryToReMoveTheGivenEntity(eTarget);
+		}
+//DELETE THE TRIGGER IT SELF, UNLESS IT IS MARKED NOT TO BE DELETED
+		coop_tryToReMoveTheGivenEntity(eTrigger);
+	}
+}
+
+void coop_hide()
+//Makes entities invisible
+//Specify targetnames in uservar1 to uservar4
+//Grabs also the target entity!
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		entity eHide;
+		float fCounter;
+		string sString;	
+		eHide=eTrigger.getTargetEntity();
+		thread globalCoop_level_hide(eHide);
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				eHide = getEntity(sString);
+				thread globalCoop_level_hide(eHide);
+			}
+		}
+//DELETE THE TRIGGER IT SELF, UNLESS IT IS MARKED NOT TO BE DELETED
+		coop_tryToReMoveTheGivenEntity(eTrigger);
+	}
+}
+
+void coop_show()
+//Makes entities visible again
+//Specify targetnames in uservar1 to uservar4
+//Grabs also the target entity!
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		entity eShow;
+		float fCounter;
+		string sString;	
+		eShow=eTrigger.getTargetEntity();
+		thread globalCoop_level_show(eShow);
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				eShow = getEntity(sString);
+				thread globalCoop_level_show(eShow);
+			}
+		}
+//DELETE THE TRIGGER IT SELF, UNLESS IT IS MARKED NOT TO BE DELETED
+		coop_tryToReMoveTheGivenEntity(eTrigger);
+	}
+}
+
+void coop_solid()
+//Makes entities SOLID
+//Specify targetnames in uservar1 to uservar4
+//Grabs also the target entity!
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		entity eSolid;
+		float fCounter;
+		string sString;	
+		eSolid=eTrigger.getTargetEntity();
+		if(doesEntityExist(eSolid)){
+			eSolid.solid();
+		}
+		thread globalCoop_level_show(eSolid);
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				eSolid = getEntity(sString);
+				if(doesEntityExist(eSolid)){
+					eSolid.solid();
+				}
+			}
+		}
+//DELETE THE TRIGGER IT SELF, UNLESS IT IS MARKED NOT TO BE DELETED
+		coop_tryToReMoveTheGivenEntity(eTrigger);
+	}
+}
+
+void coop_notsolid()
+//Makes entities SOLID
+//Specify targetnames in uservar1 to uservar4
+//Grabs also the target entity!
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		entity eSolid;
+		float fCounter;
+		string sString;	
+		eSolid=eTrigger.getTargetEntity();
+		if(doesEntityExist(eSolid)){
+			eSolid.notsolid();
+		}
+		thread globalCoop_level_show(eSolid);
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				eSolid = getEntity(sString);
+				if(doesEntityExist(eSolid)){
+					eSolid.notsolid();
+				}
+			}
+		}
+//DELETE THE TRIGGER IT SELF, UNLESS IT IS MARKED NOT TO BE DELETED
+		coop_tryToReMoveTheGivenEntity(eTrigger);
+	}
+}
+
+void coop_hidenotsolid()
+//Hide entity and makes then notsolid, collides with no objects
+//Specify targetnames in uservar1 to uservar4
+//Grabs also the target entity!
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		entity eHide;
+		float fCounter;
+		string sString;	
+		eHide=eTrigger.getTargetEntity();
+		thread globalCoop_level_hideAndNotSolid(eHide);
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				eHide = getEntity(sString);
+				thread globalCoop_level_hideAndNotSolid(eHide);
+			}
+		}
+//DELETE THE TRIGGER IT SELF, UNLESS IT IS MARKED NOT TO BE DELETED
+		coop_tryToReMoveTheGivenEntity(eTrigger);
+	}
+}
+
+
+void coop_showsolid()
+//Shows entities and makes them solid, collides with (all) objects again
+//Specify targetnames in uservar1 to uservar4
+//Grabs also the target entity!
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		entity eShow;
+		float fCounter;
+		string sString;	
+		eShow=eTrigger.getTargetEntity();
+		thread globalCoop_level_showAndSolid(eShow);
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				eShow = getEntity(sString);
+				thread globalCoop_level_showAndSolid(eShow);
+			}
+		}
+//DELETE THE TRIGGER IT SELF, UNLESS IT IS MARKED NOT TO BE DELETED
+		coop_tryToReMoveTheGivenEntity(eTrigger);
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////FORCEFIELDS//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void coop_forcefieldoff()
+//Disable Forcefields (does not remove them)
+//Set in uservar1 to uservar4
+//Grabs also the target entity!
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		thread coop_disableFF(eTrigger.getTargetEntity());
+		thread coop_disableFF(getEntity(eTrigger.getStringVar("uservar1")));
+		thread coop_disableFF(getEntity(eTrigger.getStringVar("uservar2")));
+		thread coop_disableFF(getEntity(eTrigger.getStringVar("uservar3")));
+		thread coop_disableFF(getEntity(eTrigger.getStringVar("uservar4")));
+	}
+}
+
+
+void coop_forcefieldon()
+//Enables Forcefields, Makes them Interactive
+//Set in uservar1 to uservar4
+//Grabs also the target entity!
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		entity eTarget;
+		eTarget=eTrigger.getTargetEntity();
+		if(doesEntityExist(eTarget)){
+			if(coop_checkAllUserVarsAreEmpty(eTarget)){
+				thread coop_enableFF(eTarget);
+			}
+		}
+		thread coop_enableFF(getEntity(eTrigger.getStringVar("uservar1")));
+		thread coop_enableFF(getEntity(eTrigger.getStringVar("uservar2")));
+		thread coop_enableFF(getEntity(eTrigger.getStringVar("uservar3")));
+		thread coop_enableFF(getEntity(eTrigger.getStringVar("uservar4")));
+	}
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////DYNAMIC LIGHTS//
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void coop_lightstyle()
+//Set a style on a dynamic light
+//uservar1 = Group name of the light
+//uservar2 = Style of the light how to flicker (max 64 letters->a-z)
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		$world.light_lightstyle(eTrigger.getstringvar("uservar1"),eTrigger.getstringvar("uservar2"),0);
+	}
+}
+
+void coop_lighttoggle()
+//Toggle lights ON/OFF
+//Set group_name in uservar1 to uservar4
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		float fCounter;
+		string sString;	
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				if($world.getlightintensity(sString) != 0){
+					$world.light_intensity(sString, 0 );
+				}else{
+					$world.light_intensity(sString, 1 );
+				}
+			}
+		}
+	}
+}
+
+void coop_lighttogglefade()
+//Toggle lights ON/OFF with fading
+//Set group_name in uservar1 to uservar4
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+	float fCounter;
+	string sString;
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				if($world.getlightintensity(sString) != 0){
+					$world.light_fade(sString,0,1);
+				}else{
+					$world.light_fade(sString,1,1);
+				}
+			}
+		}
+	}
+}
+
+void coop_lighton()
+//Turn light ON
+//Set group_name in uservar1 to uservar4
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+	float fCounter;
+	string sString;
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				$world.light_intensity(sString,1);
+			}
+		}
+	}
+}
+
+void coop_lightoff()
+//Turn light OFF
+//Set group_name in uservar1 to uservar4
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+	float fCounter;
+	string sString;
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				$world.light_intensity(sString,0);
+			}
+		}
+	}
+}
+
+void coop_lightonfade()
+//Turn light ON with fading
+//Set group_name in uservar1 to uservar4
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+	float fCounter;
+	string sString;
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				$world.light_fade(sString,1,1);
+			}
+		}
+	}
+}
+
+void coop_lightofffade()
+//Turn light OFF with fading
+//Set group_name in uservar1 to uservar4
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+	float fCounter;
+	string sString;
+		while(fCounter<4){
+			fCounter++;
+			sString=eTrigger.getStringVar("uservar"+fCounter);
+			if(sString != ""){
+				$world.light_fade(sString,0,1);
+			}
+		}
+	}
+}
+
+
+void coop_displayeffect()
+//use=trigger_once
+//displays the specified effect on the Players (inside the area)
+//uservar1 = Effect Name Part1 -> TransportOut
+//uservar2 = Effect Name Part2 -> Federation
+//uservar3 = Area -> inside(the trigger)/outside(the trigger)/all(every player)
+{
+	entity eTrigger;
+	eTrigger = getCurrentEntity();
+	
+	if(doesEntityExist(eTrigger)){
+		
+		vector vOrigin;
+		vector vMins;
+		vector vMaxs;
+		string sEffect1;
+		string sEffect2;
+		string sArea;
+		vOrigin 		= eTrigger.getOrigin();
+		vMins			= eTrigger.getMins();
+		vMaxs			= eTrigger.getMaxs();
+		sEffect1		= eTrigger.getStringVar("uservar1");
+		sEffect2		= eTrigger.getStringVar("uservar2");
+		sArea			= eTrigger.getStringVar("uservar3");
+		if(sArea != "outside" && sArea != "all"){
+			sArea="inside";
+		}
+	
+	//remove trigger - Avoid futher triggering
+		globalCoop_level_remove(eTrigger);
+		
+	//display the effect on the specific players
+		entity ePlayer;
+		float fPlayerIdInUse;
+		
+		float fInOrOutSide;
+		float fPlayerIsInside;
+		vector vOriginP;
+		vector vMinsP;
+		vector vMaxsP;
+		for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++){
+			fInOrOutSide	=0;
+			fPlayerIsInside	=0;
+			ePlayer = getentity("player"+fPlayerIdInUse);
+			if(globalCoop_check_existingLivingEntity(ePlayer)){
+				vOriginP 		= ePlayer.getOrigin();
+				vMinsP 			= ePlayer.getMins();
+				vMaxsP 			= ePlayer.getMaxs();
+				fPlayerIsInside	= globalCoop_check_isBoundingBox2InsideOfBoundingBox1(vOrigin,vMins,vMaxs,vOriginP,vMinsP,vMaxsP,-10);//-10=player inside not touching
+				
+				if(sArea == "inside"){//bugfix->[if] can not handle the original check construct
+					fInOrOutSide = 1;
+				}
+				
+				if(	sArea == "all" ||
+					fInOrOutSide == fPlayerIsInside)
+				{
+					if(sEffect2 != ""){
+						ePlayer.displayEffect(sEffect1,sEffect2);
+					}else{
+						ePlayer.displayEffect(sEffect1);
+					}
+				}
+			}
+		}
+	
+	}
+}
+
+
+void coop_waitforteam()
+//sets the level End gathering Area at the place and in teh size of the trigger which calles this thread
+//uservar1 = Trigger This Entity when all players are inside
+//uservar2 = Next map to load
+//uservar3 = Don't show Mission sucess hud, on value: 
+{
+	thread globalCoop_mission_accomplished();//mark done, as the mission is as good as completed
+	
+	entity eTrigger;
+	eTrigger = getCurrentEntity();
+	
+	if(doesEntityExist(eTrigger)){
+		vector vOrigin;
+		vector vMins;
+		vector vMaxs;
+		string sNextMap;
+		string sShowSucess;
+		entity eTriggerMe;
+		
+		vOrigin 	= eTrigger.getOrigin();
+		vMins		= eTrigger.getMins();
+		vMaxs		= eTrigger.getMaxs();
+		eTriggerMe		= getEntity(eTrigger.getStringVar("uservar1"));
+		sNextMap		= eTrigger.getStringVar("uservar2");
+		sShowSucess		= eTrigger.getStringVar("uservar3");
+		
+	//remove trigger
+		globalCoop_level_remove(eTrigger);
+		
+	//wait for all players
+		globalCoop_main_waitForTeam(vOrigin,vMins,vMaxs);
+		
+	//trigger the given entity
+		if(doesEntityExist(eTriggerMe)){
+			triggerEntity(eTriggerMe);
+		}
+		
+		wait(2);
+		
+	//do not show mi-objective
+		if(sShowSucess == ""){
+			coop_bool_showMissionSucessHud=0;
+		}
+
+	//trigger mission end...
+		globalCoop_mission_completed(sNextMap);
+	}
+}
+
+void coop_callvolume()
+//Checks if all the specified entities are inside the Trigger
+//uservar1 = Targetname of the object/Thread name to activate when all entities are inside
+//uservar2 = Entity-targetname without $, the keyword "team" requires all players to be inside
+//uservar3 = Entity-targetname without $, the keyword "team" requires all players to be inside
+//uservar4 = Entity-targetname without $, the keyword "team" requires all players to be inside
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		string s1;
+		string sThread,sRawTargetname;
+		sRawTargetname = eTrigger.getRawTargetname();
+		s1 = eTrigger.getStringVar("uservar1");
+		if(s1 == "" || s1 == "$"){
+			globalCoop_main_print("coop_callvolume()->ERROR: uservar1 was empty[requires raw target name OR thread name]");
+			return;
+		}
+		if(!doesEntityExist(getEntity(s1))){
+			sThread = s1;
+		}else{
+			eTrigger.target(s1);
+		}
+		globalCoop_callVolume_replace(eTrigger,sThread);
+	}
+}
+
+void coop_selectionmove()
+//Moves a object to the selected destination.
+//uservar1 = liftname
+//uservar2 = location targetname -> WITHOUT NUMBER
+//uservar3 = traveltime from start-location to end-location (entire distance)
+//uservar4 = Force to this location number (1=targetname1,2=targetname2,3=targetname3...)
+
+//Uservars for the Move-Object:
+//uservar1 = move-start / move-loop SOUND
+//uservar2 = move-stop SOUND
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		float fTriggerIdenty;
+		entity eUser;
+		string s1;
+		string s2;
+		float f3;
+		float f4;
+		eUser = eTrigger.getLastActivatingEntity();
+		if(!doesEntityExist(eUser)){
+			globalCoop_main_print("coop_selectionmove()->ERROR: This Thread MUST be called by a trigger");
+		}
+		s1 = eTrigger.getStringvar("uservar1");
+		s2 = eTrigger.getStringvar("uservar2");
+		f3 = eTrigger.getFloatvar("uservar3");
+		f4 = eTrigger.getFloatvar("uservar4");
+		eTrigger.setFloatvar("uservar4",f4);//avoid console spam
+		fTriggerIdenty = eTrigger.getFloatVar("coop_noscript_selection_triggerIdentity");
+		if(fTriggerIdenty == 0){
+			fTriggerIdenty = $world.getFloatVar("coop_noscript_selection_triggerIdentityIndex");
+			fTriggerIdenty++;
+			$world.setFloatVar("coop_noscript_selection_triggerIdentityIndex",fTriggerIdenty);
+			eTrigger.setFloatVar("coop_noscript_selection_triggerIdentity",fTriggerIdenty);
+		}
+		if(f3 == 0){
+			globalCoop_main_print("coop_selectionmove()->WARNING: No traveltime sepecified in uservar3! Using 10 sec");
+			f3=10;
+		}
+		entity eMover;
+		if(s1 != ""){eMover = getEntity(s1);}
+		
+		entity eMoverOrigin;
+		if(doesEntityExist(eMover)){
+			if(eMover.getStringvar("coop_bindMaster") != ""){
+				eMoverOrigin=getEntity((eMover.getStringvar("coop_bindMaster")));
+			}else{
+				eMoverOrigin=getEntity(s1+"_origin");
+				if(doesEntityExist(eMoverOrigin)){
+					coop_bindToOrigin(eMover,eMoverOrigin);
+				}else{
+					eMoverOrigin = eMover;//move the oject instead
+					eMover.setStringvar("coop_bindMaster",s1);//make it self to its own master
+					globalCoop_main_print("coop_selectionmove()->WARNING: Coudn't bind "+s1+" to "+s1+"_origin, object might move bad/wrong...");
+				}
+			}
+		}else{
+			globalCoop_main_print("coop_selectionmove()->ERROR: Object to Move not found, specify in uservar1");
+return;
+		}
+/////////////////////////////////
+/////////////////////////////////
+/////////////////////////////////
+		if(!doesEntityExist(eMoverOrigin)){
+			globalCoop_main_print("coop_selectionmove()->ERROR: Entity to move or its origin couldn't be found!");
+return;
+		}
+		if(eMoverOrigin.getFloatVar("coop_noscript_selectionDisable")){
+			eUser.hudprint("^3Please wait.\n");
+return;
+		}
+		if(eMoverOrigin.getFloatVar("coop_noscript_selectionTriggerIdendity") != 0){
+			if(eMoverOrigin.getFloatVar("coop_noscript_selectionTriggerIdendity") != fTriggerIdenty){
+				eUser.hudprint("^2Controls ^3allready^2 in use!\n");
+				return;
+			}
+		}else{
+			eMoverOrigin.setFloatVar("coop_noscript_selectionTriggerIdendity",fTriggerIdenty);
+		}
+		
+//grab travel entity
+		entity eMoveTo;
+		if(s2 == ""){
+			globalCoop_main_print("coop_selectionmove()->ERROR: No travel to target-entity sepecified in uservar2!");
+return;
+		}
+		eMoveTo=getEntity(s2+""+1);
+		if(!doesEntityExist(eMoveTo)){
+			globalCoop_main_print("coop_selectionmove()->ERROR: Coudn't find any travel-to entity with targetname: "+s2);
+return;
+		}
+		entity eMoveToEnd;
+		float fSelectionIndex;
+		float fSelectionIndexMax = 1;
+		while(doesEntityExist(getEntity(s2+""+fSelectionIndexMax))){
+			fSelectionIndexMax++;
+		}
+		fSelectionIndexMax--;//go one back to grab previouse
+		eMoveToEnd = getEntity(s2+""+fSelectionIndexMax);
+		if(!doesEntityExist(eMoveToEnd)){
+			globalCoop_main_print("coop_selectionmove()->ERROR: REPORT TO HAZARDMODDING CODE->ERR#1");
+return;
+		}
+		float fTravelDistanceTotal;
+		fTravelDistanceTotal = vectorLength((eMoveTo.getOrigin()) - (eMoveToEnd.getOrigin()));
+/////////////////////////////////
+/////////////////////////////////
+/////////////////////////////////
+		if(!doesEntityExist(eMoverOrigin)){
+			globalCoop_main_print("coop_selectionmove()->ERROR: Move-Object or Move-Object-Origin was deleted! #1");
+return;
+		}
+		if(f4 == 0){//uservar4 sets the index the mover must be send to
+			fSelectionIndex=eMoverOrigin.getFloatVar("coop_noscript_selectionIndex");
+			if(fSelectionIndex < fSelectionIndexMax){
+				fSelectionIndex++;
+			}else{
+				fSelectionIndex=1;
+			}
+		}else{
+			fSelectionIndex=f4;
+		}
+		eMoverOrigin.setFloatVar("coop_noscript_selectionIndex",fSelectionIndex);
+		eMoverOrigin.setFloatVar("coop_noscript_selectionTime",getLevelTime());
+//PRINT TO USER
+		string sHudprint;
+		if(doesEntityExist(eUser)){
+			eMoveTo=getEntity(s2+""+fSelectionIndex);
+			if(doesEntityExist(eMoveTo)){
+				sHudprint=eMoveTo.getStringVar("uservar1");
+			}
+			if(sHudprint != ""){
+				eUser.hudprint(sHudprint+"\n");
+			}else{
+				eMoveTo.setStringVar("uservar1","");
+				eUser.hudprint("^2Selection:^5 "+fSelectionIndex+"\n");
+			}
+		}
+//the selection is still active
+		if(eMoverOrigin.getFloatVar("coop_noscript_selectionActive")){
+			return;
+		}
+		eMoverOrigin.setFloatVar("coop_noscript_selectionActive",1);
+		eMoverOrigin.setFloatVar("coop_noscript_selectionDisable",0);
+		float fWait=1;
+		float fTime;
+		while(fWait)
+		{
+			if(doesEntityExist(eMoverOrigin)){
+				fTime = eMoverOrigin.getFloatVar("coop_noscript_selectionTime");
+				if(getLevelTime() > (fTime + 2)){
+					fWait=0;
+				}
+			}else{
+				globalCoop_main_print("coop_selectionmove()->ERROR: Move-Object or Move-Object-Origin was deleted! #2");
+				return;
+			}
+			wait(.1);
+		}
+//DISABLE SELECTION NOW!
+		eMoverOrigin.setFloatVar("coop_noscript_selectionDisable",1);		
+//TRY TO BIND TRIGGER
+		entity eTrigger;
+		entity eDoor;
+		eTrigger=getEntity(s1+"_trigger");
+		if(doesEntityExist(eTrigger)){
+			if(eTrigger.getStringvar("coop_bindMaster") == ""){
+				coop_bindToOrigin(eTrigger,eMoverOrigin);
+			}
+		}
+/////////////////////////////////
+/////////////////////////////////
+/////////////////////////////////
+		fSelectionIndex = eMoverOrigin.getFloatVar("coop_noscript_selectionIndex");
+		eMoveTo=getEntity(s2+""+fSelectionIndex);
+//PRINT TO USER
+		if(!doesEntityExist(eMoveTo)){
+			globalCoop_main_print("coop_selectionmove()->ERROR: Selection: "+s2+""+fSelectionIndex+" !INVALID ENTITY!");
+			if(doesEntityExist(eUser)){
+				eUser.hudprint("ERROR: Selection: "+s2+""+fSelectionIndex+" !INVALID ENTITY!\n");
+			}
+		//ALLOW SELECTION AGAIN, ALLOW ALL TRIGGERS AGAIN
+			coop_selectionmovereset(eMoverOrigin);
+return;
+		}
+//LOCK and CLOSE DOOR
+		eDoor=getEntity(s1+"_door"+eMoverOrigin.getFloatVar("coop_noscript_selectionLastTravel"));
+		if(doesEntityExist(eDoor)){
+			eDoor.lock();
+			eDoor.close();
+		}
+		float fTravelTime;
+		fTravelTime = (f3 / fTravelDistanceTotal);//time/distance
+		fTravelTime = (fTravelTime * vectorLength((eMoveTo.getOrigin()) - (eMoverOrigin.getOrigin())));
+		string sSound;
+		sSound = eMover.getStringVar("uservar1");
+		if(sSound != ""){
+			eMoverOrigin.loopsound(sSound,1,128);
+		}
+		eMoverOrigin.moveToPos(eMoveTo.getOrigin());
+		eMoverOrigin.time(fTravelTime);
+		waitfor(eMoverOrigin);
+		eMoverOrigin.stoploopsound();
+		sSound = eMover.getStringVar("uservar2");
+		if(sSound != ""){
+			eMoverOrigin.playsound(sSound,0,1,128);
+		}
+		eDoor=getEntity(s1+"_door"+fSelectionIndex);
+		if(doesEntityExist(eDoor)){
+			eDoor.unlock();
+			eDoor.open($world);
+			eDoor.wait(-1);//make door stay open
+		}
+		eMoverOrigin.setFloatVar("coop_noscript_selectionLastTravel",fSelectionIndex);
+		wait(3);
+//ALLOW SELECTION AGAIN, ALLOW ALL TRIGGERS AGAIN
+		coop_selectionmovereset(eMoverOrigin);
+/////////////////////////////////
+/////////////////////////////////
+/////////////////////////////////
+	}
+}
+

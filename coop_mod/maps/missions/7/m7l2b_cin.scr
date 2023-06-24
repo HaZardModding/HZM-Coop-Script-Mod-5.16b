@@ -1,0 +1,93 @@
+//--- cinematic functions
+void cinematicWoundedEngineer();
+void cinematicWoundedEngineer_Skipthread();
+void cinematicWoundedEngineer_End();
+
+//---------------------
+// Function: cinematicWoundedEngineer
+// Comments:
+// cinematic for the wounded engineer
+//---------------------
+void cinematicWoundedEngineer()
+{
+	cinDieAttrex = createcinematic( "m7l2b_dyingattrex" );
+	wait( .1 );
+	//--- start cinematic commands
+	globalCoop_cin_start();
+	coop_bool_cameraFadedOut=1;
+	
+	$cinematicWoundedEngineer_Engineer.hide();
+	$cinematicWoundedEngineer_Engineer.notsolid();
+	
+	cinDieAttrex.setendthread( "cinematicWoundedEngineer_Skipthread" );
+	cinDieAttrex.beginCinematic( "m7l2b_dyingattrex" ) ;
+	
+	//--- set the skipthread
+	globalCoop_cin_skipThread("cinematicWoundedEngineer_Skipthread");
+}
+
+
+//---------------------
+// Function: cinematicWoundedEngineer_Skipthread
+// Comments:
+// skip thread for wounded engineer cinematic
+//---------------------
+void cinematicWoundedEngineer_Skipthread()
+{
+	//kill the cinematic
+	cinDieAttrex.setendthread( "" );
+	skipthread( "null" );
+	killthread( "cinematicWoundedEngineer" );
+
+	wait( .5 );
+	
+	//fade to black
+	cam_fadeout( 1, 0, 0, 0, 1, 0 );
+
+	wait( 1 );
+	
+	//--- run the end routines for this cinematic
+	thread cinematicWoundedEngineer_End();
+}
+
+
+//---------------------
+// Function: cinematicWoundedEngineer_End
+// Comments:
+// end of the wounded engineer cinematic
+//---------------------
+void cinematicWoundedEngineer_End()
+{
+	vector playerNewOrigin;
+	
+	//--- hide dummy actors
+	$cinematicMunro.hide();
+	$cinematicMunro.notsolid();
+
+	$cinematicWoundedEngineer_Engineer.show();
+//	$cinematicWoundedEngineer_Engineer.solid();
+
+	//--- pose the engineer
+	$cinematicWoundedEngineer_Engineer.anim( "dead_ground" );
+	
+	//--- move the player
+	if(!cvar_bool_multiplayer){//Singleplayer
+		playerNewOrigin = $cinematicMunro.getorigin();
+		$player.origin( playerNewOrigin );
+	}
+	
+	wait( .1 );
+	
+	//end cinematic
+	globalCoop_cin_end();
+
+	cinDieAttrex.endCinematic();
+	
+	wait( .25 );
+
+	//release the player and fade in
+	cam_fadein( 1, 0, 0, 0, 1, 0 );
+}
+
+
+//attrx female dies in gas chanber, make it more tramatic and put up a scene

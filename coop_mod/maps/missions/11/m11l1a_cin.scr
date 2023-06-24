@@ -1,0 +1,604 @@
+entity chellCin;
+entity korbanCin;
+entity finalCin;
+
+void EntIntro();
+void EntIntroEnd();
+void introCinematic();
+void endIntroCinematic();
+void endKorbanCinematic();
+void triggerKorbanCinematic();
+void commanderBattle();
+void runCommanderBattle();
+void endFinalCinematic();
+void finalCinematicBattle();
+void endFinalCinematicBattle();
+void finalCinematicBattle();
+
+
+void EntIntro()
+{
+//Disable all AI
+	level_ai ( 0 );
+	
+//Start Cinematic
+	globalCoop_cin_start();
+		
+//align the saucer more precisely than we can in radiant
+	$entSaucer.origin ( $entBody.getorigin ());
+	$entNacelles.origin ( $entBody.getorigin ());
+
+	$entSaucer.bind   ( $entOrigin );
+	$entBody.bind     ( $entOrigin );
+	$entNacelles.bind ( $entOrigin );
+	
+	spawn ( "Camera" , "targetname" , "cam1" );
+	
+	cam.load( "m11l1a_EntIntroCamera1" );
+	cam.load( "m11l1a_EntPath" );
+	
+	wait ( .1 );
+	$mainSkyOrigin.rendereffects ( "-skyorigin" );
+	$entSkyOrigin.rendereffects ( "+skyorigin" );
+	
+	$entOrigin.followpath ( $m11l1a_EntPath , "normalangles" );
+	globalCoop_cin_follow($cam1, $m11l1a_EntIntroCamera1 );
+	globalCoop_cin_fov($cam1, 70 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+	
+	globalCoop_cin_skipThread( "EntIntroEnd" );
+	
+	
+	allowmusicducking ( 0 );
+	forcemusic ("aux2");
+	wait ( 1.5 );
+	
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+	wait ( 1 );
+
+	stuffcmd ( "locationprint 0 70 \"$$M11Stardate$$\" 10.0\n" );
+
+	wait ( 13 );
+	thread EntIntroEnd();
+}
+
+void EntIntroEnd()
+{
+	skipthread ( "" );
+	killthread ( "EntIntro" );
+	cam_fadeout( .5, 0, 0, 0, 1, 0 );
+	
+	globalCoop_level_removePath($m11l1a_EntPath);
+	globalCoop_level_removePath($m11l1a_EntIntroCamera1);
+
+/*	temp test
+	globalCoop_level_remove($entSaucer);
+	globalCoop_level_remove($entBody);
+	globalCoop_level_remove($entNacelles);
+	globalCoop_level_remove($entOrigin);
+*/
+
+	wait ( .5 );
+	$mainSkyOrigin.rendereffects ( "+skyorigin" );
+	$entSkyOrigin.rendereffects ( "-skyorigin" );
+	
+	//multiplayer
+	//thread endIntroCinematic();
+	//return
+
+	thread introCinematic();
+}
+
+void introCinematic()
+{
+	if(cvar_bool_multiplayer)
+	{
+		spawn ( "script_model" , "model" , "fx/fx-dummy.tik" , "targetname" , "telsia","0 0 0");
+		spawn ( "script_model" , "model" , "fx/fx-dummy.tik" , "targetname" , "picard","origin","0 0 0");
+	}
+
+	if(cvar_bool_multiplayer)
+		chellCin = createcinematic ( "coop_m11l1a_chell" );
+	else
+		chellCin = createcinematic ( "m11l1a_chell" );
+		
+	chellCin.setendthread ( "endIntroCinematic" );
+	chellCin.beginCinematic( "m11l1a_chelldeath" );
+	
+	cam_fadein( 1, 0, 0, 0, 1, 0 );
+
+	allowmusicducking ( 0 );
+	forcemusic ("aux3");
+
+	globalCoop_cin_skipThread( "endIntroCinematic" );
+	
+	wait(7.8);
+	if(cvar_bool_multiplayer)
+	{
+		globalCoop_dialog_play($picard,"m11l1/picard_under.mp3" , 1, 10000, 1);
+		globalCoop_dialog_play($telsia,"m11l1/telsia_comp.mp3" , 1, 10000, 1);
+	}
+}
+
+void endIntroCinematic()
+{
+	//cam_fadeout( .5, 0, 0, 0, 1, 0 );
+	killthread ( "introCinematic" );
+	chellCin.endcinematic ( 0 );
+
+//remove cinematic entity with all what might is left of it
+	globalCoop_level_remove(chellCin);
+	
+	globalCoop_cin_end();
+//warp to spawn everyone
+	globalCoop_player_warpToSpawnOriginAll();
+	
+	$korban.immortal( 1 );
+	$korban.show();
+	
+//reactivate AI
+	level_ai ( 1 );
+	
+	thread globalCoop_objectives_update("incomplete",1,1);
+}
+
+
+void triggerKorbanCinematic()
+{
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.5);
+	
+	if(cvar_bool_multiplayer)
+	{
+		coop_float_spawnAngle1 = 92;
+		coop_float_spawnAngle2 = 102;
+		coop_float_spawnAngle3 = 122;
+		coop_float_spawnAngle4 = 131;
+		coop_float_spawnAngle5 = 135;
+		coop_float_spawnAngle6 = 143;
+		coop_float_spawnAngle7 = 105;
+		coop_float_spawnAngle8 = 102;
+		coop_vector_spawnOrigin1 = '-2605 -2988 51';
+		coop_vector_spawnOrigin2 = '-2522 -2986 50';
+		coop_vector_spawnOrigin3 = '-2401 -2964 66';
+		coop_vector_spawnOrigin4 = '-2312 -2798 130';
+		coop_vector_spawnOrigin5 = '-2289 -2679 169';
+		coop_vector_spawnOrigin6 = '-2325 -2538 178';
+		coop_vector_spawnOrigin7 = '-2821 -2628 193';
+		coop_vector_spawnOrigin8 = '-2659 -2858 112';
+	//Update respawns
+		globalCoop_applaySpawnOriginOnReSpwanOrigin();
+	}
+	
+	wait(.5);
+	globalCoop_level_remove($korban);
+    music ("aux2");
+	level_ai ( 0 );
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+	
+	globalCoop_cin_skipThread( "endKorbanCinematic" );
+
+	allowmusicducking ( 0 );
+	forcemusic ("aux4");
+
+	korbanCin = createcinematic ( "m11l1a_korbandeath" );
+	korbanCin.setendthread ( "endKorbanCinematic" );
+	korbanCin.beginCinematic( "m11l1a_korbandeath" );
+}
+
+void endKorbanCinematic()
+{
+	korbanCin.endcinematic ( 0 );
+	killthread ( "triggerKorbanCinematic" );
+	cam_fadeout( .5, 0, 0, 0, 1, 0 );
+	wait(.5);
+	$towerProtector.remove ();		//keep the play from striking this tower
+	globalCoop_level_remove($korban);
+	
+	globalCoop_cin_end();
+
+	showBeaminEffects = 0;
+	AIShowGroup ( 600 );
+	AIShowGroup ( 601 );
+	AIShowGroup ( 602 );
+	
+	if(!cvar_bool_multiplayer)
+		CommandToGroup( 600 , "attack" , "$player" ,"" );
+	else
+		CommandToGroup( 600 , "aggressive" , "1" ,"" );
+	
+	AIOffGroup ( 601 );
+	AIOffGroup ( 602 );
+	showBeaminEffects = 1;
+
+	wait ( .5 );
+	cam_fadein( .5 , 0, 0, 0, 1, 0 );
+
+	level_ai ( 1 );
+}
+
+
+//-------------------------------------------------------------------------------
+//---------
+//Commander Battle Sequence
+//---------
+//-------------------------------------------------------------------------------
+void commanderBattle()
+{
+	wait ( 4 );
+	cam.load( "m11l1_commandercam" );
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(1);
+
+	allowmusicducking ( 0 );
+	forcemusic ("aux5");
+	wait ( 3.1 );
+	
+	$commander.show ();
+	$commander.solid ();
+
+	$munro.warpto ( "$munroSafeNode" );
+
+	$commander.anim ( "idle_nodust" );
+	music ("aux3","aux4");
+	
+	globalCoop_cin_skipThread( "runCommanderBattle" );
+	
+	$commander.immortal ( 1 );
+	$commander.notsolid ();
+	$commander.headwatch ( $cam1 );
+	$commanderPlat.time ( 3 );				//Raise the commander
+	$commanderPlat.moveup ( 384 );
+	
+	wait(1);
+	
+	globalCoop_cin_followWatch($cam1, $m11l1_commandercam,$commanderHead);
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera ( $cam1 );
+	cam_fadein( 1, 0, 0, 0, 1, 0 );
+		
+	waitfor ( $commanderPlat );
+	
+	
+
+	$commander.anim ( "command_charge_front" );
+	waitforanimation ( $commander , "command_charge_front" );
+	$commander.anim ( "idle_nodust" );
+
+
+	$commanderPlat.followpath ( $commanderPath );		//"fly" the commander down
+	waitfor ( $commanderPlat );
+	$commanderPlat.moveDown ( 384 );
+
+//	$commander.anim ( "command_charge_front" );
+	wait ( 4.5 );
+	cam_fadeout( .1, 0, 0, 0, 1, 0 );
+
+	thread runCommanderBattle ();
+}
+
+void runCommanderBattle ()
+{
+	killthread ( "commanderBattle" );
+	$commanderPlat.endpath ();
+	$commanderPlat.remove ();
+
+	globalCoop_level_removePath($m11l1_commandercam);
+	globalCoop_level_removePath($commanderPath);
+	
+	$commander.warpto ( "$commanderNode" );
+
+	
+	if(!cvar_bool_multiplayer)
+	{
+		$commander.headwatch ( $player );
+	}
+
+    forcemusic ("suspense");
+	wait ( 1 );
+	
+	globalCoop_cin_end();
+	
+	cam_fadein( .1, 0, 0, 0, 1, 0 );
+	$commander.solid ();
+	$commander.immortal ( 0 );
+
+	$commander.updatebosshealth ( 1 );
+	$commander.maxbosshealth ( $commander.gethealth () );
+
+	$commander.ai_on ();
+	$commander.killthread ( "finalCinematic" );
+	
+	if(!cvar_bool_multiplayer)
+	{
+		$commander.attack ( $player );
+	}
+
+	//$player.setobjectivecomplete( "FindEntrance", 1 );
+	//$player.setobjectiveshow ( "DefeatAlienCommander" , 1 );
+	globalCoop_objectives_update("complete",1,0);
+	thread globalCoop_objectives_update("incomplete",2,1);
+}
+
+
+void finalCinematic ()
+{
+//Load next map when the time runs out now
+	globalCoop_mission_accomplished();
+    forcemusic ("aux4");
+	//$player.setobjectivecomplete ( "DefeatAlienCommander" , 1 );
+	globalCoop_objectives_update("complete",2,1);
+	wait ( 4 );		//give a little delay before the cinematic
+
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.1);
+
+    allowMusicDucking( 0 );
+    forcemusic ("aux5");
+	
+	cam.load( "m11l1a_romShot1" );
+	cam.load( "m11l1a_romShot2" );
+	cam.load( "m11l1a_romShot3" );
+	cam.load( "m11l1a_romPath1" );
+	cam.load( "m11l1a_romPath2" );
+
+	//line up the models more precisely than we can in radiant (at this scale we'd require a .25 grid)
+	$entSaucer2.origin ( $entNacelles2.getorigin ());
+	$entBody2.origin ( $entNacelles2.getorigin ());
+
+	$entSaucer2.bind   ( $entOrigin2 );
+	$entBody2.bind     ( $entOrigin2 );
+	$entNacelles2.bind ( $entOrigin2 );
+
+	$warbird.forcealpha ( 1 );
+	$warbird.alpha ( 0 );
+	$warbird.bind ( $warbirdOrigin );
+
+	$warbird1.forcealpha ( 1 );
+	$warbird1.alpha ( 0 );
+	$warbird1.bind ( $warbirdOrigin1 );
+
+	$mainSkyOrigin.rendereffects ( "-skyorigin" );
+	$entSkyOrigin.rendereffects ( "+skyorigin" );
+	
+//Allow cinematic to be skipped now
+	globalCoop_cin_skipThread( "endFinalCinematic" );
+
+	spawn ( "Camera" , "targetname" , "romCam1" );
+	spawn ( "Camera" , "targetname" , "romCam2" );
+	spawn ( "Camera" , "targetname" , "romCam3" );
+
+	wait ( .05 );
+
+	globalCoop_cin_follow($romCam1, $m11l1a_romShot1 );
+	globalCoop_cin_fov($romCam1, 70 );
+	globalCoop_cin_cut($romCam1);
+
+	globalCoop_cin_follow($romCam2, $m11l1a_romShot2 );
+	globalCoop_cin_fov($romCam2, 70 );
+	globalCoop_cin_cut($romCam2);
+
+	globalCoop_cin_follow($romCam3, $m11l1a_romShot3 );
+	globalCoop_cin_fov($romCam3,70 );
+	globalCoop_cin_cut($romCam3);
+
+	$warbirdOrigin.followpath ( $m11l1a_romPath1 );
+	globalCoop_cin_cuecamera ( $romCam1 );
+
+	allowmusicducking ( 0 );
+	forcemusic ("aux1");
+
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+	wait ( 1 );
+
+	$warbird.fadein ( 6 );
+
+	wait ( 3 );
+	$warbirdOrigin1.followpath ( $m11l1a_romPath2 );
+	wait ( 5 );
+	globalCoop_cin_cuecamera ( $romCam3 );
+	$warbird1.fadein ( 4 );
+	wait ( 4.25 );
+	cam_fadeout( .5, 0, 0, 0, 1, 0 );
+	wait ( .5 );
+
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+
+	finalCin = createcinematic ( "m11l1_romgen" );
+	finalCin.setendthread ( "finalCinematicBattle" );
+	finalCin.beginCinematic( "m11l1_romgen" );
+	wait ( .25 );
+	$armRomulan.scale ( 6.5 );
+
+	vector v;
+	v = $armRomulan.getorigin ();
+	v_y-=90;
+	v_z-=460;
+	$armRomulan.origin ( v );
+
+
+}
+
+void endFinalCinematic ()
+{
+	skipthread ( "" );
+	finalCin.endcinematic ( 0 );
+	killthread ( "finalCinematic" );
+	cam_fadeout( 1, 0, 0, 0, 1, 0 );
+	wait ( 1 );
+	globalCoop_level_removePath($m11l1a_romShot1);
+	globalCoop_level_removePath($m11l1a_romShot2);
+	globalCoop_level_removePath($m11l1a_romShot3);
+	globalCoop_level_removePath($m11l1a_romPath1);
+	globalCoop_level_removePath($m11l1a_romPath2);
+	thread finalCinematicBattle ();
+}
+
+void finalCinematicBattle()
+{
+	$mainSkyOrigin.rendereffects ( "+skyorigin" );
+	$entSkyOrigin.rendereffects ( "-skyorigin" );
+
+	cam.load ( "m11l1a_goodrom" );
+	cam.load ( "m11l1a_munrocam1" );
+	cam.load ( "m11l1a_munrocam2" );
+	cam.load ( "m11l1a_munrocam3" );
+	cam.load ( "m11l1a_goodrom2" );
+	cam.load ( "m11l1a_exposition1" );
+	cam.load ( "m11l1a_exposition2" );
+	cam.load ( "m11l1a_exposition3" );
+	spawn ( "Camera" , "targetname" , "cam2" );
+	spawn ( "Camera" , "targetname" , "cam3" );
+	wait(.1);
+	$munro.warpto ( "$munroNode1" );
+	$munro.useactorweapon ( "none" );
+	$munro.removeattachedmodel ( "tag_rhand" );
+	$munro.turntoangle ( 90.0 );
+	$munro.show();
+	$munro.fadein(.1);
+
+	//show good romulans beaming in (group 777)
+	//show the bad romulans (group 888)
+
+	globalCoop_cin_skipThread( "endFinalCinematicBattle" );
+	
+	wait ( .05 );
+
+	$romulanTeam.sendeventtogroup ( "settendency" , "wander" , "0" );
+	$romulanTeam.sendeventtogroup ( "health" , "200" );
+	$romulanTeam.sendeventtogroup ( "ai_off" );
+	$romulanTeam.sendeventtogroup ( "mass" , "999999" );
+
+	globalCoop_cin_follow($cam1, $m11l1a_exposition1 );
+	globalCoop_cin_cut($cam1);
+
+	globalCoop_cin_follow($cam2, $m11l1a_exposition2 );
+	globalCoop_cin_cut($cam2);
+
+	globalCoop_cin_follow($cam3, $m11l1a_exposition3 );
+	globalCoop_cin_cut($cam3);
+
+	wait ( .5 );
+	globalCoop_cin_cuecamera ( $cam1 );
+
+	music ( "aux1" );
+
+	cam_fadein( 1, 0, 0, 0, 1, 0 );
+	globalCoop_dialog_play($picard,"m11l1/picard_taskforce.mp3" , 1, 99999999, 1);
+	wait ( .5 );
+	
+	AIShowGroup ( 777 );
+	
+	globalCoop_dialog_play($munro,"m11l1/munro_underforce.mp3" , 1 , 100000 , 0 );
+	wait ( 1 );
+	
+	globalCoop_cin_cuecamera ( $cam2 );
+	wait ( 2 );
+
+	thread globalCoop_dialog_play($romulanTeam,"m11l1/rom_anslie.mp3" , 1 , 100000 , 0 );
+	wait ( 1 );
+
+	$romulanTeam.sendeventtogroup ( "walkto" , "$munro" , "run" );
+	waitfordialog ( $romulanTeam );
+
+	globalCoop_cin_cuecamera ( $cam3 );
+	AIShowGroup ( 888 );
+	$romulanRebelTeam.sendeventtogroup ( "mass" , "99999" );
+
+	globalCoop_cin_follow($cam1, $m11l1a_goodrom );
+	globalCoop_cin_cut($cam1);
+
+	globalCoop_dialog_play($romulanRebelTeam,"m11l1/romb_wrathemp.mp3" , 1 , 100000 , 0 );
+
+	thread globalCoop_dialog_play($romulanTeam,"m11l1/rom_return.mp3" , 1 ,100000 , 0 );
+	$romulanTeam.sendeventtogroup ( "ai_on" );
+	wait ( .5 );
+	globalCoop_cin_cuecamera ( $cam1 );
+
+	//start the battle
+	$romulanTeam.sendeventtogroup ( "actortype" , "teammate" );
+	wait ( 15 );
+
+	//show munro going to the door
+
+	globalCoop_cin_follow($cam2, $m11l1a_munrocam3 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera ( $cam2 );
+
+	$munro.anim ( "duck_getup" );
+	$munro.walkto ( "$munroNode2" , "run" );
+	waitfor ( $munro );
+	$munro.giveactorweapon ( "models/weapons/worldmodel-tricorder-stx.tik" );
+	$munro.useactorweapon ( "Tricorder-STX" );
+	$munro.anim ( "tricorder_draw" );
+	waitforanimation ( $munro , "tricorder_draw" );
+	$munro.anim ( "tricorder_fire" );
+	waitforanimation ( $munro , "tricorder_fire" );
+
+	$entranceDoor.unlock ();
+	trigger ( "$entranceDoor" );
+
+	$munro.anim ( "tricorder_calm_idle1" );
+
+	wait ( .75 );
+
+	$munro.turntoangle ( 90.0 );
+	$munro.headwatch ( $romulanTeam );
+
+	wait ( 9 );
+
+	$munro.turntoangle ( 270 );
+	wait ( 1 );
+
+	cam_fadeout( .5, 0, 0, 0, 1, 0 );
+	$munro.headwatch ( $nullEntity );
+	wait ( 1 );
+	globalCoop_cin_follow($cam1, $m11l1a_munrocam2 );
+	globalCoop_cin_cut($cam1);
+
+	$entranceDoor.close ();
+
+	//show munro running to the interior
+	$munro.useactorweapon ( "none" );
+	$munro.warpto ( "$munroNode3" );
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+
+	globalCoop_cin_cuecamera ( $cam1 );
+	$munro.walkto ( "$munroNode4" , "run" );
+	wait ( 1.75 );
+	globalCoop_cin_follow($cam2, $m11l1a_goodrom2 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera ( $cam2 );
+
+	wait ( 6 );
+
+	cam_fadeout( 1, 0, 0, 0, 1, 0 );
+
+	thread endFinalCinematicBattle ();
+}
+
+void endFinalCinematicBattle ()
+{
+	killthread ( "finalCinematicBattle" );
+	globalCoop_cin_end();	
+	cam_fadeout( .5, 0, 0, 0, 1, 0 );
+
+	globalCoop_level_removePath($m11l1a_goodrom);
+	globalCoop_level_removePath($m11l1a_munrocam1);
+	globalCoop_level_removePath($m11l1a_munrocam2);
+	globalCoop_level_removePath($m11l1a_munrocam3);
+	globalCoop_level_removePath($m11l1a_goodrom2);
+	globalCoop_level_removePath($m11l1a_exposition1);
+	globalCoop_level_removePath($m11l1a_exposition2);
+	globalCoop_level_removePath($m11l1a_exposition3);
+	
+	if(!cvar_bool_multiplayer){
+		spawn( "trigger_changelevel", "targetname", "trigger_endlevel", "map", "m11l2a-drull_ruins3" , "spawnflags" , "1" );
+		wait( 1 );
+		trigger( "$trigger_endlevel" );		
+	}
+	else{
+		coop_endLevel();
+	}
+}

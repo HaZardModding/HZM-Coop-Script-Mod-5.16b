@@ -1,0 +1,813 @@
+void main();
+void setupMap();
+void setupTram();
+void introCinematic();
+void introCinematicBug();
+void introCinematicBeamIn();
+void introCinematicLighting();
+void introCinematic_skip();
+void blitzBlink();
+void facilityEntraceDoorsToggle();
+void facilityEntrace_playerInside();
+void tower_gillsup();
+void tower_lift();
+void facilityInteriorLevel0DoorMaulfunc();
+void facilityInteriorLevelMinus1DoorMaulfunc();
+void cardreader();
+void cardreaderFocusAndImmobilize(entity ePlayer, entity eCard);
+
+float float_introCinematic_lightingsound=0;
+float float_tower_gillsAreUp=0;
+float float_tower_liftIsUp=1;
+float float_level0DoorRepaired=0;
+float float_levelMinus1DoorRepaired=0;
+
+//INCLUDE other script files
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/main.scr" //co-op mod
+#include "maps/global_scripts/global_math.scr"
+#include "coop_mod/maps/global/global_acceleratedMovement.scr"
+
+
+
+void main()
+{
+/***
+music/romulan/m10l2/romulan_infoact.mp3
+music/drull/m11_command.mp3
+music/forever/uss_dallas2_introcin.mp3
+music/klingon/klingon_sfa2_hyper.mp3
+*/
+	$world.entity_fade_dist( 8000 );//6000
+	$world.farplane_cull( 1 );
+	$world.farplane_color ( '0.0875 0.1 0.145' );
+	$world.farplane ( 6000 );//4000
+//fx/fx-lightning-cloudflash.tik -> Skybox
+//fx/fx-mapleleaf-yellow.tik
+//fx/fx-mapleleaf-orange.tik
+//fx/fx-snow-gust-directional.tik -> wind
+	thread setupMap();
+	$bolt0.hide();
+	$skyModel.remove();
+	$facilityInteriorLevelMinus1DoorLift.lock();
+	spawn("camera","targetname","cam1");
+	spawn("camera","targetname","cam2");
+	thread globalCoop_main_camFadeOut(.01);
+//use this as addition to the heavy reain model, this will give the impression it rains on the entire map
+	$world.weather("rain_plain",400);
+	//removed heavy rain model, due to issues with the temp models
+//signal the mod that this are custom objectives, not loadad from the local files(without the $$)
+	coop_string_objectiveLoc		= "";
+//show sucess hud instead of just loading the next map
+	coop_bool_showMissionSucessHud	= 1;
+//set objectives for this level
+	coop_string_objectiveItem1		= "Enter the Attrexian Facility, and unlock the Entrace Door";
+	coop_string_objectiveItem2		= "Enter the Tower and restore the Communication Systems";
+	coop_string_objectiveItem3		= "Find a Security Card to unlock Secure Area Doors";
+	coop_string_objectiveItem4		= "Open and enter the main Airshaft Tunnels";
+//set Weapons for this level
+	coop_string_weapon1 = "models/weapons/worldmodel-BurstRifle.tik";
+	coop_string_weapon2 = "models/weapons/worldmodel-Phaser-stx.tik";
+	coop_string_weapon3 = "models/weapons/worldmodel-Tricorder-stx.tik";
+//developer
+	coop_vector_spawnOrigin1 = '-44608 -63451 513';
+//Start the Co-Op Script
+	globalCoop_main();
+//clear/set viewmodes
+	$world.clearAvailableViewModes();
+	//$world.addAvailableViewMode("tripwire");
+	$world.addAvailableViewMode("structuralintegrity");
+//start cinematic
+	thread introCinematic();
+}
+
+void setupMap()
+{
+	thread setupTram();
+	$towerMonitorOn.rotateXdown(180);
+//chripcard, relocate/hide
+	$chipcard0.origin($chipcardLocation0.getOrigin());
+	$chipcard1.hide();
+	$chipcard2.hide();
+	$chipcard3.hide();
+//bind blitz to origin
+	$blitz.bind($blitzOrigin);
+	$blitz.hide();
+//lift to surface
+	$liftToSurface.bind($liftToSurface_origin);
+//inner door at level 0 (surface)
+	$facilityInteriorLevel0Door.wait(-1);
+	$facilityInteriorLevel0Door.open($world);
+//Dead frozen Attrexian
+	$frozenAttrax.ai_off();
+	wait(.1);
+	$frozenAttrax.setcustomshader("textures/coop_alien/iced.tga");
+	$frozenAttrax.solid();
+	$frozenAttrax.mass(9999999);
+	$frozenAttrax.nodamage();
+	$frozenAttrax.pushable(0);
+//tower gils
+	float fNum;
+	entity e1,e2;
+	for(fNum=0;fNum<8;fNum++)
+	{
+		e1=getentity("tower_gill"+fNum);
+		e2=getentity("tower_gill"+fNum+"_origin");
+		e1.bind(e2);
+	}
+	for(fNum=0;fNum<8;fNum++)
+	{
+		e1=getEntity("tower_gill"+fNum+"_origin");
+		e1.angles('0 0 90');
+	}
+//tower radar
+	$tower_radar.bind($tower_radar_origin);
+//tower monitor
+	$towerMonitorOn.hide();
+//add symbols
+	spawn("script_model","model","use.tik","origin","-184 133 162","targetname","use1Symbol");
+	spawn("script_model","model","use.tik","origin","-1490 1649 -966","targetname","use2Symbol");
+}
+
+void setupTram()
+{
+	$tramClip0.bind($tramOrigin0);
+	$tramModel1.bind($tramOrigin0);
+	$tramClip1.bind($tramOrigin0);
+	$tramModel0.bind($tramOrigin0);
+	$tramOrigin0.movetopos($tramrailStart0.getOrigin());
+	$tramOrigin0.time(1);
+}
+
+void introCinematic()
+{
+//setup Munrotz
+	$munro.forcealpha(1);
+	$munro.alpha(0);
+	$munro.anim("idle");
+	$munro.killattach();
+	//$munro.notsolid();
+	globalCoop_cin_start();
+	thread introCinematicBug();
+	thread globalCoop_cin_follow($cam1,$entraceShot1);
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera($cam1);
+//fade in slowley
+	globalCoop_main_camFadeIn(4);
+	globalCoop_cin_skipThread("introCinematic_skip");
+//set dynamic light offline
+	$world.light_fade("RoomSecurity",0,.5);
+	$securityRoom_lightBeams.hide();
+}
+
+void introCinematicBug()
+{
+	$BugCinematic.ai_off();
+	$BugCinematic.scale(.1);
+	$BugCinematic.walkto("$bugCinematicWalkto");
+	wait(4.5);
+	spawn("sfx","model","coop_alien/fx-dust-blow-directional.tik","origin","-307 1402 659","angle","270","targetname","cinematic_dust");
+	spawn("sfx","model","coop_alien/fx-firefly.tik","origin","-625 -683 500");
+}
+
+void introCinematicBeamIn()
+{
+	wait(1);
+	if(coop_integer_cinematicIsActive!=1){return;}
+	$munro.displayEffect("TransportIn","Federation");
+	wait(2.8);
+	//$munro.animateonce("conv-scratchingchin-thinking");
+	//wait(1);
+	//$munro.anim("walk");
+	//wait(.3);
+	//$munro.anim("pain_calfR-far");
+	//wait(1.8);
+	globalCoop_actor_useWeapon($munro,"fed-tricorder-stx");
+	
+	$munro.anim("tricorder_use_once");
+	wait(1.5);
+	globalCoop_actor_useWeapon($munro,"fed-compressionrifle-enhanced");
+	if(coop_integer_cinematicIsActive!=1){return;}
+	$munro.walkto("$comeToDady");
+	wait(.5);
+	thread introCinematic_skip();
+}
+
+void introCinematicLighting()
+{
+//dynamic light does not work with the terrain...
+//fade the camera instead
+	if(coop_integer_cinematicIsActive!=1){return;}
+	$blitzOrigin.rotatey(800);
+	blitzBlink();
+	
+	if(!float_introCinematic_lightingsound)
+	{
+		globalCoop_level_remove($BugCinematic);
+		globalCoop_level_remove($cinematic_dust);
+		float_introCinematic_lightingsound =1;
+		wait(.4);
+		$munro.playsound("sound/environment/nature/thunder3.wav",3,6,8000);//snd,channel,vol,minrange
+		$blitzOrigin.rotatey(0);
+	}
+}
+
+void introCinematic_skip()
+{
+	if(coop_integer_cinematicIsActive==1){
+		globalCoop_main_camFadeOut(2);
+	}
+	spawn("sfx","model","coop_alien/fx-dusty.tik","origin","-100 0 0","targetname","outside_dusty");
+	$t26.thread("");
+	$t27.thread("");
+	$t33.thread("");
+	killthread("introCinematic");
+	killthread("introCinematicBeamIn");
+	killthread("introCinematicLighting");
+	$munro.stopSound(3);//channel
+	wait(2);
+	$munro.hide();
+	$blitzOrigin.rotatey(0);
+	$blitzOrigin.hide();
+//
+	globalCoop_level_remove($cinematic_dust);
+	globalCoop_level_remove($BugCinematic);
+	if(coop_integer_cinematicIsActive==1){
+		globalCoop_cin_end();
+		globalCoop_main_camFadeIn(3);
+	//make sure player faces the correct direction
+		if(!cvar_bool_multiplayer){
+			$player.playerviewangles('0 90 0');
+		}
+	//show first objective
+		globalCoop_objectives_update("incomplete",1,0);//State,Item,ShowIt right now
+		thread globalCoop_objectives_update("incomplete",2,1);//State,Item,ShowIt right now
+	}
+	
+//start maulfunc door
+	thread facilityInteriorLevel0DoorMaulfunc();
+	thread facilityInteriorLevelMinus1DoorMaulfunc();
+//setup frozen attraxian
+	$frozenAttrax.killattach();//remove wepon
+	$frozenAttrax.setframe(10,"run");//set animation and hold it at a specific frame
+}
+
+
+void blitzBlink()
+{
+	float fBlinkTime = 14;//20=2 sec
+	while(fBlinkTime>0 && coop_integer_cinematicIsActive == 1){
+		fBlinkTime--;
+		if(globalCoop_check_isPowerOfGiven(fBlinkTime,2)){
+			cam_fadeOut(.05, 1, 1, 1,.1);
+			$blitz.show();
+		}
+		else{
+			cam_fadeIn(.05, 1, 1, 1,.1);
+			$blitz.hide();
+		}
+		wait(.1);
+	}
+	cam_fadeIn(.05, 1, 1, 1,.1);
+	$blitz.hide();
+}
+
+void facilityEntraceTunnel()
+//open the fence to allow player entering the duct
+{
+	$use1Symbol.origin('51 1181 200');//move to heavydoor
+	$entraceDuctFence.bind($entraceDuctFenceOrigin);
+	$entraceDuctFence.notsolid();
+	$entraceDuctFence.playsound("sound/environment/machine/lift2.wav",0,1,128);
+	$entraceDuctFenceOrigin.rotateY(-45);
+	wait(2);
+	$entraceDuctFenceOrigin.rotateY(0);
+}
+
+
+void facilityEntraceDoorsLockedSound()
+//play sound to fake a locked door
+{
+	entity eTrigger;
+	eTrigger = getCurrentEntity();
+	if(doesEntityExist(eTrigger))
+	{
+		entity eActivator;
+		eActivator = eTrigger.getLastActivatingEntity();
+		if(doesEntityExist(eActivator))
+		{
+			eActivator.playsound("sound/ships/forever/for_lockeddoor.wav",0,1,85);
+		}
+	}
+}
+
+void facilityEntraceDoorsToggle()
+{
+	entity eTrigger;
+	eTrigger = getCurrentEntity();
+	if(doesEntityExist(eTrigger))
+	{
+		eTrigger.nottriggerable();
+		entity eDoor,eDoorClamps;
+		string sTargetname;
+		sTargetname = eTrigger.getStringVar("uservar1");
+		eDoor = getEntity(sTargetname+"Door");
+		eDoorClamps = getEntity(sTargetname+"Clamps");
+		
+		if(eDoor.getFloatVar("doorIsOpen") == 0)
+		{
+			eDoor.setFloatVar("doorIsOpen",2);
+			globalCoop_level_triggerEntity(eDoorClamps);
+			wait(2);
+			globalCoop_level_triggerEntity(eDoor);
+			wait(3);
+			eDoor.setFloatVar("doorIsOpen",1);
+		}
+		else if(eDoor.getFloatVar("doorIsOpen") == 1)
+		{
+			eDoor.setFloatVar("doorIsOpen",2);
+			globalCoop_level_triggerEntity(eDoor);
+			wait(3);
+			globalCoop_level_triggerEntity(eDoorClamps);
+			wait(2);
+			eDoor.setFloatVar("doorIsOpen",0);
+		}
+		eTrigger.triggerable();
+	}
+}
+
+void facilityEntrace_playerInside()
+//player entred the facility
+{
+	$use1Symbol.origin('-382 2303 -961');//move to holoweapon
+//allow player to proceed further inside now
+	$facilityEntraceDoorTriggerInside2.triggerable();
+//allow the door to be opened from outside
+	$facilityEntraceDoorTriggerOutside.thread("facilityEntraceDoorsToggle");
+//update Objectives now
+	globalCoop_objectives_update("complete",1,0);//State,Item,ShowIt right now
+}
+
+
+void securityRoomHoloWeaponUsed()
+{
+	$use1Symbol.hide();
+	cprint("Attrexian Weapon\n");
+}
+
+void toggleLiftToSurface()
+{
+//accel movement
+	float fDistance=1152;
+	if(vectorgetz($$liftToSurface_origin.getorigin()) < -1024)
+	{
+		fDistance = -1152;
+	}
+	globalAccelMoveZ($liftToSurface_origin,fDistance,6,"rampupdown","sound/ships/attrexian/att-elevat_start.wav");
+	$liftToSurface_origin.playsound("sound/ships/attrexian/att-elevat_stop.wav",0,1,256);
+}
+
+void securityRoomLights()
+{
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	eTrigger.nottriggerable();
+	$securityRoom_lightBeams.show();
+	$world.light_fade("RoomSecurity",1,1);
+	entity ePlayer;
+	ePlayer=globalCoop_return_playerClosestActive(eTrigger);
+	if(ePlayer.getRawTargetname() == "world"){
+		return;
+	}
+	while(globalCoop_check_isEntityInsideOfEntity(ePlayer,eTrigger,0))
+	{
+		wait(.25);
+	}
+	$world.light_fade("RoomSecurity",0,.5);
+	$securityRoom_lightBeams.hide();
+	wait(1);
+	eTrigger.triggerable();
+}
+
+void tower_gillsup()
+{
+	float_tower_gillsAreUp=2;
+	float fGill,fMove=12;
+	entity e1,e2;
+	for(fGill=7;fGill>=0;fGill--)
+	{
+		e1=getEntity("tower_gill"+fGill+"_origin");
+		e1.angles('0 0 0');
+		e1.playsound("sound/ships/klingon/kling_cagehit.wav",0,1,85);
+		wait(.1);
+	}
+	
+	wait(.15);
+	
+	fGill=7;
+	e1.playsound("sound/ships/forever/for_floorhatch.wav",0,1,85);
+	while(fGill>=0)
+	{
+		if(fGill==0){fMove=6;}
+		else{fMove=12;}
+		e1=getEntity("tower_gill"+fGill+"_origin");
+		e1.moveup(fMove);
+		e1.time(.3);
+		waitfor(e1);
+		fGill--;
+		if(fGill>=0){
+			e2=getEntity("tower_gill"+fGill+"_origin");
+			e1.bind(e2);
+		}
+	}
+	float_tower_gillsAreUp=1;
+}
+
+void tower_gillsdown()
+{
+	float_tower_gillsAreUp=2;
+	float fGill,fMove=12;
+	entity e1,e2;
+	
+	for(fGill=0;fGill<8;fGill++)
+	{
+		e1=getEntity("tower_gill"+fGill+"_origin");
+		if(fGill<7){
+			e2=getEntity("tower_gill"+(fGill + 1)+"_origin");
+			e2.bind(e1);
+		}
+	}
+	e1.playsound("sound/ships/forever/for_floorhatch.wav",0,1,85);
+	
+	fGill=0;
+	
+	while(fGill<8)
+	{
+		if(fGill==0){fMove=6;}
+		else{fMove=12;}
+		e1=getEntity("tower_gill"+fGill+"_origin");
+		e1.unbind();
+		fGill++;
+		if(fGill>=0){
+			e2=getEntity("tower_gill"+fGill+"_origin");
+			e2.bind(e1);
+		}
+		wait(.01);
+		e1.movedown(fMove);
+		e1.time(.3);
+		waitfor(e1);
+	}
+	
+	wait(.1);
+	
+	for(fGill=0;fGill<8;fGill++)
+	{
+		e1=getEntity("tower_gill"+fGill+"_origin");
+		e1.angles('0 0 90');
+		e1.playsound("sound/ships/klingon/kling_cagehit.wav",0,1,85);
+		wait(.1);
+	}
+	float_tower_gillsAreUp=0;
+}
+
+
+void tower_toggle()
+{
+	entity eTrigger;
+	eTrigger = getCurrentEntity();
+	eTrigger.nottriggerable();
+	eTrigger.playsound("sound/ships/attrexian/att-beepconfirm.wav",0,1,85);
+	wait(.25);
+	if(float_tower_gillsAreUp==1)
+	{
+		tower_gillsdown();
+	}
+	else if(float_tower_gillsAreUp==0)
+	{
+		tower_gillsup();
+	}
+	eTrigger.triggerable();
+}
+
+
+void tower_lift()
+{
+	entity eTrigger;
+	eTrigger = getCurrentEntity();
+	
+	if(float_tower_liftIsUp == 2){
+		eTrigger.playsound("sound/ships/forever/for_lockeddoor.wav",0,1,85);
+		return;
+	}
+	eTrigger.playsound("sound/ships/attrexian/att-beepconfirm.wav",0,1,85);
+	
+	eTrigger.nottriggerable();
+	if(float_tower_liftIsUp == 0){
+		wait(1.1);
+		float_tower_liftIsUp=2;
+		$tower_lift.moveToPos($tower_lift_originTop.getOrigin());
+		$tower_lift.time(13);
+		$tower_lift.playsound("sound/ships/attrexian/att-powerup.wav",0,1,256);
+		$tower_lift.loopsound("sound/ships/attrexian/att-elevat_start.wav",1,256);
+		waitFor($tower_lift);
+		$tower_lift.stopLoopSound();
+		$tower_lift.playsound("sound/ships/attrexian/att-elevat_stop.wav",0,1,256);
+		float_tower_liftIsUp=1;
+		}
+	else{
+		wait(1.1);
+		float_tower_liftIsUp=2;
+		$tower_lift.moveToPos($tower_lift_originBottom.getOrigin());
+		$tower_lift.time(13);
+		$tower_lift.playsound("sound/ships/attrexian/att-powerup.wav",0,1,256);
+		$tower_lift.loopsound("sound/ships/attrexian/att-elevat_start.wav",1,256);
+		waitFor($tower_lift);
+		$tower_lift.stopLoopSound();
+		$tower_lift.playsound("sound/ships/attrexian/att-elevat_stop.wav",0,1,256);
+		float_tower_liftIsUp=0;
+	}
+	eTrigger.triggerable();
+}
+
+
+void cinematicTowerComm()
+{
+	$use2Symbol.origin('-1587 1522 958');//move to tower
+//start cinematic
+	entity eTrigger;
+	eTrigger = getCurrentEntity();
+	eTrigger.playsound("sound/ships/attrexian/att-beepconfirm.wav",0,1,85);
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.25);
+	wait(.3);
+	$munro.forcealpha(0);
+	$munro.alpha(1);
+	$munro.show();
+	$munro.anim("idle");
+	$munro.origin('-1226.00 1543.00 912.00');
+	$munro.angle(270);
+	$munro.anim("ent-curvedconsole-gesture");
+	globalCoop_cin_cut($cam1);//no transition, cut directly to this cam
+	globalCoop_cin_follow($cam1,$commShot1);
+	globalCoop_cin_cuecamera($cam1);
+	wait(.1);
+	globalCoop_main_camFadeIn(.25);
+	wait(8);
+//start radar - rotate it
+	$tower_radar_origin.rotateY(50);
+	wait(3);
+	$munro.hide();
+	$munro.anim("idle");
+	globalCoop_main_camFadeOut(.25);
+	$towerAirshaftTrigger.triggerable();
+	wait(.3);
+	globalCoop_cin_end();
+	globalCoop_main_camFadeIn(.5);
+//update Objectives
+	globalCoop_objectives_update("complete",2,0);//State,Item,ShowIt right now
+	thread globalCoop_objectives_update("incomplete",4,1);//State,Item,ShowIt right now
+//activate Monitor and show a dude calling for help or so
+	$towerMonitorOff.hide();
+	$towerMonitorOn.time(.2);
+	$towerMonitorOn.show();
+	wait(3);
+	$towerMonitorOff.show();
+	$towerMonitorOn.hide();
+}
+
+
+
+void tower_airshaft()
+{
+	$vent.bind($ventOrigin);
+	$ventOrigin.rotateZdown(50);
+	$ventOrigin.time(8);
+	$use2Symbol.hide();//hide use symbol
+}
+
+
+void facilityInteriorLevel0DoorMaulfunc()
+{
+	$facilityInteriorLevel0Door.dmg(9999999);
+	while(!float_level0DoorRepaired)
+	{
+		float fRandomInt;
+		fRandomInt=randomint(3);
+		fRandomInt++;
+		wait(fRandomInt);
+		$facilityInteriorLevel0Door.open($world);
+		$facilityInteriorLevel0Door.stopsound(0);
+		$facilityInteriorLevel0Door.playsound("sound/environment/machine/lift2.wav",0,1,25);
+		wait(fRandomInt / 2);
+		$facilityInteriorLevel0Door.stopsound(0);
+		$facilityInteriorLevel0Door.playsound("sound/environment/machine/lift2.wav",0,1,25);
+		$facilityInteriorLevel0Door.close();
+	}
+}
+
+
+void facilityInteriorLevelMinus1DoorMaulfunc()
+{
+	$facilityInteriorLevelMinus1Door.dmg(9999999);
+	while(!float_levelMinus1DoorRepaired)
+	{
+		float fRandomInt;
+		fRandomInt=randomint(3);
+		fRandomInt++;
+		wait(fRandomInt);
+		$facilityInteriorLevelMinus1Door.stopsound(0);
+		$facilityInteriorLevelMinus1Door.playsound("sound/environment/machine/lift2.wav",0,1,25);
+		$facilityInteriorLevelMinus1Door.open($world);
+		wait(fRandomInt / 2);
+		$facilityInteriorLevelMinus1Door.stopsound(0);
+		$facilityInteriorLevelMinus1Door.playsound("sound/environment/machine/lift2.wav",0,1,25);
+		$facilityInteriorLevelMinus1Door.close();
+	}
+}
+
+void instantfreeze()
+{
+	entity eTrigger,ePlayer;
+	eTrigger=getCurrentEntity();
+	eTrigger.nottriggerable();
+	ePlayer=eTrigger.getLastActivatingEntity();
+	if(doesEntityExist(ePlayer))
+	{
+		ePlayer.notsolid();
+		ePlayer.addhud("coop_effect_iceing");
+		ePlayer.droptofloor();
+		ePlayer.setcustomshader("textures/romulan_installation/icesickles.tga");
+		ePlayer.immobilize(1);
+		eTrigger.triggerable();
+		wait(2);
+		ePlayer.removehud("coop_effect_iceing");
+		ePlayer.kill();
+		ePlayer.immobilize(0);
+		ePlayer.clearcustomshader("textures/romulan_installation/icesickles.tga");
+	}
+	else
+	{
+		eTrigger.triggerable();
+	}
+}
+
+void cardpickup()
+{
+	entity eTrigger,ePlayer;
+	eTrigger=getCurrentEntity();
+	eTrigger.nottriggerable();
+	ePlayer=eTrigger.getLastActivatingEntity();
+	ePlayer.setFloatVar("playerHasCard",1);
+	$chipcard0.hide();
+	if(cvar_bool_multiplayer)
+	{
+		ePlayer.hudprint("^5You picked up the Security Access Card\n");
+		wait(3);
+		eTrigger.triggerable();
+		$chipcard0.show();
+	}
+	else
+	{
+		centerprint("^5You picked up the Security Access Card\n");
+	}
+	thread globalCoop_objectives_update("complete",3,1);//State,Item,ShowIt right now
+}
+
+void cardreader()
+{
+	entity eTrigger,ePlayer,eCard,eDoor;
+	eTrigger=getCurrentEntity();
+	eTrigger.nottriggerable();
+	ePlayer=eTrigger.getLastActivatingEntity();
+	
+	float fPlayerHasCard;
+	fPlayerHasCard = ePlayer.getfloatvar("playerHasCard");
+	if(fPlayerHasCard)
+	{
+		float fCardId,fcardValid;
+		for(fCardId=0;fCardId<4;fCardId++){
+			eCard=getEntity("chipcard"+fCardId);
+			if(!fcardValid){
+				if(doesEntityExist(eCard))
+				{
+					if(!eCard.getFloatVar("cardInUse")){
+						fcardValid=1;
+					}
+				}
+			}
+		}
+		$use2Symbol.origin('-1219 1512 959');//move to tower
+		string sThreadnameToTerminate;//needed to make sure we have teh target name before the informat dies (bester knows what I mean)
+		sThreadnameToTerminate = ePlayer.getRawTargetname();
+		sThreadnameToTerminate = "cardreaderFocusAndImmobilize"+sThreadnameToTerminate;
+		thread cardreaderFocusAndImmobilize(ePlayer,eCard);
+		eCard.setFloatVar("cardInUse",1);
+		eCard.origin(eTrigger.getOrigin());
+		eCard.show();
+		eCard.movewest(10);
+		eCard.time(3);
+		waitFor(eCard);
+		wait(.5);
+		eDoor = eTrigger.getTargetEntity();
+		eDoor.unlock();
+		wait(.5);
+		eCard.moveeast(10);
+		eCard.time(3);
+		waitFor(eCard);
+		killthread(sThreadnameToTerminate);//make sure to terminate thread even if player is gone
+		eCard.hide();
+		eCard.setFloatVar("cardInUse",0);
+		if(doesEntityExist(ePlayer)){
+			ePlayer.immobilize(0);
+		}
+	}
+	else
+	{
+		if(cvar_bool_multiplayer)
+		{
+			ePlayer.hudprint("^5You need the Security Access Card\n");
+			wait(2);
+		}
+		else
+		{
+			centerprint("^5You need the Security Access Card\n");
+			thread globalCoop_objectives_update("incomplete",3,1);//State,Item,ShowIt right now
+		}
+	}
+	
+	eTrigger.triggerable();
+}
+
+
+void cardreaderFocusAndImmobilize(entity ePlayer, entity eCard)
+{
+	threadname("cardreaderFocusAndImmobilize"+ePlayer.getRawTargetname());
+	if(doesEntityExist(ePlayer)){
+		ePlayer.immobilize(1);
+		vector vOrigin;
+		vOrigin = ePlayer.getOrigin();
+		while(ePlayer.gethealth() > 0 && vOrigin == ePlayer.getOrigin())//dead/switched team
+		{
+			ePlayer.turntowardsentity(eCard);
+			ePlayer.turnspeed(200);
+			globalCoop_main_waitAFrame();
+		}
+	}
+}
+
+void ventShaftEnter()
+{
+	$ipd1.origin('-45685 -63239 200');
+	$ipd2.origin('-45685 -63239 200');
+	$ipd3.origin('-45685 -63239 200');
+	$ipd4.origin('-45685 -63239 200');
+	$ipd5.origin('-45685 -63239 200');
+	$ipd6.origin('-45685 -63239 200');
+	$ipd7.origin('-45685 -63239 200');
+	$ipd8.origin('-45685 -63239 200');
+	thread globalCoop_objectives_update("complete",4,1);//State,Item,ShowIt right now
+	
+	
+	vector vOrigin;
+	vOrigin = $tramTransportTo.getOrigin();
+	
+	if(cvar_bool_multiplayer){
+		float fPlayerIdInUse;
+		entity ePlayer;
+		for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++)
+		{
+			ePlayer=getEntity("player"+fPlayerIdInUse);
+			thread globalCoop_level_warpEntityToVectorSafty(ePlayer,vOrigin);
+		}
+	}
+	else{
+		$player.origin(vOrigin);
+	}
+}
+
+
+void tram_start()
+{
+	float fCountdown;
+	for(fCountdown=5;fCountdown>0;fCountdown--)
+	{
+		//if(fCountdown >= 18 || fCountdown < 7){
+			centerprint("^5Tram Starting in:^3 "+fCountdown+"\n");
+		//}
+		wait(1);
+	}
+	//while(1)
+	//{
+		$tramOrigin0.movetopos($tramrailStop2.getOrigin());
+		$tramOrigin0.time(100);
+		waitfor($tramOrigin0);
+		//wait(10);
+		//$tramOrigin0.movetopos($tramrailStart0.getOrigin());
+		//$tramOrigin0.time(100);
+		//waitfor($tramOrigin0);
+		centerprint("--- level end ---");
+		//wait(10);
+	//}
+}
+

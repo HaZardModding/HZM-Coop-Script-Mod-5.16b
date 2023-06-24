@@ -1,0 +1,321 @@
+//-----------------------------------------------------------------------------------
+// Script By:		Christian Sebastian Strahl (Chrissstrahl)
+// Created on:		2008.27.08
+// E-Mail:			chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+// CALLVOLUME REPLACEMENT - INCLUDE IF YOU NEED IT'S FEATURES; INCLUDE ONLY TO THE CURRENT LEVEL SCRIPT!!
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2012 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+//BEFORE YOU INCLUDE THIS SCRIPT IN YOUR MAP YOU NEED TO INCLUDE THE FOLLWOING FILE(s):
+//#include "coop_mod/maps/optional_modules/teammate.scr"
+
+
+////////////////////////////////////////////////////////////////////////////////
+//DECLARATIONS
+////////////////////////////////////////////////////////////////////////////////
+float globalCoop_callVolume_teamInsideArea(vector vOrigin,vector vMins,vector vMaxs);
+void globalCoop_callVolume_trigger();
+void globalCoop_callVolume_replace(entity eTrigger,string sThread);
+void globalCoop_callVolume_addRequiredEntity(entity eTrigger,string sReqEntity);
+void globalCoop_callVolume_add(vector vOrigin,vector vBbMins,vector vBbMaxs,string sTargetname,string sThread);
+void globalCoop_callVolume_resetActor(entity eActor);
+
+////////////////////////////////////////////////////////////////////////////////
+//FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+float globalCoop_callVolume_teamInsideArea(vector vOrigin,vector vMins,vector vMaxs)
+{
+float fPlayersInside;
+float fPlayerIdInUse;
+float fPlayerQuantity = 0;
+entity ePlayer;
+	for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++){
+		ePlayer = getentity("player"+fPlayerIdInUse);
+		if(globalCoop_check_existingLivingEntity(ePlayer))
+		{
+			if(!globalCoop_check_playerSpectator(ePlayer))
+			{
+				if(globalCoop_check_isBoundingBox2InsideOfBoundingBox1(
+					ePlayer.getOrigin(),//ORIGIN BBOX1
+					'-22 -22 0',//e.getMins()
+					'22 22 96',//e.getMaxs()
+					vOrigin,//ORIGIN BBOX2
+					vMins,//e.getMins()
+					vMaxs,//e.getMaxs()
+					0)
+				)
+				{
+					thread globalCoop_huds_textOrHud(ePlayer,"coop_msg08","^5INFO:^2 You are inside a Geathering Area, waiting for the rest of the team.");
+					fPlayersInside++;
+				}
+				fPlayerQuantity++;
+			}
+		}
+	}
+//1 player, require only 1
+	if(fPlayerQuantity == 1){
+		fPlayerIdInUse=1;//recycle
+	}
+//2 players require 2
+	else if(fPlayerQuantity == 2){
+		fPlayerIdInUse = 2;//recycle
+	}
+//more than 2 players require half, at least 2!
+	else{
+		fPlayerIdInUse = (fPlayerQuantity / 2);//recycle
+		fPlayerIdInUse = ceil(fPlayerIdInUse);//recycle					
+	}
+//CHECK IF ALL ARE INSIDE
+	if(fPlayersInside >= fPlayerIdInUse){//recycle
+		return 1;
+	}
+	return 0;
+}
+
+
+void globalCoop_callVolume_resetActor(entity eActor)
+//----------------------------------------------------------------------
+//RESET AI PROPERTIES
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eActor)){
+		eActor.settendency("wander",1);
+		eActor.settendency("getoutoftheway",1);
+		eActor.followrange(384);
+		eActor.followrangemin(256);
+		eActor.followcombatrange(512);
+		eActor.followcombatrangemin(384);
+	}
+}
+
+void globalCoop_callVolume_add(vector vOrigin,vector vBbMins,vector vBbMaxs,string sTargetname,string sThread)
+//----------------------------------------------------------------------
+//ADD CALLVOLUME TRIGGER
+//----------------------------------------------------------------------
+{
+	entity e;
+	string sClass;
+	string sThreadToSet;
+	sThreadToSet	= "globalCoop_callVolume_trigger";
+	sClass			= "trigger_multiple";
+//THIS IS A REAL TRIGGER_CALLVOLUME IN SP
+	if(!cvar_bool_multiplayer){
+		sClass			= "trigger_callVolume";
+		sThreadToSet	= sThread;
+	}
+	e =	spawn(sClass,"targetname",sTargetname,"origin",""+vOrigin);
+	globalCoop_main_wait1DotZero();
+	e.setSize(vBbMins,vBbMaxs);
+	e.thread(sThreadToSet);
+	e.setStringVar("globalCoop_callVolumeTriggerThread",sThread);
+}
+
+void globalCoop_callVolume_trigger()
+//----------------------------------------------------------------------
+//Call a the thread for this trigger call volume replacement
+//----------------------------------------------------------------------
+{
+	entity eTrigger;
+	eTrigger = getCurrentEntity();
+	if(doesEntityExist(eTrigger)){
+		eTrigger.notTriggerable();
+		entity eRequired,ePlayer;
+		float fRequired,fCurrent,fWaitForTeam,fRounds,fPlayer;
+		string sThread,sRequiredTargetname;
+		entity eActor1,eActor2,eActor3,eActor4;
+		for(fRounds=1;fRounds<5;fRounds++){
+			sRequiredTargetname = eTrigger.getStringVar("coop_requiredEntity"+fRounds);
+			if(sRequiredTargetname != ""){
+				if(sRequiredTargetname == "team" || sRequiredTargetname == "all"){
+					fWaitForTeam=1;
+				}else{
+					eRequired = getEntity(sRequiredTargetname);
+					if(doesEntityExist(eRequired)){
+						if(!doesEntityExist(eActor1)){eActor1=eRequired;}
+						if(!doesEntityExist(eActor2)){eActor2=eRequired;}
+						if(!doesEntityExist(eActor3)){eActor3=eRequired;}
+						if(!doesEntityExist(eActor4)){eActor4=eRequired;}
+						fRequired++;
+//CHECK IS INSIDE THE TRIGGER AREA
+						if(globalCoop_check_isEntityInsideOfEntity(eRequired,eTrigger,0)){
+							fCurrent++;
+							globalCoop_actor_aiOff(eRequired);
+						//RESET AI PARAMETERS
+							thread globalCoop_callVolume_resetActor(eRequired);
+						}
+//ORDER AI TO COME TO THE LIFT
+						else{
+							ePlayer = globalCoop_return_playerClosestPreferActive(eTrigger);
+							if(doesEntityExist(ePlayer)){
+								if(ePlayer.getRawTargetname() != "world"){
+									fPlayer = 0;
+									for(fPlayer=8;fPlayer>0;fPlayer--){
+										eRequired.settendency("follow_player"+fPlayer,0);
+									}
+									eRequired.followtarget(ePlayer);
+									eRequired.settendency("follow_player"+globalCoop_return_integerPlayerId(ePlayer),1);
+									eRequired.settendency("follow",1);
+									eRequired.settendency("wander",0);
+									eRequired.settendency("getoutoftheway",0);
+									eRequired.allowfall(0);
+									eRequired.followrange(60);
+									eRequired.followrangemin(70);
+									eRequired.followcombatrange(70);
+									eRequired.followcombatrangemin(60);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+//CHECK ALL PLAYERS INSIDE
+		if(fWaitForTeam){
+		//UPDATE ORIGIN EACH CHECK, IF TRIGGER IS BOUND TO MOVING OBJECT
+			if(!globalCoop_callVolume_teamInsideArea(eTrigger.getOrigin(),eTrigger.getMins(),eTrigger.getMaxs())){
+				fCurrent = -1;
+			}
+		}
+//CALL THREAD
+		if(fCurrent >= fRequired){
+			globalCoop_main_wait1DotZero();
+			entity eTarget;
+			eTarget = getEntity(eTrigger.getStringVar("coop_callVolumeTriggerTarget"));
+			eTarget.triggerable();//enable trigger as it is disabled, otherwise trigger would be triggred each time if it was directly targeted
+			globalCoop_level_triggerEntity(eTarget);
+			thread globalCoop_level_callReliably(eTrigger.getStringVar("globalCoop_callVolumeTriggerThread"));
+			globalCoop_level_remove(eTrigger);
+		}
+//ACTIVATE AGAIN AND WAIT FOR REQUIRED ENTITIES TO BE INSIDE
+		else{
+			globalCoop_main_waitZeroDot5();
+			eTrigger.triggerable();
+		}
+//RESET AI PARAMETERS
+		thread globalCoop_callVolume_resetActor(eActor1);
+		thread globalCoop_callVolume_resetActor(eActor2);
+		thread globalCoop_callVolume_resetActor(eActor3);
+		thread globalCoop_callVolume_resetActor(eActor4);
+	}
+}
+
+
+void globalCoop_callVolume_replace(entity eTrigger,string sThread)
+//----------------------------------------------------------------------
+//Replace a trigger callvolume with a STABLE trigger script Hybrid
+//----------------------------------------------------------------------
+{
+	if(!cvar_bool_multiplayer){
+		return;
+	}
+//Do only if at multiplayer
+	vector vOrigin;
+	vector vMins;
+	vector vMaxs;
+	vector vAngles;
+	string sTargetname;
+	string sTargetTargetname;
+	string sClass;
+	string s1,s2,s3;
+	s1 = eTrigger.getStringVar("uservar2");
+	s2 = eTrigger.getStringVar("uservar3");
+	s3 = eTrigger.getStringVar("uservar4");
+	vOrigin			= eTrigger.getOrigin();
+	sTargetname		= eTrigger.getRawTargetname();
+	vMins = eTrigger.getMins();
+	vMaxs = eTrigger.getMaxs();
+	vAngles = eTrigger.getAngles();
+	if(doesEntityExist(eTrigger.getTargetEntity())){
+		sTargetTargetname = eTrigger.getTarget(0);
+	}
+//DELETE OLD TRIGGER
+	globalCoop_level_remove(eTrigger);
+//SPAWN NEW TRIGGER
+	sClass = "trigger_multiple";
+/* 
+	if(!cvar_bool_multiplayer){
+		sClass = "trigger_volume_callvolume";
+	}
+*/
+	eTrigger = spawn(sClass,"targetname",sTargetname,"origin",""+vOrigin);
+	globalCoop_main_waitAFrame();
+	
+//SET SIZE
+	eTrigger.setSize(vMins,vMaxs);
+//SET ANGLE
+	if(vAngles != '0 0 0'){//in case trigger has facing side
+		eTrigger.angle(vAngles_y);
+	}
+	globalCoop_callVolume_addRequiredEntity(eTrigger,s1);
+	globalCoop_callVolume_addRequiredEntity(eTrigger,s2);
+	globalCoop_callVolume_addRequiredEntity(eTrigger,s3);
+//REPLACMENT callvolume trigger
+	if(sTargetTargetname != ""){//if trigger targets another entity
+		eTrigger.setStringVar("coop_callVolumeTriggerTarget",sTargetTargetname);
+	}
+	eTrigger.setStringVar("globalCoop_callVolumeTriggerThread",sThread);
+	eTrigger.thread("globalCoop_callVolume_trigger");		
+/* 
+	if(cvar_bool_multiplayer){
+		if(sTargetTargetname != ""){//if trigger targets another entity
+			eTrigger.setStringVar("coop_callVolumeTriggerTarget",sTargetTargetname);
+		}
+		eTrigger.setStringVar("globalCoop_callVolumeTriggerThread",sThread);
+		eTrigger.thread("globalCoop_callVolume_trigger");			
+	}
+//real callvolume trigger (CHRASH IN MULTI!)
+	else{
+		if(sTargetTargetname != ""){
+			eTrigger.target(sTargetTargetname);
+		}
+		eTrigger.thread(sThread);
+	}
+*/	
+}
+
+
+void globalCoop_callVolume_addRequiredEntity(entity eTrigger,string sReqEntity)
+//----------------------------------------------------------------------
+//Add a required entity to the callVolume replacment trigger Script-Hybrid
+//----------------------------------------------------------------------
+{
+//ADD ENTITY TO THE TRIGGER CALLVOLUME-LISTING
+	if(doesEntityExist(eTrigger)){
+		if(cvar_bool_multiplayer){
+			float fRounds;
+			string sEnlisted;
+			while(fRounds<4){
+				fRounds++;
+				sEnlisted = globalCoop_level_getStringVar(eTrigger,"coop_requiredEntity"+fRounds);
+//NOT WORLD
+				if(sReqEntity != "world"){
+//ENTITY IS INSIDE THE TRIGGER ALLREADY
+					if(sEnlisted == ""){
+						globalCoop_level_setStringVar(eTrigger,"coop_requiredEntity"+fRounds,sReqEntity);
+						fRounds=4;
+					}else if(sReqEntity == sEnlisted){
+						fRounds=4;
+					}
+				}
+			}
+		}
+		else{
+			eTrigger.requiredentity(sReqEntity);
+		}
+	}
+}
+
+
+

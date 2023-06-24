@@ -1,0 +1,2075 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	  	  m1l1b-borg_sphere
+//  Script By:    Benson R, Jerry K
+//  Geometry By:  Benson R, Jerry K
+//  Created on:   12/12/2001
+//
+//------------------------------------------------
+//	First Edit for Co-Op Compatibility:	 20.09.2007
+//
+//  Last Edited By:  Chrissstrahl
+//
+//-----------------------------------------------------------------
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  DEFINE SCRIPT
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+
+
+void main();
+
+void initializeRoster();
+void initializeObjectives();
+
+//void changeskybox();
+
+//--AI setup
+void setup_borg ();
+void setup_hazardteam ();
+
+
+//--AI routines
+void chell_disable();
+void chell_enable();
+void chell_chang_disable();
+void chell_chang_enable();
+void activate_borg_1_aggressive();
+//void deactivate_borg_1_3_hibernate();
+//void activate_borg_1_3_hibernate();
+void activate_borg_2_1_hibernate();
+void activate_borg_3();
+void activate_borg_4();
+void activate_borg_4_aggressive();
+void activate_borg_5();
+void forcefieldObjCheck();
+void forcefieldObjCheck_group4();
+void forcefieldObjCheck_group7();
+void chellForcefieldDialog();	
+
+//--world setup
+void setup_sounds();
+void setup_triggers();
+void setup_seq_chang_elevator();
+//void setup_elevator_ending();
+void setup_WorkNodes();
+void setup_plasmaConduits();
+void setup_powerCouplings();
+
+//--plasma conduits
+void plasma1_ondamage();
+void plasma1_destroy();
+void destroyPlasmaConduit1();
+//void plasma4_ondamage();
+//void plasma4_destroy();
+//void plasma6_ondamage ();
+//void plasma6_destroy ();
+
+//--power couplings
+void powercoupling1_ondamage();
+void powercoupling1_destroy();
+void powercoupling2_ondamage();
+void powercoupling2_destroy();
+void powercoupling_status_check();
+void destroyPowerCoupling3();
+
+//--distribution node
+void dis_node1_ondamage ();
+void dis_node1_destroy ();
+void dis_node2_ondamage ();
+void dis_node2_destroy ();
+
+//--work nodes
+void workNode1_Open();
+void workNode1_Close();
+void workNode2_Open();
+void workNode2_Close();
+
+//--sequences
+void seq_chang_elevator_start();
+void seq_chang_elevator_start_walkchell();
+void seq_chang_elevator_chell_console();
+void seq_chang_elevator_playerentered();
+//void seq_chang_floor();
+void seq_chang_rescued();
+//void seq_chang_elevator_exit_playerdetect();
+//void seq_chang_elevator_exit_playerdetect_onentry();
+//void seq_chang_elevator_exit_playerdetect_onexit();
+void seq_chell_liftup();
+void tuvokChangSafeDialog();
+void changBorgDead();
+void borg_7_activate();
+
+//--Tricorder stuff
+//void tricorderPuzzle();
+//void resetTricorderPuzzle();
+void yellowForcefieldDown();
+//void tricorderPuzzle_2();
+//void resetTricorderPuzzle_2();
+void yellowForcefieldDown_2();
+
+void changLifeCounter();
+void postAbductChang_dialog();
+
+//--functions
+void borgMakeAggressive( entity entBorg );
+void borgAiOn( entity entBorg );
+void borgAiOff( entity entBorg );
+//void cinematic_fov_lerp( entity fov_camera, float fov_start, float fov_goal, float time_to_take);
+//void cinematic_cam_path_remove( entity camera_path );
+
+//--skybox
+void move_turbine();
+void move_scanner();
+
+//--AI
+void setup_cinematic_characters();
+
+//--level secrets
+void setupLevelSecrets();
+void secretWallWait();
+void secretWallExplode();
+void coop_endLevel();
+
+//--variables
+float forcefieldBorgGroupsDestroyed = 0;
+float tuvokDoneTalking = 0;
+float lift2_isup = 1;
+float chell_sawmunro = 0;
+float chell_reachednode = 0;
+//float chang_rescued = 0;
+float power_coupling_destroyed = 0;
+float destroyPlasmaObjectiveSet = 0;
+float powerCouplingId = 0;
+float chang_elevator_exit_playeron = 0;
+float chang_elevator_chell_atconsole = 0;
+float postAbductdialog_played = 0;
+float borgGroup4_7_active = 0;
+float chellDialogPlayed = 0;
+float float_changTaken = 0;
+float float_changLiftDownSequenceStared = 0;
+float float_chang_find_cin = 0;
+
+//--armature cinematics
+entity cinematicArm_AbductChang;
+entity cinematicArm_PostAbductChang;
+void coop_findAndTargetnameEntities();
+
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  INCLUDES
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/optional_modules/forcefields.scr"
+#include "coop_mod/maps/optional_modules/puzzles_advanced.scr"
+#include "coop_mod/maps/optional_modules/teammate.scr"
+#include "coop_mod/maps/missions/1/forcefields.scr"
+#include "coop_mod/maps/global/global_common.scr"
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "maps/global_scripts/global_math.scr"
+#include "maps/global_scripts/global_acceleratedMovement.scr"
+#include "coop_mod/maps/global/global_cinematicFX.scr"
+#include "maps/global_scripts/global_debugutils.scr"
+#include "maps/global_scripts/global_tricorderbase.scr"
+#include "maps/global_scripts/global_tricordermod.scr"
+#include "maps/m1/m1_deathCinematic.scr"
+#include "coop_mod/maps/missions/1/m1l1b_cin.scr"
+
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  MAIN THREAD
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+
+//---------------------
+void main()
+//---------------------
+{
+	globalCoop_server_precacheSingleplayer();
+	globalCoop_main_camFadeOut(.1);
+//--set the soundtrack
+	soundtrack( "music/m1l1-borg_sphere.mus" );
+//original bsp - remove chars
+	globalCoop_level_remove($cin_voyager_chell);//remove sp+mp
+	globalCoop_level_remove($cin_voyager_munro);//remove sp+mp
+	if(getCvarInt("g_gametype") != 0){//mp
+		globalCoop_level_remove($telsia);
+		globalCoop_level_remove($tuvok);
+		globalCoop_level_remove($munro_assimilate);
+	//spawn dummy entities, for dialog	
+		spawn("actor","model","fx/fx-dummy.tik","targetname","tuvok","origin","0 0 1");
+		spawn("actor","model","fx/fx-dummy.tik","targetname","telsia","origin","0 0 1");		
+	}
+	thread coop_findAndTargetnameEntities();
+	thread chell_chang_disable();
+	//--set the sky portal
+	if(doesEntityExist($sky)){$sky.rendereffects( "+skyorigin" );}
+	//$world.entity_fade_dist( 8000 );
+/* 	$world.entity_fade_dist( 8000 );
+	$world.farplane ( 30000 );
+	$world.farplane_cull( 1 );
+	$world.farplane_color ( '0 .26 .13' );//.47 .69 .13 .64 .95 .14 */
+	
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+//Set Tactical information, to be added at the Objectives hud
+	coop_string_objectiveTacticalInfo1 = "YellowFieldInformation";
+	coop_string_objectiveTacticalInfo2 = "GreenFieldInformation";
+	coop_string_objectiveTacticalInfo3 = "BlueFieldInformation";
+	coop_string_nextMapToCheck			= "m1l1c-borg_sphere";//set the map we gona load next while we are in testmode
+//Set spawnangles for this level
+	coop_float_spawnAngle0 			= 270;//SpawnOrigin0 Angle
+//Definie Objective
+	coop_string_objectiveItem1			= "LocateChell";
+	coop_string_objectiveItem2			= "LocateTelsia";
+	coop_string_objectiveItem3			= "RescueChang";
+	coop_string_objectiveItem4			= "TakeDownForcefield";
+//spawnorigins, Spawn Players on those locations, at map start
+	coop_vector_spawnOrigin1 			= '3550 240 90';
+	coop_vector_spawnOrigin2 			= '3450 240 90';
+	coop_vector_spawnOrigin3 			= '3350 240 90';
+	coop_vector_spawnOrigin4 			= '3250 240 90';
+	coop_vector_spawnOrigin5 			= '3150 240 90';
+	coop_vector_spawnOrigin6 			= '3750 240 90';
+	coop_vector_spawnOrigin7 			= '3850 240 90';
+	coop_vector_spawnOrigin8 			= '3950 240 90';
+	// if(getcvar("username")== "Chrissstrahl")
+	// {
+		// coop_vector_spawnOrigin1='6796 -3742 -2432';
+	// }
+//Give each player a Item/weapon, the integer stands for the player-ID
+	//U get ur stuff later rambo...
+//Start the Co-Op Script
+	globalCoop_main();
+
+//Inizial temmates and then the Objectives
+	thread initializeRoster();	
+	//--setup
+	thread setup_sounds();
+	thread setup_triggers();
+	thread setup_seq_chang_elevator();
+	//thread setup_elevator_ending();
+	thread setup_WorkNodes();
+		
+	thread setup_cinematic_characters();
+	thread setup_borg();
+	thread setup_hazardteam();
+
+
+	//--plasma conduits
+	thread plasma1_ondamage();
+	thread setup_plasmaConduits();
+	//thread plasma4_ondamage();
+	//thread plasma6_ondamage();
+	
+	//--power couplings
+	thread powercoupling1_ondamage();
+	thread powercoupling2_ondamage();
+	thread setup_powerCouplings();
+	
+	//--distribution nodes
+	thread dis_node1_ondamage ();
+	thread dis_node2_ondamage ();
+
+	//--skybox stuff
+	thread move_turbine();
+	thread move_scanner();
+	$t2021.bind( $skybox_turbine );
+
+	//--on damage for secret wall
+	thread secretWallWait();
+	setupLevelSecrets();
+	
+//Start Cinematic
+	thread cinematicArm_AbductChang_Start();
+	
+//Wait for the player to be ready
+	if(cvar_bool_multiplayer){
+	//spawn Class Selection
+		thread globalCoop_class_setup("Medic",'3642 313 82');
+		thread globalCoop_class_setup("HeavyWeapons",'3710 313 82');
+		thread globalCoop_class_setup("Technician",'3780 313 82');
+		$cinematic_chang_find_trigger.remove();//trigger by thread in mp, players jump down and miss teh trigger
+	}
+	else{
+		waitForPlayer();
+		$player.setobjectiveshow("LocateChell",0);
+		wait(.1);
+		$chell.ai_off();
+		$player.setobjectivecomplete("LocateChell",1);
+		$player.setobjectiveshow("FindTelsia",1);
+		$player.model("models/char/munro_voyager.tik");		
+	}
+	
+	wait( .5 );
+	
+	//Co-Op -> Single Player
+	if(!cvar_bool_multiplayer){playerDeathThread( "m1_playerDeathCinematic" );}
+
+	//Replace PuzzleObjects, in order to make them work with every player
+	globalCoop_puzzle_replace($forceFieldPanel_1, "yellowForcefieldDown", 10);
+	
+	//Replace PuzzleObjects, in order to make them work with every player
+	globalCoop_puzzle_replace($forceFieldPanel_2, "yellowForcefieldDown_2", 20);
+	
+	//Set Interactive Forcefields
+	thread globalCoop_forcefield_makeInteractive( $forcefield_green1 );
+	thread globalCoop_forcefield_makeInteractive( $forcefield_green2 );
+	thread globalCoop_forcefield_makeInteractive( $forcefield_green3 );
+	thread globalCoop_forcefield_makeInteractive( $forcefield_modulate_3 );
+	thread globalCoop_forcefield_makeInteractive( $forcefield_modulate_4 );
+	thread globalCoop_forcefield_makeInteractive( $forcefield_blue1 );
+	thread globalCoop_forcefield_makeInteractive( $forcefield_blue2 );
+	thread globalCoop_forcefield_makeInteractive( $forcefield_blue3 );
+}
+
+
+void coop_findAndTargetnameEntities()
+//find entities without targetname and vive em a targetname
+{	
+	float fEntity;
+	entity e;
+	for(fEntity=0;fEntity<1023;fEntity++){
+		e=getEntity("*"+fEntity);
+		if(doesEntityExist(e)){
+			if(e.getOrigin() == '5456 -2111 -2388'){
+				e.targetname("stop_changLifeCounterTrigger");
+				e.nottriggerable();
+//EXIT if there are no further entities to be found!
+				return;
+			}
+		}
+	}
+}
+
+
+void yellowForcefieldDown()
+{
+	coop_shutdownForcefield( $forcefield_modulate_3 );
+	wait( 0.5 );
+	$forceFieldPanel_1.model( "enviro/borg-sphere_shield-pannel-wall-used.tik" );
+}
+
+
+void yellowForcefieldDown_2()
+{
+
+	coop_shutdownForcefield( $forcefield_modulate_4 );
+	
+	wait( 0.5 );
+	$powercoupling1_trigger.triggerable();
+	$forceFieldPanel_2.model( "enviro/borg-sphere_shield-pannel-wall-used.tik" );
+}
+
+//---------------------
+// initializeRoster
+// add teammate -- chell
+//---------------------
+void initializeRoster()
+{
+//Wait for the player to be ready
+	waitForPlayer();
+
+//Set viewModes
+	$world.clearAvailableViewModes();
+	$world.addAvailableViewMode( "structuralintegrity" );
+	
+//Only if singleplayer do that
+	if(!cvar_bool_multiplayer){	
+	//Load the objectives set
+		$player.loadobjectives( "m1l1-borg_sphere" );
+		$player.setobjectiveshow( "RescueChang", 1 );
+		$chang_assimilate.missionobjective( 1 );
+		$player.setobjectiveshow("LocateChell",0);
+		wait(.1);
+		$player.setobjectivecomplete("LocateChell",1);
+		$player.setobjectiveshow("FindTelsia",1);
+	}
+//add teammates to the player radar
+	thread globalCoop_teammate_register($chell);
+	globalCoop_teammate_register($chang);
+}
+
+//---------------------
+// initializeObjectives
+// set objectives at beginning of level
+//---------------------
+void initializeObjectives()
+{
+
+	if( getfloatvar( "game.findChangObjective" ) == 2 )
+	{
+		if(cvar_bool_multiplayer){
+			thread globalCoop_objectives_update("complete" , 3 , 1);//State,item,shownow
+		}
+		else{
+			$player.setobjectivecomplete( "RescueChang", 1 );
+			$chang_assimilate.missionobjective( 0 );
+		}
+	}
+	if ( getfloatvar( "game.forcefield" ) >= 1 )
+	{
+		if(cvar_bool_multiplayer){
+			thread globalCoop_objectives_update("inComplete" , 4 , 1);//State,item,shownow
+		}
+		else{
+			$player.setobjectiveshow( "TakeDownForcefield", 1 );
+		}
+	}
+	if( getfloatvar( "game.forcefield" ) == 2 )
+	{
+		if(cvar_bool_multiplayer){
+			thread globalCoop_objectives_update("complete" , 3 , 1);//State,item,shownow
+		}
+		else{
+			$player.setobjectivecomplete( "TakeDownForcefield", 1 );
+		}
+	}
+		
+}
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  SETUP THREADS
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//---------------------
+void setup_sounds()
+//---------------------
+{
+	//--- sounds on blue forcefields
+	if(doesEntityExist($forcefield_blue1))
+		$forcefield_blue1.loopsound ( "sound/ships/borg/borg_forcefield1.wav", .5, 32 );
+	if(doesEntityExist($forcefield_blue2))
+		$forcefield_blue2.loopsound ( "sound/ships/borg/borg_forcefield1.wav", .5, 32 );
+	if(doesEntityExist($forcefield_blue3))
+		$forcefield_blue3.loopsound ( "sound/ships/borg/borg_forcefield1.wav", .5, 32 );
+	//$forcefield_blue4.loopsound ( "sound/ships/borg/borg_forcefield1.wav", .5, 32 );
+	//$forcefield_blue5.loopsound ( "sound/ships/borg/borg_forcefield1.wav", .5, 32 );
+
+	//--- sounds on greenforcefields
+	if(doesEntityExist($forcefield_green1))
+		$forcefield_green1.loopsound ( "sound/ships/borg/borg_forcefield1.wav", .5, 32 );
+	if(doesEntityExist($forcefield_green2))
+		$forcefield_green2.loopsound ( "sound/ships/borg/borg_forcefield1.wav", .5, 32 );
+	if(doesEntityExist($forcefield_green3))
+		$forcefield_green3.loopsound ( "sound/ships/borg/borg_forcefield1.wav", .5, 32 );
+	//$forcefield_green4.loopsound ( "sound/ships/borg/borg_forcefield1.wav", .5, 32 );
+	//$forcefield_green5.loopsound ( "sound/ships/borg/borg_forcefield1.wav", .5, 32 );
+	//$forcefield_green6.loopsound ( "sound/ships/borg/borg_forcefield1.wav", .5, 32 );
+	//$forcefield_green7.loopsound ( "sound/ships/borg/borg_forcefield1.wav", .5, 32 );
+}
+
+//---------------------
+void setup_seq_chang_elevator ()
+//---------------------
+{
+	$clip_seq_chang_elevator.notsolid ();
+	$elevator_seq_munro_callvolume.nottriggerable();
+}
+
+//---------------------
+void setup_triggers ()
+//---------------------
+{
+	if(doesEntityExist($trigger_seq_chang_rescued)){$trigger_seq_chang_rescued.nottriggerable();}
+	if(doesEntityExist($trigger_seq_chang_elevator_exit)){$trigger_seq_chang_elevator_exit.nottriggerable();}
+	//$changeskybox_trigger.nottriggerable();
+	if(doesEntityExist($m1l1b_exittrigger)){$m1l1b_exittrigger.nottriggerable();}
+	if(doesEntityExist($reactivate_borg3_trigger)){$reactivate_borg3_trigger.nottriggerable();}
+	if(doesEntityExist($chang_abductArmatureTrigger)){$chang_abductArmatureTrigger.nottriggerable();}
+}
+
+//---------------------
+void setup_WorkNodes()
+//---------------------
+{
+	//--- set the times for all the pieces of the worknodes
+	$worknode1_cover_lock_top.time( .25 );
+	$worknode1_cover_lock_bottom.time( .25 );
+	$worknode1_cover_innercover_ul.time( .5 );
+	$worknode1_cover_innercover_ur.time( .5 );
+	$worknode1_cover_innercover_ll.time( .5 );
+	$worknode1_cover_innercover_lr.time( .5 );
+	$worknode1_cover_outercover_ul.time( 1 );
+	$worknode1_cover_outercover_ur.time( 1 );
+	$worknode1_cover_outercover_ll.time( 1 );
+	$worknode1_cover_outercover_lr.time( 1 );
+	$worknode1_interface.time( .25 );
+
+	$worknode2_cover_lock_top.time( .25 );
+	$worknode2_cover_lock_bottom.time( .25 );
+	$worknode2_cover_innercover_ul.time( .5 );
+	$worknode2_cover_innercover_ur.time( .5 );
+	$worknode2_cover_innercover_ll.time( .5 );
+	$worknode2_cover_innercover_lr.time( .5 );
+	$worknode2_cover_outercover_ul.time( 1 );
+	$worknode2_cover_outercover_ur.time( 1 );
+	$worknode2_cover_outercover_ll.time( 1 );
+	$worknode2_cover_outercover_lr.time( 1 );
+	$worknode2_interface.time( .25 );
+
+	//--bind the pieces
+	$worknode1_cover_innercover_ul.bind( $worknode1_cover_outercover_ul );
+	$worknode1_cover_innercover_ur.bind( $worknode1_cover_outercover_ur );
+	$worknode1_cover_innercover_ll.bind( $worknode1_cover_outercover_ll );
+	$worknode1_cover_innercover_lr.bind( $worknode1_cover_outercover_lr );
+
+	$worknode2_cover_innercover_ul.bind( $worknode2_cover_outercover_ul );
+	$worknode2_cover_innercover_ur.bind( $worknode2_cover_outercover_ur );
+	$worknode2_cover_innercover_ll.bind( $worknode2_cover_outercover_ll );
+	$worknode2_cover_innercover_lr.bind( $worknode2_cover_outercover_lr );
+
+}
+
+//---------------------
+//  setup_plasmaConduits
+//	setup for shootable plasma conduits
+//---------------------
+void setup_plasmaConduits()
+{
+	thread globalCommon_OnDamage( $plasmaConduit1, "destroyPlasmaConduit1" );
+	$plasmaConduit1.contents( "+shootable" );
+	$plasmaConduit1_fx.hide();
+	$plasmaConduit1_sparks.hide();
+	$plasmaConduit1_pipe_debris.hide();
+}
+
+//---------------------
+//  setup_powerCouplings
+//	setup for shootable power couplings
+//---------------------
+void setup_powerCouplings()
+{
+	thread globalCommon_OnDamage( $powerCoupling3, "destroyPowerCoupling3" );
+	$powerCoupling3.contents( "+shootable" );
+	$powerCoupling3_fx.hide();
+	
+	//--hide forcefield at start of map
+	$forcefield_green3.hide();
+}
+
+//---------------------
+void setup_borg()
+//---------------------
+{
+	if(doesEntityExist($intro_borg)){$intro_borg.ai_off();}
+
+	//-----------------------------------
+	//--new method to set for all borg 
+	// $borg_x_x.settendancy( "[hibernate] [work] [patrol]", [0-1 percentage] )
+	//-----------------------------------
+	//$borg_1_1_hibernate.anim ( "alcove_idle" );
+	//$borg_1_1_hibernate.setactorflag( "inalcove" , 1 );
+	//$borg_1_1_hibernate.settendency( "hibernate" , 1.0 );
+	//$borg_1_1_hibernate.settendency( "patrol" , 0.0 );
+	//$borg_1_1_hibernate.settendency( "work" , 0.0 );
+	if(doesEntityExist($borg_1_1_hibernate)){
+		$borg_1_1_hibernate.setnodeid( 2 );
+		$borg_1_1_hibernate.groupdeaththread( "postAbductChang_dialog" );
+	}
+	
+	//$borg_1_2_hibernate.anim ( "alcove_idle" );
+	//$borg_1_2_hibernate.setactorflag( "inalcove" , 1 );
+	//$borg_1_2_hibernate.settendency( "hibernate" , 1.0 );
+	//$borg_1_2_hibernate.settendency( "patrol" , 0.0 );
+	//$borg_1_2_hibernate.settendency( "work" , 0.0 );
+	if(doesEntityExist($borg_1_2_hibernate))
+		{$borg_1_2_hibernate.setnodeid( 3 );}
+	
+	//$borg_1_3_hibernate.anim ( "alcove_idle" );
+	//$borg_1_3_hibernate.setactorflag( "inalcove" , 1 );
+	//$borg_1_3_hibernate.settendency( "hibernate" , 1.0 );
+	//$borg_1_3_hibernate.settendency( "patrol" , 0.0 );
+	//$borg_1_3_hibernate.settendency( "work" , 0.0 );
+	if(doesEntityExist($borg_1_3_hibernate))
+		{$borg_1_3_hibernate.setnodeid( 4 );}
+
+	//$borg_1_4_hibernate.anim ( "alcove_idle" );
+	//$borg_1_4_hibernate.setactorflag( "inalcove" , 1 );
+	//$borg_1_4_hibernate.settendency( "hibernate" , 1.0 );
+	//$borg_1_4_hibernate.settendency( "patrol" , 0.0 );
+	//$borg_1_4_hibernate.settendency( "work" , 0.0 );
+	if(doesEntityExist($borg_1_4_hibernate))
+		{$borg_1_4_hibernate.setnodeid( 5 );}
+
+	//$borg_1_11_hibernate.settendency( "hibernate" , 0.0 );
+	//$borg_1_11_hibernate.settendency( "patrol" , 1.0 );
+	//$borg_1_11_hibernate.settendency( "work" , 1.0 );
+	//$borg_1_11_hibernate.setnodeid( 1 );
+
+	//-----------------------------------
+
+	if(doesEntityExist($borg_2_1_hibernate)){
+		$borg_2_1_hibernate.anim ( "alcove_idle" );
+		$borg_2_1_hibernate.setactorflag ( "inalcove" , 1 );
+		$borg_2_1_hibernate.settendency( "hibernate" , 1.0 );
+		$borg_2_1_hibernate.settendency( "patrol" , 0.0 );
+		$borg_2_1_hibernate.settendency( "work" , 0.0 );
+		$borg_2_1_hibernate.setnodeid( 6 );
+	}
+
+	//-----------------------------------
+
+	if(doesEntityExist($borg_3_1_hibernate)){
+		$borg_3_1_hibernate.settendency( "hibernate" , 1.0 );
+		$borg_3_1_hibernate.settendency( "patrol" , 1.0 );
+		$borg_3_1_hibernate.settendency( "work" , 0.0 );
+		$borg_3_1_hibernate.setnodeid( 7 );
+		$borg_3_1_hibernate.ai_off();
+	}
+
+	//$borg_3_2_hibernate.settendency( "hibernate" , 1.0 );
+	//$borg_3_2_hibernate.settendency( "patrol" , 0.0 );
+	//$borg_3_2_hibernate.settendency( "work" , 0.0 );
+	//$borg_3_2_hibernate.setnodeid( 9 );
+
+	if(doesEntityExist($borg_3_11_work)){
+		$borg_3_11_work.settendency( "hibernate" , 0.0 );
+		$borg_3_11_work.settendency( "patrol" , 1.0 );
+		$borg_3_11_work.settendency( "work" , 1.0 );
+		$borg_3_11_work.setnodeid( 8 );
+		$borg_3_11_work.ai_off();
+	}
+	if(doesEntityExist($borg_3_12_work)){
+		$borg_3_12_work.settendency( "hibernate" , 0.0 );
+		$borg_3_12_work.settendency( "patrol" , 1.0 );
+		$borg_3_12_work.settendency( "work" , 1.0 );
+		$borg_3_12_work.setnodeid( 10 );
+		$borg_3_12_work.ai_off();
+	}
+
+	//-----------------------------------
+	
+	if(doesEntityExist($borg_4_1_hibernate)){
+		$borg_4_1_hibernate.anim ( "alcove_idle" );
+		$borg_4_1_hibernate.setactorflag ( "inalcove" , 1 );
+		$borg_4_1_hibernate.settendency( "hibernate" , 1.0 );
+		$borg_4_1_hibernate.settendency( "patrol" , 0.0 );
+		$borg_4_1_hibernate.settendency( "work" , 0.0 );
+		$borg_4_1_hibernate.setnodeid( 11 );
+		$borg_4_1_hibernate.groupdeaththread( "forcefieldObjCheck_group4" );
+	}
+	
+	if(doesEntityExist($borg_4_2_hibernate)){
+		$borg_4_2_hibernate.anim ( "alcove_idle" );
+		$borg_4_2_hibernate.setactorflag ( "inalcove" , 1 );
+		$borg_4_2_hibernate.settendency( "hibernate" , 1.0 );
+		$borg_4_2_hibernate.settendency( "patrol" , 0.0 );
+		$borg_4_2_hibernate.settendency( "work" , 0.0 );
+		$borg_4_2_hibernate.setnodeid( 12 );
+		$borg_4_2_hibernate.groupdeaththread( "forcefieldObjCheck_group7" );
+	}
+
+	if(doesEntityExist($borg_4_3_hibernate)){
+		$borg_4_3_hibernate.anim ( "alcove_idle" );
+		$borg_4_3_hibernate.setactorflag ( "inalcove" , 1 );
+		$borg_4_3_hibernate.settendency( "hibernate" , 1.0 );
+		$borg_4_3_hibernate.settendency( "patrol" , 0.0 );
+		$borg_4_3_hibernate.settendency( "work" , 0.0 );
+		$borg_4_3_hibernate.setnodeid( 13 );
+		$borg_4_3_hibernate.ai_off();
+	}
+
+	if(doesEntityExist($borg_4_11_work)){
+		$borg_4_11_work.settendency( "hibernate" , 0.0 );
+		$borg_4_11_work.settendency( "patrol" , 1.0 );
+		$borg_4_11_work.settendency( "work" , 1.0 );
+		$borg_4_11_work.setnodeid( 14 );
+		$borg_4_11_work.ai_off();
+	}
+	
+	if(doesEntityExist($borg_4_12_work)){
+		$borg_4_12_work.settendency( "hibernate" , 0.0 );
+		$borg_4_12_work.settendency( "patrol" , 0.0 );
+		$borg_4_12_work.settendency( "work" , 1.0 );
+		$borg_4_12_work.setnodeid( 15 );
+		$borg_4_12_work.ai_off();
+	}
+
+	//-----------------------------------
+
+	if(doesEntityExist($borg_5_1_hibernate)){
+		$borg_5_1_hibernate.settendency( "hibernate" , 1.0 );
+		$borg_5_1_hibernate.settendency( "patrol" , 0.0 );
+		$borg_5_1_hibernate.settendency( "work" , 0.0 );
+		$borg_5_1_hibernate.setnodeid( 18 );
+	}
+
+	if(doesEntityExist($borg_5_2_hibernate)){
+		$borg_5_2_hibernate.settendency( "hibernate" , 1.0 );
+		$borg_5_2_hibernate.settendency( "patrol" , 0.0 );
+		$borg_5_2_hibernate.settendency( "work" , 0.0 );
+		$borg_5_2_hibernate.setnodeid( 19 );
+	}
+
+	if(doesEntityExist($borg_5_21_patrol)){
+		$borg_5_21_patrol.settendency( "hibernate" , 0.0 );
+		$borg_5_21_patrol.settendency( "patrol" , 1.0 );
+		$borg_5_21_patrol.settendency( "work" , 0.0 );
+		$borg_5_21_patrol.setnodeid( 20 );
+		$borg_5_21_patrol.ai_off();
+	}
+
+	//-----------------------------------
+
+	if(doesEntityExist($borg_6_1_hibernate)){
+		$borg_6_1_hibernate.settendency( "hibernate" , 1.0 );
+		$borg_6_1_hibernate.settendency( "patrol" , 0.0 );
+		$borg_6_1_hibernate.settendency( "work" , 0.0 );
+		$borg_6_1_hibernate.setnodeid( 16 );
+	}
+
+	if(doesEntityExist($borg_6_2_hibernate)){
+		$borg_6_2_hibernate.settendency( "hibernate" , 1.0 );
+		$borg_6_2_hibernate.settendency( "patrol" , 0.0 );
+		$borg_6_2_hibernate.settendency( "work" , 0.0 );
+		$borg_6_2_hibernate.setnodeid( 17 );
+	}
+	
+	if(doesEntityExist($borg1_changroom)){
+		$borg1_changroom.ai_off();
+		$borg1_changroom.anim( "working_buttonpushing" );
+		$borg1_changroom.settendency( "hibernate" , 0.0 );
+		$borg1_changroom.settendency( "patrol" , 0.0 );
+		$borg1_changroom.settendency( "work" , 1.0 );
+		$borg1_changroom.groupdeaththread( "changBorgDead" );
+	}
+	
+	//-----------------------------------
+	if(doesEntityExist($borg1_changroom)){
+		$borg1_deathcinematic.ai_off();
+		$borg1_deathcinematic.anim( "working_buttonpushing" );
+		$borg1_deathcinematic.settendency( "hibernate" , 0.0 );
+		$borg1_deathcinematic.settendency( "patrol" , 0.0 );
+		$borg1_deathcinematic.settendency( "work" , 1.0 );
+	}
+	
+	if(doesEntityExist($borg2_deathcinematic)){
+		$borg2_deathcinematic.ai_off();
+		$borg2_deathcinematic.anim( "alcove_idle" );
+		$borg2_deathcinematic.settendency( "hibernate" , 1.0 );
+		$borg2_deathcinematic.settendency( "patrol" , 0.0 );
+		$borg2_deathcinematic.settendency( "work" , 0.0 );
+	}
+	
+	if(doesEntityExist($borg3_deathcinematic)){
+		$borg3_deathcinematic.ai_off();
+		$borg3_deathcinematic.anim( "alcove_idle" );
+		$borg3_deathcinematic.settendency( "hibernate" , 1.0 );
+		$borg3_deathcinematic.settendency( "patrol" , 0.0 );
+		$borg3_deathcinematic.settendency( "work" , 0.0 );
+	}
+}
+
+//---------------------
+void setup_hazardteam()
+//---------------------
+{
+//Do regular procedure
+	$chell.giveactorweapon( "models/weapons/worldmodel-actorweapon-tricorder", 1.0 );
+	$chell.giveactorweapon( "models/weapons/worldmodel-actorweapon-compressionrifle", 0.4 );
+	$chell.useactorweapon( "I-mod");
+	$chang.useactorweapon( "I-mod");
+	
+	$munro.ai_off();
+	$telsia.ai_off();
+	$tuvok.ai_off();	
+	
+	$chang_assimilate.ai_off();
+	$chang_assimilate.flags( "+notarget" );
+	$chang_assimilate.removeactorweapon( "Compressionrifle" );
+}
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  AI THREADS
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+
+//------------------------
+//	borgMakeAggressive
+//	entborg - entity, the passed in borg to make aggressive
+//	function to make a borg aggressive
+//------------------------
+void borgMakeAggressive( entity entBorg )
+{
+	if( doesEntityExist( entBorg ))
+	{
+		entBorg.aggressive( 1 );
+	}
+}
+
+//------------------------
+//	borgAiOn
+//	entborg - entity, the passed in borg to make aggressive
+//	function to make a turn borg ai on
+//------------------------
+void borgAiOn( entity entBorg )
+{
+	if( doesEntityExist( entBorg ))
+	{
+		//centerprint( "borg ai on" );
+		entBorg.ai_on();
+	}
+}
+
+//------------------------
+//	borgAiOn
+//	entborg - entity, the passed in borg to make aggressive
+//	function to make a turn borg ai off
+//------------------------
+void borgAiOff( entity entBorg )
+{
+	if( doesEntityExist( entBorg ))
+	{
+		//centerprint( "borg ai off" );
+		entBorg.ai_off();
+	}
+}
+
+//------------------------
+void activate_borg_1_aggressive()
+//------------------------
+{
+	//--group 1 borg aggressive passed through function
+	borgMakeAggressive( $borg_1_1_hibernate );
+	//borgMakeAggressive( $borg_1_2_hibernate );
+	//borgMakeAggressive( $borg_1_3_hibernate );
+	borgMakeAggressive( $borg_1_4_hibernate );
+}
+
+
+//---------------------
+void changBorgDead()
+//---------------------
+{
+	if( borgGroup4_7_active == 0 )
+	{
+		borgGroup4_7_active = 1;
+		thread activate_borg_4_aggressive();
+	}
+	forcefieldBorgGroupsDestroyed++;
+	forcefieldObjCheck();
+	//centerprint( forcefieldBorgGroupsDestroyed );
+}
+
+
+//---------------------
+void activate_borg_2_1_hibernate()
+//---------------------
+{
+	$borg_2_1_hibernate.settendency( "hibernate" , 0.0 );
+	$borg_2_1_hibernate.settendency( "patrol" , 1.0 );
+	$borg_2_1_hibernate.settendency( "work" , 1.0 );
+}
+
+//------------------------
+void deactivate_borg3()
+//------------------------
+{
+	//--group 3 borg ai off passed through function called via trigger
+	borgAiOff( $borg_3_1_hibernate );
+	borgAiOff( $borg_3_11_work );
+	borgAiOff( $borg_3_12_work );
+}
+
+//------------------------
+void reactivate_borg3()
+//------------------------
+{
+	$deactivate_borg3_trigger.nottriggerable();
+	//--group 3 borg ai off passed through function called via trigger
+	borgAiOn( $borg_3_1_hibernate );
+	borgAiOn( $borg_3_11_work );
+	borgAiOn( $borg_3_12_work );
+	$chell.ai_on();
+}
+
+//---------------------
+void activate_borg_3()
+//---------------------
+{
+	//--- wakeup borg in area
+	$borg_3_1_hibernate.ai_on();
+	//$borg_3_2_hibernate.ai_on();
+	$borg_3_11_work.ai_on();
+	$borg_3_12_work.ai_on();
+	if(cvar_bool_multiplayer){
+		thread globalCoop_level_moveToPos($coop_class_HeavyWeaponsModel,'5805 -1816 75');
+		thread globalCoop_level_moveToPos($coop_class_TechnicianModel,'5741 -1817 75');
+		thread globalCoop_level_moveToPos($coop_class_MedicModel,'5674 -1819 75');	
+	//Set new spawn Locations/Respwan/warpto
+		coop_vector_spawnOrigin1 	= '5369 -1650 75';
+		coop_vector_spawnOrigin2 	= '5369 -1700 75';
+		coop_vector_spawnOrigin3 	= '5369 -1750 75';
+		coop_vector_spawnOrigin4 	= '5369 -1800 75';
+		coop_vector_spawnOrigin5 	= '5369 -1850 75';
+		coop_vector_spawnOrigin6 	= '5369 -1900 75';
+		coop_vector_spawnOrigin7 	= '5369 -1950 75';
+		coop_vector_spawnOrigin1 	= '5369 -2000 75';
+		coop_float_spawnAngle1 		= 360;
+		coop_float_spawnAngle2 		= 360;
+		coop_float_spawnAngle3 		= 360;
+		coop_float_spawnAngle4 		= 360;
+		coop_float_spawnAngle5 		= 360;
+		coop_float_spawnAngle6 		= 360;
+		coop_float_spawnAngle7 		= 360;
+		coop_float_spawnAngle8 		= 360;
+	//Appaly spawn origins to the respawn origins
+		globalCoop_applaySpawnOriginOnReSpwanOrigin();
+	}
+}
+
+//---------------------
+void activate_borg_4()
+//---------------------
+{
+	//--wakeup borg in area
+	$borg_4_3_hibernate.ai_on();
+	$borg_4_11_work.ai_on();
+	if(doesEntityExist($borg_4_12_work)){
+		$borg_4_12_work.ai_on();
+	}
+}
+
+//---------------------
+void activate_borg_5()
+//---------------------
+{
+	//--wakeup borg in area
+	$borg_5_21_patrol.ai_on();
+}
+
+//------------------------
+void activate_borg_4_aggressive()
+//------------------------
+{
+	//--- activate the borg after plasma 1 is destroyed
+	$borg_4_1_hibernate.ai_on();
+	$borg_4_1_hibernate.aggressive( 1 );
+	wait( .1 );
+	$borg_4_3_hibernate.ai_on();
+	$borg_4_3_hibernate.aggressive( 1 );
+	wait( .1 );
+	$borg_4_11_hibernate.ai_on();
+	$borg_4_11_hibernate.aggressive( 1 );
+	wait( .1 );
+	//$borg1_changroom.ai_on();
+	//$borg1_changroom.aggressive( 1 );
+}
+
+//------------------------
+void borg_6_activate()
+//------------------------
+{
+	$borg_6_3.aggressive( 1 );
+
+	wait( .2 );
+	$borg_6_2.aggressive( 1 );
+
+	wait( .1 );
+	$borg_6_5.aggressive( 1 );
+
+	wait( .3 );
+	$borg_6_4.aggressive( 1 );
+}
+
+//------------------------
+void borg_7_activate()
+//------------------------
+{
+	$borg_7_1.aggressive( 1 );
+}
+
+//------------------------
+void borg_8_activate()
+//------------------------
+{
+	$borg_8_1.aggressive( 1 );
+}
+
+//------------------------
+void borg_9_activate()
+//------------------------
+{
+	$borg_9_1.aggressive( 1 );
+
+	wait( .1 );
+	$borg_9_2.aggressive( 1 );
+
+	wait( .3 );
+	$borg_9_3.aggressive( 1 );
+}
+
+//------------------------
+void borg_11_activate()
+//------------------------
+{
+	$borg_11_1.aggressive( 1 );
+
+	wait( .1 );
+	$borg_11_2.aggressive( 1 );
+
+	wait( .3 );
+	$borg_11_3.aggressive( 1 );
+
+	wait( .2 );
+	$borg_11_4.aggressive( 1 );
+
+	wait( .3 );
+	$borg_11_5.aggressive( 1 );
+}
+
+//------------------------
+void borg_12_activate()
+//------------------------
+{
+	//--- set the spawn effect on the spawner
+	$borg_12_spawner1.spawneffectname( "TransportIn", "borg" );
+	$borg_12_spawner2.spawneffectname( "TransportIn", "borg" );
+
+	//--- spawn the guys
+	if(doesEntityExist($borg_12_spawner1)){trigger( "$borg_12_spawner1" );}
+	if(doesEntityExist($borg_12_spawner2)){trigger( "$borg_12_spawner2" );}
+
+	wait( .2 );
+
+	//--- make the guys stupid for a second
+	$borg_12_1.ai_off();
+	$borg_12_2.ai_off();
+
+	//--- turn the AI on
+	wait ( 2 );
+	$borg_12_1.ai_on ();
+	$borg_12_1.aggressive( 1 );
+	$borg_12_2.ai_on ();
+	$borg_12_2.aggressive( 1 );
+}
+
+//------------------------
+void forcefieldObjCheck()
+//------------------------
+{
+	if(( forcefieldBorgGroupsDestroyed == 2 ) && ( power_coupling_destroyed < 2 ))
+	{
+		thread chellForcefieldDialog();	
+	}
+}
+
+//------------------------
+void forcefieldObjCheck_group4()
+//------------------------
+{
+	if( forcefieldBorgGroupsDestroyed < 2 )
+	{
+		forcefieldBorgGroupsDestroyed++;
+		//centerprint( forcefieldBorgGroupsDestroyed );	
+	}
+	forcefieldObjCheck();
+	
+}
+
+//------------------------
+void forcefieldObjCheck_group7()
+//------------------------
+{
+	if( forcefieldBorgGroupsDestroyed < 2 )
+	{
+		forcefieldBorgGroupsDestroyed++;
+		//centerprint( forcefieldBorgGroupsDestroyed );
+	}
+	forcefieldObjCheck();
+}
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  GAME OBJECT THREADS
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//----------------------------------------------
+//----------------------------------------------
+// Level Plasma Conduits 
+//----------------------------------------------
+//----------------------------------------------
+
+//---------------------
+void plasma1_ondamage()
+//---------------------
+{
+	$plasma1_model_damaged.hide();
+	$plasma1_model_damaged.notsolid();
+	$plasma1_debris.hide();
+	$plasma1_fx.hide();
+	$plasma1_model.loopsound ( "sound/environment/machine/generator2.wav", .8, 50 );
+	$plasma1_trigger.thread ( "plasma1_destroy" );
+	$plasma1_trigger.triggerondamage( 1 );
+}
+
+//---------------------
+void plasma1_destroy()
+//---------------------
+{
+	$plasma1_trigger.nodamage();
+	//--spawn an explosioin
+	$plasma1_spawn.modelname ( "fx/fx-explosion-plasmacon-red.tik" );
+	$plasma1_spawn.spawntargetname ( "plasma1_boom" );
+	if(doesEntityExist($plasma1_spawn)){trigger( "$plasma1_spawn" );}
+	$plasma1_spawn.remove();
+	//--stop the plasma sound
+	$plasma1_model.stoploopsound();
+	$plasma1_model_damaged.show();
+	$plasma1_model_damaged.solid();
+	$plasma1_debris.show();
+	$plasma1_fx.show();
+	$plasma1_model.remove();
+	$plasma1_solid.remove();
+	//--show the sparks and fx
+	if(doesEntityExist($plasma_sparks1)){trigger( "$plasma_sparks1" );}
+	$plasma_sparks1.loopsound ( "sound/environment/electric/fritz5.wav", .7, 52 );
+	//--play steam sound
+	$plasma1_fx.loopsound( "sound/environment/plasma/plasma_loop.wav", .3, 62 );
+	wait ( .5 );
+	$plasma1_boom.remove();
+	//--activate borg in lower area
+	//thread activate_borg_4_aggressive();
+	if( borgGroup4_7_active == 0 )
+	{
+		borgGroup4_7_active = 1;
+		thread activate_borg_4_aggressive();
+	}
+	
+}
+
+//-------------------------
+void destroyPlasmaConduit1()
+//-------------------------
+{
+	if(doesEntityExist($plasmaConduit1_explode)){trigger( "$plasmaConduit1_explode" );}
+	$plasmaConduit1.model( "enviro/borg-sphere_plasmacon_plasmacon_damaged.tik" );
+	$plasmaConduit1_fx.show();
+	$plasmaConduit1_fx.loopsound( "sound/environment/plasma/plasma_loop.wav", .3, 62 );
+	
+	$plasmaConduit1_pipe_debris.show();
+	$plasmaConduit1_pipes.remove();
+	
+	$plasmaConduit1_sparks.show();
+	$plasmaConduit1_sparks.loopsound ( "sound/environment/electric/fritz5.wav", .7, 52 );
+	
+	//thread activate_borg_1_aggressive();
+}
+
+//----------------------------------------------
+//----------------------------------------------
+// Level Power Couplings
+//----------------------------------------------
+//----------------------------------------------
+
+//---------------------
+void powercoupling1_ondamage()
+//---------------------
+{
+	$powercoupling1_model_damaged.hide();
+	$powercoupling1_model_damaged.notsolid();
+	$powercoupling1_fx.hide();
+	$powercoupling1_model.loopsound ( "sound/environment/machine/generator2.wav", .8, 50 );
+	$powercoupling1_trigger.nottriggerable();
+	$powercoupling1_trigger.triggerondamage( 1 );
+	$powercoupling1_trigger.thread ( "powercoupling1_destroy" );
+}
+
+//---------------------
+void powercoupling1_destroy()
+//---------------------
+{
+	//--set trigger to take no damage
+	$powercoupling1_trigger.nodamage();
+
+	$chang.stopdialog();
+
+	//--up the change puzzle counter
+	power_coupling_destroyed ++;
+
+	//--spawn an explosioin
+	$powercoupling1_spawn.modelname ( "fx/fx-explosion-fieldgenerator.tik" );
+	$powercoupling1_spawn.spawntargetname ( "powercoupling1_boom" );
+	if(doesEntityExist($powercoupling1_spawn)){trigger( "$powercoupling1_spawn" );}
+	$powercoupling1_spawn.remove ();
+
+	//--stop the plasma sound
+	$powercoupling1_model.stoploopsound ();
+	//--remove the non damaged version
+	$powercoupling1_model.remove ();
+	//--remove the destructable stuff
+	$powercoupling1_model_damaged.show();
+	$powercoupling1_model_damaged.solid();
+	//--show the sparks and fx
+	$powercoupling1_fx.show ();
+	$powercoupling1_fx.loopsound ( "sound/environment/electric/fritz5.wav", .5, 52 );
+	//--play steam sound
+	$powercoupling1_fx.loopsound ( "sound/environment/plasma/plasma_loop.wav", .4, 32 );
+	wait ( 1 );
+	$powercoupling1_boom.remove();
+
+	//--wake up Chang and the two lower borg on the level
+	$chang.ai_on();
+	$borg_6_1_hibernate.aggressive( 1 );
+	$borg_6_2_hibernate.aggressive( 1 );
+
+	//chang_rescued = 1;
+	powerCouplingId = 1;
+	//--variable set to keep chang dialogue from playing
+	thread powercoupling_status_check();
+}
+
+//---------------------
+void powercoupling2_ondamage()
+//---------------------
+{
+	$powercoupling2_model_damaged.hide();
+	$powercoupling2_model_damaged.notsolid();
+	$powercoupling2_fx.hide();
+	$powercoupling2_model.loopsound ( "sound/environment/machine/generator2.wav", .8, 50 );
+	$powercoupling2_trigger.thread ( "powercoupling2_destroy" );
+	$powercoupling2_trigger.triggerondamage( 1 );
+}
+
+//---------------------
+void powercoupling2_destroy()
+//---------------------
+{
+	//--set trigger to take no damage
+	if(doesEntityExist($powercoupling2_trigger)){
+		$powercoupling2_trigger.nodamage ();
+	}
+	//--up the change puzzle counter
+	power_coupling_destroyed ++;
+
+	//--spawn an explosioin
+	if(doesEntityExist($powercoupling2_spawn)){
+		$powercoupling2_spawn.modelname ( "fx/fx-explosion-fieldgenerator.tik" );
+		$powercoupling2_spawn.spawntargetname ( "powercoupling2_boom" );
+		$powercoupling2_spawn.playsound ( "sound/impact/explosion/expl_energy2.wav", 5, 1, 500);
+		if(doesEntityExist($powercoupling2_spawn)){trigger( "$powercoupling2_spawn" );}
+		$powercoupling2_spawn.remove ();
+	}
+	if(doesEntityExist($powercoupling2_model)){
+		//--stop the plasma sound
+		$powercoupling2_model.stoploopsound ();
+		//--destroy the plasma
+		$powercoupling2_model.remove ();
+		//--remove the destructable stuff
+		$powercoupling2_model_damaged.show();
+		$powercoupling2_model_damaged.solid();
+	}
+	if(doesEntityExist(	$powercoupling2_fx)){
+		//--show the sparks and fx
+		$powercoupling2_fx.show ();
+		$powercoupling2_fx.loopsound ( "sound/environment/electric/fritz5.wav", .5, 52 );
+		//--play steam sound
+		$powercoupling2_fx.loopsound ( "sound/environment/plasma/plasma_loop.wav", .4, 32 );
+	}
+		wait ( 1 );
+	if(doesEntityExist($powercoupling2_boom)){
+		$powercoupling2_boom.remove ();
+	}
+	
+	powerCouplingId = 2;
+	thread powercoupling_status_check();
+}
+
+//------------------------------
+void powercoupling_status_check()
+//------------------------------
+{
+	if (power_coupling_destroyed == 1)
+	{
+		$forcefield_green2.stoploopsound();
+		$forcefield_green2.remove();
+		//--turn on trigger that activates seq_chang_rescued
+		$trigger_seq_chang_rescued.triggerable();
+		//turn on the trigger for the beam out seq, was disabled due to multiplayer cinematics
+		$stop_changLifeCounterTrigger.triggerable();
+	}
+
+	if ( power_coupling_destroyed == 2 )
+	{
+		$trigger_seq_chang_elevator_exit.triggerable();
+		$elevator_seq_munro_callvolume.triggerable();
+		
+		$forcefield_green1.stoploopsound ();
+		$forcefield_green1.remove ();
+		
+		//That knocked out the forcefield up here!
+		globalCoop_dialog_play($chell,"borg01/chell_knockout.mp3", 1, 20000,1);//e,dialog,vol,dist,head
+    	if( destroyPlasmaObjectiveSet == 1 )
+    	{
+    		setfloatvar( "game.forcefield", 2 );
+    		initializeObjectives();
+    	}
+	}
+}
+
+//-------------------------
+void destroyPowerCoupling3()
+//-------------------------
+{	
+	if(doesEntityExist($powerCoupling3_explode)){trigger( "$powerCoupling3_explode" );}
+	$powerCoupling3.model( "enviro/borg-sphere_plasmacon_plasmacon_damaged.tik" );
+	$powerCoupling3_fx.show();
+	$forcefield_green3.remove();
+}
+
+//----------------------------------------------
+//DISTRIBUTION NODES
+//----------------------------------------------
+
+//------------------------
+void dis_node1_ondamage ()
+//------------------------
+{
+	wait( .05 );
+	$dis_node1_fx.hide();
+	$dis_node1_model_damaged.hide();
+	$dis_node1_model_damaged.notsolid();
+	$dis_node1_model.loopsound ( "sound/environment/machine/generator2.wav", .8, 50 );
+	$dis_node1_trigger.triggerondamage( 1 );
+	$dis_node1_trigger.triggerondeath( 1 );
+	$dis_node1_trigger.thread ( "dis_node1_destroy" );
+}
+
+//------------------------
+void dis_node1_destroy()
+//------------------------
+{
+	//--make the trigger not take damage anymore
+	$dis_node1_trigger.nodamage ();
+
+	//--set the explosion spawner to spawn an explosion and trigger it
+	$dis_node1_spawn.modelname ( "fx/fx-explosion-distnode.tik" );
+	$dis_node1_spawn.spawntargetname ( "dis_node1_boom" );
+	if(doesEntityExist($dis_node1_spawn)){trigger( "$dis_node1_spawn" );}
+
+	$dis_node1_spawn.playsound ( "sound/impact/explosion/expl_energy2.wav", 5, 1, 500);
+
+	wait( .1 );
+	$dis_node1_spawn.remove();
+
+	//--stop the looping sound
+	$dis_node1_model.stoploopsound();
+
+	//--switch the node to a damaged state
+	$dis_node1_model_damaged.show();
+	$dis_node1_model_damaged.solid();
+	$dis_node1_model.remove();
+
+	//--turn on the smoke
+	$dis_node1_fx.show();
+	$dis_node1_fx.loopsound ( "sound/environment/plasma/plasma_loop.wav", .3, 42 );
+
+	wait ( 1 );
+	//$dis_node1_boom.remove();
+
+	//--deactivate the borg
+	if(doesEntityExist($dis_node1_event)){trigger( "$dis_node1_event" );}
+	
+	thread postAbductChang_dialog();
+}
+
+//------------------------
+void dis_node2_ondamage()
+//------------------------
+{
+	wait( .05 );
+	$dis_node2_fx.hide();
+	$dis_node2_model_damaged.hide();
+	$dis_node2_model_damaged.notsolid();
+	$dis_node2_model.loopsound ( "sound/environment/machine/generator2.wav", .8, 50 );
+	$dis_node2_trigger.thread ( "dis_node2_destroy" );
+	$dis_node2_trigger.triggerondamage( 1 );
+}
+
+//------------------------
+void dis_node2_destroy()
+//------------------------
+{
+	//--make the trigger not take damage anymore
+	$dis_node2_trigger.nodamage ();
+	
+	$borg1_changroom.ai_on();//allow borg to be disabled
+
+	//--set the explosion spawner to spawn an explosion and trigger it
+	$dis_node2_spawn.modelname ( "fx/fx-explosion-distnode.tik" );
+	$dis_node2_spawn.spawntargetname ( "dis_node2_boom" );
+	if(doesEntityExist($dis_node2_spawn)){trigger( "$dis_node2_spawn" );}
+	$dis_node2_spawn.playsound ( "sound/impact/explosion/expl_energy2.wav", 5, 1, 500);
+
+	wait( .1 );
+	$dis_node2_spawn.remove();
+
+	//--stop the looping sound
+	$dis_node2_model.stoploopsound();
+
+	//--switch the node to a damaged state
+	$dis_node2_model_damaged.show();
+	$dis_node2_model_damaged.solid();
+	$dis_node2_model.remove();
+
+	//--turn on the smoke
+	$dis_node2_fx.show();
+	$dis_node1_fx.loopsound ( "sound/environment/plasma/plasma_loop.wav", .3, 42 );
+
+	wait ( 1 );
+	$dis_node2_boom.remove();
+
+	//--deactivate the borg
+	if(doesEntityExist($dis_node2_event)){trigger( "$dis_node2_event" );}
+	if( forcefieldBorgGroupsDestroyed < 2 ){forcefieldBorgGroupsDestroyed = 2;}
+	forcefieldObjCheck();
+	 
+}
+
+
+//----------------------------------------------
+// WORK NODES
+//----------------------------------------------
+
+//------------------------
+void workNode1_Open()
+//------------------------
+{
+	//--- move the locks up
+	$worknode1_cover_lock_top.moveup( 7 );
+	$worknode1_cover_lock_bottom.movedown( 7 );
+	waitfor( $worknode1_cover_lock_bottom );
+
+	//--- move the inner covers
+	$worknode1_cover_innercover_ul.moveup( 4 );
+	$worknode1_cover_innercover_ul.movenorth( 4 );
+	$worknode1_cover_innercover_ur.moveup( 4 );
+	$worknode1_cover_innercover_ur.movesouth( 4 );
+	$worknode1_cover_innercover_ll.movedown( 4 );
+	$worknode1_cover_innercover_ll.movenorth( 4 );
+	$worknode1_cover_innercover_lr.movedown( 4 );
+	$worknode1_cover_innercover_lr.movesouth( 4 );
+	waitfor( $worknode1_cover_innercover_lr );
+
+	wait( .2 );
+
+	//--- move the outer covers
+	$worknode1_cover_outercover_ul.moveup( 4 );
+	$worknode1_cover_outercover_ul.movenorth( 4 );
+	$worknode1_cover_outercover_ur.moveup( 4 );
+	$worknode1_cover_outercover_ur.movesouth( 4 );
+	$worknode1_cover_outercover_ll.movedown( 4 );
+	$worknode1_cover_outercover_ll.movenorth( 4 );
+	$worknode1_cover_outercover_lr.movedown( 4 );
+	$worknode1_cover_outercover_lr.movesouth( 4 );
+	waitfor( $worknode1_cover_outercover_lr );
+
+	wait( .1 );
+
+	//--- move out the interface
+	$worknode1_interface.movewest( 8 );
+	waitfor( $worknode1_interface );
+}
+
+//------------------------
+void workNode1_Close()
+//------------------------
+{
+	//--- move out the interface
+	$worknode1_interface.moveeast( 9 );
+	waitfor( $worknode1_interface );
+
+	wait( .1 );
+
+	//--- move the outer covers
+	$worknode1_cover_outercover_ul.movedown( 4 );
+	$worknode1_cover_outercover_ul.movesouth( 4 );
+	$worknode1_cover_outercover_ur.movedown( 4 );
+	$worknode1_cover_outercover_ur.movenorth( 4 );
+	$worknode1_cover_outercover_ll.moveup( 4 );
+	$worknode1_cover_outercover_ll.movesouth( 4 );
+	$worknode1_cover_outercover_lr.moveup( 4 );
+	$worknode1_cover_outercover_lr.movenorth( 4 );
+	waitfor( $worknode1_cover_outercover_lr );
+
+	wait( .2 );
+
+	//--- move the inner covers
+	$worknode1_cover_innercover_ul.movedown( 4 );
+	$worknode1_cover_innercover_ul.movesouth( 4 );
+	$worknode1_cover_innercover_ur.movedown( 4 );
+	$worknode1_cover_innercover_ur.movenorth( 4 );
+	$worknode1_cover_innercover_ll.moveup( 4 );
+	$worknode1_cover_innercover_ll.movesouth( 4 );
+	$worknode1_cover_innercover_lr.moveup( 4 );
+	$worknode1_cover_innercover_lr.movenorth( 4 );
+	waitfor( $worknode1_cover_innercover_lr );
+
+	//--- move the locks up
+	$worknode1_cover_lock_top.movedown( 7 );
+	$worknode1_cover_lock_bottom.moveup( 7 );
+	waitfor( $worknode1_cover_lock_bottom );
+}
+
+//------------------------
+void workNode2_Open()
+//------------------------
+{
+	//--- move the locks up
+	$worknode2_cover_lock_top.moveup( 7 );
+	$worknode2_cover_lock_bottom.movedown( 7 );
+	waitfor( $worknode1_cover_lock_bottom );
+
+	//--- move the inner covers
+	$worknode2_cover_innercover_ul.moveup( 4 );
+	$worknode2_cover_innercover_ul.movenorth( 4 );
+	$worknode2_cover_innercover_ur.moveup( 4 );
+	$worknode2_cover_innercover_ur.movesouth( 4 );
+	$worknode2_cover_innercover_ll.movedown( 4 );
+	$worknode2_cover_innercover_ll.movenorth( 4 );
+	$worknode2_cover_innercover_lr.movedown( 4 );
+	$worknode2_cover_innercover_lr.movesouth( 4 );
+	waitfor( $worknode2_cover_innercover_lr );
+
+	wait( .2 );
+
+	//--- move the outer covers
+	$worknode2_cover_outercover_ul.moveup( 4 );
+	$worknode2_cover_outercover_ul.movenorth( 4 );
+	$worknode2_cover_outercover_ur.moveup( 4 );
+	$worknode2_cover_outercover_ur.movesouth( 4 );
+	$worknode2_cover_outercover_ll.movedown( 4 );
+	$worknode2_cover_outercover_ll.movenorth( 4 );
+	$worknode2_cover_outercover_lr.movedown( 4 );
+	$worknode2_cover_outercover_lr.movesouth( 4 );
+	waitfor( $worknode2_cover_outercover_lr );
+
+	wait( .1 );
+
+	//--- move out the interface
+	$worknode2_interface.movewest( 8 );
+	waitfor( $worknode2_interface );
+}
+
+//------------------------
+void workNode2_Close()
+//------------------------
+{
+	//--- move out the interface
+	$worknode2_interface.moveeast( 9 );
+	waitfor( $worknode2_interface );
+
+	wait( .1 );
+
+	//--- move the outer covers
+	$worknode2_cover_outercover_ul.movedown( 4 );
+	$worknode2_cover_outercover_ul.movesouth( 4 );
+	$worknode2_cover_outercover_ur.movedown( 4 );
+	$worknode2_cover_outercover_ur.movenorth( 4 );
+	$worknode2_cover_outercover_ll.moveup( 4 );
+	$worknode2_cover_outercover_ll.movesouth( 4 );
+	$worknode2_cover_outercover_lr.moveup( 4 );
+	$worknode2_cover_outercover_lr.movenorth( 4 );
+	waitfor( $worknode2_cover_outercover_lr );
+
+	wait( .2 );
+
+	//--- move the inner covers
+	$worknode2_cover_innercover_ul.movedown( 4 );
+	$worknode2_cover_innercover_ul.movesouth( 4 );
+	$worknode2_cover_innercover_ur.movedown( 4 );
+	$worknode2_cover_innercover_ur.movenorth( 4 );
+	$worknode2_cover_innercover_ll.moveup( 4 );
+	$worknode2_cover_innercover_ll.movesouth( 4 );
+	$worknode2_cover_innercover_lr.moveup( 4 );
+	$worknode2_cover_innercover_lr.movenorth( 4 );
+	waitfor( $worknode2_cover_innercover_lr );
+
+	//--- move the locks up
+	$worknode2_cover_lock_top.movedown( 7 );
+	$worknode2_cover_lock_bottom.moveup( 7 );
+	waitfor( $worknode2_cover_lock_bottom );
+}
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  SEQUENCE THREADS
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+
+//---------------------
+void seq_chang_elevator_start()
+//---------------------
+{
+	//--- call the cinematic and wait for it to finish
+	//cinematic_chang_elevator_down();
+
+	//--- turn off chell's AI
+
+	$chell.useactorweapon( "tricorder" );
+	wait( .5 );
+
+	$chell.ai_off();
+	$chell.nodamage();
+
+	//--- walk chell over to the switch
+	thread seq_chang_elevator_start_walkchell();
+
+	//--- chell says chang's downstairs
+	//Chang is below us. One of us will need to and operate the lift from here.
+	globalCoop_dialog_play($chell,"borg01/chell_changbelow.mp3", 1, 20000,0);//e,dialog,vol,dist,time,head
+}
+
+//---------------------
+void seq_chang_elevator_start_walkchell()
+//---------------------
+{
+	//--reset the variable telling whether chell has reached the node or not
+	chell_reachednode = 0;
+	globalCoop_actor_walkTo($chell,"cinematic_chang_elevator_down_munro1","run");//$chell.warpto( "$cinematic_chang_elevator_down_munro1" );
+	globalCoop_actor_walkTo($chell,"seq_chang_elevator_chell1","run");
+	
+	$chell.turntoangle( 0 );
+	waitfor( $chell );
+	$chell.useactorweapon( "tricorder" );
+
+	wait( 1 );
+	$chell.pushable ( 0 );
+	$chell.anim( "tricorder_idle" );
+	waitforanimation( $chell, "tricorder_idle" );
+	wait( .1 );
+	$chell.anim ( "tricorder_fire" );
+	chell_reachednode = 1;
+}
+
+//---------------------
+void seq_chang_elevator_playerentered ()
+//---------------------
+{
+	//Do only if we are in single player
+	if(!cvar_bool_multiplayer){
+		//--- solidify the clip walls
+		$clip_seq_chang_elevator.solid();
+	}
+
+	//--- wait until chell is at the panel
+	while ( chell_reachednode != 1 )
+	{
+		wait ( .5 );
+	}
+	
+//--- munro says tells chell to man the lift up here
+//Stay here and operate the lift. I'll get Chang
+	globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($chell),"borg01/munro_sendme.mp3", 1, 20000, 1);
+
+	//--- send the elevator on it's way
+	$panel_seq_chang_elevator.playsound ( "sound/environment/switches/switch_01.wav", 6, 1.5, 512 );
+
+	wait ( .75 );
+	//$elevator_seq_chang.time ( 12 );
+	//$elevator_seq_chang.moveDown  ( 2560 );
+	//$elevator_seq_chang.loopsound ( "sound/environment/machine/borg_biglift.wav", 1.0, 5000 );
+	//$elevator_seq_chang.playsound ( "sound/environment/machine/borg_biglift.wav", 8, 1.0, 1500 );
+	//waitfor ( $elevator_seq_chang );
+	
+	//$elevator_seq_chang.stoploopsound();
+	//$elevator_seq_chang.playsound ( "sound/environment/machine/borg_biglift_stop.wav", 8, 0.7, 1500 );
+
+	$elevator_seq_chang.loopsound( "sound/environment/machine/borg_biglift.wav", 1.5, 1500 );
+	//globalAccelMove( $elevator_seq_chang, '0 0 -2560', 12, "rampupdown", "" );
+	globalAccelMove( $elevator_seq_chang, '0 0 -2560', 6, "rampupdown", "" );
+	
+	$elevator_seq_chang.stoploopsound();
+	$elevator_seq_chang.playsound( "sound/environment/machine/borg_biglift_stop.wav", 8, 1, 1500 );
+	
+//START ONLY IN MP, STARTS ON IT'S OWN IN SP
+	if(cvar_bool_multiplayer){
+		thread cinematic_chang_find();
+	}
+
+	//--- non-solidify the clip walls
+	$clip_seq_chang_elevator.notsolid();
+}
+
+//---------------------
+void seq_chang_elevator_chell_console()
+//---------------------
+{
+	//--- set the variable telling that chell has reached the elevator console
+	chang_elevator_chell_atconsole = 1;
+}
+
+//---------------------
+void seq_chang_rescued()
+//---------------------
+{
+	//--stop any other actor speaking
+	$chell.stopdialog();
+	$chang.stopdialog();
+	$munro.stopdialog();
+
+	//--set the objective
+	setfloatvar( "game.findChangObjective", 2 );
+    initializeObjectives();
+	
+	wait( 2 );
+	
+	//--turn on borg working on chang
+	$borg1_changroom.ai_on();
+	$borg1_changroom.aggressive( 1 );
+}
+
+//------------------------
+void seq_chell_liftup()
+//------------------------
+{
+	//while ( chang_elevator_exit_playeron = 0 )
+	//{
+	//	wait ( .5 );
+	//}
+
+	//--turn on the elevator clips and send it back up
+	//But only if this is single Player
+	if(!cvar_bool_multiplayer){
+		$clip_seq_chang_elevator.solid ();
+	}
+
+	//--munro tells chell to bring the lift back up
+	//OK, Chell.
+	globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($chell), "borg01/munro_bringlift.mp3", 1, 20000,1);//e,dialog,vol,range,time,head
+	wait( .5 );
+	//Yes sir!
+	globalCoop_dialog_play($chell, "borg01/chell_yessir.mp3", 1, 20000,1);//e,dialog,vol,range,time,head
+ 
+    thread tuvokChangSafeDialog();
+    
+    $reactivate_borg3_trigger.triggerable();
+	//--give chell the comp rifle again
+	$chell.useactorweapon( "Compressionrifle" );
+	
+	wait( .5 );
+	//--send the elevator on it's way
+	$panel_seq_chang_elevator.playsound ( "sound/environment/switches/switch_01.wav", 6, 1.5, 250 );
+
+	wait ( .75 );
+	//$elevator_seq_chang.time( 12 );
+	//$elevator_seq_chang.moveUp ( 2560 );
+	//$elevator_seq_chang.loopsound ( "sound/environment/machine/borg_biglift.wav", 1.0, 5000 );
+	//$elevator_seq_chang.playsound ( "sound/environment/machine/borg_biglift.wav", 8, 1.0, 1500 );
+	//waitfor( $elevator_seq_chang );
+	
+	//$elevator_seq_chang.stoploopsound();
+	//$elevator_seq_chang.playsound ( "sound/environment/machine/borg_biglift_stop.wav", 8, 0.7, 1500 );
+	
+	$elevator_seq_chang.loopsound( "sound/environment/machine/borg_biglift.wav", 1.5, 1500 );
+	globalAccelMove( $elevator_seq_chang, '0 0 2560', 12, "rampupdown", "" );
+	
+	$elevator_seq_chang.stoploopsound();
+	$elevator_seq_chang.playsound( "sound/environment/machine/borg_biglift_stop.wav", 8, 1, 1500 );
+
+	
+	//--non-solidify the clip walls
+	$clip_seq_chang_elevator.notsolid ();
+
+	//--turn Chell's and Chang's AI back on and makes chell pushable again
+	$chell.pushable( 1 );
+	$chell.ai_on();
+	//$chang.ai_on();
+
+	//--dialog about making it back
+	//Nice job Munro.
+	globalCoop_dialog_play($chell, "borg01/chell_savedchang.mp3", 1,20000,1);//e,dialog,vol,range,time,head
+	wait(.5);
+	//Let’s go find Telsia.
+	globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($chell), "borg01/munro_gofindtelsia.mp3", 1,20000,1);//e,dialog,vol,range,time,head
+	if(cvar_bool_multiplayer){
+		thread coop_endLevel();
+	}
+}
+
+
+void tuvokChangSafeDialog()
+{
+	wait( 3 );
+	//Ensign Chang is safe. Locate Ensign Murphy and complete your primary objective.
+	globalCoop_dialog_play($tuvok, "borg01/tuvok_wegothim.mp3", 1, 20000,1);//e,dialog,vol,range,time,head
+}
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  AI ROUTINE THREADS
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+
+//------------------------
+void chell_disable()
+//------------------------
+{
+	if(doesEntityExist($chell)){
+		$chell.ai_off();
+	}
+}
+
+//------------------------
+void chell_enable()
+//------------------------
+{
+	if(doesEntityExist($chell)){
+		$chell.ai_on();
+	}
+}
+
+//------------------------
+void chell_chang_disable()
+//------------------------
+{
+	if(doesEntityExist($chell)){$chell.ai_off();}
+	if(doesEntityExist($chang)){$chang.ai_off();}
+}
+
+//------------------------
+void chell_chang_enable()
+//------------------------
+{
+	if(doesEntityExist($chell)){$chell.ai_on();}
+	if(doesEntityExist($chang)){$chang.ai_on();}
+}
+
+
+//---------------------
+// postAbductChang_dialog
+// after the borg have been defeated, chell states they need to find chang
+//---------------------
+void postAbductChang_dialog()
+{
+	
+	if ( postAbductdialog_played == 0 )
+	{
+		postAbductdialog_played = 1;
+		while(!float_changTaken){
+			wait(1.5);
+		}
+		
+		//Munro to Voyager. The Borg took Chang. Beam him out!
+		globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($chell), "borg01/munro_beamchang.mp3", 1, 20000,1);//e,dialog,vol,range,time,head
+		//His signal is too weak. Find him and eliminate nearby sources of interference, possibly forcefields.
+		globalCoop_dialog_play($tuvok, "borg01/tuvok_wecannot.mp3", 1, 20000,1);//e,dialog,vol,range,time,head
+		
+		//Start objectives now
+		globalCoop_objectives_update("inComplete" , 1 , 1);//State,item,shownow
+		
+		//Understood. Chell, locate Chang.
+		globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($chell), "borg01/munro_standbyvoy.mp3", 1, 20000,1);//e,dialog,vol,range,time,head
+		//I’ve sent his location to your Tricorder. He’s in a maturation chamber. For assimilation!
+		globalCoop_dialog_play($chell, "borg01/chell_changnearby.mp3", 1, 20000,1);//e,dialog,vol,range,time,head
+		wait( 1.5 );
+		//Telsia to Munro. I’ve found a Borg relay node. Accessing their computer system...
+		globalCoop_dialog_play($telsia, "borg01/telsia_stilllooking.mp3", 1, 20000,1);//e,dialog,vol,range,time,head
+		//Good. The Borg took Chang. We’ll find you after he’s safe.
+		globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($chell), "borg01/munro_diverted.mp3", 1, 20000,1);//e,dialog,vol,range,time,head
+		if(cvar_bool_multiplayer){//delete telsia in multiplayer
+			globalCoop_level_remove($telsia);
+			//KEEP TUVOK WE NEED HIM LATER
+		}
+		setfloatvar( "game.findChangObjective", 1 );
+		initializeObjectives();
+	}
+}
+
+//------------------------
+void changLifeCounter()
+//------------------------
+{
+	//
+	//Note:  To balance the timer, you can adjust 2 values.
+	//		 The first is the amount of damage done.  The second
+	//		 is the wait time until chang is damaged again.
+	//	
+	//		 To determine the overall amount of time available for 
+	//		 the player to save Chang, increase the total amount of 
+	//		 health chang has. -- This will likely be done in the same place
+	//		 that you call the updatebosshealth().  Keep in mind that health
+	//		 and maxboss health must be equal for the "lifebar" to be correct
+	//
+	
+	//First Get Initial Value of Chang's life
+	float changLife;
+	changLife = $chang_assimilate.gethealth();
+	
+	//Now, continue looping until chang is dead.  If chang is saved
+	//before he dies, then killthread MUST be called on this thread
+	//to stop this counter
+	while( changLife > 1.0 )
+	{	
+		//Every iteration damage Chang
+		$chang_assimilate.addhealth( -5 ); //5
+		changLife = $chang_assimilate.gethealth();
+		//print ("end of cinematic thread life counter\n");
+		//Check if chang is 'dead".  If he is, then fail the mission
+		if ( changLife <= 1.0 )
+		{
+			//Munro, you're too late! We've lost Chang!
+			globalCoop_dialog_play($chell, "borg01/chell_changdead.mp3",1,20000,1);//e,dialog,vol,range,time,head
+			if(cvar_bool_multiplayer){
+				globalCoop_mission_failWithReason("ChangKilled");
+			}
+			else{
+				$player.missionfailed( "ChangKilled" );
+			}
+		}
+		//Wait a specified interval before damaging again
+		wait( 2 );
+	}
+}
+
+//--------------------------
+void stop_changLifeCounter()
+//--------------------------
+{
+	killthread( "changLifeCounter" );
+	$chang_assimilate.updatebosshealth( 0 );
+	//Uhhhhhhh!
+	globalCoop_dialog_play($chang_assimilate, "borg01/chang_gaspmoan.mp3",1,20000,0);//e,dialog,vol,range,time,head
+	//Munro to Voyager. Beam Chang directly to sickbay. Now!!
+	globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($chell), "borg01/munro_beamoutchang.mp3",1,20000,0);//e,dialog,vol,range,time,head
+	
+	$chang_assimilate.displayEffect( "TransportOut", "FederationAttach" );
+	wait( 5 );
+	//--remove chang model from level
+	$chang_assimilate.remove();
+	//--turn on the exit level trigger
+	if(doesEntityExist($m1l1b_exittrigger)){$m1l1b_exittrigger.triggerable();}
+}	
+
+//--------------------------
+void chellForcefieldDialog()
+//--------------------------
+{	
+	if( chellDialogPlayed == 0 )
+	{
+		chellDialogPlayed = 1;
+		wait( 2 );
+		//while( tuvokDoneTalking == 0 )
+		//{
+		//	wait( .25 );
+		//}
+		//Munro, there's a forcefield up here we'll need to get through. My scans indicate the power source is on your level.
+		globalCoop_dialog_play($chell,"borg01/chell_scansour.mp3",1,20000,1);//e,dialog,vol,dist,time,head
+		destroyPlasmaObjectiveSet = 1;
+		setfloatvar( "game.forcefield", 1 );
+	
+		if( powerCouplingId == 1 )
+		{ 
+			$powercoupling2_model.missionobjective( 1 );
+		}
+		if( powerCouplingId == 2 )
+		{ 
+			$powercoupling1_model.missionobjective( 1 );
+		}
+		initializeObjectives();
+	}
+}
+
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  SKYBOX THREADS
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+
+//------------------------
+void move_turbine()
+//------------------------
+{
+	while( 1 )
+	{
+		//--- rotate the turbine
+        	$skybox_turbine.time( 14 );
+        	$skybox_turbine.rotateZdown( 180 );
+        	waitfor( $skybox_turbine );
+	}
+}
+
+//------------------------
+void move_scanner()
+//------------------------
+{
+	while( 1 )
+	{
+		//--- move the scanner one way
+        	$skybox_scanner.time( 26 );
+        	$skybox_scanner.moveEast( 2024 );
+        	waitfor( $skybox_scanner );
+
+        	//--- move the scanner the other way
+        	$skybox_scanner.time( 26 );
+        	$skybox_scanner.moveWest( 2024 );
+        	waitfor( $skybox_scanner );
+	}
+}
+
+//------------------------
+void setup_cinematic_characters()
+//------------------------
+{
+//Exit if in Multiplayer
+	if(cvar_bool_multiplayer){
+		return;
+	}
+
+	$cinematic_munro.ai_off ();
+	$cinematic_munro.hide ();
+	$cinematic_munro.notsolid ();
+}
+
+//------------------------
+// setupLevelSecrets
+// setup viewmode for struc integ filter for secret door
+//------------------------
+
+void setupLevelSecrets()
+{
+	$secret_wall_fracture1.notsolid();
+	$secret_wall_fracture1.viewmode( "structuralintegrity" );
+}
+
+void secretWallWait()
+{
+	$secret_wall1.ondamage( "secretWallExplode" );
+	pause();
+}
+
+void secretWallExplode()
+{
+	$secret_wall1.nodamage();
+	triggerentity( $secret_wall_explosion1 );
+	wait( .1 );
+	$secret_wall_fracture1.remove();
+	$secret_wall1.remove();
+}
+
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed("m1l1c-borg_sphere");
+}
+

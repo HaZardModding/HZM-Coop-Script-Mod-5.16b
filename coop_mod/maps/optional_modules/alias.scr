@@ -1,0 +1,266 @@
+//-----------------------------------------------------------------------------------
+// Script By:	Christian Sebastian Strahl (Chrissstrahl)
+// Created on:	2008.12.25
+// E-Mail:		chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+// CONTAINING DIALOG ALIAS RELATED FUNCTIONS FOR THE HZM CO-OP MOD
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2012 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+// Automated System Aliases Used for +use converations
+/*
+	talk-gestureL			conv-gestureL.ska
+	talk-gestureR			conv-gestureR.ska
+	talk-crossarms			conv-crossarms.ska
+	talk-talk-handsonhips		conv-talk-handsonhips.ska	
+	talk-handsweep			conv-handsweep.ska
+
+	conv-gestureL			conv-gestureL.ska
+	conv-look				conv-look.ska
+	conv-shakehead			conv-shakehead.ska
+	conv-no					conv-no.ska
+	conv-affirmative		conv-nod.ska
+	conv-shrug				conv-shrug.ska
+	conv-wavehello			conv-wavehello.ska
+	conv-backthere			conv-backthere.ska
+	conv-overthere			conv-overthere.ska
+	conv-handflick-hellno		conv-handflick-hellno.ska
+	conv-fingerpoint-atyou		conv-fingerpoint-atyou.ska
+	conv-fingerup-warning		conv-fingerup-warning.ska
+	conv-gesture1			conv-look.ska
+*/
+
+
+////////////////////////////////////////////////////////////////////////////////
+//DECLARATIONS
+////////////////////////////////////////////////////////////////////////////////
+void globalCoop_alias_set(entity eActor,string sDialogName,string sDialog);
+void globalCoop_alias_setAnim(entity eActor,string sDialogName,string sDialog,string sAnimation);
+void globalCoop_alias_condition(entity eActor,string sDialogName,string sDependencyVar,string sDependencyValue);
+void globalCoop_alias_playGiven(entity eActor,string sDialogName);
+void globalCoop_alias_play();
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+void globalCoop_alias_set(entity eActor,string sDialogName,string sDialog)
+//----------------------------------------------------------------------
+//Sets a dialog name and file to play - use this to save statements (saves 1 statement each time, if used more than 5 times in a script file)
+//----------------------------------------------------------------------
+{
+	globalCoop_alias_setAnim(eActor,sDialogName,sDialog,"");
+}
+
+void globalCoop_alias_setAnim(entity eActor,string sDialogName,string sDialog,string sAnimation)
+//----------------------------------------------------------------------
+//Sets a dialog name and file, animation to play
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eActor))
+	{
+		float fIndex;
+		string sName;
+	//set global index
+		fIndex=1;
+		while(fIndex<10)
+		{
+			sName = eActor.getStringVar("coop_aliasNameIndex"+fIndex);
+			if(sName == "" || sName == sDialogName)
+			{
+				eActor.setStringVar("coop_aliasNameIndex"+fIndex,sDialogName);
+				fIndex=10;
+			}
+			fIndex++;
+		}
+	//set a index for the specific dialog name
+		fIndex = eActor.getFloatVar("coop_aliasIndex"+sDialogName);
+		fIndex++;
+		eActor.setFloatVar("coop_aliasIndex"+sDialogName,fIndex);
+	//set file info for this dialog name and index
+		eActor.setStringVar("coop_aliasFile"+sDialogName+fIndex,sDialog);
+	//set animation info for this dialog name and index
+		eActor.setStringVar("coop_aliasAnim"+sDialogName+fIndex,sAnimation);
+		globalCoop_main_waitAFrame();
+		globalCoop_main_printTimeAndString("alias: "+sDialogName+"->"+fIndex+"->"+sAnimation);
+	}
+}
+
+void globalCoop_alias_condition(entity eActor,string sDialogName,string sDependencyVar,string sDependencyValue)
+//----------------------------------------------------------------------
+//Sets dependency conditions for the named dialog to play
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eActor))
+	{
+		eActor.setStringVar("coop_aliasDepend"+sDialogName,sDependencyVar);
+		eActor.setStringVar("coop_aliasDependValue"+sDialogName,sDependencyValue);
+		globalCoop_main_waitAFrame();
+	}
+}
+
+void globalCoop_alias_playGiven(entity eActor,string sDialogName)
+//----------------------------------------------------------------------
+//Sets dependency conditions for the named dialog to play
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eActor))
+	{
+		float fIndex;
+		float fRandomAnim;
+		float fAnimTime;
+		string sAnim;
+		string sDialogPath;
+		
+		fAnimTime=1;
+		
+		fIndex = eActor.getFloatVar("coop_aliasIndexPlay"+sDialogName);
+		if(fIndex <= 0)
+		{
+			fIndex=1;
+		}
+		
+//grab dialog and see if it is valid
+		sDialogPath	= eActor.getStringVar("coop_aliasFile"+sDialogName+fIndex);
+		if(sDialogPath == "")
+		{
+			fIndex=1;
+			sDialogPath	= eActor.getStringVar("coop_aliasFile"+sDialogName+fIndex);
+		}
+
+//go with the valid dialog
+		sAnim		= eActor.getStringVar("coop_aliasAnim"+sDialogName+fIndex);
+		
+		fRandomAnim = randomint(4);
+		if(sAnim == "")
+		{
+			if(fRandomAnim==0){sAnim="talk-gestureL";}
+			if(fRandomAnim==1){sAnim="talk-gestureR";}
+			if(fRandomAnim==2){sAnim="talk-talk-handsonhips";}
+			if(fRandomAnim==3){sAnim="talk-handsweep";}
+			if(fRandomAnim==4){sAnim="conv-look";}
+			//if(fRandomAnim==5){sAnim="conv-shakehead";}
+		}
+		//centerprint("dialog: "+eActor.getRawTargetname()+"->"+sDialogName+fIndex+"->"+sAnim);
+		
+//no dialog to play, fail
+		if(sDialogPath == "")
+		{
+			globalCoop_main_printTimeAndString("globalCoop_alias_play(failed->no_sound_file)");
+			return;
+		}
+
+//set next dialog to play next time
+		fIndex++;
+		eActor.setFloatVar("coop_aliasIndexPlay"+sDialogName,fIndex);
+		
+		eActor.ai_off();
+		vector vAngels;
+		vAngels = eActor.getangles();
+
+//globalCoop_main_waitAFrame();
+//Play the dialog
+		entity ePlayer;
+	//headwatch player
+		ePlayer = globalCoop_return_playerClosestPreferActive(eActor);
+		if(doesEntityExist(ePlayer))
+		{
+			eActor.headwatch(ePlayer,10);
+			eActor.turntowardsentity(ePlayer);
+		}
+		
+		thread globalCoop_dialog_play(eActor,sDialogPath,1,250,0);
+		globalCoop_main_waitZeroDot2();
+//play animation
+		//if(sAnim != "")
+		//{
+			eActor.animateonce(sAnim);
+		//}
+//wait for the dialog to end
+		globalCoop_dialog_waitForDialog(eActor);
+		eActor.angles(vAngels);
+		eActor.ai_on();
+		eActor.headwatchtarget("none",10);
+		eActor.resethead(10);
+	}
+}
+
+void globalCoop_alias_play()
+//----------------------------------------------------------------------
+//Sets dependency conditions for the named dialog to play
+//----------------------------------------------------------------------
+{
+	entity eActor;
+	eActor = getCurrentEntity();
+	if(doesEntityExist(eActor))
+	{
+	//don't allow actor to be used again during dialog
+		eActor.nouse();
+		
+		float fIndex;
+		string sName;
+		string sDialogName;
+		string sVarName;
+		string sVarValue;
+
+	//get a dialog to play
+		fIndex=1;
+		while(fIndex<10)
+		{
+		//grab any dialog name
+			sName = eActor.getStringVar("coop_aliasNameIndex"+fIndex);
+			
+			if(sName != "")
+			{
+				string sCurrentVlaue;
+				sDialogName = sName;
+				sVarName	= eActor.getStringVar("coop_aliasDepend"+sName);
+				sVarValue	= eActor.getStringVar("coop_aliasDependValue"+sName);
+				
+			//check if condition is meet, break
+				sCurrentVlaue = getStringVar(sVarName);
+				if(sVarValue != "")
+				{
+				//debug
+				//$player1.hudprint(sVarName+" - "+sVarValue+" current"+sCurrentVlaue+"\n");
+				
+				//fix game retriving floatvars to full length when read a string
+					float fCounter;
+					while(fCounter<11)
+					{
+						if(sCurrentVlaue == fCounter+".000000")
+						{
+							sVarValue = (sVarValue+".000000");
+						}
+						fCounter++;
+					}
+					if(sCurrentVlaue == sVarValue)
+					{
+						fIndex=10;
+					}
+				}
+			}
+		//no more dialog names saved, exit
+			else
+			{
+				fIndex=10;
+			}
+			fIndex++;
+		}
+	//play a dialog with the given alias name
+		globalCoop_alias_playGiven(eActor,sDialogName);
+	//Make usable again
+		globalCoop_level_onUse(eActor,"globalCoop_alias_play");
+	}
+}
+

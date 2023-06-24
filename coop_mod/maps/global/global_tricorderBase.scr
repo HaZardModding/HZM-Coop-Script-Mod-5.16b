@@ -1,0 +1,295 @@
+
+//=================================================================
+//  Prototypes
+//=================================================================
+
+void globalTricorder_hud_remove(string sHudName);
+void globalTricorder_hud_add(string sHudName);
+void globalTricorder_doClientCommand( string command );
+void globalTricorder_BaseSetEntity( entity e );
+void globalTricorder_BaseCancelDisable();
+void globalTricorder_BaseCancelEnable();
+void globalTricorder_BaseRunTimer( entity entPuzzleObject, float timeLimit );
+void globalTricorder_BaseClose();
+string _tricorderBase_getWidgetInsertForPuzzleType();
+void globalTricorder_SetToolTip_killthisthread();
+void playSound_9_1_1000(entity e,string sSound);
+void wait0dot05();
+
+//=================================================================
+// Global variables
+//=================================================================
+float tricorderBaseExiting;
+float _tricorderBase_puzzleType;  //tells globably what kind of tricorder puzzle is active
+string _tricorderBase_keypadType;  //tells globably what kind of keypad puzzle is active, either "" for federation, "r" for romulan
+entity _tricorderBase_entity;
+
+string _globalTricorder_keypadURC = "TricorderKeypad";
+string _globalTricorder_keypadType = "";
+
+//=================================================================
+// Constants
+//=================================================================
+float TRICORDER_PUZZLE_MOD = 1;
+float TRICORDER_PUZZLE_ROUTING = 2;
+float TRICORDER_PUZZLE_KEYPAD = 3;
+
+//=================================================================
+// Functions
+//=================================================================
+void globalTricorder_hud_remove(string sHudName)
+{
+	if(!cvar_bool_multiplayer){$player.removeHud(sHudName);}
+}
+void globalTricorder_hud_add(string sHudName)
+{
+	if(!cvar_bool_multiplayer){$player.addHud(sHudName);}
+}
+
+void globalTricorder_BaseSetEntity( entity e )
+{
+	_tricorderBase_entity = e;
+}
+
+//---------------------
+// tricorderBaseSetPuzzleType
+// sets the global variable defining what puzzle type is being used on the tricorder
+//---------------------
+void tricorderBaseSetPuzzleType( float intPuzzleType )
+{
+	if( 	(intPuzzleType != TRICORDER_PUZZLE_MOD)
+		&& 	(intPuzzleType != TRICORDER_PUZZLE_ROUTING)
+		&&	(intPuzzleType != TRICORDER_PUZZLE_KEYPAD) )
+	{
+		centerPrint( "INVALID TRICORDER PUZZLE TYPE IN tricorderBaseSetPuzzleType\n" );
+	}
+	else
+	{
+		_tricorderBase_puzzleType = intPuzzleType;
+	}
+}
+
+//---------------------
+// globalTricorder_BaseRunTimer
+//
+//---------------------
+void globalTricorder_BaseRunTimer( entity entPuzzleObject, float timeLimit )
+{
+	float timeNow, endTime, timeLeft;
+	float min, sec, milsec;
+	string secStr, milsecStr;
+	string widgetCommandBase;
+	widgetCommandBase = "globalwidgetcommand tri_" + _tricorderBase_getWidgetInsertForPuzzleType() + "_base_";
+
+	if( timeLimit <= 0 )
+	{
+		globalTricorder_BaseCancelEnable();
+		globalTricorder_doClientCommand( widgetCommandBase + "timer_min title 0" );
+		globalTricorder_doClientCommand( widgetCommandBase + "timer_sec title 00" );
+		globalTricorder_doClientCommand( widgetCommandBase + "timer_milsec title 00" );
+
+		return;
+	}
+	
+	// disable the cancel button when there is a timelimit
+	globalTricorder_BaseCancelDisable();
+
+	timeNow = getLevelTime();
+	endTime = timeNow + timeLimit;
+	
+	// milliseconds are hacked because float precision results in stuff like 55.6 - 55 => 0.599999 and that's bad.
+	milsec = 100;
+	while( timeNow <= endTime )
+	{
+		if( tricorderBaseExiting )
+			return;
+
+		timeLeft = endTime - timeNow;
+		min = div( timeLeft, 60 );
+		sec = mod( timeLeft, 60 );
+		
+		//milsec = floor( (timeLeft - div( timeLeft, 1 )) * 10 );
+		
+		if( sec < 10 )
+			secStr = "0" + sec;
+		else
+			secStr = sec;
+			
+		if( milsec < 10 )
+			milsecStr = "0" + milsec;
+		else
+			milsecStr = milsec;
+		
+		globalTricorder_doClientCommand( widgetCommandBase + "timer_min title " + min );
+		globalTricorder_doClientCommand( widgetCommandBase + "timer_sec title " + secStr );
+		globalTricorder_doClientCommand( widgetCommandBase + "timer_milsec title " + milsecStr );
+		//print( min + ":" + sec + ":" + milsec + "\n" );
+	
+		wait0dot05();
+		timeNow = getLevelTime();
+
+		milsec = milsec - 5;
+		if( milsec < 0 ) 
+			milsec = 95;
+	}
+
+	globalTricorder_BaseClose();
+	entPuzzleObject.puzzleobject_failed();
+	entPuzzleObject.playsound( "sound/weapons/tricorder/tri_puzz_failure.wav", 9, 1, 1000 );
+	// testing compiler bugs. remove this
+	milsec = 0;
+
+}
+
+//---------------------
+// globalTricorder_BaseCancelEnable
+// enables the cover over the cancel button
+//---------------------
+void globalTricorder_BaseCancelEnable()
+{
+	//remove the cancel button
+	globalTricorder_doClientCommand( 
+		"globalwidgetcommand tri_" 
+		+ _tricorderBase_getWidgetInsertForPuzzleType() 
+		+ "_base_button_cancel enable" );
+}
+
+//---------------------
+// globalTricorder_BaseCancelDisable
+// diables the cover over the cancel button
+//---------------------
+void globalTricorder_BaseCancelDisable()
+{
+	//remove the cancel button
+	globalTricorder_doClientCommand( 
+		"globalwidgetcommand tri_" 
+		+ _tricorderBase_getWidgetInsertForPuzzleType() 
+		+ "_base_button_cancel disable" );
+}
+
+//---------------------
+// tricorderBaseCancel
+// cancels the puzzle
+//---------------------
+//void globalTricorderRoute_Cancel();
+void tricorderBaseCancel()
+{
+	globalTricorder_BaseCancelDisable();
+	globalTricorder_BaseClose();
+	
+	_tricorderBase_entity.puzzleobject_canceled();
+}
+
+
+//---------------------
+void globalTricorder_BaseClose()
+{
+	wait0dot05();
+	tricorderBaseExiting = 1;
+	if( _tricorderBase_puzzleType == TRICORDER_PUZZLE_MOD )
+	{
+		globalTricorder_hud_remove("TricorderModulation");
+		globalTricorder_doClientCommand( "ui_removehud TricorderModulationHelp" );
+	}
+	else if( _tricorderBase_puzzleType == TRICORDER_PUZZLE_KEYPAD )
+	{
+		globalTricorder_hud_remove("TricorderKeypad");
+		globalTricorder_hud_remove("RomulanKeypad");
+		globalTricorder_doClientCommand( "ui_removehud TricorderKeypadHelp" );
+	}
+	else if( _tricorderBase_puzzleType == TRICORDER_PUZZLE_ROUTING )
+	{
+		globalTricorder_hud_remove("TricorderRoute");
+		globalTricorder_doClientCommand( "ui_removehud TricorderRoutingHelp" );
+	}
+}
+
+//---------------------
+string _tricorderBase_getWidgetInsertForPuzzleType()
+{
+	if( _tricorderBase_puzzleType == TRICORDER_PUZZLE_MOD )
+	{
+		return "mod";
+	}
+	else if( _tricorderBase_puzzleType == TRICORDER_PUZZLE_KEYPAD )
+	{
+		return "kp" + _tricorderBase_keypadType;
+	}
+	else if( _tricorderBase_puzzleType == TRICORDER_PUZZLE_ROUTING )
+	{
+		return "route";
+	}
+}
+
+string _tricorderBase_getTooltipInsertForPuzzleType()
+{
+	if( _tricorderBase_puzzleType == TRICORDER_PUZZLE_MOD )
+		return "mo";
+	else if( _tricorderBase_puzzleType == TRICORDER_PUZZLE_KEYPAD )
+		return "kp";
+	else if( _tricorderBase_puzzleType == TRICORDER_PUZZLE_ROUTING )
+		return "ro";
+}
+
+//-------------------------------------------------------------------------------------------------
+void globalTricorder_doClientCommand( string command )
+{
+//If single player
+	if(!cvar_bool_multiplayer){
+		if( GetNumFreeReliableServerCommands( $player ) < 80 )
+		{
+			globalCoop_main_waitZeroDot2();
+		}
+		SendClientCommand( $player, command + "\n" );
+	}
+}
+
+//-------------------------------------------------------------------------------------------------------
+// TOOL TIPS
+void globalTricorder_ClearToolTip()
+{
+	globalTricorder_doClientCommand( "globalwidgetcommand tri_" + _tricorderBase_getTooltipInsertForPuzzleType() + "_tooltip title $$TriPuz_Default$$" );
+}
+
+void globalTricorder_SetToolTip( string s )
+{
+	globalTricorder_doClientCommand( "globalwidgetcommand tri_" + _tricorderBase_getTooltipInsertForPuzzleType() + "_tooltip title " + s );
+}
+
+////////////////////////////
+
+void globalTricorder_TT_Clear() 		{ killthread( "globalTricorder_ClearToolTip" ); thread globalTricorder_ClearToolTip(); }
+
+void globalTricorder_TT_Cancel() 		{globalTricorder_SetToolTip_killthisthread(); thread globalTricorder_SetToolTip( "$$TriPuz_Cancel$$" ); }
+void globalTricorder_TT_Timer() 		{globalTricorder_SetToolTip_killthisthread(); thread globalTricorder_SetToolTip( "$$TriPuz_Timer$$" ); }
+
+void globalTricorder_TT_KP_Code()		{globalTricorder_SetToolTip_killthisthread(); thread globalTricorder_SetToolTip( "$$TriPuz_KP_Code$$" ); }
+void globalTricorder_TT_KP_Keypad()		{globalTricorder_SetToolTip_killthisthread(); thread globalTricorder_SetToolTip( "$$TriPuz_KP_Keypad$$" ); }
+
+// routing tooltips are context sensitive and are in the routing script file
+
+void globalTricorder_TT_WA_Tricorder()	{globalTricorder_SetToolTip_killthisthread(); thread globalTricorder_SetToolTip( "$$TriPuz_WA_Tricorder$$" ); }
+void globalTricorder_TT_WA_Compare()	{globalTricorder_SetToolTip_killthisthread(); thread globalTricorder_SetToolTip( "$$TriPuz_WA_Compare$$" ); }
+void globalTricorder_TT_WA_Lock()		{globalTricorder_SetToolTip_killthisthread(); thread globalTricorder_SetToolTip( "$$TriPuz_WA_Lock$$" ); }
+void globalTricorder_TT_WA_Ampl()		{globalTricorder_SetToolTip_killthisthread(); thread globalTricorder_SetToolTip( "$$TriPuz_WA_Ampl$$" ); }
+void globalTricorder_TT_WA_Freq()		{globalTricorder_SetToolTip_killthisthread(); thread globalTricorder_SetToolTip( "$$TriPuz_WA_Freq$$" ); }
+void globalTricorder_TT_WA_Offs()		{globalTricorder_SetToolTip_killthisthread(); thread globalTricorder_SetToolTip( "$$TriPuz_WA_Offs$$" ); }
+void globalTricorder_TT_WA_Increase()	{globalTricorder_SetToolTip_killthisthread(); thread globalTricorder_SetToolTip( "$$TriPuz_WA_Increase$$" ); }
+void globalTricorder_TT_WA_Value()		{globalTricorder_SetToolTip_killthisthread(); thread globalTricorder_SetToolTip( "$$TriPuz_WA_Value$$" ); }
+void globalTricorder_TT_WA_Decrease()	{globalTricorder_SetToolTip_killthisthread(); thread globalTricorder_SetToolTip( "$$TriPuz_WA_Decrease$$" ); }
+
+
+void globalTricorder_SetToolTip_killthisthread()
+{
+	killthread( "globalTricorder_SetToolTip" );
+}
+
+void playSound_9_1_1000(entity e,string sSound)
+{
+	e.playsound(sSound, 9, 1, 1000 );
+}
+
+void wait0dot05()
+{
+	wait( 0.05 );
+}

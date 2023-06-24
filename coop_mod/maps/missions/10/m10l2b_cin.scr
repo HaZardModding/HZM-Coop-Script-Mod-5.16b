@@ -1,0 +1,250 @@
+void stageTransitionSkipthread ();
+void Cinematic_LevelEnd();
+void skipCinematicLevelEnd ();
+void Cinematic_BossFight();
+void Cinematic_BossFightEnd();
+
+//cam.load ( "m10l2a_gonzcam" );
+//cam.load ( "m10l2b_final_cinematic" );
+
+
+
+
+//---------------------
+// Cinematic_BossFight
+// Find gonzales, start fight with informant
+void Cinematic_BossFight()
+{
+//SINGLEPLAYER, LOCK PLAYER INSIDE THIS AREA
+	if(!cvar_bool_multiplayer)
+	{
+		thread closeDoor ();
+	}
+	killthread ( "BigLift_MoveDown" );
+	//$player.setobjectivecomplete ( "FollowInformant" , 1 );
+	thread globalCoop_objectives_update("complete",1,1);
+	
+	globalCoop_main_camFadeOut(.5);
+	wait ( .5 );
+	cinIntro = createcinematic ( "m10-l2b-rom" );
+	
+	globalCoop_cin_start();
+	wait ( .1 );
+	
+	cinIntro.setendthread ( "Cinematic_BossFightEnd" );
+	cinIntro.beginCinematic( "m10-l2b-rom" );
+	allowmusicDucking ( 0 );
+	music ( "aux2" );
+	$informant.remove ();
+	globalCoop_cin_skipThread( "Cinematic_BossFightEnd" );
+}
+
+void Cinematic_BossFightEnd ()
+{
+	cinIntro.endcinematic ( 0 );
+	killthread ( "Cinematic_BossFight" );
+	cam_fadeout( .5, 0, 0, 0, 1, 0 );
+	cinIntro.endcinematic ( 0 );
+	wait ( .5 );
+	$gonzalez.ai_off ();
+	wait ( .1 );
+	$gonzalez.angles ( '0 90 0' );
+
+	$gonzalez.anim ( "idle_cheer" );
+	$merc1.anim ( "idle_cheer" );
+	$merc2.anim ( "idle_cheer" );
+	$merc3.anim ( "idle_cheer" );
+	$merc4.anim ( "idle_cheer" );
+
+	$informantBoss.stopdialog();
+	$gonzalez.stopdialog ();
+	$munro.stopdialog ();
+	$munro.warpto ( "$munroNode2" );
+	$munro.angles ( '0 90 0' );
+	
+	globalCoop_cin_end();
+
+	setupBoss ( $informantBoss , 300 );
+
+	//$informantBoss.immortal ( 1 );
+	//we use setactorflag "cannotdisintegrate" 1 instead now
+
+	$merc1.warpto ( "$merc1Node" );
+	$merc2.warpto ( "$merc2Node" );
+	$merc3.warpto ( "$merc3Node" );
+	$merc4.warpto ( "$merc4Node" );
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.use ( "RomulanDisruptor" );
+	}
+	
+	//$player.setobjectiveshow ( "DefeatInformant" , 1 );
+	thread globalCoop_objectives_update("inComplete",3,1);
+	
+	
+    //--- change the music
+	music( "action" );
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+
+	wait ( 2 );
+	//	$informantBoss.warpto ( "$informantBossNode" );
+	$informantBoss.show ();
+	$informantBoss.forcealpha ( 1 );
+	$informantBoss.alpha ( 0 );
+
+	$informantBoss.origin ( '4929 1635 1' );
+	wait ( .1 );
+	//$informantBoss.fadein ( 2 );
+	$informantBoss.anim ( "idle" );
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$informantBoss.turntowardsentity ( $player );
+		$informantBoss.attack ( $player );
+	}
+	$informantBoss.ai_on ();
+
+	$merc1.anim ( "cheer" );
+	wait ( .5 );
+	$merc2.anim ( "cheer" );
+	wait ( .5 );
+	$merc3.anim ( "cheer" );
+	wait ( .5 );
+	$merc4.anim ( "cheer" );
+
+	wait ( .5 );
+	$gonzalez.anim ( "cheer" );
+}
+
+
+void stageTransitionSkipthread ()
+{
+	killthread ( "m10l2b_FromStateMachine_StageTransition" );
+	cam_fadeout( .5, 0, 0, 0, 1, 0 );
+	wait ( .5 );
+	
+	globalCoop_cin_end();
+
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+	
+	$munro.stopdialog ();
+	$informantBoss.ai_on ();
+	$informantBoss.show ();
+}
+
+
+//---------------------
+// Cinematic_LevelEnd
+// End of the level cinematic
+//---------------------
+void Cinematic_LevelEnd()
+{
+//ALLOW LOADING NEXT MAP IF TIME RUNS OUT DURING CIN
+	globalCoop_mission_accomplished();
+	
+	//$player.setobjectivecomplete ( "DefeatInformant" , 1 );
+	thread globalCoop_objectives_update("complete",3,1);
+	if(!cvar_bool_multiplayer)
+	{
+		$player.nodamage ();
+		$player.notsolid ();
+	}
+
+	informantKilled = 1;
+
+	//
+	$informantBoss.origin ( '4459 1487 -6' );
+	globalCoop_main_camFadeOut(.5);
+	spawn ( "Camera" , "targetname" , "cam1" );
+	spawn ( "Actor" , "targetname" , "fakeInformant" , "model" , "char/romulan_informant-boss.tik" );
+	spawn ( "ScriptSlave" , "targetname" , "watcher" );
+	wait ( .05 );
+
+	$watcher.origin('4459 1487 -6');
+
+	$fakeInformant.ai_off ();
+	$fakeInformant.origin ( '4459 1487 -6' );
+	$fakeInformant.angles ( '0 270 0' );
+	$fakeInformant.useactorweapon ( "none" );
+	$informantBoss.updatebosshealth ( 0 );
+	$informantBoss.remove ();
+
+	$watcher.time ( .1 );
+	$watcher.moveNorth ( 64 );
+	wait ( .05 );
+	´
+	globalCoop_cin_start();
+
+/*
+	$cam1.orbit ( $fakeInformant , $watcher ) ;
+	$cam1.orbit_height ( 256 );
+	$cam1.speed ( .25 );
+	$cam1.fov ( 60 );
+	$cam1.cut ();
+*/
+
+	globalCoop_cin_orbitHeight($cam1,256);//must be set before orbit is started
+	globalCoop_cin_speed($cam1,.25);//must be set before orbit is started
+	globalCoop_cin_orbitWatch($cam1,$fakeInformant,$watcher);//start orbit
+	globalCoop_cin_fov($cam1,60);
+	globalCoop_cin_cut($cam1);
+	wait ( .1 );
+
+    //--- change the music
+    allowMusicDucking( 0 );
+	
+	$fakeInformant.animateonce ( "informantdeath" );
+	wait (.1 );
+        //--- change the music
+	forcemusic( "aux3" );
+
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+	globalCoop_cin_skipThread( "skipCinematicLevelEnd" );
+	
+	
+	globalCoop_cin_cuecamera ( $cam1 );
+	music ( "aux3" );
+	wait ( 10 );
+	cam_fadeout( .5, 0, 0, 0, 1, 0 );
+	wait ( .5 );
+	$gonzoField.remove ();
+	$gonzalez.remove ();
+	$fakeInformant.origin ( '4925 1560 0' );
+	//$fakeInformant.remove ();
+
+	cin = createcinematic ( "m10l2-gonz" );
+	
+	wait ( 2 );
+
+	cin.setendthread ( "skipCinematicLevelEnd" );
+	cin.beginCinematic( "m10l2-gonz" );
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+
+	$merc1.anim ( "idle" );
+	$merc2.anim ( "idle" );
+	$merc3.anim ( "idle" );
+	$merc4.anim ( "idle" );
+}
+
+void skipCinematicLevelEnd ()
+{
+	cin.endcinematic ( 0 );
+	cam_fadeout( .1, 0, 0, 0, 1, 0 );
+	killthread ( "Cinematic_LevelEnd");
+
+	globalCoop_cin_end();
+	
+	wait ( 2 );
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		spawn ( "trigger_changelevel", "targetname", "trigger_endlevel", "map", "ent-deck8","origin","0 0 999");
+		setfloatvar ( "game.globalMissionEnterprise", 8 );
+		wait ( 1 );
+		$player.takedamage ();
+		trigger ( "$trigger_endlevel" );
+	}
+	else{
+		thread coop_endLevel();
+	}
+}
+
+

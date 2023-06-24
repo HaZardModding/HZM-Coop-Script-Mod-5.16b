@@ -1,0 +1,20 @@
+cache sysimg/icons/mp/team_red.img
+cache sysimg/icons/mp/team_blue.img
+cache sysimg/icons/mp/team_red_hud.img
+cache sysimg/icons/mp/team_blue_hud.img
+cache sysimg/icons/mp/team_red_spectator.img
+cache sysimg/icons/mp/team_blue_spectator.img
+
+cache localization/sound/dialog/dm/comp_teamstied.mp3
+cache localization/sound/dialog/dm/comp_team1stplace.mp3
+cache localization/sound/dialog/dm/comp_teamnolead.mp3
+cache localization/sound/dialog/dm/comp_team1stplace.mp3
+cache localization/sound/dialog/dm/comp_teamnolead.mp3
+
+//at end of match, no one will realize that micro lag, since they are all immobilized and starring on the score-board
+//cache localization/sound/dialog/dm/comp_matover.mp3
+//cache localization/sound/dialog/dm/comp_redtlose.mp3
+//cache localization/sound/dialog/dm/comp_bltlose.mp3
+//cache localization/sound/dialog/dm/comp_rtwins.mp3
+//cache localization/sound/dialog/dm/comp_btwins.mp3
+

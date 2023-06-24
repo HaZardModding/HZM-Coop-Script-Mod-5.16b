@@ -1,0 +1,1140 @@
+menu "coop_settings" 640 480 NONE 0
+bgcolor 0 0 0 0.75
+borderstyle NONE
+depth 0.2
+
+//pushcommand "ui_showmouse\n"
+//popcommand "ui_hidemouse\n"
+
+
+// resource 
+// RenderModel
+// {
+// ordernumber 0
+// name "xxxxxxx"
+// rect 0 0 640 480
+// fgcolor 0.00 0.00 0.00 1.00
+// bgcolor 0.35 0.67 1.00 1.00
+// rendermodelprecache
+// rendermodel /models/sky/sky_UI-stardome02.tik
+// rendermodeloffset "0 0 0"
+// rendermodelrotateoffset "0 0 0"
+// rendermodelanimation "idle"
+// rendermodelfov 100 70
+
+//rendermodel /models/sky/sky_UI-stardome02.tik
+//linkcvar "ui_mainMenuModel"
+//rendermodelfov 60.0 45.0
+//visibilityProperty "Background" "ShowShip"
+// }
+
+resource
+Widget
+{
+	ordernumber 10
+	name "coop_settings_bgArt"
+	rect 240 60 370 370
+	fgcolor 1.00 1.00 1.00 1.00
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "none"
+	shader textures/coop_mod/misc/boxart
+	//shadercolor 1 1 1 0.5
+	shadercolor 1 1 1 0.75
+}
+
+resource
+Widget
+{
+name "coop_settings_main_bkg_01"
+rect 0 0 256 256
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+ordernumber 1
+shader menu/main/bkg_01
+}
+
+resource
+Widget
+{
+name "coop_settings_main_bkg_02"
+rect 256 0 256 256
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+ordernumber 1
+shader menu/main/bkg_02
+}
+
+resource
+Widget
+{
+name "coop_settings_main_bkg_03"
+rect 512 0 128 256
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+ordernumber 1
+shader menu/main/bkg_03
+}
+
+resource
+Widget
+{
+name "coop_settings_main_bkg_04"
+rect 0 256 256 256
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+ordernumber 1
+shader menu/main/bkg_04
+}
+
+resource
+Widget
+{
+name "coop_settings_main_bkg_05"
+rect 256 256 256 256
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+ordernumber 1
+shader menu/main/bkg_05
+}
+
+resource
+Widget
+{
+name "coop_settings_main_bkg_06"
+rect 512 256 128 256
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+ordernumber 1
+shader menu/main/bkg_06
+}
+
+resource
+Widget
+{
+name "coop_settings_logo"
+rect 174 -29 288 134
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+ordernumber 10
+shader menu/main/logo
+}
+
+
+resource
+Label
+{
+    name "coop_settings_tooltip"
+    rect 49 403 320 26
+    fgcolor 1 1 1 1
+    bgcolor 0 0 0 0
+    font tahoma-8
+    
+    horizontaljustify left
+    verticaljustify top
+}
+
+
+
+//----------------------------------------------------------------------
+// FINE TUNNING
+// FINE TUNNING
+// FINE TUNNING
+//----------------------------------------------------------------------
+resource 
+Label
+{
+    title "Fine Tuning"
+	name "coop_settings_fineTunningTitel"
+	rect 34 87 215 16
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	font serpentinemedium-10
+	borderstyle "3D_BORDER"
+	hovercommand "globalwidgetcommand coop_settings_tooltip title \"Fine tune your Network settings here, after you have execute the Settings Assistent below\""
+	hoverexitcommand "globalwidgetcommand coop_settings_tooltip title \"\""
+	cvarvisibility coop_setupA 1 ==
+}
+resource
+Widget
+{
+	name "coop_settings_fineTunningWidget"
+	rect 34 103 214 118
+	fgcolor 1 1 1 1
+	bgcolor 0.000 0.000 0.000 0.75
+	borderstyle "OUTLINE_BORDER"
+	borderwidth 1
+	bordercolor 0.278 0.365 0.510 1.000
+	cvarvisibility coop_setupA 1 ==
+}
+resource 
+Label
+{
+	title "Max Frames per secound"
+	name "coop_settings_fineTunningFpsTitle"
+	rect 34 103 170 16
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+	cvarvisibility coop_setupA 1 ==
+}
+resource 
+Label
+{
+	title ""
+	name "coop_settings_fineTunningFpsCurrent"
+	linkcvar "com_maxfps"
+	rect 190 103 40 16
+	fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+	cvarvisibility coop_setupA 1 ==
+}
+resource
+PulldownMenuContainer
+{
+	title "$$list$$"
+	name "coop_settings_fineTunningFpsSelect"
+	rect 230 103 16 16
+    fgcolor 				0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinelight-10
+	
+	menushader "MENU" "textures/menu/pulldownarrow"
+	selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "20"		command "seta com_maxfps 20\n"
+	addpopup "MENU" "25"		command "seta com_maxfps 25\n"
+	addpopup "MENU" "30"		command "seta com_maxfps 30\n"
+	addpopup "MENU" "40"		command "seta com_maxfps 40\n"
+	addpopup "MENU" "43"		command "seta com_maxfps 43\n"
+	addpopup "MENU" "50"		command "seta com_maxfps 50\n"
+	addpopup "MENU" "60"		command "seta com_maxfps 60\n"
+	addpopup "MENU" "62"		command "seta com_maxfps 62\n"
+	addpopup "MENU" "70"		command "seta com_maxfps 70\n"
+	addpopup "MENU" "75"		command "seta com_maxfps 75\n"
+	addpopup "MENU" "80"		command "seta com_maxfps 80\n"
+	addpopup "MENU" "85"		command "seta com_maxfps 85\n"
+	addpopup "MENU" "90"		command "seta com_maxfps 90\n"
+	addpopup "MENU" "96"		command "seta com_maxfps 96\n"
+	addpopup "MENU" "110"		command "seta com_maxfps 110\n"
+	addpopup "MENU" "Unlim." 	command "seta com_maxfps 0\n"
+	
+	popup_width "MENU" 50
+    clicksound sound/misc/menu/click.wav
+	cvarvisibility coop_setupA 1 ==
+}
+//----------------------------------------------------------------------
+// cl_maxpackets
+//----------------------------------------------------------------------
+resource 
+Label
+{
+	title "Max packets to send"
+	name "coop_settings_fineTunningMaxPacketsTitle"
+	rect 34 119 160 16
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+	cvarvisibility coop_setupA 1 ==
+}
+resource 
+Label
+{
+	title "maxpackets"
+	name "coop_settings_fineTunningMaxPacketsCurrent"
+	linkcvar "cl_maxpackets"
+	rect 190 119 40 16
+	fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+	cvarvisibility coop_setupA 1 ==
+}
+
+
+resource
+PulldownMenuContainer
+{
+	title "$$list$$"
+	name "coop_settings_fineTunningMaxPacketsSelect"
+	rect 230 119 16 16
+    fgcolor					0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinemedium-10
+	menushader "MENU" "textures/menu/pulldownarrow"
+	selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "62"			command "seta cl_maxpackets 62\n"
+	addpopup "MENU" "76"			command "seta cl_maxpackets 76\n"
+	addpopup "MENU" "86"			command "seta cl_maxpackets 86\n"
+	addpopup "MENU" "97"			command "seta cl_maxpackets 97\n"
+	addpopup "MENU" "111"			command "seta cl_maxpackets 111\n"
+
+	popup_width "MENU" 50
+    clicksound sound/misc/menu/click.wav
+	cvarvisibility coop_setupA 1 ==
+}
+//----------------------------------------------------------------------
+// snaps
+//----------------------------------------------------------------------
+resource 
+Label
+{
+	title "Updates per sec (snaps)"
+	name "coop_settings_fineTunningSnapsTitle"
+	rect 34 135 170 16
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+	cvarvisibility coop_setupA 1 ==
+}
+resource 
+Label
+{
+	title ""
+	name "coop_settings_fineTunningSnapsCurrent"
+	linkcvar "snaps"
+	rect 190 135 40 16
+	fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+	cvarvisibility coop_setupA 1 ==
+}
+resource
+PulldownMenuContainer
+{
+	title "$$list$$"
+	name "coop_settings_fineTunningSnapsSelect"
+	rect 230 135 16 16
+    fgcolor					0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinemedium-10
+	menushader "MENU" "textures/menu/pulldownarrow"
+	selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "reset"	command "seta snaps 20\n"
+	addpopup "MENU" "30"	command "seta snaps 30\n"
+
+	popup_width "MENU" 50
+    clicksound sound/misc/menu/click.wav
+	cvarvisibility coop_setupA 1 ==
+}
+
+//----------------------------------------------------------------------
+// Rate
+//----------------------------------------------------------------------
+resource 
+Label
+{
+	title "Data Rate"
+	name "coop_settings_tunningAssisentRateTitle"
+	rect 34 151 130 16
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+	cvarvisibility coop_setupA 1 ==
+}
+resource 
+Label
+{
+	title ""
+	name "coop_settings_tunningAssisentRateCurrent"
+	linkcvar "rate"
+	rect 180 151 50 16
+	fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+	cvarvisibility coop_setupA 1 ==
+}
+resource
+PulldownMenuContainer
+{
+	title "$$list$$"
+	name "coop_settings_tunningAssisentRateSelect"
+	rect 230 151 16 16
+    fgcolor					0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinemedium-10
+	menushader "MENU" "textures/menu/pulldownarrow"
+	selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "56k Modem"	command "seta rate 4000\n"
+	addpopup "MENU" "ISDN"		command "seta rate 5000\n"
+	addpopup "MENU" "Dual ISDN"	command "seta rate 8000\n"
+	addpopup "MENU" "DSL Light"	command "seta rate 10000\n"
+	addpopup "MENU" "DSL 1k"	command "seta rate 12000\n"
+	addpopup "MENU" "DSL 2k"	command "seta rate 14000\n"
+	addpopup "MENU" "DSL 6k"	command "seta rate 16000\n"
+	addpopup "MENU" "DSL 10k"	command "seta rate 18000\n"
+	addpopup "MENU" "LAN"		command "seta rate 20000\n"
+	addpopup "MENU" "Default"	command "seta rate 25000\n"
+	
+	popup_width "MENU" 70	
+    clicksound sound/misc/menu/click.wav
+	cvarvisibility coop_setupA 1 ==
+}
+//----------------------------------------------------------------------
+// FPS
+//----------------------------------------------------------------------
+resource 
+Label
+{
+	title "Show framrate"
+	name "coop_settings_tunningAssisentFpsTitle"
+	rect 34 167 130 16
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+	cvarvisibility coop_setupA 1 ==
+}
+resource 
+Label
+{
+	name "fps"
+	title "coop_settings_tunningAssisentFpsCurrent"
+	rect 190 167 40 16
+	fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+	linkcvar fps
+	cvarvisibility coop_setupA 1 ==
+}
+resource
+PulldownMenuContainer
+{
+	title "$$list$$"
+	name "coop_settings_tunningAssisentFpsSelect"
+	rect 230 167 16 16
+    fgcolor					0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinemedium-10
+	menushader "MENU" "textures/menu/pulldownarrow"
+	selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "on"	command "seta fps 1\n"
+	addpopup "MENU" "off"	command "seta fps 0\n"
+
+
+	popup_width "MENU" 40
+    clicksound sound/misc/menu/click.wav
+	cvarvisibility coop_setupA 1 ==
+}
+
+//----------------------------------------------------------------------
+// Logconsole
+//----------------------------------------------------------------------
+resource 
+Label
+{
+	title "Save Console to Logfile"
+	name "coop_settings_tunningAssisentLogTitle"
+	rect 34 182 170 16
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+	cvarvisibility coop_setupA 1 ==
+}
+resource 
+Label
+{
+	title ""
+	name "coop_settings_tunningAssisentLogSelect"
+	rect 190 182 40 16
+	fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+	linkcvar logfile
+	cvarvisibility coop_setupA 1 ==
+}
+
+resource
+PulldownMenuContainer
+{
+	title "$$list$$"
+	name "coop_settings_tunningAssisentLogSelect"
+	rect 230 182 16 16
+    fgcolor					0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinemedium-10
+	menushader "MENU" "textures/menu/pulldownarrow"
+	selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "on - normal"	command "seta logfile 1\n"
+	addpopup "MENU" "on - delayed"	command "seta logfile 2\n"
+	addpopup "MENU" "off"			command "seta logfile 0\n"
+
+	popup_width "MENU" 100	
+    clicksound sound/misc/menu/click.wav
+	cvarvisibility coop_setupA 1 ==
+}
+
+//----------------------------------------------------------------------
+//strafe tilt
+//----------------------------------------------------------------------
+resource
+label
+{
+    title "Tilt view during Strafe"
+    name "coop_settings_tunningAssisentTiltTitle"
+    rect 34 197 160 15
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+	cvarvisibility coop_setupA 1 ==
+}
+
+resource 
+Label
+{
+	title ""
+	name "coop_settings_tunningAssisentTiltCurrent"
+	rect 190 197 40 16
+	fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+	linkcvar cg_viewStrafeTilt
+	cvarvisibility coop_setupA 1 ==
+}
+
+
+resource
+PulldownMenuContainer
+{
+	title "Strafetilt"
+	name "coop_settings_tunningAssisentTiltSelect"
+	rect 230 197 16 16
+    fgcolor                 0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinemedium-10
+	menushader		"MENU" "textures/menu/pulldownarrow"
+	selmenushader	"MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "On"	command "seta cg_viewstrafetilt 1\n"
+	addpopup "MENU" "Off" 	command "seta cg_viewstrafetilt 0\n"
+	popup_width "MENU" 40
+	
+    clicksound sound/misc/menu/click.wav
+	cvarvisibility coop_setupA 1 ==
+}
+
+
+
+
+//----------------------------------------------------------------------
+// SETUP-ASSISTENT
+// SETUP-ASSISTENT
+// SETUP-ASSISTENT
+//----------------------------------------------------------------------
+resource 
+Label
+{
+    title "Settings Assistent"  //$$Settings$$
+	name "coop_settings_tunningAssisentTitle"
+	rect 34 230 215 16
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	font serpentinemedium-10
+	borderstyle "3D_BORDER"
+	hovercommand "globalwidgetcommand coop_settings_tooltip title \"Execute this Setup Assistent in the correct order, before you fine tune your Settings!\""
+	hoverexitcommand "globalwidgetcommand coop_settings_tooltip title \"\""
+}
+
+resource
+Widget
+{
+	name "coop_settings_tunningAssisentWidget"
+	rect 34 246 214 100
+	fgcolor 1 1 1 1
+	bgcolor 0.000 0.000 0.000 0.75
+	borderstyle "OUTLINE_BORDER"
+	borderwidth 1
+	bordercolor 0.278 0.365 0.510 1.000
+	cvarvisibility coop_setupA 0 ==
+}
+resource
+Widget
+{
+	name "coop_settings_tunningAssisentWidget"
+	rect 34 246 214 55
+	fgcolor 1 1 1 1
+	bgcolor 0.000 0.000 0.000 0.75
+	borderstyle "OUTLINE_BORDER"
+	borderwidth 1
+	bordercolor 0.278 0.365 0.510 1.000
+	cvarvisibility coop_setupA 1 ==
+}
+//----------------------------------------------------------------------
+//	Settings CPU SPEED
+//----------------------------------------------------------------------
+resource 
+Label
+{
+	title "1. CPU SPEED"
+	name "coop_settings_tunningAssisentCpuTitle"
+	rect 34 246 130 16
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+}
+resource 
+Label
+{
+	title ""
+	name "coop_settings_tunningAssisentCpuCurrent"
+	linkcvar "coop_ui_cpu"
+	rect 90 246 130 16
+	fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+}
+resource
+PulldownMenuContainer
+{
+	title "CPU SPEED"
+	name "coop_settings_tunningAssisentCpuSelect"
+	rect 230 246 16 16
+    fgcolor 				0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinelight-10
+	
+	menushader "MENU" "textures/menu/pulldownarrow"
+	selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "< 1600 MHz - Very Slow CPU"	command "seta coop_ui_cpu very^0_^8Slow;exec coop_mod/cfg/tuning/cpuveryslow.cfg\n"
+	addpopup "MENU" "< 2400 MHz - Slow CPU"			command "seta coop_ui_cpu Slow;exec coop_mod/cfg/tuning/cpuslow.cfg\n"
+	addpopup "MENU" "> 2400 MHz - Medium CPU"		command "seta coop_ui_cpu Medium;exec coop_mod/cfg/tuning/cpumedium.cfg\n"
+	addpopup "MENU" "> 3000 MHz - Normal CPU"		command "seta coop_ui_cpu Normal;exec coop_mod/cfg/tuning/cpunormal.cfg\n"
+	addpopup "MENU" "> 3500 MHz - Fast CPU"			command "seta coop_ui_cpu Fast;exec coop_mod/cfg/tuning/cpufast.cfg\n"
+	addpopup "MENU" "> 4000 MHz - Very Fast CPU"	command "seta coop_ui_cpu very^0_^8Fast;exec coop_mod/cfg/tuning/cpuveryfast.cfg\n"
+	popup_width "MENU" 200
+	clicksound sound/misc/menu/click.wav
+}
+//----------------------------------------------------------------------
+//	Connection Settings
+//----------------------------------------------------------------------
+resource 
+Label
+{
+	title "2. Network"
+	name "coop_settings_tunningAssisentNetworkTitle"
+	rect 34 262 130 16
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+}
+resource 
+Label
+{
+	title ""
+	name "coop_settings_tunningAssisentNetworkCurrent"
+	linkcvar "coop_ui_netw"
+	rect 84 262 130 16
+	fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+}
+resource
+PulldownMenuContainer
+{
+	title "Network"
+	name "coop_settings_tunningAssisentNetworkSelect"
+	rect 230 262 16 16
+    fgcolor 				0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinelight-10
+	
+	menushader "MENU" "textures/menu/pulldownarrow"
+	selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "RESET"				command "seta coop_ui_netw DEFAULT;exec coop_mod/cfg/tuning/resetconnection.cfg\n"
+	addpopup "MENU" "56k Modem"			command "seta coop_ui_netw 56k;exec coop_mod/cfg/tuning/56kconnection.cfg\n"
+	addpopup "MENU" "ISDN / DSL-light"	command "seta coop_ui_netw ISDN/DSL-light;exec coop_mod/cfg/tuning/dsl300connection.cfg\n"
+	addpopup "MENU" "DSL 1000"			command "seta coop_ui_netw DSL-1;exec coop_mod/cfg/tuning/dsl1000connection.cfg\n"
+	addpopup "MENU" "DSL 3000"			command "seta coop_ui_netw DSL-3;exec coop_mod/cfg/tuning/dsl3000connection.cfg\n"
+	addpopup "MENU" "DSL 6000"			command "seta coop_ui_netw DSL-6;exec coop_mod/cfg/tuning/dsl6000connection.cfg\n"
+	addpopup "MENU" "DSL 10000"			command "seta coop_ui_netw DSL-10;exec coop_mod/cfg/tuning/dsl10000connection.cfg\n"
+	addpopup "MENU" "LAN"				command "seta coop_ui_netw LAN;exec coop_mod/cfg/tuning/lanconnection.cfg\n"
+	addpopup "MENU" "Shared 56k Modem"	command "seta coop_ui_netw Shared-56k;exec coop_mod/cfg/tuning/shared56kconnection.cfg\n"
+	addpopup "MENU" "Shared ISDN/DSL-L"	command "seta coop_ui_netw ISDN/DSL-light;exec coop_mod/cfg/tuning/shareddsl300connection.cfg\n"
+	addpopup "MENU" "Shared DSL 1000"	command "seta coop_ui_netw Shared-DSL-1;exec coop_mod/cfg/tuning/shareddsl1000connection.cfg\n"
+	addpopup "MENU" "Shared DSL 3000"	command "seta coop_ui_netw Shared-DSL-3;exec coop_mod/cfg/tuning/shareddsl3000connection.cfg\n"
+	addpopup "MENU" "Shared DSL 6000"	command "seta coop_ui_netw Shared-DSL-6;exec coop_mod/cfg/tuning/shareddsl6000connection.cfg\n"
+	popup_width "MENU" 200
+	clicksound sound/misc/menu/click.wav
+}
+
+//----------------------------------------------------------------------
+//	Settings Renderer
+//----------------------------------------------------------------------
+resource 
+Label
+{
+	title "3. Graphics"
+	name "coop_settings_tunningAssisentRendererTitle"
+	rect 34 278 160 16
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+}
+resource 
+Label
+{
+	title ""
+	name "coop_settings_tunningAssisentRendereCurrent"
+	linkcvar "coop_ui_rSpeed"
+	rect 84 278 130 16
+	fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-10
+}
+resource
+PulldownMenuContainer
+{
+	title "Renderer"
+	name "coop_settings_tunningAssisentRendererSelect"
+	rect 230 278 16 16
+    fgcolor 				0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinelight-10
+	
+	menushader "MENU" "textures/menu/pulldownarrow"
+	selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "< 16 Mb - very Slow"	command "seta coop_ui_rSpeed very^0_^8Slow;exec coop_mod/cfg/tuning/rveryslow.cfg\n"
+	addpopup "MENU" "= 16 MB - Slow"		command "seta coop_ui_rSpeed Slow;exec coop_mod/cfg/tuning/rslow.cfg\n"
+	addpopup "MENU" "= 32 MB - Normal"		command "seta coop_ui_rSpeed Normal;exec coop_mod/cfg/tuning/rnormal.cfg\n"
+	addpopup "MENU" "= 64 MB - Medium"		command "seta coop_ui_rSpeed Medium;exec coop_mod/cfg/tuning/rmedium.cfg\n"
+	addpopup "MENU" "> 64 MB - Fast"		command "seta coop_ui_rSpeed High;exec coop_mod/cfg/tuning/rfast.cfg\n"
+	addpopup "MENU" "=128 MB - very Fast"	command "seta coop_ui_rSpeed very^0_^8Fast;exec coop_mod/cfg/tuning/rveryfast.cfg\n"
+	popup_width "MENU" 200
+	clicksound sound/misc/menu/click.wav
+}
+
+resource 
+Label
+{
+	name "coop_settings_tunningAssisentNote"
+	title "^3Please execute the setup ^3assistent in the correct order ^3or it might not work correctly.\n 1. CPU\n 2. Network\n 3. Renderer"
+	rect 35 247 212 98
+    bgcolor 0.000 0.000 0.000 0.9
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+	cvarvisibility coop_setupA 0 ==
+}
+resource
+Button
+{
+	title	"$$OK$$"
+	name 	"coop_settings_tunningAssisentButton"
+	rect 	 180 320 60 16
+	font serpentinemedium-10
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+    clicksound sound/misc/menu/click.wav
+	stuffcommand "exec coop_mod/cfg/coop_settings_showAssistant.cfg"
+    verticaljustify top
+	cvarvisibility coop_setupA 0 ==
+}
+
+
+
+//----------------------------------------------------------------------
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//	Right SIDE
+//----------------------------------------------------------------------
+
+resource 
+Label
+{
+    title "Coop Settings"
+	name "coop_settings_coopSettingsTitel"
+	rect 290 87 300 16
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	font serpentinemedium-10
+	borderstyle "3D_BORDER"
+	hovercommand "globalwidgetcommand coop_settings_tooltip title \"Coop Mod related settings\""
+	hoverexitcommand "globalwidgetcommand coop_settings_tooltip title \"\""
+}
+resource
+Widget
+{
+	name "coop_settings_coopSettingsWidget"
+	rect 290 103 300 118
+	fgcolor 1 1 1 1
+	bgcolor 0.000 0.000 0.000 0.75
+	borderstyle "OUTLINE_BORDER"
+	borderwidth 1
+	bordercolor 0.278 0.365 0.510 1.000
+}
+
+//----------------------------------------------------------------------
+//	Info hud
+//----------------------------------------------------------------------
+resource 
+Label
+{
+	title "Show Server Settings Info automatically"
+	name "coop_settings_coopSettingsInfoTitle"
+	rect 294 106 280 16
+    bgcolor 0.000 0.000 0.000 0.000
+    fgcolor 1.000 1.000 1.000 1.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+}
+resource
+PulldownMenuContainer
+{
+	title "Coop Info"
+	name "coop_settings_coopSettingsInfoSelect"
+	rect 570 106 16 16
+    fgcolor 				0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+	font serpentinelight-10
+	
+	menushader "MENU" "textures/menu/pulldownarrow"
+	selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "Enable"	command "seta coop_iUi \"ui_addhud coop_info\"\n"
+	addpopup "MENU" "Disable"		command "seta coop_iUi \"\"\n"
+	popup_width "MENU" 140
+	clicksound sound/misc/menu/click.wav
+}
+
+resource 
+Label
+{
+	title "Chat Font Size and Type"
+	name "coop_settings_coopSettingsFontTitle"
+	rect 294 122 200 16
+    bgcolor 0.000 0.000 0.000 0.000
+    fgcolor 1.000 1.000 1.000 1.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-10
+}
+resource
+Button
+{
+	title	"Select"
+	name 	"coop_settings_coopSettingsFontButton"
+	rect 	 496 122 90 16
+	font serpentinemedium-10
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+    clicksound sound/misc/menu/click.wav
+	stuffcommand "pushmenu coop_font"
+    verticaljustify top
+	hovercommand "globalwidgetcommand coop_settings_tooltip title \"Set Type and Size of the Player Chat Text\""
+	hoverexitcommand "globalwidgetcommand coop_settings_tooltip title \"\""
+}
+
+
+//----------------------------------------------------------------------
+//	Keybinds
+//	Keybinds
+//	Keybinds
+//----------------------------------------------------------------------
+resource 
+Label
+{
+    title "Coop Keybinds"
+	name "coop_settings_coopKeybindsTitel"
+	rect 290 227 300 16
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	font serpentinemedium-10
+	borderstyle "3D_BORDER"
+	hovercommand "globalwidgetcommand coop_settings_tooltip title \"Coop Mod Key binds\""
+	hoverexitcommand "globalwidgetcommand coop_settings_tooltip title \"\""
+}
+// resource
+// Widget
+// {
+	// name "coop_settings_coopKeybindsWidget"
+	// rect 290 243 300 118
+	// fgcolor 1 1 1 1
+	// bgcolor 0.000 0.000 0.000 0.75
+	// borderstyle "OUTLINE_BORDER"
+	// borderwidth 1
+	// bordercolor 0.278 0.365 0.510 1.000
+// }
+resource 
+Button
+{
+	 title ""
+	name "coop_settings_coopKeybindsHeader"
+	fgcolor 0.953 0.667 0.271 1.000
+	bgcolor 0.125 0.157 0.251 1.000
+	
+	font serpentinemedium-8
+	horizontaljustify left
+	verticaljustify center
+	
+	borderstyle "3D_BORDER"
+	bordercolor	0.125 0.157 0.251 1.000
+	//font serpentinelight-10
+	
+}
+resource 
+Label
+{
+	name "coop_settings_coopKeybindsCommand"
+	fgcolor 		        0.278 0.365 0.510 1.000
+	bgcolor 		        0.000 0.000 0.000 0.000
+	hoverfgcolor		    0.278 0.365 0.510 1.000
+	hoverbgcolor		    0.953 0.667 0.271 0.500
+	selectedfgcolor 	    1.000 1.000 1.000 1.000
+	selectedbgcolor 	    0.278 0.365 0.510 1.000
+	
+	borderstyle			    "BORDER_NONE"
+	
+	font 				serpentinemedium-10
+	horizontaljustify left
+	
+    clicksound sound/misc/menu/click.wav
+}	
+resource
+BindButton
+{
+	name "coop_settings_coopKeybindsButton"
+	fgcolor 		    0.278 0.365 0.510 1.000
+	bgcolor 		    0.000 0.000 0.000 0.000
+	hoverfgcolor		0.278 0.365 0.510 1.000
+	hoverbgcolor		0.953 0.667 0.271 0.500
+	armedfgcolor		1.000 1.000 1.000 1.000
+	armedbgcolor		0.278 0.365 0.510 1.000
+	
+	borderstyle			    "BORDER_NONE"
+	
+ 	font 				    serpentinemedium-10
+ 	
+    clicksound sound/misc/menu/click.wav
+}
+resource
+BindButton
+{
+	name "coop_settings_coopKeybindsAlt"
+	fgcolor 		    0.278 0.365 0.510 1.000
+	bgcolor 		    0.000 0.000 0.000 0.000
+	hoverfgcolor		0.278 0.365 0.510 1.000
+	hoverbgcolor		0.953 0.667 0.271 0.500
+	armedfgcolor		1.000 1.000 1.000 1.000
+	armedbgcolor		0.278 0.365 0.510 1.000
+	
+	borderstyle			"BORDER_NONE"
+
+	font 				serpentinemedium-10
+	alternatekey
+	
+    clicksound sound/misc/menu/click.wav
+}
+resource
+vertscroll
+{
+	name "coop_settings_coopKeybindsScroll"
+	fgcolor 		0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 0.500
+	scrollbar_thumbcolor	0.125 0.157 0.251 1.000
+	scrollbar_width 16
+	borderstyle "3D_BORDER"
+}
+resource
+Table
+{
+	name "coop_settings_coopKeybindsTable"
+	rect 290 243 300 120
+	fgcolor 1.00 1.00 1.00 1.00
+	bgcolor 0.00 0.00 0.00 0.90
+	headerheight 18
+	itemheight 20
+	norowselect
+	allowusersort 0
+
+	scrollbartemplate "coop_settings_coopKeybindsScroll"
+	
+	tablecolumn  "coop_settings_coopKeybindsCommand"	160 alpha   "coop_settings_coopKeybindsHeader" "$$Command$$"
+	tablecolumn  "coop_settings_coopKeybindsButton" 	62 	alpha   "coop_settings_coopKeybindsHeader" "$$Primary$$"
+	tablecolumn  "coop_settings_coopKeybindsAlt"  		62 	alpha   "coop_settings_coopKeybindsHeader" "$$Alternate$$"
+	tablecolumn  "coop_settings_coopKeybindsCommand"    0   alpha   "coop_settings_coopKeybindsHeader" ""	
+	tablecolumn  "coop_settings_coopKeybindsCommand"	16	alpha	"coop_settings_coopKeybindsHeader" ""		            //table fudge
+
+	addrow	"^5Co-Op ^8Objectives"		"togglemenu coop_objectives"		"togglemenu coop_objectives" 		"menu_idle"
+	addrow	"^5Co-Op ^8Communicator"	"togglemenu coop_communicator"		"togglemenu coop_communicator"		"menu_idle"
+	addrow	"^5Co-Op ^83rd Person"		"exec coop_mod/cfg/3rdToggle.cfg" 	"exec coop_mod/cfg/3rdToggle.cfg"	"menu_idle"
+	addrow  "$$VoteYes$$"               "vote y;use yes"					"vote y;use yes"					"menu_idle"
+	addrow  "$$VoteNo$$"                "vote n;use no"						"vote n;use no"						"menu_idle"
+	//addrow	"LagoMeter"					"toggle cg_lagometer" 	"toggle cg_lagometer"	"menu_idle"
+	//addrow	"reconnect"					"reconnect" 			"reconnect"				"menu_idle"
+	
+	borderstyle	"OUTLINE_BORDER"
+	bordercolor	0.125 0.157 0.251 1.000
+	
+	hovercommand 	 "globalwidgetcommand coop_setupTooltip enable;globalwidgetcommand coop_setupTooltip title \"$$PressEnterOrClickToChange$$\"" 4 
+	hoverexitcommand "globalwidgetcommand coop_setupTooltip disable;globalwidgetcommand coop_setupTooltip title \"\""
+}
+
+
+
+
+
+resource
+Button
+{
+	title "$$Multiplayer$$"
+	name "coop_settings_resume"
+	font serpentinemedium-12
+	rect 435 428 96 32
+	
+	fgcolor 0.12 0.15 0.25 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+
+	borderstyle "none"
+	stuffcommand "popmenu 0;showmenu ingame_multiplayer\n"
+	
+    clicksound sound/misc/menu/click.wav
+
+   	hovercommand "globalwidgetcommand coop_settings_tooltip title \"$$ResumeCurrentMatch$$\""
+	hoverexitcommand "globalwidgetcommand coop_settings_tooltip title \"\""
+}
+end.

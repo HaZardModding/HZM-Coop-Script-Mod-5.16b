@@ -1,0 +1,54 @@
+void coop_shutdownForcefield ( entity forcefield )
+{
+	if(doesEntityExist(forcefield)){
+		forcefield.stoploopsound ();
+		forcefield.playsound ( "sound/ships/borg/borg_forcefield2_down.wav", 6, 1, 200 );
+		globalCoop_level_hideAndNotSolid(forcefield);
+		wait ( .1 );
+		globalCoop_level_show(forcefield);
+		wait ( .1 );
+		globalCoop_level_hide(forcefield);
+		wait ( .15 );
+		globalCoop_level_show(forcefield);
+		wait ( .15 );
+		globalCoop_level_hide(forcefield);
+		wait ( .15 );
+		globalCoop_level_show(forcefield);
+		wait ( .1 );
+		globalCoop_level_hide(forcefield);
+		wait ( .1 );
+		globalCoop_level_show(forcefield);
+		wait ( .15 );
+		if(doesEntityExist(forcefield)){
+			forcefield.setFloatVar("coop_ffIsOffline",1);
+		}
+		wait(.2);
+		globalCoop_level_hideAndNotSolid(forcefield);
+	}
+}
+
+void coop_powerUpForcefield ( entity forcefield )
+{
+	if(doesEntityExist(forcefield)){
+		forcefield.setFloatVar("coop_ffIsOffline",0);
+		forcefield.stoploopsound ();
+		forcefield.hide ();
+		wait ( .1 );
+		globalCoop_level_show(forcefield);
+		wait ( .1 );
+		globalCoop_level_hide(forcefield);
+		wait ( .15 );
+		globalCoop_level_show(forcefield);
+		wait ( .15 );
+		globalCoop_level_hide(forcefield);
+		wait ( .15 );
+		globalCoop_level_show(forcefield);
+		wait ( .1 );
+		globalCoop_level_hide(forcefield);
+		wait ( .1 );
+		if(doesEntityExist(forcefield)){
+			thread globalCoop_level_showAndSolid(forcefield);
+			forcefield.playsound ( "sound/ships/borg/borg_forcefield_on2.wav", 6, 1, 200 );
+		}
+	}
+}

@@ -1,0 +1,28 @@
+
+//--------------------------------------------------------------------------------------
+// Dialog Script
+// 	Contains all dialog setup code for one specific BSP.  That map's script should
+//	#include this file and call the function "initDialog" somewhere in it's main function.
+//--------------------------------------------------------------------------------------
+void initDialog()
+{
+	//print( "Initializing dialog\n" );
+
+	// DMX's +use dialog
+	$ForeverCrewMale.setdialogmode("normal");
+	$ForeverCrewMale.settalkwatchmode ( "turnto" );
+	$ForeverCrewMale.alias( "ForeverCrewMaleDialog1", "localization/sound/dialog/ent_m4/jacobs_notime2.mp3");
+	$ForeverCrewMale.dialog( "ForeverCrewMaleDialog" );
+
+	// Katarina's +use dialog
+	$ForeverEngineer.setdialogmode("normal");
+	$ForeverEngineer.settalkwatchmode ( "turnto" );
+	$ForeverEngineer.alias( "ForeverEngineerDialog1", "localization/sound/dialog/m2l1/female_youguy.mp3");
+	$ForeverEngineer.dialog( "ForeverEngineerDialog" );
+	
+	// "The Ugly One"'s +use dialog
+	$ForeverCrewFemale.setdialogmode("normal");
+	$ForeverCrewFemale.settalkwatchmode ( "turnto" );
+	$ForeverCrewFemale.alias( "ForeverCrewFemaleDialog1", "localization/sound/dialog/ent_m1/alison_kindaBusy.mp3");
+	$ForeverCrewFemale.dialog( "ForeverCrewFemaleDialog" );
+}

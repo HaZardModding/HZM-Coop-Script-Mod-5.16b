@@ -1,0 +1,26 @@
+You need to open up the console to type the commands in.
+You can also use the middle mouse button to paste text from
+the clipboard into the in-game console.
+
+
+HOW CAN I OPEN MY GAME CONSOLE?
+////////////////////////////////////////////////////////////////////////
+It depends on your keyboard language/layout!
+Try the follow keys to open the console:
+^ or ° or ² or ³ or @ or < or ~ or '
+
+
+//Do a callvote for a map, if you can't/won't use the menu:
+callvote <command> <attribute1>
+
+//EXAMPLES:
+////////////////////////////////////////////////////////////////////////
+//load the map named zoo1
+callvote map zoo1
+
+//restart current map
+callvote restart
+
+//kick player with client id 1 (this is not the co-op player ID!)
+//press TAB button to see player ID in score list
+callvote kick [player ID]

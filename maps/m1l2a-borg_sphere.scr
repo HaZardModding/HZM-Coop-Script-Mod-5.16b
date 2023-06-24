@@ -1,0 +1,970 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	  m1l2b-borg_sphere
+//  Script By:    L. Whiteside, J. Keehan
+//  Geometry By:  K. Thompson, B. Russell, A. Bellefeuil, J. Keehan
+//  Created on:   04/29/2002
+//
+//	Last edited: 10/24/2002 JK
+//-----------------------------------------------------------------
+
+void main();
+void coop_findAndTargetnameEntities();
+void init();
+void SetupSounds();
+
+void StartWaypointTeleport();
+void StartWaypointTeleportTriggerOff();
+void StartWaypointTeleportTriggerOff();
+
+void DisNode1_Plasma_Wait();
+void DisNode1_Destroyed();
+void setup_distNodes();
+void disNode2_destroyed();
+//void DisNode2_Wait();
+//void DisNode2_Destroyed();
+
+void LevelStart_Dialog();
+void DisNode1Destroyed_Dialog();
+void YellowForceField_Dialog();
+
+void BorgSetup();
+void Group1_Spawn1();
+void Group1_Spawn2();
+void Group2_Spawn1();
+void Group2_Spawn2();
+
+void Group1_Activate();
+void Group2Borg_dead();
+void telsiaBorgPlayDialog();
+
+//Special crap
+void countDeathBorgToEnableSpawn();
+void countDeathBorgToDisableForefield();
+void countDeathBorgToEndLevel();
+void allow_levelEnding();
+
+void actorCanFollow();
+void actorCannotFollow();
+
+
+//void tricorderPuzzle();
+//void resetTricorderPuzzle();
+void yellowForcefieldDown();
+
+void coop_exitLevel1();
+void coop_exitLevel2();
+void coop_endLevel();
+
+float startDialogFinished = 0;
+float Group2Borg_areDead = 0;
+float coop_fDeathBorg;
+float coop_nodeDisabled;
+//float TelsiaSurvived = 1;
+
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  INCLUDES
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+
+//$StartWaypointTeleportTrigger -> Exit right top
+//2a loads 2c if entering level exit on right hand side (LIFT TOP TOW WAY OPTION)
+//DIALOG: tuvok - time is short find the two other generators
+//MAP: m2l2b - DOWN, AT THE LEVEL EXIT, LIFT STAYS ON TOP
+//GENERATOR 3 DESTROYED: Cinematic, team beams out
+//DIALOG: MUNRO - How is the damening field ?
+//DIALOG: TUVOK - It's gone
+//MAP BORGBOSS - END
+//2a loads 2b if entering level exit on left hand side (TOPSIDE OF THIS BLUE POWER THING)
+//DIALOG: CHELL - SEE ONE OF THE 3 GENERATORS
+//DIALOG: tuvok - find the last generator the borg have stared to adapt to our new shield tech
+//MAP : m2l2c - START AT EXIT LOCATION, GOING LEVEL IN REVERSE
+//DIALOG: CHELL - THE THIRD GENERATOR!
+//GENERATOR 3 DESTROYED: Cinematic, team beams out
+//DIALOG: MUNRO - How is the damening field ?
+//DIALOG: TUVOK - It's gone
+//MAP BORGBOSS - END
+
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/optional_modules/forcefields.scr"
+#include "coop_mod/maps/optional_modules/puzzles_advanced.scr"
+#include "coop_mod/maps/optional_modules/teammate.scr"
+#include "coop_mod/maps/missions/1/forcefields.scr"
+#include "coop_mod/maps/missions/1/m1l2a_cin.scr"
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "maps/global_scripts/global_common.scr"
+#include "maps/global_scripts/global_math.scr"
+#include "maps/global_scripts/global_cinematicFX.scr"
+#include "maps/global_scripts/global_debugutils.scr"
+#include "maps/global_scripts/global_tricorderbase.scr"
+#include "maps/global_scripts/global_tricordermod.scr"
+#include "maps/m1/m1_deathCinematic.scr"
+
+//===================================================
+// Main Stuff
+//===================================================
+
+//---------------------
+// main
+// do start up stuff
+//---------------------
+void main()
+{
+	globalCoop_server_precacheSingleplayer();
+	thread coop_findAndTargetnameEntities();//remove useless interfering effects!!!
+	
+	soundtrack( "music/m1l2-borg_sphere.mus" );
+	globalCoop_main_camFadeOut(.1);
+	
+//original bsp -  delete chars
+	globalCoop_level_remove($chellDummy);
+	globalCoop_level_remove($telsiaDummy);
+	globalCoop_level_remove($munroDummy);
+	if(getCvarInt("g_gametype") != 0){//mp
+		globalCoop_level_remove($munro_assimilate);
+	}
+	
+	//globalCoop_level_remove($munro);
+	//globalCoop_level_remove($tuvok);
+
+	//$sky.rendereffects( "+skyorigin" );
+	$world.entity_fade_dist( 8000 );//8000
+	$world.farplane ( 25000 );
+	$world.farplane_cull( 0 );
+	//$world.farplane_color ( '0 .26 .13' );//.47 .69 .13 .64 .95 .14	
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+//Set Tactical information, to be added at the Objectives hud
+	coop_string_objectiveTacticalInfo1	= "YellowFieldInformation";
+	coop_string_objectiveTacticalInfo2	= "GreenFieldInformation";
+	coop_string_objectiveTacticalInfo3	= "BlueFieldInformation";
+	//Set spawnangles for this level
+	coop_string_nextMapToCheck			= "m1l2b-borg_sphere";//set the map we gona load next while we are in testmode
+	coop_float_spawnAngle0 				= 270;//SpawnOrigin0 Angle
+	//Definie Objective
+	coop_string_objectiveItem1			= "FindImod";
+	coop_string_objectiveItem2			= "FindGenerator1";
+	coop_string_objectiveItem3			= "FindGenerator2";
+	coop_string_objectiveItem4			= "FindGenerator3";
+	//spawnorigins, Spawn Players on those locations, at map start
+	
+	coop_vector_spawnOrigin8 			= '-134 396 500';//8
+	coop_vector_spawnOrigin7 			= '-213 398 500';//7
+	coop_vector_spawnOrigin6 			= '-310 400 500';//6
+	coop_vector_spawnOrigin5 			= '-329 332 500';//5
+	coop_vector_spawnOrigin4 			= '-226 331 500';//4
+	coop_vector_spawnOrigin3 			= '-143 330 500';//3
+	coop_vector_spawnOrigin2 			= '-176 251 500';//2
+	coop_vector_spawnOrigin1 			= '-264 251 500';//1
+//Give each player a Item/weapon
+	coop_string_weapon1 = "models/weapons/worldmodel-CompressionRifle.tik";
+	coop_string_weapon2 = globalCoop_armory_weaponCheckWeaponAndReturnValid("models/weapons/worldmodel-Phaser.tik");
+	coop_string_weapon3 = "models/weapons/worldmodel-Tricorder.tik";
+	coop_string_weapon4 = "models/weapons/worldmodel-imod.tik";
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	if(cvar_bool_multiplayer){
+	//INVISIBLE WALLS FOR LIFT
+		spawn("script_model","model","fx/fx-dummy.tik","targetname","coopLiftClip1","origin","-238 208 -720");
+		spawn("script_model","model","fx/fx-dummy.tik","targetname","coopLiftClip2","origin","-90 351 -720");//-68
+		spawn("script_model","model","fx/fx-dummy.tik","targetname","coopLiftClip3","origin","-350 350 -720");//-361
+	//relocate the class selection//spawn Class Selection
+		thread globalCoop_class_setup("Medic",'-1001 406 330');
+		thread globalCoop_class_setup("HeavyWeapons",'-1001 480 330');
+		thread globalCoop_class_setup("Technician",'-1001 550 330');
+	}
+	
+	thread globalCoop_puzzle_replace($forceFieldPanel_1,"yellowForcefieldDown",15);
+	setfloatvar( "game.m1l2_SecondLevelComplete", 0 );
+
+	thread BorgSetup();
+	thread DisNode1_Plasma_Wait();
+	thread setup_distNodes();
+	
+//Setup the stuff
+	thread globalCoop_level_hideAndNotSolid($dummyLift);
+	//thread globalCoop_level_remove($StartLiftClip);
+//wait for the player to be ready
+	if(!cvar_bool_multiplayer){
+		waitForPlayer();
+		$player.loadobjectives( "m1l2-borg_sphere" );
+		$player.model("models/char/munro_voyager.tik");
+		playerDeathThread( "m1_playerDeathCinematic" );
+	}
+	else{
+		$coopLiftClip1.setSize('-100 -1 0','100 1 1000');
+		$coopLiftClip2.setSize('-1 -100 0','1 100 1000');
+		$coopLiftClip3.setSize('-1 -100 0','1 100 1000');
+	}
+	//thread DisNode2_Wait();
+	SetupSounds();
+	thread init();
+
+//start once the warmup time is up
+	globalCoop_main_waitForWarmupTime();
+//Start cinematic now
+	IntroCinematic();
+//Wait a moment
+	wait(2);
+//set first objective
+	globalCoop_objectives_update("inComplete",1,0);
+	globalCoop_objectives_update("inComplete",2,0);
+	globalCoop_objectives_update("inComplete",3,0);
+	thread globalCoop_objectives_update("inComplete",4,1);
+	$DisNode1_Plasma.missionobjective(1);
+}
+
+void coop_findAndTargetnameEntities()
+//find entities without targetname and vive em a targetname
+{
+	float 	fEntity,
+			fToFind=2;
+	entity	e;
+	
+	for(fEntity=0;fEntity<1023;fEntity++){
+		e=getEntity("*"+fEntity);
+		if(doesEntityExist(e)){
+			if(e.getOrigin() == '0 0 0'){
+				e.remove();//remove useless!!! Players spawn at '0 0 0' triggering these explosion effects
+				fToFind--;
+			}
+			if(e.getOrigin() == '0 0 0'){
+				e.remove();//remove useless!!! Players spawn at '0 0 0' triggering these explosion effects
+				fToFind--;
+			}
+//Exit if all entites have been found
+			if(fToFind < 1){
+				return;
+			}			
+		}
+	}
+}
+
+
+void loadM1l2b()
+{
+	stuffCMD("seta coop_lvlP m1l2aTom1l2b\n");
+	if(!cvar_bool_multiplayer){
+		spawn ( "trigger_changelevel", "targetname", "trigger_endlevel", "map", "m1l2b-borg_sphere" );
+		wait ( .1 );
+		trigger ( "$trigger_endlevel" );
+	}
+}
+
+void loadM1l2c()
+{
+	stuffCMD("seta coop_lvlP m1l2aTom1l2c\n");
+	if(!cvar_bool_multiplayer){
+		spawn ( "trigger_changelevel", "targetname", "trigger_endlevel", "map", "m1l2c-borg_sphere" );
+		wait ( .1 );
+		trigger ( "$trigger_endlevel" );
+	}
+}
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  SETUP THREADS
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+
+//---------------------
+// SetupSounds
+// starts looping sounds for objects
+//---------------------
+void SetupSounds()
+{
+	$DisNode1_Field.loopsound ( "sound/ships/borg/borg_forcefield1.wav", .5, 32 );
+}
+
+//---------------------
+// init
+// initialization thread
+//---------------------
+void init()
+{
+//Register teammates
+	thread globalCoop_teammate_register($chell);
+	globalCoop_teammate_register($telsia);
+	
+	$forcefield_modulate_1.time(.1);
+	$forcefield_modulate_1.movedown ( 244 ); // forcefield starts up to allow path connections
+	wait ( .1 );
+	
+//Make those ffs interactive :)
+	globalCoop_forcefield_makeInteractive($forcefield_modulate_1);
+	globalCoop_forcefield_makeInteractive($DisNode1_Field);
+	$fan1.rotateY ( -175 );
+	$group2spawn_trigger.nottriggerable();
+
+	//--sets up teammates weapons
+	$world.addbroken( "i-mod" );	
+	wait ( .25 );
+	$DisNode1_Field.movedown ( 156 );
+}
+
+
+void yellowForcefieldDown()
+{
+	coop_shutdownForcefield( $forcefield_modulate_1 );
+	wait( 0.5 );
+	$forceFieldPanel_1.model( "enviro/borg-sphere_shield-pannel-wall-used.tik" );
+}
+
+//----------------------------------------------
+// Warping Teammates to correct spots (level transition workarounds)
+//----------------------------------------------
+
+//---------------------
+//StartWaypointTeleport
+//---------------------
+void StartWaypointTeleport()
+{
+	$StartWaypointTeleportTrigger.nottriggerable();
+	$chell.warpto ("$StartWaypoint_Chell");
+	$telsia.warpto ("$StartWaypoint_Telsia");
+}
+
+//---------------------
+// StartWaypointTeleportTriggerOff
+//---------------------
+void StartWaypointTeleportTriggerOff()
+{
+	$StartWaypointTeleportTrigger.nottriggerable();
+}
+
+//---------------------
+// StartWaypoint TeleportTriggerOn
+//---------------------
+void StartWaypointTeleportTriggerOn	()
+{
+	stuffCMD("seta coop_lvlP m1l2aTom1l2c\n");
+	$StartWaypointTeleportTrigger.triggerable();
+}
+
+//---------------------
+//StartWaypoint2Teleport
+//---------------------
+void StartWaypoint2Teleport()
+{
+	$StartWaypoint2TeleportTrigger.nottriggerable();
+	$chell.warpto ("$StartWaypoint2_Chell");
+	$telsia.warpto ("$StartWaypoint2_Telsia");
+}
+
+//---------------------
+// StartWaypoint2TeleportTriggerOff
+//---------------------
+void StartWaypoint2TeleportTriggerOff()
+{
+	$StartWaypoint2TeleportTrigger.nottriggerable();
+}
+
+//---------------------
+// StartWaypoint2TeleportTriggerOn
+//---------------------
+void StartWaypoint2TeleportTriggerOn()
+{
+	$StartWaypoint2TeleportTrigger.triggerable();
+}
+
+//----------------------------------------------
+// DisNode Stuff
+//----------------------------------------------
+
+//---------------------
+// DisNode1_Plasma_Wait
+//---------------------
+void DisNode1_Plasma_Wait()
+{
+	$DisNode1_PlasmaDamaged.hide();
+	$DisNode1_PlasmaDamaged.notsolid();
+	$DisNode1_Plasma.contents( "+shootable" );
+	
+	$DisNode1_PowerDamaged.hide();
+	$DisNode1_PowerDamaged.notsolid();
+	$DisNode1_Power.contents( "+shootable" );
+
+	$DisNode1Damaged.hide();
+	$DisNode1Damaged.notsolid();
+	$DisNode1.contents( "+shootable" );
+
+	$DisNode1_Plasma.ondamage( "DisNode1_Destroyed" );
+	$DisNode1_Power.ondamage( "DisNode1_Destroyed" );
+	$DisNode1.ondamage( "DisNode1_Destroyed" );
+	pause();
+}
+
+//---------------------
+//DisNode1_Destroyed
+//---------------------
+void DisNode1_Destroyed()
+{
+	// sets music mood
+	//music( "success", "normal" );
+
+	$DisNode1_Plasma.nodamage();
+	$DisNode1_Power.nodamage();
+	$DisNode1.nodamage();
+		
+	globalCoop_level_triggerEntity($DisNode1GroupEvent);
+	$DisNode1Spawn.modelname ( "fx/fx-explosion-distnode.tik" );
+	$DisNode1Spawn.spawntargetname( "DisNode1Explosion" );
+
+	$DisNode1_PlasmaSpawn.modelname ( "fx/fx-explosion-plasmacon-red.tik" );
+	$DisNode1_PlasmaSpawn.spawntargetname ( "DisNode1Explosion" );
+
+	$DisNode1_PowerSpawn.modelname ( "fx/fx-explosion-fieldgenerator.tik" );
+	$DisNode1_PowerSpawn.spawntargetname ( "DisNode1Explosion" );
+
+	globalCoop_level_triggerEntity($DisNode1_PlasmaSpawn);
+	globalCoop_level_remove($DisNode1_PlasmaSpawn);
+	globalCoop_level_triggerEntity($DisNode1_PowerSpawn);
+	globalCoop_level_remove($DisNode1_PowerSpawn);
+	globalCoop_level_triggerEntity($DisNode1Spawn);
+	globalCoop_level_remove($DisNode1Spawn);
+	
+	globalCoop_level_remove($DisNode1_Plasma);
+	globalCoop_level_remove($DisNode1_Power);
+	globalCoop_level_remove($DisNode1);
+	
+	$DisNode1_PlasmaDamaged.show();
+	$DisNode1_PowerDamaged.show();
+	$DisNode1Damaged.show();
+	$DisNode1_PlasmaDamaged.loopsound ( "sound/environment/plasma/plasma_loop.wav", .3, 42 );
+	
+	wait ( 1 );
+
+//---completes objective
+	globalCoop_objectives_update("complete",1,1);
+	
+//Unmark the mission object
+	//$DisNode1_Plasma.missionobjective( 0 );
+
+	globalCoop_level_remove($DisNode1Explosion);
+
+//--makes i-mod useable again
+	$world.removebroken( "i-mod" );
+	if(!cvar_bool_multiplayer){//remove the shitt now in sp
+		globalCoop_level_remove($DisNode1_Field);
+	}
+
+//--executes dialog thread
+	thread DisNode1Destroyed_Dialog();
+	$group2spawn_trigger.triggerable();
+}
+
+//---------------------
+//  setup_distNodes
+//	setup for shootable borg distribution nodes
+//---------------------
+void setup_distNodes()
+{
+	thread globalCommon_OnDamage( $disNode2, "disNode2_destroyed" );
+	$disNode2.contents( "+shootable" );
+	$disNode2_fx.hide();
+}
+
+//---------------------
+//  disNode2_destroyed
+//	destry distribution node 2
+//---------------------
+void disNode2_destroyed()
+{
+	globalCoop_level_triggerEntity($disNode2_explode);
+	$disNode2.model( "enviro/borg-sphere_distnode_distnode_damaged.tik" );
+	$disNode2_fx.show();
+	globalCoop_level_triggerEntity($DisNode2GroupEvent);
+	coop_nodeDisabled=1;
+	wait( 2 );
+	if( Group2Borg_areDead == 0){
+		//--chell shutdown borg node dialog
+		globalCoop_dialog_play($chell,"borg02/chell_borgshut.mp3 ", 1, 20000, 1);
+	}	
+}
+
+
+//----------------------------------------------
+// CINEMATICS AND DIALOG
+//----------------------------------------------
+//---------------------
+// LevelStart_Dialog
+//---------------------
+
+void LevelStart_Dialog()
+{
+	thread actorCannotFollow();
+	wait(1);
+	globalCoop_dialog_play(globalCoop_return_entityE1OrE2(globalCoop_return_playerClosestPreferActive($chell),$munro),"borg02/munro_howschang.mp3", 1, 20000, 1); //Munro to Voyager. How’s Chang?
+	globalCoop_dialog_play($tuvok,"borg02/tuvok_fullrecover.mp3", 1, 20000, 1); //The Doctor expects him to make a full recovery.
+	globalCoop_dialog_play(globalCoop_return_entityE1OrE2(globalCoop_return_playerClosestPreferActive($chell),$munro),"borg02/munro_proceeding.mp3", 1, 20000, 1); //We’re proceeding to the dampening field generators so we can release Voyager. Munro out.  
+	
+	startDialogFinished = 1;
+}
+
+
+//---------------------
+// YellowForceField_Dialog
+//---------------------
+void YellowForceField_Dialog()
+{
+	globalCoop_dialog_play($chell,"borg02/chell_controlc.mp3", 1, 20000, 1);//Munro, that forcefield has a Control Console.
+	globalCoop_dialog_play(globalCoop_return_entityE1OrE2(globalCoop_return_playerClosestPreferActive($chell),$munro),"borg02/munro_coverme.mp3", 1, 20000, 1);//Cover me! I'll disable it with my tricorder!
+}
+
+//---------------------
+// DisNode1Destroyed_Dialog
+//---------------------
+void DisNode1Destroyed_Dialog()
+{
+    music ("surprise","normal");
+	wait ( 1.5 );
+	//That node was jamming us. Our I-Mods work again!
+	globalCoop_dialog_play($chell,"borg02/chell_nodejam.mp3", 1, 20000, 1);
+
+	$chell.useactorweapon("i-mod");
+	$telsia.useactorweapon("i-mod");
+	wait ( 1 );
+	globalCoop_player_useAll("i-mod");
+}
+
+//----------------------------------------------------------------------------------------------
+// AI STUFF
+//-----------------------------------------------------------------------------------------------
+
+//---------------------
+// BorgSetup
+// makes borg hibernate and stuff
+//---------------------
+void BorgSetup()
+{
+	$Group1Borg1.settendency( "hibernate" , 1.0 );
+	$Group1Borg2.settendency( "hibernate" , 1.0 );
+	if(doesEntityExist($Group1Borg3)){
+		$Group1Borg3.settendency( "hibernate" , 1.0 );
+	}
+	$Group2Borg4.groupdeaththread( "Group2Borg_dead" );
+	$Group2Borg5.groupdeaththread( "Group2Borg_dead" );
+	$Group2Borg6.groupdeaththread( "Group2Borg_dead" );
+	
+	$Group2Borg4.killthread("countDeathBorgToEnableSpawn");
+	$Group2Borg5.killthread("countDeathBorgToEnableSpawn");
+	$Group2Borg6.killthread("countDeathBorgToEnableSpawn");
+
+//Make them stronger for the co-op mod
+	globalCoop_main_waitForWarmupTime();
+	//wait...
+	globalCoop_actor_healthMultiplicatePerPlayer($Group1Borg1);
+	globalCoop_actor_healthMultiplicatePerPlayer($Group1Borg2);
+	globalCoop_actor_healthMultiplicatePerPlayer($Group1Borg3);
+	globalCoop_actor_healthMultiplicatePerPlayer($Group1Borg4);
+	globalCoop_actor_healthMultiplicatePerPlayer($Group1Borg5);
+	//group2
+	globalCoop_actor_healthMultiplicatePerPlayer($Group2Borg4);
+	globalCoop_actor_healthMultiplicatePerPlayer($Group2Borg5);
+	globalCoop_actor_healthMultiplicatePerPlayer($Group2Borg6);
+}
+
+//---------------------
+// Group1_Spawn1
+// Spawns 2 borg in front of the party
+//---------------------
+
+void Group1_Spawn1()
+{
+	// playing teleport in sounds
+	$Group1Borg4Spawn.playsound ( "sound/environment/transporter/transport2.wav", 1, .5, 250 );
+	$Group1Borg5Spawn.playsound ( "sound/environment/transporter/transport2.wav", 1, .5, 250 );
+	wait (.15);
+
+	//--- set the spawn effect on the spawner
+	$Group1Borg4Spawn.spawneffectname( "TransportIn", "Borg" );
+	$Group1Borg5Spawn.spawneffectname( "TransportIn", "Borg" );
+
+	//--- spawn the guys
+	globalCoop_level_triggerEntity($Group1Borg4Spawn);
+	globalCoop_level_triggerEntity($Group1Borg5Spawn);
+	wait( .2 );
+
+	//--- make the guys stupid for a second
+	$Group1Borg4.ai_off ();
+	$Group1Borg5.ai_off ();
+	$Group1Borg4.groupnumber (1);
+	$Group1Borg5.groupnumber (1);
+	//--- turn the AI on
+	wait ( 1 );
+	$Group1Borg4.ai_on ();
+	$Group1Borg4.aggressive( 1 );
+	$Group1Borg5.ai_on ();
+	$Group1Borg5.aggressive( 1 );
+//get current health and multiplicate it with the current number of players
+	globalCoop_actor_healthMultiplicatePerPlayer($Group1Borg4);
+	globalCoop_actor_healthMultiplicatePerPlayer($Group1Borg5);
+}
+
+//---------------------
+// Group1_Spawn2
+// Spawns borg in dis node hallway
+//---------------------
+
+void Group1_Spawn2()
+{
+	// playing teleport in sounds
+	$Group1Borg6Spawn.playsound ( "sound/environment/transporter/transport2.wav", 1, .5, 250 );
+	$Group1Borg7Spawn.playsound ( "sound/environment/transporter/transport2.wav", 1, .5, 250 );
+	$Group1Borg8Spawn.playsound ( "sound/environment/transporter/transport2.wav", 1, .5, 250 );
+	
+
+	wait (.2);
+	
+	//--- set the spawn effect on the spawner
+	$Group1Borg6Spawn.spawneffectname( "TransportIn", "Borg" );
+	$Group1Borg7Spawn.spawneffectname( "TransportIn", "Borg" );
+	$Group1Borg8Spawn.spawneffectname( "TransportIn", "Borg" );
+
+	//--- spawn the guys
+	globalCoop_level_triggerEntity($Group1Borg6Spawn);
+	globalCoop_level_triggerEntity($Group1Borg7Spawn);
+	globalCoop_level_triggerEntity($Group1Borg8Spawn);
+	
+
+	wait( .2 );
+
+	//--- make the guys stupid for a second
+	$Group1Borg6.ai_off ();
+	$Group1Borg7.ai_off ();
+	$Group1Borg8.ai_off ();
+
+	$Group1Borg6.groupnumber (1);
+	$Group1Borg7.groupnumber (1);
+	$Group1Borg8.groupnumber (1);
+
+//get current health and multiplicate it with the current number of players
+	globalCoop_actor_healthMultiplicatePerPlayer($Group1Borg6);
+	globalCoop_actor_healthMultiplicatePerPlayer($Group1Borg7);
+	globalCoop_actor_healthMultiplicatePerPlayer($Group1Borg8);
+	
+	//--- turn the AI on
+	wait ( 1 );
+	$Group1Borg6.ai_on ();
+	$Group1Borg6.aggressive( 1 );
+
+	$Group1Borg7.ai_on ();
+	$Group1Borg7.aggressive( 1 );
+
+	$Group1Borg8.ai_on ();
+	$Group1Borg8.aggressive( 1 );
+
+}
+
+
+//---------------------
+// Group2_Spawn1
+// Spawns 3 borg in front of the party
+//---------------------
+
+void Group2_Spawn1()
+{
+
+	$Group2Borg1Spawn.playsound("sound/environment/transporter/transport2.wav",1,.5,250);
+	$Group2Borg2Spawn.playsound("sound/environment/transporter/transport2.wav",1,.5,250);
+	$Group2Borg3Spawn.playsound("sound/environment/transporter/transport2.wav",1,.5,250);
+	wait (.1);
+
+	//--- set the spawn effect on the spawner
+	$Group2Borg1Spawn.spawneffectname( "TransportIn", "Borg" );
+	$Group2Borg2Spawn.spawneffectname( "TransportIn", "Borg" );
+	$Group2Borg3Spawn.spawneffectname( "TransportIn", "Borg" );
+
+	//--- spawn the guys
+	globalCoop_level_triggerEntity($Group2Borg1Spawn);
+	globalCoop_level_triggerEntity($Group2Borg2Spawn);
+	globalCoop_level_triggerEntity($Group2Borg3Spawn);
+
+	wait( .2 );
+
+	globalCoop_level_remove($Group2_Spawn1Clip);
+	//--- make the guys stupid for a second
+	$Group2Borg1.ai_off ();
+	$Group2Borg2.ai_off ();
+	$Group2Borg3.ai_off ();	
+	
+//Do not allow to proceed without having all the borg here killed or we risk to
+//messup the animations chace again and models become nonsolid
+	if(cvar_bool_multiplayer){
+		$Group2Borg1.killthread("countDeathBorgToDisableForefield");
+		$Group2Borg2.killthread("countDeathBorgToDisableForefield");
+		$Group2Borg3.killthread("countDeathBorgToDisableForefield");
+	}
+
+//get current health and multiplicate it with the current number of players
+	globalCoop_actor_healthMultiplicatePerPlayer($Group2Borg1);
+	globalCoop_actor_healthMultiplicatePerPlayer($Group2Borg2);
+	globalCoop_actor_healthMultiplicatePerPlayer($Group2Borg3);
+
+	$Group2Borg1.groupnumber (2);
+	$Group2Borg2.groupnumber (2);
+	$Group2Borg3.groupnumber (2);
+	//--- turn the AI on
+	wait (1);
+	$Group2Borg1.ai_on();
+	$Group2Borg1.aggressive(1);
+
+	$Group2Borg2.ai_on();
+	$Group2Borg2.aggressive(1);
+
+	$Group2Borg3.ai_on();
+	$Group2Borg3.aggressive(1);
+}
+
+//---------------------
+// Group2_Spawn2
+// Spawns 4 borg around the party
+//---------------------
+
+void Group2_Spawn2()
+{
+	while(!coop_nodeDisabled)
+	{
+		wait(2);
+	}
+	$Group2Borg7Spawn.playsound("sound/environment/transporter/transport2.wav",1,.5,250);
+	$Group2Borg8Spawn.playsound("sound/environment/transporter/transport2.wav",1,.5,250);
+	$Group2Borg9Spawn.playsound("sound/environment/transporter/transport2.wav",1,.5,250);
+	$Group2Borg10Spawn.playsound("sound/environment/transporter/transport2.wav",1,.5,250);
+	
+	wait (.1);
+
+	//--- set the spawn effect on the spawner
+	$Group2Borg7Spawn.spawneffectname( "TransportIn", "Borg" );
+	$Group2Borg8Spawn.spawneffectname( "TransportIn", "Borg" );
+	$Group2Borg9Spawn.spawneffectname( "TransportIn", "Borg" );
+	$Group2Borg10Spawn.spawneffectname( "TransportIn", "Borg" );
+
+	//--- spawn the guys
+	globalCoop_level_triggerEntity($Group2Borg7Spawn);
+	globalCoop_level_triggerEntity($Group2Borg8Spawn);
+	globalCoop_level_triggerEntity($Group2Borg9Spawn);
+	globalCoop_level_triggerEntity($Group2Borg10Spawn);
+
+	wait( .2 );
+	
+	$Group2Borg7.killthread("countDeathBorgToEndLevel");
+	$Group2Borg8.killthread("countDeathBorgToEndLevel");
+	$Group2Borg9.killthread("countDeathBorgToEndLevel");
+	$Group2Borg10.killthread("countDeathBorgToEndLevel");
+
+	globalCoop_level_remove($Group2_Spawn2Clip);
+//get current health and multiplicate it with the current number of players
+	globalCoop_actor_healthMultiplicatePerPlayer($Group2Borg7);
+	globalCoop_actor_healthMultiplicatePerPlayer($Group2Borg8);
+	globalCoop_actor_healthMultiplicatePerPlayer($Group2Borg9);
+	globalCoop_actor_healthMultiplicatePerPlayer($Group2Borg10);
+
+	//--- make the guys stupid for a second
+	$Group2Borg7.ai_off ();
+	$Group2Borg8.ai_off ();
+	$Group2Borg9.ai_off ();
+	$Group2Borg10.ai_off ();
+
+	if(!cvar_bool_multiplayer){
+		$Group2Borg7.groupnumber( 2 );
+		$Group2Borg8.groupnumber( 2 );
+		$Group2Borg9.groupnumber( 2 );
+		$Group2Borg10.groupnumber( 2 );
+	}
+
+	//--- turn the AI on
+	wait ( 1 );
+
+	$Group2Borg7.ai_on ();
+	$Group2Borg7.aggressive(1);
+
+	$Group2Borg8.ai_on ();
+	$Group2Borg8.aggressive(1);
+
+	$Group2Borg9.ai_on ();
+	$Group2Borg9.aggressive(1);
+
+	$Group2Borg10.ai_on ();
+	$Group2Borg10.aggressive(1);
+}
+
+
+void countDeathBorgToDisableForefield()
+{
+	coop_fDeathBorg++;
+ 	if(coop_fDeathBorg == 3){
+		$DisNode1_Field.stoploopsound();
+		globalCoop_level_remove($DisNode1_Field);
+		coop_fDeathBorg = 0;
+	}
+}
+
+
+void countDeathBorgToEnableSpawn()
+{
+	coop_fDeathBorg++;
+ 	if(coop_fDeathBorg == 3){
+		coop_nodeDisabled = 1;
+		coop_fDeathBorg = 0;
+	}
+}
+
+void countDeathBorgToEndLevel()
+{
+	coop_fDeathBorg++;
+	if(coop_fDeathBorg == 4){//3
+		thread allow_levelEnding();
+	}
+}
+
+
+void allow_levelEnding()
+{
+//Spawn triggers
+	spawn("trigger_once","thread","coop_exitLevel1","targetname","coop_triggerOnce_levelend1","origin","-546 2349 370");
+	spawn("trigger_once","thread","coop_exitLevel2","targetname","coop_triggerOnce_levelend2","origin","1550 3380 370");
+//wait a mo for the triggers to be spawned...
+	wait(.5);
+//wait a mo for the spwned troggers to be avaialbe
+	$coop_triggerOnce_levelend1.setSize('-256 -256 -70','256 256 70');
+	$coop_triggerOnce_levelend2.setSize('-256 -256 -70','256 256 70');
+}
+
+//---------------------
+// Group1_Activate
+// Activates borg at start of level
+//---------------------
+
+void Group1_Activate()
+{
+	//---sets music mood
+	music( "suprise", "normal" );
+
+	if(doesEntityExist($Group1Borg1)){$Group1Borg1.aggressive ( 1 );}
+	if(doesEntityExist($Group1Borg3)){$Group1Borg3.aggressive ( 1 );}
+	if(doesEntityExist($Group1Borg2)){$Group1Borg2.aggressive ( 1 );}
+	if(doesEntityExist($Group1Borg9)){$Group1Borg9.aggressive ( 1 );}
+
+	wait ( 2.5 );
+	thread telsiaBorgPlayDialog();
+}
+
+void telsiaBorgPlayDialog()
+{
+	while ( startDialogFinished != 1 )
+	{
+		wait( .25 );
+	}
+	//Looks like the Borg want to play.
+	globalCoop_dialog_play($telsia,"borg02/telsia_borgplay.mp3", 1, 20000, 1);
+}
+
+//---------------------
+// Group2Borg_dead
+// Change variable if group 2 borg are killed
+//---------------------
+void Group2Borg_dead()
+{
+	Group2Borg_areDead = 1;	
+}
+
+//---------------------
+// actorCanFollow
+// allow teammates to follow player
+//---------------------
+void actorCanFollow()
+{
+	if(doesEntityExist($telsia)){
+		$telsia.settendency( "wander", 1 );
+		$telsia.settendency( "follow", 1 );
+	}
+	if(doesEntityExist($chell)){
+		$chell.settendency( "follow", 1 );
+		$chell.settendency( "wander", 1 );
+	}
+}
+
+//---------------------
+// actorCannotFollow
+// allow teammates to follow player
+//---------------------
+void actorCannotFollow()
+{
+	//$actorClip01.solid();
+	if(doesEntityExist($telsia)){
+		$telsia.settendency( "wander", 0 );
+		$telsia.settendency( "follow", 0 );
+	}
+	if(doesEntityExist($chell)){
+		$chell.settendency( "follow", 0 );
+		$chell.settendency( "wander", 0 );
+	}
+}
+//$StartWaypointTeleportTrigger -> Exit right top
+//2a loads 2c if entering level exit on right hand side (LIFT TOP TWO WAY OPTION)
+//DIALOG: tuvok - time is short find the two other generators
+//MAP: m2l2b - DOWN, AT THE LEVEL EXIT, LIFT STAYS ON TOP
+//GENERATOR 3 DESTROYED: Cinematic, team beams out
+//DIALOG: MUNRO - How is the damening field ?
+//DIALOG: TUVOK - It's gone
+//MAP BORGBOSS - END
+//--
+//2a loads 2b if entering level exit on left hand side (TOPSIDE OF THIS BLUE POWER THING)
+//DIALOG: CHELL - SEE ONE OF THE 3 GENERATORS
+//DIALOG: tuvok - find the last generator the borg have stared to adapt to our new shield tech
+//MAP : m2l2c - START AT EXIT LOCATION, GOING LEVEL IN REVERSE
+//DIALOG: CHELL - THE THIRD GENERATOR!
+//GENERATOR 3 DESTROYED: Cinematic, team beams out
+//DIALOG: MUNRO - How is the damening field ?
+//DIALOG: TUVOK - It's gone
+//MAP BORGBOSS - END
+
+void coop_exitLevel1()
+//------------------------------------------------------------------------------
+//Select path 1 (left) //-630 2340 408
+//------------------------------------------------------------------------------
+{
+	stuffCMD("seta coop_lvlP m1l2aTom1l2b\n");
+	globalCoop_level_remove($coop_triggerOnce_levelend1);
+	globalCoop_level_remove($coop_triggerOnce_levelend2);
+	globalCoop_main_waitForTeam('-630 2340 408','-400 -400 -200','400 400 200');
+	coop_endLevel();
+}
+
+void coop_exitLevel2()
+//------------------------------------------------------------------------------
+//Select path 2 (right) //1536 3641 408
+//------------------------------------------------------------------------------
+{
+	stuffCMD("seta coop_lvlP m1l2aTom1l2c\n");
+	globalCoop_level_remove($coop_triggerOnce_levelend1);
+	globalCoop_level_remove($coop_triggerOnce_levelend2);
+	globalCoop_main_waitForTeam('1536 3641 408','-400 -400 -200','400 400 200');	
+	coop_endLevel();
+}
+
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	string sNextMap;
+	sNextMap = "m1l2b-borg_sphere";
+	if(getCvar("coop_lvlP") == "m1l2aTom1l2c"){
+		sNextMap = "m1l2c-borg_sphere";
+	}
+	thread globalCoop_mission_completed(sNextMap);
+}

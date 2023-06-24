@@ -1,0 +1,515 @@
+//------------------------------------------------------------------------------
+// Cinematic Functions
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////DECLARATION
+////////////////////////////////////////////////////////////////////////////////
+	void	cinematicGravity_barrel1_move();
+	void	cinematicGravity_barrel2_move();
+	void	cinematicGravity_crewDead1_move();
+	void	cinematicIntro_MoveBody();
+
+	void	cin_m3a_1_scene1_setup();
+	void	cin_m3a_1_scene1();
+	void	cin_m3a_1_scene1_end();
+	
+	void	cin_m3a_1_scene2();
+	void	cin_m3a_1_scene2_skip();
+	void	cin_m3a_1_scene2_end();
+	
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////RELATED Functions
+////////////////////////////////////////////////////////////////////////////////
+
+
+void cinematicGravity_barrel1_move()
+////////////////////////////////////////////////////////////////////////////////
+// makes the cinematicGravity_barrel1 object float while gravity is low
+////////////////////////////////////////////////////////////////////////////////
+{
+	floatingObject( $cinematicGravity_barrel1 );
+}
+
+
+void cinematicGravity_barrel2_move()
+////////////////////////////////////////////////////////////////////////////////
+// makes the cinematicGravity_barrel2 object float while gravity is low
+////////////////////////////////////////////////////////////////////////////////
+{
+	floatingObject( $cinematicGravity_barrel2 );
+}
+
+
+void cinematicGravity_crewDead1_move()
+////////////////////////////////////////////////////////////////////////////////
+// makes the cinematicGravity_crewDead1 object float while gravity is low
+////////////////////////////////////////////////////////////////////////////////
+{
+	globalCoop_actor_animateWaitForAnimation($cinematicGravity_crewDead1,"hunched_dead_falling1");//entity,anim
+	globalCoop_actor_animateWaitForAnimation($cinematicGravity_crewDead1,"hunched_dead1");//entity,anim
+	globalCoop_level_remove($cinematicGravity_crewDead1);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+//rotates and shifts the body in the intro
+////////////////////////////////////////////////////////////////////////////////
+void cinematicIntro_MoveBody()
+{
+	$cinematicDeadBody.angles('315 210 45');
+	$cinematicDeadBody.time( 6 );
+	$cinematicDeadBody.moveDown( 16 );
+	$cinematicDeadBody.moveNorth( 32 );
+	$cinematicDeadBody.moveEast( 128 );
+	$cinematicDeadBody.rotateX( -5 );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////CINEMATICS
+////////////////////////////////////////////////////////////////////////////////
+void cin_m3a_1_scene1_setup()
+////////////////////////////////////////////////////////////////////////////////
+// Setup stuff for the fisrt scene
+////////////////////////////////////////////////////////////////////////////////
+{
+//globalCoop_main_executeInSp("coop_mod/cfg/maps/m3l1a/cin/setup_cameras.cfg");
+
+//	Hack to spawn multiple models
+	cam.load( "coop_m3l1a_spawn1" );
+
+//align the saucer more precisely than we can in radiant
+	$entSaucer.origin ( $entBody.getorigin ());
+	$entNacelles.origin ( $entBody.getorigin ());
+	$entSaucer.bind   ( $entOrigin );
+	$entBody.bind     ( $entOrigin );
+	$entNacelles.bind ( $entOrigin );
+	globalCoop_main_waitAFrame();
+	
+	//$sparks3.angles ( '0 45 0' );
+	//$steam2.angles ( '0 45 0' );	
+//	globalCoop_main_executeInSp("coop_mod/cfg/maps/m3l1a/cin/scene1_setup2.cfg");
+	//$dallasSaucer.scale(0.35);
+	//$dallasBody.scale(0.35);
+	//$sparks.scale(.05);
+	//$sparks3.scale(.05);	
+	
+	
+	globalCoop_main_waitAFrame();
+	$entOrigin.origin ( '13168 -13248 1008' );
+	$entSkyOrigin.rendereffects ( "+skyorigin" );
+	$steam2.scale(.05);
+	$sparks2.scale(.1);
+	
+	$sparks.bind($dallasOrigin);
+	$dallasBody.bind($dallasOrigin);
+	$dallasSaucer.bind($dallasOrigin);
+
+	$entOrigin.time ( .1 );
+	$entOrigin.moveWest ( 1024 );
+
+	$dallasOrigin.time ( .1 );
+	$dallasOrigin.rotateXUp ( 15 );
+	$dallasOrigin.rotateYUp ( 10 );
+}
+
+
+void cin_m3a_1_scene1()
+////////////////////////////////////////////////////////////////////////////////
+// Start first cinematic scene
+////////////////////////////////////////////////////////////////////////////////
+{
+	globalCoop_cin_start();
+	
+//globalCoop_main_executeInSp("coop_mod/cfg/maps/m3l1a/cin/cin_m3a_1_scene12.cfg");
+	
+	globalCoop_main_waitAFrame();	
+	//globalCoop_main_executeInSp("coop_mod/cfg/maps/m3l1a/cin/cin_m3a_1_scene13.cfg");
+		
+	globalCoop_cin_follow($entIntroCam,$igm2_EntIntro);
+	globalCoop_cin_cut($entIntroCam);
+	globalCoop_main_waitZeroDot2();
+	
+	stuffcmd("locationprint 0 70 $$M3Stardate$$ 14.0\n");
+	
+	globalCoop_cin_cuecamera($entIntroCam);
+	allowMusicDucking ( 0 );
+	music ( "aux1" );
+	
+	globalCoop_cin_skipThread("cin_m3a_1_scene1_end");
+	
+	globalCoop_main_camFadeIn(1);
+	thread globalAccelMove( $entOrigin, '1024 0 0', 15, "rampdown", "" );
+	wait ( 15 );
+	thread cin_m3a_1_scene1_end();
+}
+
+
+void cin_m3a_1_scene1_end()
+////////////////////////////////////////////////////////////////////////////////
+// End first cinematic scene
+////////////////////////////////////////////////////////////////////////////////
+{
+	if($world.getFloatVar("cin_m3a_1_scene1_end") == 1)
+		return;
+	$world.setFloatVar("cin_m3a_1_scene1_end",1);
+	
+	skipThread("null");
+	killthread ("cin_m3a_1_scene1");
+	globalCoop_main_camFadeOut(.25);
+	stuffcmd("locationprint 0 70 \"\" 14.0\n");
+	globalCoop_main_wait1DotZero();
+	allowMusicDucking ( 1 );
+	thread setupSky();
+}
+
+
+void cin_m3a_1_scene2()
+////////////////////////////////////////////////////////////////////////////////
+// Intro cinematic - Adam 4/11/2003
+////////////////////////////////////////////////////////////////////////////////
+{
+	if($world.getFloatVar("cin_m3a_1_scene2_active") == 1)
+		return;
+		
+	$world.setFloatVar("cin_m3a_1_scene2_active",1);
+		
+	//if($world.getFloatVar("stupidCinDone2") != 1){
+	//$world.setFloatVar("stupidCinDone2",1);
+	
+	//--- set all the weapons
+	// move all the jerkys into thier places
+	$Munro.origin( '988.00 -572.00 -272.00' );
+	$Chell.origin( '712 -280 0' );
+	$Franklin.origin( '736 -136 0' );
+	$Jurot.origin( '704 -184 0' );
+	
+//globalCoop_main_executeInSp("coop_mod/cfg/maps/m3l1a/cin/cin_m3a_1_scene21.cfg");
+	$Munro.useActorWeapon( "none" );
+	$Chell.useActorWeapon( "none" );
+	$Jurot.useActorWeapon( "none" );
+	$Franklin.useActorWeapon( "none" );
+	
+	globalCineFX_PositionObject( $Munro, $introcin_munro_node1 );
+	globalCineFX_PositionObject( $Jurot, $introcin_jurot_node1 );
+	globalCineFX_PositionObject( $Chell, $introcin_chell_node1 );
+	globalCineFX_PositionObject( $Franklin, $introcin_franklin_node1 );
+
+	//--------------------------------------------------------
+	//shot1 establishing, push in towards center of room behind crates
+	globalCoop_cin_fov($cam1,100);
+	globalCoop_cin_follow($cam1, $m3l1a_Intro_Shot1);
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+	globalCoop_main_waitZeroDot2();
+//--- fade in
+	globalCoop_main_camFadeIn(1);
+	
+	globalCoop_cin_skipThread("cin_m3a_1_scene2_skip");
+//--- start the body twisting around
+	thread cinematicIntro_MoveBody();
+	wait( 4.5 );
+	thread globalCineFX_CameraFOVLerp( $cam1, 100, 60, 6, "rampupdown" );
+	wait( 9 );
+	$Munro.displayEffect( "TransportIn", "Federation" );
+	$Jurot.displayEffect( "TransportIn", "Federation" );
+	$Chell.displayEffect( "TransportIn", "Federation" );
+	$Franklin.displayEffect( "TransportIn", "Federation" );
+	
+//--------------------------------------------------------
+//shot2 overhead of team finsihing beam in
+		
+	//--- set camera
+//globalCoop_main_executeInSp("coop_mod/cfg/maps/m3l1a/cin/cin_m3a_1_scene25.cfg");
+	globalCoop_cin_follow($cam2,$m3l1a_Intro_Shot2);
+	globalCoop_cin_fov($cam2,60);
+	globalCoop_cin_cut($cam2);
+	//globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera( $cam2 );
+	
+	// pull out tricorders and look around
+	$Chell.useactorweapon( "Tricorder" );
+	$Jurot.useactorweapon( "Tricorder" );
+	$Chell.anim( "tricorder_draw" );
+	$Jurot.anim( "tricorder_draw" );
+	waitforanimation( $Jurot, "tricorder_draw" );
+	$Jurot.anim( "tricorder_fire" );
+	$Chell.anim( "tricorder_fire" );
+	
+	$Munro.headwatch( $CargoBay1Secret_fx );
+	globalCoop_main_wait1DotZero();
+	thread globalCoop_actor_walkTo($Munro,"intro_munroNode1","walk");
+	wait( .25 );
+	
+	thread globalCoop_actor_walkTo($Jurot,"intro_jurotNode1","walk");
+	thread globalCoop_actor_walkTo($Franklin,"intro_franklinNode1","walk");
+	globalCoop_main_wait1Dot5();
+	
+	// start dialog
+	thread globalCoop_actor_walkTo($Munro,"intro_munroNode1","walk");
+	$Munro.headwatch($CargoBay1Secret_fx);
+	//wait(.25);
+	
+	globalCoop_main_wait1Dot5();
+//Gravity's low.
+	thread coop_statementSaver_playdialogNoHead($Franklin,"dallas01/frank_gravlow.mp3");
+	globalCoop_main_wait1DotZero();
+	thread globalCoop_actor_walkTo($Chell,"intro_chellNode1","walk");
+//The artificial gravity system is malfunctioning.
+	thread coop_statementSaver_playdialogNoHead($Chell,"dallas01/chell_malgrav.mp3");
+	globalCoop_main_wait1DotZero();
+	
+	//--------------------------------------------------------
+	//shot3 extreme zoom wiggle cam
+	//--- set camera
+//globalCoop_main_executeInSp("coop_mod/cfg/maps/m3l1a/cin/cin_m3a_1_scene28.cfg");
+	globalCoop_cin_follow($cam1,$m3l1a_Intro_Shot3);
+	globalCoop_cin_fov($cam1,25);
+	globalCoop_cin_cut($cam1);
+	//globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera( $cam1 );
+	$Jurot.headwatch( $lowgravity_barrel3 );
+	//--- wait for chell to finish yappin'
+	wait( 4 );
+
+	// chell notices the hole
+	$Chell.headwatch( $introcin_holeclip1 );
+	$Jurot.headwatch($Munro);
+//No lifesigns in this area.
+	coop_statementSaver_playdialogNoHead($Jurot,"dallas01/jurot_nolife.mp3");
+	globalCoop_main_waitZeroDot2();		
+	$Munro.headwatch( $Jurot );
+//Well, keep scanning.
+	coop_statementSaver_playdialogNoHead($Munro,"dallas01/munro_keepscan.mp3");
+	globalCoop_main_wait1Dot5();
+	$Chell.headwatch( $introcin_holeclip1 );
+//Look at this strange hole.
+	thread coop_statementSaver_playdialogNoHead($Chell,"dallas01/chell_strnghole.mp3");
+	globalCoop_main_wait1DotZero();
+	$Jurot.resethead();
+	globalCoop_cin_cuecamera( $cam2 );
+	
+	//--- start walking chell over
+	thread globalCoop_actor_walkTo($Chell,"intro_chellNode2","walk");
+	wait( 4 );
+
+	//--------------------------------------------------------
+	//shot5 reveal the hole
+	
+	//--- set camera
+//globalCoop_main_executeInSp("coop_mod/cfg/maps/m3l1a/cin/cin_m3a_1_scene29.cfg");
+	globalCoop_cin_follow($cam3,$m3l1a_Intro_Shot5);
+	globalCoop_cin_fov($cam3,60);
+	globalCoop_cin_cut($cam3);
+//	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam3);
+	
+	//--- walk the rest of the team over
+	$Munro.headwatch( $introcin_holeclip1 );
+	thread globalCoop_actor_walkTo($Munro,"intro_munroNode2","walk");	
+	thread globalCoop_actor_walkTo($Franklin,"intro_franklinNode2","walk");
+	thread globalCoop_actor_walkTo($Jurot,"intro_jurotNode2","walk");
+	globalCoop_main_wait1Dot5();
+	
+	$Jurot.headwatch( $introcin_holeclip1 );
+	globalCoop_main_waitZeroDot5();
+	
+//Too irregular for a phaser. Mechanical damage?
+	thread coop_statementSaver_playdialogNoHead($Jurot,"dallas01/jurot_irreg.mp3");
+	globalCoop_main_wait1DotZero();
+	$Jurot.headwatch($Chell,10 );
+	globalCoop_dialog_waitForDialog($Jurot);
+	
+	// chell waves his tricorder around like hes doing stuff
+	globalCoop_actor_animateWaitForAnimation($Chell,"tricorder_scan180");//entity,anim
+	$Chell.anim( "tricorder_calm_idle" );
+
+//The edges show irregular rasp marks. And trace amounts of liquid.
+	thread coop_statementSaver_playdialogNoHead($Chell,"dallas01/chell_edges.mp3");
+	wait( 3 );
+	$Jurot.resethead();
+
+	//--------------------------------------------------------
+	//shot6 close up on chell
+
+	//--- set camera
+//globalCoop_main_executeInSp("coop_mod/cfg/maps/m3l1a/cin/cin_m3a_1_scene210.cfg");
+	globalCoop_cin_follow($cam2,$m3l1a_intro_adam4);
+	globalCoop_cin_fov($cam2,45);
+	globalCoop_cin_cut($cam2);
+	//globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera( $cam2 );
+	
+	//--- wait for chell to stop speaking
+	globalCoop_dialog_waitForDialog($Chell);
+
+	
+	$Jurot.headwatch($Munro);
+	
+	
+	$Jurot.morph( "exp_Nervous" );
+	$Munro.morph( "exp_Confused" );
+	
+//Liquid coolant for an industrial drill?
+	wait( .25 );
+	$Jurot.headwatch( $Chell );
+	coop_statementSaver_playdialogNoHead($Jurot,"dallas01/jurot_coolant.mp3");
+	
+	$Munro.headwatch( $Chell );
+	wait( 1.25 );
+	$Jurot.resethead();
+	
+	//--------------------------------------------------------
+	//shot7 the team
+
+	//--- set camera
+//globalCoop_main_executeInSp("coop_mod/cfg/maps/m3l1a/cin/cin_m3a_1_scene211.cfg");
+	globalCoop_cin_follow($cam1,$m3l1a_intro_adam3);
+	globalCoop_cin_fov($cam1,45);
+	globalCoop_cin_cut($cam1);
+	//globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera( $cam1 );
+
+	globalCoop_actor_animateWaitForAnimation($Chell,"tricorder_fire");//entity,anim
+	$Chell.anim( "tricorder_calm_idle" );
+	$Jurot.headwatch($Munro);
+
+	$Munro.unmorph( "exp_Confused" );
+	$Jurot.unmorph( "exp_Confused" );
+	$Chell.morph( "exp_Nervous" );
+	$Franklin.morph( "exp_Nervous" );
+	
+//No. There's too little of it. And it's thicker, with trace organic compounds, almost like…
+	thread coop_statementSaver_playdialogNoHead($Chell,"dallas01/chell_thicker.mp3");
+
+	//--------------------------------------------------------
+	//shot8 behind the crates at the team
+
+	//--- set camera
+//globalCoop_main_executeInSp("coop_mod/cfg/maps/m3l1a/cin/cin_m3a_1_scene212.cfg"); 		
+	globalCoop_cin_follow($cam2,$m3l1a_Intro_Shot6);
+	globalCoop_cin_fov($cam2,30);
+	globalCoop_cin_cut($cam2);
+	//globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera( $cam2 );
+
+	//--- wait for chell to finish yappin'
+	globalCoop_dialog_waitForDialog($Chell);
+
+	//--------------------------------------------------------
+	//shot9 chell again
+
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( 1.1 );
+
+	$Franklin.headwatch( $Chell );
+	$Franklin.morph( "exp_Skeptical" );
+	
+	
+//What?
+	thread coop_statementSaver_playdialogNoHead($Franklin,"dallas01/frank_what.mp3");
+	globalCoop_main_wait1DotZero();
+	$Jurot.headwatch($Franklin);
+
+	$Chell.morph( "exp_Confused" );
+	$Chell.headwatch( $introcin_holeclip1 );
+	
+//--- wait for chell to finish yappin'
+	globalCoop_dialog_waitForDialog($Chell);
+	
+//Saliva.
+	thread coop_statementSaver_playdialogNoHead($Chell,"dallas01/chell_saliva.mp3");
+
+	//--------------------------------------------------------
+	//shot7 the team
+
+	//--- set camera
+//globalCoop_main_executeInSp("coop_mod/cfg/maps/m3l1a/cin/cin_m3a_1_scene213.cfg");
+	globalCoop_cin_follow($cam2,$m3l1a_intro_adam5);
+	globalCoop_cin_fov($cam2,30);
+	globalCoop_cin_cut($cam2);
+	//globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera( $cam2 );
+	$Jurot.resethead();
+	
+	//--- wait for chell to finish yappin'
+	globalCoop_dialog_waitForDialog($Chell);
+	globalCoop_main_waitZeroDot2();
+	
+//Something chewed its way in?
+	thread coop_statementSaver_playdialogNoHead($Franklin,"dallas01/frank_chewed.mp3");
+	globalCoop_main_waitZeroDot2();
+	$Chell.turntowardsentity($Franklin);
+	$Franklin.headWatch($Munro, 4 );
+	$Jurot.headwatch($Chell);
+	$Munro.headWatch( $Franklin, 4 );
+	wait(3);
+	cin_m3a_1_scene2_skip();
+}
+
+
+void cin_m3a_1_scene2_skip()
+////////////////////////////////////////////////////////////////////////////////
+// Intro cinematics skip thread
+////////////////////////////////////////////////////////////////////////////////
+{
+	skipThread("null");
+//kill the cinematic
+	killthread( "cin_m3a_1_scene1" );
+	killthread( "cin_m3a_1_scene2" );
+	$world.setFloatVar("CargoBayDoor1ButtonSolved",1);
+	
+	globalCoop_main_camFadeOut(1);
+	globalCoop_main_wait1DotZero();
+	
+/* 	if(!cvar_bool_multiplayer){
+		$player.setobjectiveshow( "ExploreShip", 1 );
+	} */
+
+	music ("normal");
+	globalCoop_level_show($Jurot);
+	globalCoop_level_show($Chell);
+	globalCoop_level_show($Franklin);
+//the other dudes here, we stop the hazard teams it's speach allready in cinematicEnd
+	$Franklin.stopdialog();
+//end cine
+	thread cin_m3a_1_scene2_end();
+}
+
+
+void cin_m3a_1_scene2_end()
+////////////////////////////////////////////////////////////////////////////////
+//End Cin scene 2
+////////////////////////////////////////////////////////////////////////////////
+{
+	$Jurot.alpha( 1 );
+	$Chell.alpha( 1 );
+	$Franklin.alpha( 1 );
+	$Jurot.resethead();
+	$Franklin.resethead();
+	$Chell.resethead();
+	globalCoop_level_hideAndNotSolid($Munro);
+//--- remove the dead body close to the ground
+	globalCoop_level_remove($cinematicDeadBody);		
+	globalCoop_actor_useWeapon($Chell,"fed-compressionrifle-enhanced");//ENTITY:actor,STRING: weapon
+	thread globalCoop_actor_useWeapon($Jurot,"fed-compressionrifle-enhanced");//ENTITY:actor,STRING: weapon
+	
+ 	$Chell.origin( '712 -280 0' );
+	$Franklin.origin( '736 -136 0' );
+	$Jurot.origin( '704 -184 0' );
+	
+	if(!cvar_bool_multiplayer){//singlePlayer
+		$player.loopsound ( "sound/player/player_rebreath.wav", .4, 50);
+		$player.use ( "tricorder-stx" );
+	}
+	
+//end cinematic
+	wait( .3 );
+	globalCoop_main_camFadeIn(.5);
+	globalCoop_cin_end();
+	thread sequenceCargoBayDoorLocked();
+}
+
+

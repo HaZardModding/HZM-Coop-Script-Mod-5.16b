@@ -1,0 +1,981 @@
+//-----------------------------------------------------------------
+//  EF2 Level Script File
+//
+//  Level:	  m4l2b-attrexian_station
+//  Script By:    Adam 'Senn' Bellefeuil
+//  Geometry By:  Adam 'Senn' Bellefeuil
+//  Created on:   09/13/2002
+//  Last Edited:  05/11/2003 - Adam
+//-----------------------------------------------------------------
+// -- Primary Functionality
+void main();
+void init();
+
+// -- Gonzales Control Functions
+void gonzales_goaway();
+
+// -- Engineer Control Functions
+void EngineerDead();
+
+// -- Storage Room Stuff
+void SteamJumpPuzzle();
+void EngineerRescued();
+
+void seq1_start();
+void seq1_bulletproof();
+void seq1_end();
+
+float seq1_kills = 0;
+
+// -- Dialog Sequences
+void SequenceEngineerRescue();
+void SequenceCoreBelow();
+
+// -- Engineer Door Power Puzzle
+void EngineerDoorPuzzle_Used();
+void EngineerDoorPuzzle_Solved();
+
+// -- Core Lift
+void CoreLift_MoveDown();
+
+// -- Power Core Lift
+void PowerCoreLift_MoveDown();
+
+float EngineerGotToNode = 0;
+
+// -- Stage 2 battle
+void stage2();
+void stage2death();
+void stage2complete();
+
+float stage2deaths = 0;
+float engineerRescueDialogPlayed = 0;
+float bool_tramReadyToGo = 0;
+
+// -- Core Wave Battle
+void CoreWaveBattleSetup();
+void SequenceEngineerWalkToControls();
+void SequenceStartCoreWaveBattlePart1();
+void SequenceStartCoreWaveBattlePart2();
+void SequenceStartCoreWaveBattlePart3();
+void SequenceStartCoreWaveBattlePart4();
+void CoreWaveBattleFlyinWave();
+
+void coop_onblockKillThread(entity e);
+void coop_onblockKill();
+
+void secret_lift();
+void coop_endLevel();
+
+float PowerCoreLiftPosition = 1;
+float engineerAlive = 1;
+float cineMaticActive;
+
+// -- Archetypes
+void archetypes();
+entity cinematicArm_MeetGonzales;
+void coop_removePath(entity ePath);
+void coop_findAndTargetnameEntities();
+
+
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/global/global_common.scr"
+#include "coop_mod/maps/optional_modules/puzzles.scr"
+#include "coop_mod/maps/optional_modules/teammate.scr"
+#include "coop_mod/maps/global/global_flyin.scr"
+#include "coop_mod/maps/global/global_tricorderBase.scr"
+#include "coop_mod/maps/global/global_tricorderRoute.scr"
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "maps/global_scripts/global_debugUtils.scr"
+#include "maps/global_scripts/global_array.scr"
+#include "maps/global_scripts/global_spawnWave.scr"
+#include "maps/global_scripts/global_math.scr"
+#include "maps/global_scripts/global_acceleratedMovement.scr"
+#include "maps/global_scripts/global_archetype.scr"
+#include "coop_mod/maps/global/global_cinematicFX.scr"
+#include "maps/m4/m4l2b_dialog.scr"
+#include "coop_mod/maps/missions/4/m4l2b_cin.scr"
+
+//ENTITYS WE MIGHT NEED
+//$CoreLift_PlayerClip
+//PowerCoreLift_PlayerClip
+
+//REMOVE
+//FAKEpicard - spawn sp,mp=dummy
+//FAKEchell - spawn sp,mp=dummy
+
+
+void main()
+{
+	$gonzales.ai_off();
+	globalCoop_server_precacheSingleplayer();
+//remove the actor, we have a dublicate we use instead
+	$FakeMunro.remove();//dublicated
+	$intro_munroTram.remove();//buggy, repats dialog all over, at last in german
+//Set soundtrack, so all players hear music durring loading
+//If they have been on the server while the server was loading this
+//level script with this head info
+	soundtrack( "music/m4l2b-attrexian_station.mus" );
+//start black, black is sexy
+	globalCoop_main_camFadeOut(.1);
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_string_nextMapToCheck			= "m5l1a-drull_ruins1";//set the map we gona load next while we are in testmode
+	//coop_vector_lmsStartedPausedWarmuptime_y = 1;//Pause LMS until the mission accutly starts
+	coop_bool_showMissionSucessHud		= 1;//Final level, display Mission Sucess Hud
+//Set spawnangles for this level
+	coop_float_spawnAngle0 				= 270;
+	coop_vector_spawnOrigin8 			= '-1597 -1758 -300';
+	coop_vector_spawnOrigin7 			= '-1530 -1758 -300';
+	coop_vector_spawnOrigin6 			= '-1460 -1758 -300';
+	coop_vector_spawnOrigin5 			= '-1390 -1758 -300';
+	coop_vector_spawnOrigin4 			= '-1530 -1680 -300';
+	coop_vector_spawnOrigin3 			= '-1597 -1680 -300';
+	coop_vector_spawnOrigin2 			= '-1460 -1680 -300';
+	coop_vector_spawnOrigin1 			= '-1390 -1680 -300';
+//Definie Objective
+	coop_string_objectiveItem1			= "RescueChiefEngineer";
+	coop_string_objectiveItem2			= "FindDallasCrew";
+	coop_string_objectiveItem3			= "RestorePower";
+	coop_string_objectiveItem4			= "ProtectChiefEngineer";
+//definie weapons
+	coop_string_weapon1 = "models/weapons/worldmodel-FieldAssaultRifle.tik";
+	coop_string_weapon2 = "models/weapons/worldmodel-BurstRifle.tik";
+	coop_string_weapon3 = "models/weapons/worldmodel-Phaser-stx.tik";
+	coop_string_weapon4 = "models/weapons/worldmodel-Tricorder-stx.tik";
+	coop_string_weapon5 = getCvar("coop_eWtik");
+//DYN Weapon
+	if(coop_string_weapon5 != "models/weapons/worldmodel-attrex-rifle.tik"){coop_string_weapon5 ="";}
+	else{setfloatvar("game.attrexianWeaponFound",1);}
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+//Set viewModes
+	$world.clearAvailableViewModes();
+	$world.addAvailableViewMode( "structuralintegrity" );
+
+//IGM - Set next IGM number
+	if(cvar_bool_multiplayer){
+		stuffCMD("seta coop_igm 3\n");
+	}
+	else{
+		setfloatvar("game.globalMissionEnterprise",3);
+	}
+	
+//Setup World
+	$sky.rendereffects( "+skyorigin" );
+	$world.entity_fade_dist( 8000 );
+//Initialize
+	thread init();
+	
+	globalCoop_main_waitForWarmupTime();
+	thread cinematic_intro();
+}
+
+void coop_removePath(entity ePath)
+{
+	entity eRemove;
+	
+	while(doesEntityExist(ePath)){
+		eRemove = ePath;
+		ePath = ePath.gettargetentity();
+		globalCoop_level_remove(eRemove);
+		globalCoop_main_waitAFrame();
+	}
+}
+
+void inaccessible_sound()
+{
+	entity e;
+	e = getcurrententity();
+	e.playsound( "sound/doors/door_locked.wav", 1, .7, 90 );
+}
+
+void coop_onblockKillThread(entity e)
+{
+	if(doesEntityExist(e)){
+		e.noblock();
+		globalCoop_main_waitAFrame();
+		e.onblock("coop_onblockKill");
+		pause();
+	}	
+}
+
+void coop_onblockKill()
+{
+	entity e;
+	e=getCurrentEntity();
+	if(doesEntityExist(e)){
+		entity ePlayer;
+		ePlayer = e.getLastActivatingEntity();
+		if(doesEntityExist(ePlayer)){
+			if(globalCoop_check_entityValidPlayerTargetname(ePlayer)){
+				ePlayer.kill();
+			}
+		}
+		thread coop_onblockKillThread(e);
+	}
+}
+
+void coop_findAndTargetnameEntities()
+//find entities without targetname and vive em a targetname
+{	
+	float fEntity;
+	entity e;
+	for(fEntity=0;fEntity<1023;fEntity++){
+		e=getEntity("*"+fEntity);
+		if(doesEntityExist(e)){
+			if(e.getOrigin() == '2096 -3520 -3168'){
+				e.targetname("sequence2Trigger");
+				e.nottriggerable();
+//EXIT if there are no further entities to be found!
+				return;
+			}
+		}
+	}
+}
+
+//---------------------
+// init
+// intialization thread
+//---------------------
+void init()
+{	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		waitForPlayer();
+		$player.loadobjectives("m4l2-attrexian_station");
+	}
+	else{//Multiplayer
+		thread coop_findAndTargetnameEntities();
+		thread globalCoop_puzzle_replace($EngineerDoorPuzzle,"EngineerDoorPuzzle_Solved",10);
+		spawn("trigger_hurt","targetname","coop_liftJumpdownMurder","damagetype","falling","origin","2000 -3500 -3300");
+	}
+	
+	thread initDialog();
+	thread CoreWaveBattleSetup();
+
+	$world.light_lightstyle( "engineerDoorRed" , "zzzzzzzzzzzzzzzzzzzzzzzyzzzzzzzzzzzzzzzzzzzzzz" , 0 );
+	$world.light_lightstyle( "engineerDoorGreen" , "aaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaa" , 0 );
+
+	thread archetypes();
+
+	//set up stuff for engineer rescue sequence
+	$Engineer.ai_off();
+	$ControlRoom_Door.lock();
+	thread SteamJumpPuzzle();
+
+	//bind stuff to Core Lift
+	$CoreLift_Button.bind( $CoreLift );
+	$CoreLift_DropPanel.bind( $CoreLift );
+	$CoreLift_PlayerClip.bind( $CoreLift );
+
+	//bind stuff to Power Core Lift
+	$PowerCoreLift_Button.bind( $PowerCoreLift );
+	$PowerCoreLift_PlayerClip.bind( $PowerCoreLift );
+	$secret_liftButton.bind( $PowerCoreLift );
+
+	//Remove clip brush that holds up pathnodes
+	$ElevatorShaftFloor.remove();
+
+	// Set death thread for engineer
+	$Engineer.killthread( "EngineerDead" );
+	$Engineer.useactorweapon( "None" );
+
+	// Bind the tram together
+	thread coop_onblockKillThread($tram_clip);
+	$tram_trailer.bind( $tram_origin );
+	$tram_clip.bind( $tram_origin );
+	$tram_cab.bind( $tram_origin );
+	vector vTram;
+	vTram = $tram_clip.getOrigin();
+	$intro_explosion3.bind( $tram_origin );
+	$intro_explosion4.bind( $tram_origin );
+
+	// Set the engineers health
+	$Engineer.ai_off();
+	$Engineer.health( 300 );
+	$Engineer.anim( "laying_idle" );
+	$Engineer.pushable( 0 );
+
+	// Bind the core
+	$topthingy1.bind( $mushroomtip );
+	$topthingy2.bind( $mushroomtip );
+	$bottomthingy1.bind( $mushroomtip );
+	$bottomthingy2.bind( $mushroomtip );
+	$sideBeam1.bind( $mushroomtip );
+	$sideBeam2.bind( $mushroomtip );
+
+	//make the engineer heavy as hell so she doesnt move around on the lift, haha
+	$Engineer.mass( 999999 );
+	
+
+	globalCoop_teammate_register($gonzales);
+}
+
+//---------------------
+// Archetypes
+// Setup archetypes
+//---------------------
+void archetypes()
+{
+	wait( 0.05 );
+	globalArchetype_Setup( $powerPanelArchetype, "AttrexianPowerPanel" );
+	globalArchetype_Setup( $doorControlArchetype, "AttrexianPowerPanel" );
+}
+
+//---------------------
+// Engineer Death Thread
+// Fail the mission if the engineer dies
+//---------------------
+void EngineerDead()
+{
+	engineerAlive = 0;
+	wait( 1 );
+	globalCoop_objectives_update("failed",4,1);
+	thread globalCoop_mission_failCivilianKilled();
+}
+
+
+// When munro goes up top for the jump puzzle, gonzo fiddles with the locked engineer room
+void gonzales_goaway()
+{
+//Disable Co-Op Command ability
+	$gonzales.ai_off();
+	$gonzales.pushable( 0 );
+	$gonzales.mass(999999);
+	$gonzales.strictlyfollowpath( 1 );
+	globalCoop_actor_walkToVector($gonzales,'176 -2904 -416',"walk");
+	wait( .25 );
+
+	//MAKE GONZO LOOK LIKE HES DOING THINGS, BUSY BUSY GONZO
+	$gonzales.angle( 90 );
+	$gonzales.useactorweapon( "Tricorder" );
+	
+	globalCoop_actor_animateWaitForAnimation($gonzales,"cin-m3_kneel-down");
+	$gonzales.setmovetype( "none" );
+	globalCoop_actor_animateWaitForAnimation($gonzales,"cin-m3_idle-kneel");
+	wait( 5 );
+	globalCoop_actor_animateWaitForAnimation($gonzales,"cin-m3_kneel-up");
+	$gonzales.anim( "idle" );
+}
+
+//====================================================================================
+// Steam Jump Puzzle
+//====================================================================================
+
+//---------------------
+// SteamJumpPuzzle -- turned into fire cause deadly steam was retarded -- adam
+// Timed Steam Jump Puzzle
+//---------------------
+void SteamJumpPuzzle()
+{
+	while( 1 )
+	{
+		$SteamJumpPuzzle_Steam.hide();
+		$SteamJumpPuzzle_Hurt.nottriggerable();
+		wait ( 2 );
+
+    		$SteamJumpPuzzle_Steam.playsound( "sound/environment/steam/steam_3sec.wav", 5, 1.2, 200 );
+		$SteamJumpPuzzle_Steam.show();
+		$SteamJumpPuzzle_Hurt.triggerable();
+		wait ( 3 );
+
+		$SteamJumpPuzzle_Steam.hide();
+		$SteamJumpPuzzle_Hurt.nottriggerable();
+		wait ( 2 );
+
+		$SteamJumpPuzzle_Steam.playsound( "sound/environment/steam/steam_3sec.wav", 5, 1.2, 200 );
+		$SteamJumpPuzzle_Steam.show();
+		$SteamJumpPuzzle_Hurt.triggerable();
+		wait ( 3 );
+
+		$SteamJumpPuzzle_Steam.hide();
+		$SteamJumpPuzzle_Hurt.nottriggerable();
+		wait ( 3 );
+
+  		$SteamJumpPuzzle_Steam.playsound( "sound/environment/steam/steam_4sec.wav", 5, 1.2, 200 );
+		$SteamJumpPuzzle_Steam.show();
+		$SteamJumpPuzzle_Hurt.triggerable();
+		wait ( 4 );
+	}
+}
+
+//====================================================================================
+// Engineer Rescue
+//====================================================================================
+
+//---------------------
+// SequenceEngineerRescue
+// Wakes up the Engineer and makes her play her dialog
+//---------------------
+void SequenceEngineerRescue()
+{
+	thread gonzales_goaway();
+	globalCoop_actor_animateWaitForAnimation($Engineer,"laying_getup");
+
+	//Over here! I'm Vorch'ov, Chief Engineer! I'm locked in.
+	thread globalCoop_dialog_play($Engineer,"m4l2/vorchov_locked.mp3", 1, 800, 1);
+
+	globalCoop_actor_walkTo($Engineer,"$windowNode","walk");
+
+	$Engineer.turntoangle( 270 );
+	$Engineer.angle( 270 );
+	globalCoop_actor_animateWaitForAnimation($Engineer,"cin-m3_greet");
+	globalCoop_actor_animateWaitForAnimation($Engineer,"ent-krindo");
+	$Engineer.anim( "idle" );
+
+	wait( .5 );
+	globalCoop_actor_animateWaitForAnimation($Engineer,"attrexsecpistol_draw");
+	$Engineer.useactorweapon( "AttrexianSecurityPistol" );
+	$Engineer.anim( "idle" );
+	
+	//We have to find the power source
+	$gonzales.headwatch(globalCoop_return_playerClosestPreferActive($gonzales));
+	globalCoop_dialog_play($gonzales,"m4l2/gonz_source.mp3", 1, 800, 1); 
+	$gonzales.resethead(10);
+}
+
+//---------------------
+// Setup Steam Control Puzzle
+// Prepare the steam control puzzle
+//---------------------
+void EngineerDoorPuzzle_Used()
+{
+	entity puzzle;
+	puzzle = getcurrententity();
+
+	globalTricorderRoute_Reset();
+	globalTricorderRoute_SetSource1Row( 9 );
+	globalTricorderRoute_SetDestination1( 3, 9 );
+
+	//--- begin row definitions
+ 	globalTricorderRoute_BeginDef();
+ 	globalTricorderRoute_SetNextRow( 32, 32, 32, 32, 32, 32, 32, 32, 32 );
+ 	globalTricorderRoute_SetNextRow( 32, 32, 32, 32, 32, 32, 11, 11, 11 );
+ 	globalTricorderRoute_SetNextRow( 32, 32, 32, 32, 32, 19,  7, 10,  7 );
+ 	globalTricorderRoute_SetNextRow( 32, 32,  4,  9, 16,  4,  2,  7,  1 );
+ 	globalTricorderRoute_SetNextRow( 11, 32,  9, 11, 32, 32, 32, 25, 11 );
+ 	globalTricorderRoute_SetNextRow(  9, 22,  4,  9,  3,  2, 22, 21, 32 );
+ 	globalTricorderRoute_SetNextRow( 17, 17, 17,  2, 10,  4, 11, 32, 32 );
+ 	globalTricorderRoute_SetNextRow(  2, 23,  3, 22,  0, 32, 32, 32, 32 );
+ 	globalTricorderRoute_SetNextRow(  8,  4,  2,  9,  8, 32, 32, 32, 32 );
+ 	globalTricorderRoute_SetNextRow( 32,  0,  8, 11, 32, 32, 32, 32, 32 );
+ 	globalTricorderRoute_SetNextRow( 32, 18,  6, 11, 32, 32, 32, 32, 32 );
+
+ 	//--- run the puzzle
+ 	globalTricorderRoute_Run( puzzle, 0 );
+}
+
+//---------------------
+// SequenceEngineerRescueDoor
+// Unlocks door to engineer
+//---------------------
+void EngineerDoorPuzzle_Solved()
+{
+	$ControlRoom_Door.unlock();
+
+	$world.light_lightstyle( "engineerDoorRed" , "a" , 0 );
+	$world.light_lightstyle( "engineerDoorGreen" , "z" , 0 );
+
+	$engineerDoorRed.remove();
+	$engineerDoorGreen.show();
+
+	$EngineerDoorPuzzle.playsound( "sound/ships/attrexian/att-beepconfirm.wav", 4, 1, 90 );
+
+	thread EngineerRescued();
+}
+
+//---------------------
+// EngineerRescued
+// does stuff for when you get to the room with the engineer and rescue them
+//---------------------
+void EngineerRescued()
+{
+	//$player.setobjectivecomplete( "RescueChiefEngineer" , 1 );
+	//$player.setobjectiveshow( "RestorePower" , 1 );
+	globalCoop_objectives_update("incomplete",3,0);
+	thread globalCoop_objectives_update("complete",1,1);
+}
+
+
+//---------------------
+// Engineer Dialog
+// Dialog between Munro and Engineer
+//---------------------
+void SequenceCoreBelow()
+{
+	//The main power core is below. We need to take the lift down.
+	globalCoop_dialog_play($Engineer,"m4l2/vorchov_below.mp3", 1, 800, 1);
+	
+	//Let's go. I'll protect you while you reroute power.
+	globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($Engineer),"m4l2/munro_protect.mp3", 1, 9999, 0);
+}
+
+//====================================================================================
+// Core Lift
+//====================================================================================
+
+//---------------------
+// CoreLift_MoveDown
+// Moves lift to central core down
+//---------------------
+void CoreLift_MoveDown()
+{//first lift!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//make sure she is on the lift
+	$Engineer.setactorflag("cannotuse" , 1.0 );
+	globalCoop_level_warpEntityToVectorSafty($Engineer,'720 -3424 -392');
+
+	globalCoop_actor_animateWaitForAnimation($Engineer,"attrexsecpistol_putaway");
+	$Engineer.useactorweapon( "None" );
+
+	globalCoop_actor_animateWaitForAnimation($Engineer,"ent-library-stand-gesture1");
+	$Engineer.anim( "ent-library-stand-idle" );
+
+	$CoreLift_Button.playsound( "sound/ships/attrexian/att-beepconfirm.wav", 4, .4, 150 );
+   	$CoreLift.playsound( "sound/environment/machine/lift4.wav", 5, 1, 150 );
+
+    music ("aux2");
+
+	$CoreLift.time( 5 );
+	$CoreLift.moveto( $corelift_point2 );
+	waitfor( $CoreLift );
+
+	$CoreLift.time( 15 );
+	$CoreLift.moveto( $corelift_point3 );
+	waitfor( $CoreLift );
+	
+	$CoreLift.time( 15 );
+	$CoreLift.moveto( $corelift_end );
+	if(cvar_bool_multiplayer){//Multiplayer	
+		$sequence2Trigger.setsize('-99999 -99999 -99999','99999 99999 0');//players shall not miss this trigger!!!
+		wait(10);
+		$sequence2Trigger.triggerable();
+		wait(2);
+	//relocate spawn
+		coop_float_spawnAngle1 				= 360;
+		coop_float_spawnAngle2 				= 360;
+		coop_float_spawnAngle3 				= 360;
+		coop_float_spawnAngle4 				= 360;
+		coop_float_spawnAngle5 				= 360;
+		coop_float_spawnAngle6 				= 360;
+		coop_float_spawnAngle7 				= 360;
+		coop_float_spawnAngle8 				= 360;
+		coop_vector_spawnOrigin1 			= '2600 -3210 -3400';
+		coop_vector_spawnOrigin2 			= '2600 -3280 -3400';
+ 		coop_vector_spawnOrigin3 			= '2600 -3350 -3400';
+		coop_vector_spawnOrigin4 			= '2600 -3420 -3400';
+		coop_vector_spawnOrigin5 			= '2600 -3490 -3400';
+		coop_vector_spawnOrigin6 			= '2600 -3560 -3400';
+		coop_vector_spawnOrigin7 			= '2600 -3730 -3400';
+		coop_vector_spawnOrigin8 			= '2600 -3800 -3400';
+	//Force spawnlocations on respawn locations!
+		thread globalCoop_applaySpawnOriginOnReSpwanOrigin();
+	//relocate Class Selection
+		thread globalCoop_level_warpDroptofloor($coop_class_HeavyWeaponsModel,'2665 -3395 -3370');
+		thread globalCoop_level_warpDroptofloor($coop_class_TechnicianModel,'2665 -3495 -3370');
+		thread globalCoop_level_warpDroptofloor($coop_class_MedicModel,'2665 -3595 -3370');
+		thread globalCoop_level_remove($coop_liftJumpdownMurder);
+	}else{
+		$sequence2Trigger.triggerable();
+	}
+	waitfor( $CoreLift );
+
+    $CoreLift.playsound( "sound/environment/machine/lift4stop.wav", 5, 1, 150 );
+	wait ( 1 );
+	$CoreLift_DropPanel.movedown (44);
+	waitfor ($CoreLift_DropPanel);
+
+	$Engineer.angle( 180 );
+
+	$Engineer.useactorweapon( "AttrexianSecurityPistol" );
+	globalCoop_actor_animateWaitForAnimation($Engineer,"attrexsecpistol_draw");
+
+	globalCoop_actor_walkTo($Engineer,"$liftUnfuckNode","run");
+//make sure she is on the lift
+	globalCoop_level_warpEntityToVectorSafty($Engineer,'1984 -3488 -3424');
+	EngineerGotToNode = 1;
+
+	$Engineer.turntoangle( 0 );
+
+	wait( .25 );
+	if( stage2deaths != 3 )
+	{
+		$Engineer.ai_on();
+		$Engineer.settendency ( "wander" , 0.0 );
+		$Engineer.settendency ( "follow" , 1.0 );
+	}
+	else
+	{
+		thread stage2complete();
+	}
+}
+
+//====================================================================================
+// Power Core
+//====================================================================================
+
+//---------------------
+// PowerCoreLift
+// Power core lift moves down
+//---------------------
+void PowerCoreLift_MoveDown()
+{//secound lift!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	globalCoop_actor_animateWaitForAnimation($Engineer,"attrexsecpistol_putaway");
+	$Engineer.useactorweapon( "None" );
+
+	globalCoop_actor_animateWaitForAnimation($Engineer,"ent-library-stand-gesture1");
+	$Engineer.anim( "ent-library-stand-idle" );
+
+	$PowerCoreLift.playsound( "sound/ships/attrexian/att-beepconfirm.wav", 6, .7, 250 );
+	$PowerCoreLift.playsound( "sound/environment/machine/lift4.wav", 4, 1, 550 );
+
+	$PowerCoreLift.time( 8 );
+	$PowerCoreLift.movedown ( 704 );
+	waitfor( $PowerCoreLift );
+	
+	if(cvar_bool_multiplayer){//Multiplayer	
+	//relocate spawn
+		coop_float_spawnAngle1 				= 270;
+		coop_float_spawnAngle2 				= 270;
+		coop_float_spawnAngle3 				= 270;
+		coop_float_spawnAngle4 				= 270;
+		coop_float_spawnAngle5 				= 270;
+		coop_float_spawnAngle6 				= 270;
+		coop_float_spawnAngle7 				= 270;
+		coop_float_spawnAngle8 				= 270;
+		coop_vector_spawnOrigin8 			= '2530 -3095 -4000';
+		coop_vector_spawnOrigin7 			= '2600 -3095 -4000';
+		coop_vector_spawnOrigin6 			= '2670 -3095 -4000';
+		coop_vector_spawnOrigin5 			= '2740 -3095 -4000';
+		coop_vector_spawnOrigin4 			= '2810 -3095 -4000';
+		coop_vector_spawnOrigin3 			= '2880 -3095 -4000';
+		coop_vector_spawnOrigin2 			= '2950 -3095 -4000';
+		coop_vector_spawnOrigin1 			= '3020 -3095 -4000';
+	//Force spawnlocations on respawn locations!
+		globalCoop_applaySpawnOriginOnReSpwanOrigin();
+	//relocate Class Selection
+		thread globalCoop_level_warpDroptofloor($coop_class_HeavyWeaponsModel,'3072 -3376 -4190');
+		thread globalCoop_level_warpDroptofloor($coop_class_TechnicianModel,'3072 -3452 -4190');
+		thread globalCoop_level_warpDroptofloor($coop_class_MedicModel,'3072 -3532 -4190');
+	}
+
+	$PowerCoreLift.playsound( "sound/environment/machine/lift4stop.wav", 4, 1, 550 );
+
+	$Engineer.angle( 180 );
+	$Engineer.anim( "idle" );
+	$Engineer.useactorweapon( "AttrexianSecurityPistol" );
+	globalCoop_actor_animateWaitForAnimation($Engineer,"attrexsecpistol_draw");
+	wait( .25 );
+	thread SequenceEngineerWalkToControls();
+	wait( 5 );
+	$secret_liftButton.triggerable();
+}
+
+void stage2()
+{
+	wait( .1 );
+	$stage2lurker1.killthread( "stage2death" );
+	$stage2lurker2.killthread( "stage2death" );
+	$stage2chewer1.killthread( "stage2death" );
+}
+
+void stage2death()
+{
+	stage2deaths ++;
+
+	if( stage2deaths == 3)
+	{
+		thread stage2complete();
+	}
+}
+
+void stage2complete()
+{
+	while ( EngineerGotToNode == 0 )
+	{
+		wait(3);
+	}
+	
+	wait( .25 );
+	$Engineer.ai_off();
+	globalCoop_actor_walkTo($Engineer,"$PowerCoreWaypointLift","run");
+	$Engineer.turntoangle( 360 );
+	wait( .25 );
+	$PowerCoreLift_Trigger.triggerable();
+}
+
+//---------------------
+// Engineer Walks
+// Make the engineer walk over to the controls
+//---------------------
+void SequenceEngineerWalkToControls()
+{
+	thread globalCoop_dialog_play($Engineer,"m4l2/vorchov_burnout.mp3", 1, 800, 1);
+	$Engineer.strictlyfollowpath( 1 );
+
+	globalCoop_actor_walkTo($Engineer,"$PowerCoreWaypointBottomConsole","run");
+	$Engineer.turntoangle( 90 );
+	wait( .25 );
+
+	$Engineer.angle( 90 );
+	
+	globalCoop_actor_animateWaitForAnimation($Engineer,"attrexsecpistol_putaway");
+	$Engineer.useactorweapon( "None" );
+	wait( .15 );
+
+	$Engineer.actortype( "teammate" );
+
+	globalCoop_actor_animateWaitForAnimation($Engineer,"ent-library-stand-gesture1");
+    $generator.playsound( "sound/ships/attrexian/att-powerup.wav", 5, 2, 590 );
+
+	thread SequenceStartCoreWaveBattlePart1();
+}
+
+//---------------------
+// Power Core Wave Battle Setup
+// Setup the wave battle
+//---------------------
+void CoreWaveBattleSetup()
+{
+	globalSpawnWave_Setup( "CoreSpawnerGroupOne", 4, 2, 2, 3, 1 );
+	globalSpawnWave_SetupDeathThread( "CoreSpawnerGroupOne", "SequenceStartCoreWaveBattlePart2" );
+
+	globalSpawnWave_Setup( "CoreSpawnerGroupTwo", 4, 2, 2, 3, 2 );
+	globalSpawnWave_SetupDeathThread( "CoreSpawnerGroupTwo", "SequenceStartCoreWaveBattlePart3" );
+
+	globalSpawnWave_Setup( "CoreSpawnerGroupThree", 4, 3, 2, 3, 3 );
+	globalSpawnWave_SetupDeathThread( "CoreSpawnerGroupThree", "SequenceStartCoreWaveBattlePart4" );
+}
+
+//---------------------
+// Power Core Wave Battle Flyin Wave
+// Send in a wave of flyers
+//---------------------
+void CoreWaveBattleFlyinWave()
+{
+	globalFlyin_SpawnLaunch( $coreFlyinSpawner1, "char/alien-type1b-chewer.tik", 0, "", "flyingModelDamageThread", 0 );	wait( 3 );
+	globalFlyin_SpawnLaunch( $coreFlyinSpawner2, "char/alien-type1a-lurker.tik", 0, "", "flyingModelDamageThread", 0 );	wait( 5 );
+	globalFlyin_SpawnLaunch( $coreFlyinSpawner3, "char/alien-type1a-lurker.tik", 0, "", "flyingModelDamageThread", 0 );	wait( 3 );
+}
+
+//---------------------
+// Power Core Wave Battle Stage 1
+// Wave battle while engineer fixes generators
+//---------------------
+// UNLEASH THE HUNGRY HUNGRY HIPPOS
+void SequenceStartCoreWaveBattlePart1()
+{
+	wait( 3 );
+
+	thread CoreWaveBattleFlyinWave();
+
+	//--- change the music
+	forcemusic( "surprise","action" );
+
+	trigger( "$coreQuake" );
+	trigger( "$coreHoleExplodeObject" );
+	trigger( "$coreHoleExplosion1" );
+	wait( .25 );
+
+	trigger( "$coreHoleFx1" );
+	wait( .25 );
+	trigger( "$coreHoleFx2" );
+	wait( .25 );
+
+	//$player.setobjectiveshow( "ProtectChiefEngineer" , 1 );
+	thread globalCoop_objectives_update("incomplete",4,1);
+
+	$coreHoleHurt.triggerable();
+
+	thread globalSpawnWave_Start( "CoreSpawnerGroupOne" );
+
+	trigger( "$coreHallwayExplosion1" );	wait( .5 );
+	trigger( "$coreHallwayExplosion2" );
+}
+
+//---------------------
+// Power Core Wave Battle Stage 2
+// Wave battle while engineer fixes generators
+//---------------------
+void SequenceStartCoreWaveBattlePart2()
+{
+//NULL ENTITY IN HERE, trace with com_printwarnings 1
+	thread CoreWaveBattleFlyinWave();
+	trigger( "$coreQuake" );
+
+	globalCoop_dialog_play($Engineer,"m4l2/vorchov_first.mp3", 1, 800, 0);
+	$generator.playsound( "sound/ships/attrexian/att-beepconfirm.wav", 4, .8, 390 );
+
+	$topthingy1.rotateXup( 30 );
+	$spinjobby1.rotateX( 120 );
+	$sideBeam1.anim( "active" );
+	$sideBeam1.loopsound( "sound/environment/electric/elec_powerloop1.wav",.9, 300 );
+
+	thread globalSpawnWave_Start( "CoreSpawnerGroupTwo" );
+}
+
+//---------------------
+// Power Core Wave Battle Stage 3
+// Wave battle while engineer fixes generators
+//---------------------
+void SequenceStartCoreWaveBattlePart3()
+{
+		globalCoop_dialog_play($Engineer,"m4l2/vorchov_second.mp3", 1, 800, 0);
+		
+		$generator.playsound( "sound/ships/attrexian/att-beepconfirm.wav", 4, 1, 300 );
+		$topthingy2.rotateXup( 30 );
+		$spinjobby2.rotateX( 120 );
+		$sideBeam2.anim( "active" );
+		$sideBeam2.loopsound( "sound/environment/electric/elec_powerloop1.wav",.9, 300 );
+		thread CoreWaveBattleFlyinWave();
+		trigger( "$coreQuake" );
+
+		thread globalSpawnWave_Start( "CoreSpawnerGroupThree" );
+}
+
+//---------------------
+// Power Core Wave Battle Stage 4
+// Wave battle while engineer fixes generators
+//---------------------
+void SequenceStartCoreWaveBattlePart4()
+{
+	if( engineerAlive == 1 )
+	{
+		globalCoop_dialog_play($Engineer,"m4l2/vorchov_three.mp3", 1, 800, 0);
+		$Engineer.anim ( "idle" );
+	}
+
+	if( engineerAlive == 1 )
+	{
+		$PowerCore_Button.playsound( "sound/ships/attrexian/att-beepconfirm.wav", 4, 1, 300 );
+		thread coreController();
+
+		//$player.setobjectivecomplete( "ProtectChiefEngineer" , 1 );
+		//$player.setobjectivecomplete( "RestorePower" , 1 );
+		globalCoop_objectives_update("complete",3,1);
+		thread globalCoop_objectives_update("complete",4,1);
+
+		$Engineer.immortal( 1 );
+		$Engineer.angle( 270 );
+		$Engineer.useactorweapon( "SecurityPistol" );
+		$Engineer.ai_on();
+
+		wait( 6 );
+
+		thread cinematic_end();
+	}
+}
+
+//---------------------
+// Secret Lift
+// Secret area in power core
+//---------------------
+void secret_lift()
+{
+	$secret_liftButton.nottriggerable();
+
+	if( PowerCoreLiftPosition == 1 )
+	{
+		PowerCoreLiftPosition = 0;
+
+		$PowerCoreLift.playsound( "sound/ships/attrexian/att-beepconfirm.wav", 6, .7, 250 );
+		$PowerCoreLift.playsound( "sound/environment/machine/lift4.wav", 4, 1, 550 );
+
+		$PowerCoreLift.time( 8 );
+		$PowerCoreLift.moveUp( 960 );
+		waitfor( $PowerCoreLift );
+
+		$PowerCoreLift.playsound( "sound/environment/machine/lift4stop.wav", 4, 1, 550 );
+
+		PowerCoreLiftPosition = 2;
+
+		wait( .5 );
+
+		$secret_liftButton.triggerable();
+	}
+	else if( PowerCoreLiftPosition == 2 )
+	{
+		PowerCoreLiftPosition = 0;
+
+		$PowerCoreLift.playsound( "sound/ships/attrexian/att-beepconfirm.wav", 6, .7, 250 );
+		$PowerCoreLift.playsound( "sound/environment/machine/lift4.wav", 4, 1, 550 );
+
+		$PowerCoreLift.time( 8 );
+		$PowerCoreLift.moveDown( 960 );
+		waitfor( $PowerCoreLift );
+
+		$PowerCoreLift.playsound( "sound/environment/machine/lift4stop.wav", 4, 1, 550 );
+
+		PowerCoreLiftPosition = 1;
+
+		wait( .5 );
+
+		$secret_liftButton.triggerable();
+	}
+}
+
+// This business makes the Vorchov dialog sequence not break - Adam 3/29/03
+void seq1_start()
+{
+	$seq1_chewer1.killthread( "seq1_end" );
+	$seq1_lurker1.killthread( "seq1_end" );
+	$seq1_lurker2.killthread( "seq1_end" );
+}
+
+void seq1_bulletproof()
+{
+return;//messy!!!!!!
+	seq1_kills = 666;
+
+	if( doesEntityExist ( $seq1_chewer1 ) )
+	{
+		$seq1_chewer1.suicide();
+	}
+	if( doesEntityExist ( $seq1_lurker1 ) )
+	{
+		$seq1_lurker1.suicide();
+	}
+	if( doesEntityExist ( $seq1_lurker2 ) )
+	{
+		$seq1_lurker2.suicide();
+	}
+
+	if( engineerRescueDialogPlayed != 1 )
+	{
+		thread SequenceEngineerRescue();
+	}
+}
+
+void seq1_end()
+{
+	seq1_kills ++;
+
+	wait( .25 );
+
+	if( seq1_kills == 3 )
+	{
+		engineerRescueDialogPlayed = 1;
+		thread SequenceEngineerRescue();
+	}
+}
+
+void gonzo_fiddleabout()
+{
+	$gonzales.followcombatrange( 10000 );
+}
+
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	stuffcmd("seta coop_igm 3\n");
+	thread globalCoop_mission_completed("ent-deck8");
+}

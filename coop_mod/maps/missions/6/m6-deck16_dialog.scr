@@ -1,0 +1,62 @@
+
+//--- character loadouts
+void initDialog_Barclay( entity entActor );
+void initDialog_CrewEngineer1( entity entActor );
+void initDialog_CrewEngineer2( entity entActor );
+
+
+
+//--------------------------------------------------------------------------------------
+// Dialog Script
+// 	Contains all dialog setup code for one specific BSP.  That map's script should
+//	#include this file and call the function "initDialog" somewhere in it's main function.
+//--------------------------------------------------------------------------------------
+void initDialog_Barclay( entity entActor )
+{
+	//--- dialog and watch modes
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( "headwatchonly" );
+	
+	//--- alias and registering
+	entActor.alias( "generalBarclay1" , "localization/sound/dialog/m6l1/barclay_tooclose.mp3", "stop" );	//That was too close, Munro!
+	entActor.alias( "generalBarclay2" , "localization/sound/dialog/m6l1/barclay_neverlike.mp3", "stop" );	//I’ve seen some warp core breaches in my day, but never like that!
+	entActor.alias( "generalBarclay3" , "localization/sound/dialog/m6l1/barclay_finish.mp3" );				//Time to finish the job, Munro! Eliminate the remaining threat.
+
+	entActor.alias( "greetingBarclay1" , "localization/sound/dialog/ent_m1/munro_barclay.mp3" );			//Barclay.
+	entActor.alias( "greetingBarclay2" , "localization/sound/dialog/ent_m1/munro_hbarclay.mp3" );			//Hey Barclay.
+	
+	entActor.dialog( "generalBarclay" );
+	entActor.dialog( "greetingBarclay", "greetingDialog" );
+}
+
+void initDialog_CrewEngineer1( entity entActor )
+{
+	//--- dialog and watch modes
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( "turnto" );
+	
+	//--- alias and registering
+	entActor.alias( "generalCrewEngineer11" , "localization/sound/dialog/m6l1/engm_almost.mp3" );			//We almost became neutrino dust there.  Thank you.
+	entActor.alias( "generalCrewEngineer12" , "localization/sound/dialog/m6l1/engm_should.mp3", "stop" );	//I should do more Holodeck combat training!
+
+	entActor.alias( "greetingCrewEngineer11" , "localization/sound/dialog/ent_m1/munro_hey3.mp3" );		//Hey.
+	
+	entActor.dialog( "generalCrewEngineer1" );
+	entActor.dialog( "greetingCrewEngineer1", "greetingDialog" );
+}
+
+void initDialog_CrewEngineer2( entity entActor )
+{
+	//--- dialog and watch modes
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( "turnto" );
+	
+	//--- alias and registering
+	entActor.alias( "generalCrewEngineer21" , "localization/sound/dialog/m6l1/engf_seencomb.mp3" );		//I’ve never seen combat in engineering before! Thank you for helping us!
+	entActor.alias( "generalCrewEngineer22" , "localization/sound/dialog/m6l1/engf_sudd.mp3", "stop" );	//It’s terrifying to be suddenly under attack like that!
+
+	entActor.alias( "greetingCrewEngineer21" , "localization/sound/dialog/ent_m1/munro_hey3.mp3" );		//Hey.
+	
+	entActor.dialog( "generalCrewEngineer2" );
+	entActor.dialog( "greetingCrewEngineer2", "greetingDialog" );
+}

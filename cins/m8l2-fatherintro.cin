@@ -1,0 +1,205 @@
+//-----------------------------------------------
+// Cinematic Name: c:\projects\ef2\ef2\base\cins\m8l2-fatherintro.cin
+// Export Version: 1
+// Export Date:    Wed Apr 16 18:18:45 2003
+//-----------------------------------------------
+
+Origins
+{
+    Origin
+    {
+          name          "m8l2-fatherintro"
+          origin         0.000000 0.000000 0.000000
+          yaw            0.000000
+    }
+}
+
+
+Actors
+{
+    Actor
+    {
+        name          "armKrindo"
+        tiki          "char/krindo-noweapon.tik"
+        anim          "cin-m8l2_fatherintro_krindo"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  FREEZE
+        origin         -3085.852295 4834.815918 775.721863
+        yaw            -104.5
+    }
+    Actor
+    {
+        name          "armMunro"
+        tiki          "char/hazardteam_munro.tik"
+        anim          "cin-m8l2_fatherintro_munro"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  FREEZE
+        origin         -3170.303955 5079.208984 775.821472
+        yaw            -75.0
+    }
+}
+
+
+Cameras
+{
+    Camera
+    {
+        name         "Cam2-m8l2-fatherintro"
+        camfile      "Cam2-m8l2-fatherintro"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+		selfRemoving false
+    }
+    Camera
+    {
+        name         "Cam3-m8l2-fatherintro"
+        camfile      "Cam3-m8l2-fatherintro"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+		selfRemoving false
+    }
+    Cut
+    {
+        toCamera     "Cam2-m8l2-fatherintro"
+        frame         0
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "Cam3-m8l2-fatherintro"
+        frame         46
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "Cam2-m8l2-fatherintro"
+        frame         82
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "Cam3-m8l2-fatherintro"
+        frame         105
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "Cam2-m8l2-fatherintro"
+        frame         152
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "Cam3-m8l2-fatherintro"
+        frame         193
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "Cam2-m8l2-fatherintro"
+        frame         248
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "Cam3-m8l2-fatherintro"
+        frame         276
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "Cam2-m8l2-fatherintro"
+        frame         303
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "Cam3-m8l2-fatherintro"
+        frame         342
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "Cam2-m8l2-fatherintro"
+        frame         413
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "Cam3-m8l2-fatherintro"
+        frame         460
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "Cam2-m8l2-fatherintro"
+        frame         584
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "Cam3-m8l2-fatherintro"
+        frame         617
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "Cam2-m8l2-fatherintro"
+        frame         716
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "Cam3-m8l2-fatherintro"
+        frame         839
+        fadeout       20
+	  fadein        0
+        lerp          false
+    }
+}

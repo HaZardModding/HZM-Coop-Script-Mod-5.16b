@@ -1,0 +1,3239 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	      ent-deck8 - MISSION 7
+//  Script By:    K.Thompson
+//  Created on:   08/12/2002
+//	Last Edited:  08/12/2002 - kt
+//-----------------------------------------------------------------
+
+void setupMission7Deck8();
+void justLoadedDeckThreadIGM7();
+
+//--- omag conversation
+void IGM7_Start();
+void IGM7_Skipthread();
+void IGM7_Bribe_Skipthread();
+
+void IGM7_DialogChoice1_Fail();
+void IGM7_DialogChoice1_Win();
+
+void IGM7_DialogChoice2_Fail();
+void IGM7_DialogChoice2_Win();
+
+void IGM7_DialogChoice3_Fail();
+void IGM7_DialogChoice3_Win();
+
+void IGM7_DialogChoice4_Fail();
+void IGM7_DialogChoice4_Win();
+
+void IGM7_DialogChoice5_Fail();
+void IGM7_DialogChoice5_Win();
+
+void IGM7_DialogChoice6();
+void IGM7_DialogChoice6_Fail();
+void IGM7_DialogChoice6_Win();
+
+void IGM7_DialogChoice7_Fail();
+void IGM7_DialogChoice7_Win();
+
+void IGM7_Guard1Run();
+void IGM7_Guard2Run();
+
+void cinematicInGameWithPicardIGM7();
+void cinematicInGameWithPicardIGM7Skipthread();
+void cinematicInGameWithPicardIGM7End();
+
+void korban_workIGM7();
+void korbanDialog7_1();
+void korbanDialog7_2();
+void korbanDialog7_3();
+void korbanDialog7_4();
+void korbanDialog7_5();
+void korbanDialog7_10();
+
+void stevenson_workIGM7();
+void stevensonDialog7_1();
+void stevensonDialog7_2();
+void stevensonDialog7_10();
+
+void ambientActorsIGM7();
+
+void lawKetchersideTalkIGM7();
+void kretarStevensonTalkIGM7();
+
+void dorchev_workIGM7();
+void dorchevDialog7_1();
+
+void kretar_workIGM7();
+void kretarDialog7_1();
+void kretarDialog7_2();
+
+void chang_workIGM7();
+void changDialog7_1();
+void changDialog7_2();
+
+void omag_workIGM7();
+void omagDialog7_1();
+void omagDialog7_2();
+void omagDialog7_3();
+void startHoloTrainingMissionIGM7();
+
+void tetryonGatlingGunWaitIGM7();
+void tetryonGatlingGunGoIGM7();
+void holoMissionIGM7Over();
+
+void setTurboLiftTriggerIGM7();
+void coop_setupAfterBriefing();
+
+float kretarStevensonHaveTalked = 0;
+entity ePlayerCinOmag;
+
+//===================================================================================================================
+// Setup 
+//===================================================================================================================
+void coopLoadCamInMPOnly(string sCamPath)
+{
+	if(sCamPath != "" && cvar_bool_multiplayer == 1)
+	{
+		cam.load(sCamPath);
+	}
+}
+void coop_headWatch(entity eActor)
+{
+	if(doesEntityExist(eActor))
+	{
+		eActor.headwatch(globalCoop_return_playerClosestPreferActive(eActor),10);
+	}
+}
+void coop_headWatchTurnTo(entity eActor)
+{
+	if(doesEntityExist(eActor))
+	{
+		entity ePlayer;
+		ePlayer = globalCoop_return_playerClosestPreferActive(eActor);
+		eActor.headwatch(ePlayer,10);
+		eActor.turntowardsentity(ePlayer);
+	}
+}
+
+void Coop_cin_followDeleteHandle(entity eCam,entity ePath)
+{
+	globalCoop_cin_followEnd(eCam,ePath);
+	globalCoop_level_removePath(ePath);
+}
+
+void Coop_cin_followDelete(entity eCam,entity ePath)
+//deletes entities again avois network overload
+{
+	if(!cvar_bool_multiplayer)
+	{
+		eCam.follow(ePath);
+	}
+	else
+	{
+		thread Coop_cin_followDeleteHandle(eCam,ePath);
+	}
+}
+
+//---------------------
+// setupMission7Deck8	
+// does all the setup stuff for the mission
+//---------------------
+void setupMission7Deck8()
+{
+	$triggerBrig.thread( "" );
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/setupMission7Deck8.cfg");
+//spawn inside turbolift near to Armory
+	if(cvar_bool_multiplayer)
+	{
+	//set for internal script reference
+		setFloatVar( "game.globalMissionEnterprise", 7 );
+	//Definie Objective
+		coop_string_objectiveItem1			= "IGM7GoToBrig";
+		coop_string_objectiveItem2			= "IGM7GoToArmory";
+		coop_string_objectiveItem3			= "IGM7HoloDeck";
+		coop_string_objectiveItem4			= "IGM7GoToBreifingRoom";
+		coop_string_objectiveItem5			= "IGM7GoToSickBay";
+		
+		if(getCvarInt("coop_igmH") != 1 /* roomsvistied 5*/)
+		{
+			cam_fadein( 2, 0, 0, 0, 1, 0 );	
+			//spawn inside turbolift near to Armory
+			coop_float_spawnAngle0 				= 139;
+			coop_float_spawnAngle1 				= 51;
+			coop_float_spawnAngle2 				= 28;
+			coop_vector_spawnOrigin1 			= '-10190 -2548 0';
+			coop_vector_spawnOrigin2 			= '-10212 -2471 0';
+			coop_vector_spawnOrigin3 			= '-9884 -2507  0';
+			coop_vector_spawnOrigin4 			= '-9939 -2572 0';
+			coop_vector_spawnOrigin5 			= '-9895 -2618 0';
+			coop_vector_spawnOrigin6 			= '-9843 -2555 0';
+			coop_vector_spawnOrigin7 			= '-9793 -2611 0';
+			coop_vector_spawnOrigin8 			= '-9843 -2670 0';
+			
+			if(getCvarInt("coop_igmR") == 5)
+			{
+				coop_setupAfterBriefing();
+			}
+			else
+			{
+				globalCommon_SpawnActor( "char/starfleet_picard.tik", "picard", '-10116 -992 12', 90 );
+				globalCommon_AiDummyHide( $picard );
+			
+				spawn( "script_origin", "targetname", "lookAtOrigin1", "origin", "-9752 -384 104" );
+				spawn( "script_origin", "targetname", "lookAtOrigin2", "origin", "-9704 -384 104" );
+				spawn( "script_origin", "targetname", "lookAtOrigin3", "origin", "-9752 -384 56" );
+				spawn( "script_origin", "targetname", "lookAtOrigin4", "origin", "-9704 -384 56" );			
+		
+			//omag brig cinematic
+				$triggerBrig.thread( "IGM7_Start" );
+			//go to brig
+				thread globalCoop_objectives_update("incomplete",1,1);
+			}
+		}
+//player just spawned in holodeck after weapontraing4
+		else
+		{
+			thread globalCoop_objectives_update("complete",1,0);
+			thread globalCoop_objectives_update("complete",2,0);
+			thread globalCoop_objectives_update("complete",3,1);
+
+			thread holoMissionIGM7Over();
+		}
+	}
+	globalCommon_SpawnActor( "char/hazardteam_sf-munro.tik", "scriptmunro", '-9716 -672 12', 90 );
+	globalCommon_AiDummyHide( $scriptmunro );
+	
+	globalCommon_SpawnActor( "char/hazardteam_sf-kourban.tik", "korban", '-12492 -1252 0', 90 );
+	thread randomlyAnimateActor( $korban, "ent-stand" );
+	$korban.setfloatVar( "actorToRandomlyUseTricorder", 1 );
+	thread korban_workIGM7();
+
+	thread ambientActorsIGM7();
+	
+	$brigCellFeild2.loopsound( "sound/ships/enterprise/ent_forcefield.wav", .75, 1000 );
+	$brigCellFeild2.show();
+	$brigCellFeild2.solid();
+	
+	developerMode = 0;
+	if( developerMode == 1 )
+	{
+		IGM7_Start();
+	}
+}
+
+
+void coop_setupAfterBriefing()
+{
+//set for internal script reference
+	setFloatVar( "game.checkEntMission7RoomsVisited",5);
+//load and display objectives
+	thread globalCoop_objectives_update("complete",1,0);
+	thread globalCoop_objectives_update("complete",2,0);
+	thread globalCoop_objectives_update("complete",3,0);
+	thread globalCoop_objectives_update("complete",4,0);
+	thread globalCoop_objectives_update("incomplete",5,1);
+}
+
+//---------------------
+// munroHereToSeePicardIGM7
+// Triggered and check to see if A cinematic should happen.
+//------------------------
+void justLoadedDeckThreadIGM7()
+{
+	if(!cvar_bool_multiplayer)
+	{
+		if(getFloatVar( "game.IGM7GoToBrig" ) <= 1 )
+		{
+			$triggerBrig.thread( "IGM7_Start" );
+		}
+		if(getFloatVar( "game.IGM7GoToBrig" ) >= 1 ){
+			$player.setobjectiveshow( "IGM7GoToBrig", 1 );
+		}
+		if(getFloatVar( "game.IGM7GoToBrig" ) == 2 ){
+			$player.setobjectivecomplete( "IGM7GoToBrig", 1 );			
+		}
+		
+		if(getFloatVar( "game.IGM7GoToArmory" ) >= 1 ){
+			$player.setobjectiveshow( "IGM7GoToArmory", 1 );		
+		}
+		if(getFloatVar( "game.IGM7GoToArmory" ) == 2 ){
+			$player.setobjectivecomplete( "IGM7GoToArmory", 1 );			
+		}
+
+		if(getFloatVar("game.IGM7HoloDeck" ) >= 1 ){
+			$player.setobjectiveshow( "IGM7HoloDeck", 1 );		
+		}
+		if(getFloatVar( "game.IGM7HoloDeck" ) == 2 ){
+			$player.setobjectivecomplete( "IGM7HoloDeck", 1 );			
+		}
+		
+		if(getFloatVar( "game.IGM7GoToBreifingRoom" ) >= 1 ){
+			$player.setobjectiveshow( "IGM7GoToBreifingRoom", 1 );		
+		}
+		if(getFloatVar( "game.IGM7GoToBreifingRoom" ) == 2 ){
+			$player.setobjectivecomplete( "IGM7GoToBreifingRoom", 1 );			
+		}
+		
+		if(getFloatVar( "game.IGM7GoToSickBay" ) >= 1 ){
+			$player.setobjectiveshow( "IGM7GoToSickBay", 1 );		
+		}
+		if(getFloatVar( "game.IGM7GoToSickBay" ) == 2 ){
+			$player.setobjectivecomplete( "IGM7GoToSickBay", 1 );			
+		}
+		
+		if( 3 == getFloatVar( "game.checkEntMission7RoomsVisited" ) ){
+			$player.immobilize( 1 );
+			camfadeout01();
+			thread holoMissionIGM7Over();		
+		}
+	}
+}
+
+//---------------------
+// IGM7_Start
+// munro interrogates omag in the brig
+//---------------------
+void IGM7_Start()
+{
+	$triggerBrig.thread( "" );
+	
+	//--- start cinematic commands
+	
+	camfadeout05();
+	wait_06();
+	$doorBrig.lock();
+	ePlayerCinOmag = $player;
+
+	if(cvar_bool_multiplayer)
+	{
+		ePlayerCinOmag=globalCoop_return_playerClosestPreferActive($nodeGuard1_AtGuardPosition);
+	}
+	ePlayerCinOmag.immobilize(1);
+	ePlayerCinOmag.warp('-9831 -695 0');
+	ePlayerCinOmag.playerviewangles('0 290 0');
+	
+	globalCoop_cin_start();
+	
+//load camera path
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot1" );
+
+	//--- position omag and munro
+	$omag.warpto( "$nodeOmag_Pace2" );
+	globalCineFX_PositionObject( $scriptmunro, $nodeMunro_AtCell2Doorway );
+	$scriptmunro.notsolid();
+	globalCoop_main_waitZeroDot5();
+
+	//--------------------------------------------------------
+	//shot 1 - establishing shot of Omag in cell
+	
+	//--- set the camera
+	
+	$omag.morph( "exp_Anger" );
+	globalCoop_cin_fov($cam1,60);
+	Coop_cin_followDelete($cam1,$IGM7_Deck8_Omag_Shot1);
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera($cam1);
+	globalCoop_main_waitZeroDot2();
+	camfadein05();
+	globalCoop_main_wait1DotZero();
+
+	//--- omag pacing back and forth
+	globalCoop_actor_walkTo($omag,"$nodeOmag_Pace1","walk");
+	$omag.morph( "exp_eyes_squint" );
+	globalCoop_main_wait1DotZero();
+	$omag.morph( "exp_Anger" );
+	
+	globalCoop_actor_walkTo($omag,"$nodeOmag_Pace2","walk");
+	$omag.morph( "exp_Skeptical" );
+	wait( 1.25 );
+	$omag.morph( "exp_Anger" );
+
+	globalCoop_actor_walkTo($omag,"$nodeOmag_Pace1","walk");
+	$omag.morph( "exp_Disdain" );
+	 globalCoop_main_wait2DotZero();
+	$omag.morph( "exp_Anger" );
+
+	globalCoop_actor_walkTo($omag,"$nodeOmag_Pace3","walk");
+	wait( .75 ); 
+	$omag.headWatch( $lookAtOrigin1, 4 );
+	globalCoop_main_wait1Dot5();
+	$omag.headWatch( $lookAtOrigin3, 4 );
+	globalCoop_main_wait1DotZero();
+	$omag.headWatch( $lookAtOrigin2, 4 );
+	wait( 1.25 );
+	$omag.headWatch( $lookAtOrigin4, 4 );
+
+	//--- show munro in the doorway
+	globalCommon_AiDummy( $scriptmunro, "idle" );
+	globalCoop_main_wait1Dot5();
+		
+	//Hello, Omag.
+	thread coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_helloomag2.mp3");
+	globalCoop_main_waitZeroDot5();
+	$omag.morph( "exp_Surprise" );
+	wait_025();
+	$omag.resetHead();
+	
+//load camera path
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot2" );
+	
+	globalCoop_dialog_waitForDialog( $scriptmunro );
+	$omag.morph( "exp_Anger" );
+	globalCoop_main_wait1DotZero();	
+
+	//--------------------------------------------------------
+	//shot 2 - looking over munro's shoulder into the cell
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,60);
+	Coop_cin_followDelete($cam2,$IGM7_Deck8_Omag_Shot2);
+	globalCoop_cin_cut($cam2);
+	
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	wait_025();
+	
+	$omag.turnTowardsEntity( $scriptmunro );
+	$omag.headwatch( $scriptmunro, 3 );
+	$scriptmunro.headwatch( $omag );
+	
+	//I demand you release me!
+	coop_playDialogNoHead_20000($omag,"ent_m7/omag_demand.mp3");
+	
+//load camera path
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot3" );
+	
+	globalCoop_main_waitZeroDot2();
+	
+	//--------------------------------------------------------
+	//shot 3 - push in on munro
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,50);
+	Coop_cin_followDelete($cam1,$IGM7_Deck8_Omag_Shot3);
+	globalCoop_cin_cut($cam1);
+	wait_01();
+	globalCoop_cin_cuecamera($cam1);
+	
+	$omag.hide();
+	wait_01();
+	
+	//Let’s make a deal, Omag. Who’s your customer?
+	thread coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_whobought.mp3");
+	wait( 2.5 );
+	
+	$omag.show();
+	
+//load camera path
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot4" );
+	
+	globalCoop_dialog_waitForDialog( $scriptmunro );
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 4 - looking over munro's shoulder into the cell
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	Coop_cin_followDelete($cam2,$IGM7_Deck8_Omag_Shot4);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	
+	globalCoop_cin_cuecamera($cam2);
+	
+	thread globalCoop_actor_walkTo($omag,"$nodeOmag_Pace1","walk");
+	
+//load camera path
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot5" );
+	
+	//Sorry. ‘Good customers are as rare as Latinum, Treasure them.’ Rule number 57.
+	thread coop_playDialogNoHead_20000($omag,"ent_m7/omag_rule57.mp3");
+	wait( 5 );
+	
+	//--------------------------------------------------------
+	//shot 4 - face off between munro and omag
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,93);
+	globalCoop_cin_follow($cam1,$IGM7_Deck8_Omag_Shot5);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	
+	if( developerMode == 2 )
+	{
+		globalCoop_cin_end();
+		pause();
+	}
+	
+	globalCoop_cin_cuecamera($cam1);
+	globalCineFX_PositionObject( $omag, $nodeOmag_AtCell2Doorway );
+	
+	//--- wait for omag to finish speaking
+	globalCoop_dialog_waitForDialog( $omag );
+	
+//load camera path
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot_WMMC" );
+	
+	globalCoop_main_waitZeroDot2();
+	
+	/*
+opertunity
+17 A contract
+Everything is for sale
+expand or die
+62 The riskier the road
+- Omag I am charging you with attempted bribery
+	*/
+	
+	if(!cvar_bool_multiplayer)
+	{
+		//--- first dialog choice
+		$omag.branchdialog( "IGM7OmagInterrogation_DialogChoice1" );
+		pause();
+	}
+	else
+	{
+		coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot_WMC" );
+		IGM7_DialogChoice1_Win();
+	}
+}
+
+//---------------------
+// 	IGM7_Skipthread
+// 	skipthread for cinematic
+//---------------------
+void IGM7_Skipthread()
+{
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "IGM7_DialogChoice7_Win" );
+
+	//fade to black
+	camfadeout05();
+	wait_06();
+
+	//--- stop all talking
+	$picard.stopDialog();
+	$scriptmunro.stopDialog();
+	$omag.stopDialog();
+	
+	//--- position everybody
+	globalCineFX_PositionObject( $omag, $nodeOmag_AtCell2Doorway );
+	$picard.warpTo( "$nodePicard_WalkToBrigExit" );
+	$scriptmunro.warpTo( "$nodeMunro_WalkToBrigExit" );
+	wait_01();
+	
+	globalCommon_AiDummyHide( $scriptmunro );
+	globalCommon_AiDummy( $picard, "idle" );
+	
+	$picard.resetHead();
+	$scriptmunro.resetHead();
+	$omag.headwatch( $picard );
+
+	$picard.turnTowardsEntity( $scriptmunro );
+	$scriptmunro.turnTowardsEntity( $picard );
+	globalCoop_main_waitZeroDot2();
+
+
+	
+	globalCoop_cin_end();
+	
+	if(!doesEntityExist(ePlayerCinOmag))
+	{
+		ePlayerCinOmag = globalCoop_return_playerClosestPreferActive($picard);
+	}
+	ePlayerCinOmag.immobilize( 1 );
+	ePlayerCinOmag.origin( $scriptmunro.getorigin() );
+	wait_01();
+	ePlayerCinOmag.turntowardsentity( $picard );
+	
+	globalCoop_main_waitZeroDot5();
+	if(doesEntityExist(ePlayerCinOmag))
+	{
+		ePlayerCinOmag.turntowardsentity( $picard );
+	}
+	
+	//--- in-game sequence with picard talking
+	thread cinematicInGameWithPicardIGM7();
+}
+
+void IGM7_Bribe_Skipthread()
+{
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "IGM7_DialogChoice7_Fail" );
+
+	//fade to black
+	camfadeout05();
+	wait_06();
+	
+	//--- stop all talking
+	$guard2.stopdialog();
+	$omag.stopdialog();
+	$scriptmunro.stopdialog();
+	
+	//--- fail the mission
+	if(cvar_bool_multiplayer)
+	{
+		$player.missionfailed();
+	}
+}
+	
+	
+//---------------------------------------------------
+//	DIALOG CHOICE 1
+void IGM7_DialogChoice1_Fail()
+{
+	//--------------------------------------------------------
+	//shot 6F1 - failure, munro close up
+	
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice1_Fail1.cfg");
+/* 	$cam3.fov( 50 );
+	$cam3.follow( $IGM7_Deck8_Omag_Shot_FMC );
+	$cam3.cut(); */
+	 wait_01();
+	
+	cuecamera( $cam3 );
+	
+	//What about the rule that says ‘Once you have their money, never give it back.’
+	coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_rule126.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 6F2 - win, omag medium close up over the shoulder
+	
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice1_Fail2.cfg");
+/* 	$cam1.fov( 50 );
+	$cam1.follow( $IGM7_Deck8_Omag_Shot_WOMC );
+	$cam1.cut(); */
+	 wait_01();
+	
+	cuecamera( $cam1 );
+		
+	//Ha! You are right! I shall keep my client’s money, AND his secrets. ‘Good customers are as rare as latinum. Treasure them.’ Rule 57.
+	coop_playDialogNoHead_20000($omag,"ent_m7/omag_keeplat.mp3");
+	globalCoop_main_waitZeroDot2();
+	
+	//--- give the same choice to the player again
+	$omag.branchdialog( "IGM7OmagInterrogation_DialogChoice1" );
+	pause();
+}
+
+void IGM7_DialogChoice1_Win()
+{
+	//--------------------------------------------------------
+	//shot 6W1 - win, munro medium close up over the shoulder
+	//globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice1_Win1.cfg");
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam3,50);
+	Coop_cin_followDelete($cam3,$IGM7_Deck8_Omag_Shot_WMMC);
+	globalCoop_cin_cut($cam3);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+		
+	//What about the rule that says 'Only a fool passes up a business opportunity?'
+	coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_rule8.mp3");
+	
+//load camera path
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot_FOMC" );
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 6W2 - failure, omag medium close up over the shoulder
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,50);
+	Coop_cin_followDelete($cam1,$IGM7_Deck8_Omag_Shot_FOMC);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	//True. But your opportunity conflicts with my last contract.
+	thread coop_playDialogNoHead_20000($omag,"ent_m7/omag_conflict.mp3");
+	wait_3();
+
+	//--------------------------------------------------------
+	//shot 6W3 - face off between munro and omag
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,93);
+	globalCoop_cin_follow($cam2,$IGM7_Deck8_Omag_Shot5);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	//--- wait for omag to finish speaking
+	globalCoop_dialog_waitForDialog( $omag );
+	globalCoop_main_waitZeroDot2();
+	
+	if(!cvar_bool_multiplayer)
+	{
+		//--- proceed to the next dialog choice
+		$omag.branchdialog( "IGM7OmagInterrogation_DialogChoice2" );
+		pause();
+	}
+	else
+	{
+		thread IGM7_DialogChoice2_Win();
+	}
+}
+
+//---------------------------------------------------
+//	DIALOG CHOICE 2
+void IGM7_DialogChoice2_Fail()
+{
+	//--------------------------------------------------------
+	//shot 7F1 - failure, munro medium close up
+	
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice2_Fail1.cfg");
+/* 	$cam3.fov( 50 );
+	$cam3.follow( $IGM7_Deck8_Omag_Shot_FMMC );
+	$cam3.cut(); */
+	 wait_01();
+	
+	cuecamera( $cam3 );
+	
+	//Rule 9. ‘Opportunity plus instinct equals profit.’
+	coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_rule9.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 7F2 - win, omag medium close up over the shoulder
+	
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice2_Fail1.cfg");
+/* 	$cam1.fov( 50 );
+	$cam1.follow( $IGM7_Deck8_Omag_Shot_WOMC );
+	$cam1.cut(); */
+	 wait_01();
+	
+	cuecamera( $cam1 );
+		
+	//My instincts tell me this is a lousy opportunity.
+	coop_playDialogNoHead_20000($omag,"ent_m7/omag_lousy.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--- give the same choice to the player again
+	$omag.branchdialog( "IGM7OmagInterrogation_DialogChoice2" );
+	pause();
+}
+
+void IGM7_DialogChoice2_Win()
+{
+	//--------------------------------------------------------
+	//shot 7W1 - win, munro close up
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam3,50);
+	globalCoop_cin_follow($cam3,$IGM7_Deck8_Omag_Shot_WMC);
+	globalCoop_cin_cut($cam3);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam3);
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot_FOC" );
+	
+	//Rule 17. ‘A contract is a contract is a contract. But only between Ferengi.’
+	thread coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_rule17.mp3");
+	wait_3d5();
+
+	//--------------------------------------------------------
+	//shot 7W2 - failure, omag close up
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,50);
+	globalCoop_cin_follow($cam1,$IGM7_Deck8_Omag_Shot_FOC);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	globalCoop_main_waitZeroDot5();
+	
+	$omag.morph( "exp_brows_down" );
+	
+	//--- wait for munro to finish speaking
+	globalCoop_dialog_waitForDialog( $scriptmunro );
+	globalCoop_main_waitZeroDot2();
+	
+	//Contracts with other races can be honored when the profits are high enough.
+	thread coop_playDialogNoHead_20000($omag,"ent_m7/omag_profhi.mp3");
+	wait( 2.75 );
+
+	//--------------------------------------------------------
+	//shot 7W3 - win, munro medium close up over the shoulder
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot_FOMC" );
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	globalCoop_cin_follow($cam2,$IGM7_Deck8_Omag_Shot_FOC);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	$scriptmunro.morph( "exp_Skeptical" );
+
+	//--- wait for omag to finish speaking
+	globalCoop_dialog_waitForDialog( $omag );
+			
+	//So your client is not a Ferengi.
+	thread coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_notfer.mp3");
+	
+
+	//--------------------------------------------------------
+	//shot 7W4 - failure, omag medium close up over the shoulder
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	globalCoop_cin_follow($cam2,$IGM7_Deck8_Omag_Shot_FOMC);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot_WMMC" );
+	
+	globalCoop_dialog_waitForDialog( $scriptmunro );
+		
+	//Humph! I won’t tell you who he is.
+	coop_playDialogNoHead_20000($omag,"ent_m7/omag_wonttell.mp3");
+
+	if(!cvar_bool_multiplayer)
+	{
+		//--- proceed to the next dialog choice
+		$omag.branchdialog( "IGM7OmagInterrogation_DialogChoice3" );
+		pause();
+	}
+	else
+	{
+		thread IGM7_DialogChoice3_Win();
+	}
+}
+
+//---------------------------------------------------
+//	DIALOG CHOICE 3
+void IGM7_DialogChoice3_Fail()
+{
+	//--------------------------------------------------------
+	//shot 8F1 - failure, munro close up
+	
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice3_Fail1.cfg");
+/* 	$cam3.fov( 50 );
+	$cam3.follow( $IGM7_Deck8_Omag_Shot_FMC );
+	$cam3.cut(); */
+	 wait_01();
+	
+	cuecamera( $cam3 );
+	
+	//Rule 1: ‘Once you have their money, you never give it back.’
+	coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_rule1.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 8F2 - win, omag close up
+	
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice3_Fail2.cfg");
+/* 	$cam1.fov( 50 );
+	$cam1.follow( $IGM7_Deck8_Omag_Shot_WOC );
+	$cam1.cut(); */
+	 wait_01();
+	
+	cuecamera( $cam1 );
+		
+	//I don’t intend to. My customer is quite satisfied, and so am I.
+	coop_playDialogNoHead_20000($omag,"ent_m7/omag_intend.mp3");
+	wait( 4.5 );
+
+	//--------------------------------------------------------
+	//shot 8F2 - win, omag medium close up over the shoulder
+	
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice3_Fail3.cfg");
+/* 	$cam2.fov( 50 );
+	$cam2.follow( $IGM7_Deck8_Omag_Shot_WOMC );
+	$cam2.cut(); */
+	 wait_01();
+	
+	cuecamera( $cam2 );
+	
+	//--- wait for omag to finish speaking
+	globalCoop_dialog_waitForDialog( $omag );
+	globalCoop_main_waitZeroDot2();
+
+	//--- give the same choice to the player again
+	$omag.branchdialog( "IGM7OmagInterrogation_DialogChoice3" );
+	pause();
+}
+
+void IGM7_DialogChoice3_Win()
+{
+	//--------------------------------------------------------
+	//shot 8W1 - win, munro medium close up over the shoulder
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam3,50);
+	globalCoop_cin_follow($cam3,$IGM7_Deck8_Omag_Shot_WMMC);
+	globalCoop_cin_cut($cam3);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam3);
+	
+	//Rule 121. ‘Everything is for sale. Even friendship.’
+	coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_rule121.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 8W2 - failure, omag medium close up over the shoulder
+	globalCoop_cin_fov($cam1,50);
+	globalCoop_cin_follow($cam1,$IGM7_Deck8_Omag_Shot_FOMC);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+		
+	//If he was merely a FRIEND I’d rat him out right now. But he’s a CUSTOMER! ‘New customers are like razor-backed Greeworms. They can be succulent, but sometimes they bite back!’ Rule 203.
+	thread coop_playDialogNoHead_20000($omag,"ent_m7/omag_greeworm.mp3");
+	wait_3d5();
+
+
+	//--------------------------------------------------------
+	//shot 8W3 - win, reaction close up of munro
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	globalCoop_cin_follow($cam2,$IGM7_Deck8_Omag_Shot_WMC);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	globalCoop_main_wait1DotZero();
+	
+	$scriptmunro.morph( "exp_brows_down" );
+	wait_3();
+	
+	//--------------------------------------------------------
+	//shot 8W4 - failure, omag close up
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,50);
+	globalCoop_cin_follow($cam1,$IGM7_Deck8_Omag_Shot_FOC);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	//--- wait for omag to finish speaking
+	globalCoop_dialog_waitForDialog( $omag );
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 8W5 - win, munro medium close up over the shoulder
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	globalCoop_cin_follow($cam2,$IGM7_Deck8_Omag_Shot_WMMC);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+
+	//Hmm so, he’s a new customer. And one you’re afraid can find you. That makes him a powerful and deadly non-Ferengi with a starship. Or several.
+	thread coop_playDialogNoHead_20000($scriptmunro,"ent_m7/omag_newcust.mp3");
+	wait( 7 );
+
+	//--------------------------------------------------------
+	//shot 8W6 - failure, reaction omag close up
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,50);
+	globalCoop_cin_follow($cam1,$IGM7_Deck8_Omag_Shot_FOC);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+
+	globalCoop_main_wait1DotZero();
+	
+	$omag.morph( "exp_Surprise" );
+
+	//--- wait for munro to finish speaking
+	globalCoop_dialog_waitForDialog( $scriptmunro );
+	globalCoop_main_waitZeroDot2();
+			
+	//I never said that! I’m I’m just not looking to expand into any new markets.
+	thread coop_playDialogNoHead_20000($omag,"ent_m7/omag_neversaid.mp3");
+	 globalCoop_main_wait2DotZero();
+
+	//--------------------------------------------------------
+	//shot 8W7 - failure, omag medium closeup over the shoulder
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	globalCoop_cin_follow($cam2,$IGM7_Deck8_Omag_Shot_FOMC);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+
+	//--- wait for omag to finish speaking
+	globalCoop_dialog_waitForDialog( $omag );
+	globalCoop_main_waitZeroDot2();
+		
+	if(!cvar_bool_multiplayer)
+	{
+		//--- proceed to the next dialog choice
+		$omag.branchdialog( "IGM7OmagInterrogation_DialogChoice4" );
+		pause();
+	}
+	else
+	{
+		thread IGM7_DialogChoice4_Win();
+	}
+}
+
+//---------------------------------------------------
+//	DIALOG CHOICE 4
+void IGM7_DialogChoice4_Fail()
+{
+	//--------------------------------------------------------
+	//shot 9F1 - failure, munro medium close up over the shoulder
+	
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice4_Fail1.cfg");
+/* 	$cam3.fov( 50 );
+	$cam3.follow( $IGM7_Deck8_Omag_Shot_FMMC );
+	$cam3.cut(); */
+	 wait_01();
+	
+	cuecamera( $cam3 );
+	
+	//‘Knowledge equals profit.’ Rule 74.
+	coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_rule74.mp3");
+	globalCoop_main_waitZeroDot2();
+	
+	//--------------------------------------------------------
+	//shot 9F2 - win, omag medium close up over the shoulder
+	
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice4_Fail2.cfg");
+/* 	$cam2.fov( 50 );
+	$cam2.follow( $IGM7_Deck8_Omag_Shot_WOMC );
+	$cam2.cut(); */
+	 wait_01();
+	
+	cuecamera( $cam2 );
+		
+	//Quite. So I’ll keep my knowledge and my profits. Now stop asking!
+	coop_playDialogNoHead_20000($omag,"ent_m7/omag_stopask.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--- goto dialog choice 5
+	$omag.branchdialog( "IGM7OmagInterrogation_DialogChoice5" );
+	pause();
+}
+
+void IGM7_DialogChoice4_Win()
+{
+	//--------------------------------------------------------
+	//shot 9W1 - win, munro close up
+	
+	//--- set the camera	
+	globalCoop_cin_fov($cam3,50);
+	globalCoop_cin_follow($cam3,$IGM7_Deck8_Omag_Shot_WMC);
+	globalCoop_cin_cut($cam3);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam3);
+	
+	//‘Expand or die.’ Rule 95
+	coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_rule95.mp3");
+	globalCoop_main_waitZeroDot2();
+	
+	//--- meet up on the starting point into choice 6
+	thread IGM7_DialogChoice6();
+}
+
+//---------------------------------------------------
+//	DIALOG CHOICE 5
+void IGM7_DialogChoice5_Fail()
+{
+	//--------------------------------------------------------
+	//shot 10F1 - failure, munro close up
+	
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice5_Fail1.cfg");
+/* 	$cam3.fov( 50 );
+	$cam3.follow( $IGM7_Deck8_Omag_Shot_FMC );
+	$cam3.cut(); */
+	 wait_01();
+	
+	cuecamera( $cam3 );
+	
+	//Rule 2. ‘A wise man can hear profit in the wind.’
+	coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_rule2.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 10F2 - win, omag close up
+	
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice5_Fail2.cfg");
+/* 	$cam2.fov( 50 );
+	$cam2.follow( $IGM7_Deck8_Omag_Shot_WOMC );
+	$cam2.cut(); */
+	 wait_01();
+	
+	cuecamera( $cam2 );
+	
+	//I’d rather be rich than wise. I won’t tell no matter how often you ask me.
+	thread coop_playDialogNoHead_20000($omag,"ent_m7/omag_richwise.mp3");
+	wait_3();
+
+	//--------------------------------------------------------
+	//shot 10F3 - face off shot
+
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice5_Fail3.cfg");
+/* 	$cam1.fov( 93 );
+	$cam1.follow( $IGM7_Deck8_Omag_Shot5 );
+	$cam1.cut(); */
+	 wait_01();
+	
+	//--- wait for omag to finish speaking
+	globalCoop_dialog_waitForDialog( $omag );
+	globalCoop_main_waitZeroDot2();
+
+	//--- give the same choice to the player again
+	$omag.branchdialog( "IGM7OmagInterrogation_DialogChoice5" );
+	pause();
+}
+
+void IGM7_DialogChoice5_Win()
+{
+	//--------------------------------------------------------
+	//shot 10W1 - win, munro close up
+	
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice5_Win.cfg");
+/* 	$cam3.fov( 50 );
+	$cam3.follow( $IGM7_Deck8_Omag_Shot_WMC );
+	$cam3.cut(); */
+	 wait_01();
+	
+	cuecamera( $cam3 );
+	
+	//Rule 52. ‘Never ask when you can take.’
+	coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_rule52.mp3");
+	globalCoop_main_waitZeroDot2();
+	
+	//--- meet up on the starting point into choice 6
+	thread IGM7_DialogChoice6();	
+}
+
+//---------------------------------------------------
+//	DIALOG CHOICE 6
+void IGM7_DialogChoice6()
+{
+	//--------------------------------------------------------
+	//shot 11W1 - fail, omag close up
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	globalCoop_cin_follow($cam2,$IGM7_Deck8_Omag_Shot_FOC);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	//Don’t threaten me! You’re risking a court martial!
+	coop_playDialogNoHead_20000($omag,"ent_m7/omag_courtm.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	if(!cvar_bool_multiplayer)
+	{
+		//--- proceed to the next dialog choice
+		$omag.branchdialog( "IGM7OmagInterrogation_DialogChoice6" );
+		pause();
+	}
+	else
+	{
+		thread IGM7_DialogChoice6_Win();
+	}
+}
+
+void IGM7_DialogChoice6_Fail()
+{
+	//--------------------------------------------------------
+	//shot 12F1 - failure, munro medium close up over the shoulder
+	
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice6_Fail1.cfg");
+/* 	$cam3.fov( 50 );
+	$cam3.follow( $IGM7_Deck8_Omag_Shot_FMMC );
+	$cam3.cut(); */
+	 wait_01();
+	
+	cuecamera( $cam3 );
+	
+	//Rule 34. ‘War is good for business’
+	coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_rule260.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 12F2 - win, omag medium close up over the shoulder
+	
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice6_Fail1.cfg");
+/* 	$cam1.fov( 50 );
+	$cam1.follow( $IGM7_Deck8_Omag_Shot_WOMC );
+	$cam1.cut(); */
+	 wait_01();
+	
+	cuecamera( $cam1 );
+	
+	//That's true. But risking war on me is not good for your career!
+	coop_playDialogNoHead_20000($omag,"ent_m7/omag_notgood.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--- go all the way back to choice 5
+	$omag.branchdialog( "IGM7OmagInterrogation_DialogChoice6" );
+	pause();
+}
+
+void IGM7_DialogChoice6_Win()
+{
+	//--------------------------------------------------------
+	//shot 13 - close up on munro
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam3,50);
+	globalCoop_cin_follow($cam3,$IGM7_Deck8_Omag_Shot_WMC);
+	globalCoop_cin_cut($cam3);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam3);
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot6" );
+	
+	//Rule 62. ‘The riskier the road, the greater the profit.’
+	coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_rule62.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 14 - over the shoulder at omag
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,40);
+	Coop_cin_followDelete($cam1,$IGM7_Deck8_Omag_Shot6 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot7" );
+	
+	//But what about your career!
+	coop_playDialogNoHead_20000($omag,"ent_m7/omag_career.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 15 - dolly into munro
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	Coop_cin_followDelete($cam2,$IGM7_Deck8_Omag_Shot7 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot8" );
+		
+	//I’m on the Hazard Team! You think I’ll ever reach retirement?
+	coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_retire.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 16 - close up on omag, high angle
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,80);
+	Coop_cin_followDelete($cam1,$IGM7_Deck8_Omag_Shot8 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot9" );
+		
+	//Please! I’m just a kindly merchant who risked his hard-earned latinum to help some scientists.
+	coop_playDialogNoHead_20000($omag,"ent_m7/omag_kindly.mp3");
+	globalCoop_main_waitZeroDot2();
+	
+	//--------------------------------------------------------
+	//shot 17 - close up on munro
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	globalCoop_cin_follow($cam2,$IGM7_Deck8_Omag_Shot9 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+		
+	//AFTER they brought you priceless artifacts.
+	coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_afterprice.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 19 - close up of omag
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,50);
+	globalCoop_cin_follow($cam1,$IGM7_Deck8_Omag_Shot_FOC);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot10" );
+	
+	//Of course. You think I’d take a risk that’s not a sure thing?
+	coop_playDialogNoHead_20000($omag,"ent_m7/omag_ofcourse.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 20 - dolly in on omag
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	Coop_cin_followDelete($cam2,$IGM7_Deck8_Omag_Shot10 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot11" );
+		
+	//And you sold their artifacts on the black market, where they would be lost to history.
+	thread coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_soldart.mp3");
+	globalCoop_main_waitZeroDot5();
+	
+	$omag.morph( "exp_Nervous" );
+	globalCoop_main_wait1Dot5();
+
+	//--------------------------------------------------------
+	//shot 21 - dolly in on munro
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,50);
+	Coop_cin_followDelete($cam1,$IGM7_Deck8_Omag_Shot11 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot12" );
+	
+	//--- wait for munro to finish speaking
+	globalCoop_dialog_waitForDialog( $scriptmunro );
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 22 - dolly left looking at omag
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	Coop_cin_followDelete($cam2,$IGM7_Deck8_Omag_Shot12 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot_WOC" );
+		
+	//Exactly! That’s what keeps the profits high. And they say you Federation-types lack the lobes for business.
+	thread coop_playDialogNoHead_20000($omag,"ent_m7/omag_since.mp3");
+	wait( 4 );
+
+	//--------------------------------------------------------
+	//shot 23 - close up on omag
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,50);
+	Coop_cin_followDelete($cam1,$IGM7_Deck8_Omag_Shot_WOC );
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot13" );
+	
+	//--- wait for omag to finish speaking
+	globalCoop_dialog_waitForDialog( $omag );
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 24 - extreme close up on munro
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,35);
+	Coop_cin_followDelete($cam2,$IGM7_Deck8_Omag_Shot13 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot14" );
+	
+	//Oh, I understand business very well.
+	coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_ohi.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 25 - slow push in on omag
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,40);
+	Coop_cin_followDelete($cam1,$IGM7_Deck8_Omag_Shot14 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	//Well since you understand business. Help me escape! And I’ll give you a class M colony planet with tropical beaches! For your retirement!
+	thread coop_playDialogNoHead_20000($omag,"ent_m7/omag_escape.mp3");
+	wait( 5.5 );
+
+	//--------------------------------------------------------
+	//shot 26 - reaction shot on munro
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	globalCoop_cin_follow($cam2,$IGM7_Deck8_Omag_Shot9);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	globalCoop_main_wait1Dot5();
+	
+	$scriptmunro.morph( "exp_Surprise" );
+	 globalCoop_main_wait2DotZero();
+	
+	$scriptmunro.unmorph( "exp_Surprise" );
+	
+	//--- wait for omag to finish speaking
+	globalCoop_dialog_waitForDialog( $omag );
+	globalCoop_main_waitZeroDot2();
+
+	if(!cvar_bool_multiplayer)
+	{
+		//--- proceed to the next dialog choice
+		$omag.branchdialog( "IGM7OmagInterrogation_DialogChoice7" );
+		pause();
+	}
+	else
+	{
+		thread IGM7_DialogChoice7_Win();
+	}
+}
+
+//---------------------------------------------------
+//	DIALOG CHOICE 7
+
+//--- player accepts the brige, fails mission
+void IGM7_DialogChoice7_Fail()
+{
+	skipthread( "IGM7_Bribe_Skipthread" );
+
+	$doorBrig.unlock();
+	
+	//Wow. OK, I’ll sneak you out of here.
+	thread coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_wow.mp3");
+	globalCoop_main_wait2DotZero();
+	
+	//--------------------------------------------------------
+	//shot 27b - over the shoulder from munro to omag
+	
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice7_Fail1.cfg");
+/* 	$cam3.fov( 50 );
+	$cam3.follow( $IGM7_Deck8_Omag_Shot_WOMC );
+	$cam3.cut(); */
+	 wait_01();
+	
+	cuecamera( $cam3 );	
+	globalCoop_main_waitZeroDot5();
+	
+	$omag.morph( "exp_happy" );
+
+	//--- wait for munro to finish speaking
+	globalCoop_dialog_waitForDialog( $scriptmunro );
+	globalCoop_main_waitZeroDot2();
+	
+	//--------------------------------------------------------
+	//shot 28b - POV shot of guys coming through the door
+	
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice7_Fail2.cfg");
+/* 	$cam1.fov( 60 );
+	$cam1.follow( $IGM7_Deck8_Omag_Shot31 );
+	$cam1.cut(); */
+	 wait_01();
+	
+	cuecamera( $cam1 );	
+	wait( .3 );
+	
+	//--- open the brig door
+	$doorBrig.open( $player );
+	wait( 1.85 );
+
+	//--------------------------------------------------------
+	//shot 29b - push in on munro as he turns
+	
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice7_Fail3.cfg");
+/* 	$cam2.fov( 50 );
+	$cam2.follow( $IGM7_Deck8_Omag_Shot32 );
+	$cam2.cut(); */
+	 wait_01();
+	
+	cuecamera( $cam2 );	
+	 wait_01();
+	
+	//--- turn munro towards the door
+	$scriptmunro.resetHead();
+	$scriptmunro.turnTowardsEntity( $nodeGuard1_AtBrigEntrance );
+
+	$scriptmunro.morph( "exp_Surprise" );
+
+	//--- spawn in the guards
+	globalCommon_SpawnActor( "char/starfleet_crew-male2.tik", "guard1", $nodeGuard1_AtBrigEntrance.getOrigin(), 0 );
+	globalCommon_SpawnActor( "char/starfleet_crew-male3.tik", "guard2", $nodeGuard2_AtBrigEntrance.getOrigin(), 0 );
+	$guard2.notsolid();
+	$guard1.notsolid();
+	 wait_01();
+	
+	//--- run the guards into the room
+	thread IGM7_Guard1Run();
+	globalCoop_main_waitZeroDot5();
+	
+	thread IGM7_Guard2Run();
+		
+	//--------------------------------------------------------
+	//shot 30b - dutch push in as guards enter the room
+	
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice7_Fail4.cfg");
+/* 	$cam1.fov( 50 );
+	$cam1.follow( $IGM7_Deck8_Omag_Shot33 );
+	$cam1.cut(); */
+	 wait_01();
+	
+	cuecamera( $cam1 );	
+	globalCoop_main_waitZeroDot5();
+		
+	//Freeze! Lieutenant Munro, you have been relieved of duty. You will face the courts martial on charges of corruption.
+	thread coop_playDialogNoHead_20000($guard2,"ent_m7/security_freeze.mp3");
+	wait( 2.5 );
+	
+	//--------------------------------------------------------
+	//shot 31b - push in on munro between the guards
+	
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice7_Fail5.cfg");
+/* 	$cam2.fov( 50 );
+	$cam2.follow( $IGM7_Deck8_Omag_Shot34 );
+	$cam2.cut(); */
+	 wait_01();
+	
+	cuecamera( $cam2 );
+	wait( 1.75 );
+	
+	$scriptmunro.morph( "exp_Anger" );
+	wait_3();
+	
+	//--- fade the camera to black
+	camfadeout05();
+	globalCoop_main_wait1DotZero();
+	
+	//--- setup the next shot
+	$omag.origin( '-9652 -428 3' );
+	$omag.angle( 180 );
+	globalCineFX_PositionObject( $guard1, $nodeGuard1_AtGuardPosition );
+	$scriptmunro.warpTo( "$nodeOmag_Pace3" );
+	$guard2.remove();
+	 wait_01();
+	
+	$omag.anim( "sfa_chair_talk_omag" );
+	$omag.headWatch( $lookAtOrigin1, 4 );
+	$scriptmunro.turnToAngle( 270 );
+
+	$scriptmunro.morph( "exp_Anger" );
+
+	$omag.resetHead();
+	$scriptmunro.resetHead();
+	globalCoop_main_wait1DotZero();
+
+	//--------------------------------------------------------
+	//shot 32b - slow pull out as omag says his line
+	
+	//--- set the camera
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/img7/IGM7_DialogChoice7_Fail6.cfg");
+/* 	$cam1.fov( 50 );
+	$cam1.follow( $IGM7_Deck8_Omag_Shot35 );
+	$cam1.cut(); */
+	globalCoop_main_waitZeroDot2();
+	
+	cuecamera( $cam1 );
+	
+	//--- fade the camera in
+	camfadein1();
+	globalCoop_main_waitZeroDot5();
+	
+	//The good thing about you agreeing to accept a bribe is that it's considered a mitigating factor with the Grand Nagus. I'm guilty of getting caught by the Federation, but the Grand Nagus should let me off lightly for corrupting you.
+	thread coop_playDialogNoHead_20000($omag,"ent_m7/omag_bribe.mp3");
+	wait( 19 );
+	
+	//--- walk munro forward
+	thread globalCoop_actor_walkTo($scriptmunro,"$nodeOmag_Pace1","walk");
+	
+	wait( 5.5 );
+	
+	thread IGM7_Bribe_Skipthread();
+}
+
+//--- run the first guard into the room
+void IGM7_Guard1Run()
+{
+	globalCoop_actor_walkTo($guard1,"$nodePicard_WalkToBrigRoom","run");
+	thread globalCoop_actor_walkTo($guard1,"$nodeGuard1_RunToBrig1","run");
+}
+
+//--- run the second guard into the room
+void IGM7_Guard2Run()
+{
+	globalCoop_actor_walkTo($guard2,"$nodePicard_WalkToBrigRoom","run");
+	thread globalCoop_actor_walkTo($guard2,"$nodeGuard2_RunToBrig1","run");
+}
+
+//--- the player rejects the bribe, wins the scenario
+void IGM7_DialogChoice7_Win()
+{
+	skipthread( "IGM7_Skipthread" );
+
+	//Omag, I am charging you with attempted bribery.
+	thread coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_charging.mp3");
+	globalCoop_main_wait1Dot5();
+	
+	//--------------------------------------------------------
+	//shot 27 - reaction close up on omag
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,50);
+	globalCoop_cin_follow($cam1,$IGM7_Deck8_Omag_Shot_FOC);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	globalCoop_main_waitZeroDot5();
+	
+	$omag.morph( "exp_Surprise" );
+	
+	//--- wait for Munro to finish speaking
+	globalCoop_dialog_waitForDialog( $scriptmunro );
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 28 - over the shoulder shot at omag
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	globalCoop_cin_follow($cam2,$IGM7_Deck8_Omag_Shot_FOMC);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+		
+	//This is entrapment! No Starfleet officer says he understands business unless he wants a bribe!
+	coop_playDialogNoHead_20000($omag,"ent_m7/omag_entrap.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 29 - closeup on munro
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,50);
+	globalCoop_cin_follow($cam1,$IGM7_Deck8_Omag_Shot_WMC);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot15" );
+		
+	//Who was your customer?
+	coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_whocust.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 30 - low angle, picard walks into frame
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	Coop_cin_followDelete($cam2,$IGM7_Deck8_Omag_Shot15);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	//He’ll send those monsters to kill me! They can destroy cities!
+	coop_playDialogNoHead_20000($omag,"ent_m7/omag_monsters.mp3");
+	wait( 1.75 );
+	
+	//--- picard enters the frame
+	globalCineFX_PositionObject( $picard, $nodePicard_AtBrigEntrance );
+	globalCommon_AiDummy( $picard, "idle" );
+	$picard.notsolid();
+	globalCoop_main_waitZeroDot5();
+	
+	thread globalCoop_actor_walkTo($picard,"$nodePicard_WalkToBrigRoom","walk");
+	
+	//--- wait for Omag to finish speaking
+	globalCoop_dialog_waitForDialog( $omag );
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 31 - over shoulder, at munro
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,50);
+	globalCoop_cin_follow($cam1,$IGM7_Deck8_Omag_Shot_WMMC);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	thread coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_broke.mp3"); //Looks like you broke a vital Law of Acquisition when you sold something that could kill you.
+	globalCoop_dialog_waitForDialog( $scriptmunro );
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 32 - dutch angle close up on omag
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	globalCoop_cin_follow($cam2,$IGM7_Deck8_Omag_Shot_FOC);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+
+	coop_playDialogNoHead_20000($omag,"ent_m7/omag_didnot.mp3"); //I did not!
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 33 - close up on munro
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	globalCoop_cin_follow($cam2,$IGM7_Deck8_Omag_Shot_WMC);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	//Rule 125. ‘You can’t make a deal if you’re dead!’
+	coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_rule125.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 34 - medium close up on omag, over the shoulder
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,40);
+	globalCoop_cin_follow($cam1,$IGM7_Deck8_Omag_Shot_FOMC);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	//Wrong! He agreed to never send them against a Ferengi planet! Ha! I win!
+	thread coop_playDialogNoHead_20000($omag,"ent_m7/omag_wrong.mp3");
+	wait( 6 );
+	
+	thread globalCoop_actor_walkTo($picard,"$nodePicard_WalkToBrigCell2","walk");
+
+
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot16" );
+	
+	globalCoop_dialog_waitForDialog( $omag );
+	globalCoop_main_waitZeroDot2();
+	
+	//--------------------------------------------------------
+	//shot 34 - push in over omags shoulders as picard walks in
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	Coop_cin_followDelete($cam2,$IGM7_Deck8_Omag_Shot16 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	globalCoop_main_wait1Dot5();
+
+	$picard.headwatch( $omag );
+
+	//No. You just confessed.
+	coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_justconf.mp3");
+	globalCoop_main_waitZeroDot2();
+	
+	//Omag, we’re charging you as an accessory to mass murder.
+	thread coop_playDialogNoHead_20000($picard,"ent_m7/picard_mass.mp3");
+	 globalCoop_main_wait2DotZero();
+
+	//--------------------------------------------------------
+	//shot 35 - closeup on omag
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,50);
+	globalCoop_cin_follow($cam1,$IGM7_Deck8_Omag_Shot_FOC);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	globalCoop_main_waitZeroDot5();
+	
+	$omag.morph( "exp_Surprise" );
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot17" );	
+	
+	//--- wait for picard to finish speaking
+	globalCoop_dialog_waitForDialog( $picard );
+	globalCineFX_PositionObject( $picard, $nodePicard_AtCell2Doorway );
+
+	//What?!
+	coop_playDialogNoHead_20000($omag,"ent_m7/omag_what.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 36 - push in on picard
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	Coop_cin_followDelete($cam2,$IGM7_Deck8_Omag_Shot17 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	$scriptmunro.morph( "exp_Serious" );
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot18" );
+	
+	//You knew you were selling a weapon of mass destruction. Your customer killed Attrexians on Prazjag Gamma 3. Your have their blood on your hands.
+	coop_playDialogNoHead_20000($picard,"ent_m7/picard_blood.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 37 - over the shoulder at omag
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,50);
+	globalCoop_cin_follow($cam1,$IGM7_Deck8_Omag_Shot_FOMC);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	//Arrgh! But I won’t tell you who he is unless you drop the charges and release me.
+	coop_playDialogNoHead_20000($omag,"ent_m7/omag_drop.mp3");
+	globalCoop_main_waitZeroDot2();
+	
+	//--------------------------------------------------------
+	//shot 38 - wide shot of all 3, munro/picard's side
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	Coop_cin_followDelete($cam2,$IGM7_Deck8_Omag_Shot18 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+		
+	//Very well.
+	coop_playDialogNoHead_20000($picard,"ent_m7/picard_verywell.mp3");
+	globalCoop_main_waitZeroDot2();
+	
+	//On a planet of my choosing.
+	coop_playDialogNoHead_20000($omag,"ent_m7/omag_planet.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 39 - close up on munro
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,50);
+	globalCoop_cin_follow($cam1,$IGM7_Deck8_Omag_Shot_WMC);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	$picard.morph( "exp_Serious" );
+	
+	//Of course not. We’re not a shuttle service. We’ll choose a planet convenient for us.
+	thread coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_notshuttle.mp3");
+	wait_3();
+
+	//--------------------------------------------------------
+	//shot 40 - over the shoulder at omag
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	globalCoop_cin_follow($cam2,$IGM7_Deck8_Omag_Shot_FOMC);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	//--- wait for munro to finish speaking
+	globalCoop_dialog_waitForDialog( $scriptmunro );
+	globalCoop_main_waitZeroDot2();
+
+	//I accept the bargain. He is a Captain in the Romulan Imperial Navy.
+	coop_playDialogNoHead_20000($omag,"ent_m7/omag_bargain.mp3");
+	
+	//--------------------------------------------------------
+	//shot 41 - close up on munro
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,50);
+	globalCoop_cin_follow($cam1,$IGM7_Deck8_Omag_Shot_WMC);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	//Romulans? What were you thinking?!
+	thread coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_romulans.mp3");
+	globalCoop_main_waitZeroDot5();
+	
+	$picard.morph( "exp_Disgust" );
+	
+	globalCoop_dialog_waitForDialog( $scriptmunro );
+	 wait_01();
+
+	//--------------------------------------------------------
+	//shot 42 - close up on omag
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	globalCoop_cin_follow($cam2,$IGM7_Deck8_Omag_Shot_FOC);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	$picard.unmorph( "exp_Disgust" );
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot19" );
+	
+	//I know. Romulans are usually terribly cheap.
+	coop_playDialogNoHead_20000($omag,"ent_m7/omag_cheap.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 43 - pull out as munro and picard start to exit
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,50);
+	Coop_cin_followDelete($cam1,$IGM7_Deck8_Omag_Shot19 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	$picard.resetHead();
+	thread globalCoop_actor_walkTo($picard,"$nodePicard_WalkToBrigExit","walk");
+	globalCoop_main_waitZeroDot5();
+	
+	$scriptmunro.resetHead();
+	globalCoop_actor_walkTo($scriptmunro,"$nodeMunro_WalkToBrigExit","walk");
+	
+	$picard.turnTowardsEntity( $scriptmunro );
+	$picard.headwatch( $scriptmunro );
+	globalCoop_main_wait2DotZero();
+	
+	$scriptmunro.headWatch( $picard );
+	$scriptmunro.turnTowardsEntity( $picard );
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot20" );
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot21" );
+		
+	//Good work goading him into confessing, Lieutenant. I believe that would be Rule 87. ‘Learn the customer’s weaknesses so you can better take advantage of him.’
+	thread coop_playDialogNoHead_20000($picard,"ent_m7/picard_find.mp3");
+	wait_3d5();
+
+	//--------------------------------------------------------
+	//shot 44 - close up on munro
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	Coop_cin_followDelete($cam2,$IGM7_Deck8_Omag_Shot21 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	globalCoop_main_wait2DotZero();
+	
+	//--------------------------------------------------------
+	//shot 45 - close up on picard
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,50);
+	Coop_cin_followDelete($cam1,$IGM7_Deck8_Omag_Shot20);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot22" );	
+
+	//--- wait for picard to finish speaking
+	globalCoop_dialog_waitForDialog( $picard );
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 46 - close up on picard
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	Coop_cin_followDelete($cam2,$IGM7_Deck8_Omag_Shot22);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	globalCoop_main_wait2DotZero();
+	
+	//--- turn picard and munro towards the door
+	$scriptmunro.turnTowardsEntity( $nodePicard_AtBrigEntrance );
+	$scriptmunro.resetHead();
+	wait( .4 );
+	
+	$picard.turnTowardsEntity( $nodePicard_AtBrigEntrance );
+	$picard.resetHead();
+	globalCoop_main_waitZeroDot5();
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot23" );
+	
+	//You think you won, Munro! But you have to release me and I never told you where to find his secret base! Ha!
+	thread coop_playDialogNoHead_20000($omag,"ent_m7/omag_profit.mp3");
+	globalCoop_main_wait1Dot5();
+	
+	$scriptmunro.morph( "exp_Skeptical" );
+	wait_3d5();
+	
+	//--------------------------------------------------------
+	//shot 47 - from the cell out to picard and munro
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,70);
+	globalCoop_cin_follow($cam1,$IGM7_Deck8_Omag_Shot23);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	globalCoop_main_waitZeroDot5();
+	
+	$scriptmunro.turnTowardsEntity( $omag );
+	$scriptmunro.headWatch( $omag );
+	wait( .4 );
+	
+	$picard.turnTowardsEntity( $omag );
+	$picard.headWatch( $omag );
+
+	//--- wait for omag to finish speaking
+	globalCoop_dialog_waitForDialog( $omag );
+	globalCoop_main_waitZeroDot2();
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot24" );
+	
+	//He has a secret base?
+	thread coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_lifeworth.mp3");
+	globalCoop_main_wait1DotZero();
+
+	//--------------------------------------------------------
+	//shot 48 - close up on omag
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,70);
+	globalCoop_cin_follow($cam2,$IGM7_Deck8_Omag_Shot24);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	//--- wait for munro to finish speaking
+	globalCoop_dialog_waitForDialog( $scriptmunro );
+	globalCoop_main_waitZeroDot2();
+
+	//Ha, ha, ha! Too late! So, where will you drop me off? Ferenginar? Risa?
+	thread coop_playDialogNoHead_20000($omag,"ent_m7/omag_toolate.mp3");
+	wait_3d5();
+
+	//--------------------------------------------------------
+	//shot 49 - 3 shot from omag to picard and munro
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,70);
+	Coop_cin_followDelete($cam1,$IGM7_Deck8_Omag_Shot23);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot25" );
+
+	//--- wait for omag to finish speaking	
+	globalCoop_dialog_waitForDialog( $omag );
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 50 - closeup on picard
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	globalCoop_cin_follow($cam2,$IGM7_Deck8_Omag_Shot25);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);	
+	
+	//We will release you on the next planet to be attacked by Exomorphs.
+	thread coop_playDialogNoHead_20000($picard,"ent_m7/picard_nextpl.mp3");
+	wait( 2.5 );
+
+	//--------------------------------------------------------
+	//shot 51 - closeup on omag
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,70);
+	Coop_cin_followDelete($cam1,$IGM7_Deck8_Omag_Shot24);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	globalCoop_main_waitZeroDot5();
+	
+	$omag.morph( "exp_Fear" );
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot26" );
+	
+	//--- wait for picard to finish speaking
+	globalCoop_dialog_waitForDialog( $picard );
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 52 - wide shot with omag in the middle
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,40);
+	globalCoop_cin_follow($cam1,$IGM7_Deck8_Omag_Shot26);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+		
+	//No! You wouldn’t.
+	thread coop_playDialogNoHead_20000($omag,"ent_m7/omag_would.mp3");
+	globalCoop_main_wait1DotZero();
+	
+	$omag.headWatch( $picard, 5 );
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot27" );
+	
+	globalCoop_dialog_waitForDialog( $omag );
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 53 - over omag's shoulder at picard and munro
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,40);
+	globalCoop_cin_follow($cam2,$IGM7_Deck8_Omag_Shot27);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	$scriptmunro.morph( "exp_Skeptical" );
+		
+	//That way you can inspect the results of your profiteering.
+	coop_playDialogNoHead_20000($picard,"ent_m7/picard_inspect.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 54 - wide shot with omag in the middle
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,40);
+	Coop_cin_followDelete($cam1,$IGM7_Deck8_Omag_Shot26);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+		
+	//Those monsters don’t value latinum! I’ll be killed!
+	thread coop_playDialogNoHead_20000($omag,"ent_m7/omg_latkill.mp3");
+	globalCoop_main_wait1DotZero();
+	
+	$omag.headWatch( $scriptmunro, 5 );
+	globalCoop_main_wait1Dot5();
+	
+	$omag.headWatch( $picard, 5 );
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot28" );
+	
+	globalCoop_dialog_waitForDialog( $omag );
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 55 - closeup on munro
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	Coop_cin_followDelete($cam2,$IGM7_Deck8_Omag_Shot28);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	$omag.headWatch( $scriptmunro, 5 );
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot29" );
+	
+	//The Ferengi dream is to die rich?
+	coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_dreamdie.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 56 - closeup on omag
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,50);
+	globalCoop_cin_follow($cam1,$IGM7_Deck8_Omag_Shot29);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+		
+	//You can’t!
+	coop_playDialogNoHead_20000($omag,"ent_m7/omag_cant.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 57 - closeup on picard
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,50);
+	globalCoop_cin_follow($cam2,$IGM7_Deck8_Omag_Shot25);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+		
+	//Goodbye, Omag.
+	coop_playDialogNoHead_20000($picard,"ent_m7/picard_goodbye.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 58 - closeup on omag
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,50);
+	Coop_cin_followDelete($cam1,$IGM7_Deck8_Omag_Shot29);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	
+	//His name is Commander Suldok! I’ll give you coordinates to his base is in the Romulan Neutral Zone!
+	thread coop_playDialogNoHead_20000($omag,"ent_m7/omag_suldok.mp3");
+	wait_3d5();
+
+	//--------------------------------------------------------
+	//shot 59 - over shoulder at picard and munro
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,40);
+	Coop_cin_followDelete($cam2,$IGM7_Deck8_Omag_Shot27);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+		
+	//--- wait for omag to finish speaking
+	globalCoop_dialog_waitForDialog( $omag );
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 60 - closeup on picard
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1,50);
+	Coop_cin_followDelete($cam1,$IGM7_Deck8_Omag_Shot25);
+	globalCoop_cin_cut($cam1);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam1);
+	
+	coopLoadCamInMPOnly( "IGM7_Deck8_Omag_Shot30" );
+		
+	//Thank you, Omag.
+	coop_playDialogNoHead_20000($picard,"ent_m7/picard_thankomag.mp3");
+	globalCoop_main_waitZeroDot2();
+
+	//--------------------------------------------------------
+	//shot 61 - slow pull out with omag in the middle
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam2,40);
+	Coop_cin_followDelete($cam2,$IGM7_Deck8_Omag_Shot30);
+	globalCoop_cin_cut($cam2);
+	globalCoop_main_waitZeroDot2();
+	globalCoop_cin_cuecamera($cam2);
+	
+	//Nice doing business with you.
+	thread coop_playDialogNoHead_20000($scriptmunro,"ent_m7/munro_nicebus.mp3");
+	globalCoop_main_wait1Dot5();
+	
+	$omag.headWatch( $picard, 5 );
+	
+	globalCoop_dialog_waitForDialog( $scriptmunro );
+	globalCoop_main_waitZeroDot5();
+	
+	$omag.headWatch( $nodeMunro_AtCell2Doorway, 5 );
+	globalCoop_main_waitZeroDot5();
+	
+	thread IGM7_Skipthread();
+}
+
+
+//---------------------
+// cinematicInGameWithPicardIGM7
+// setup and begin cinematicInGameWithPicardIGM7
+//---------------------
+void cinematicInGameWithPicardIGM7()
+{
+	// --- Skip Thread
+	skipthread( "cinematicInGameWithPicardIGM7Skipthread");
+		
+	//--- Start & Fade in
+	camfadein05();
+	globalCoop_main_waitZeroDot5();
+
+	//I'll inform Starfleet of our new destination. Commander Tuvok will arrange a security briefing.
+	thread coop_playDialogNoHead_20000($picard,"ent_m7/picard_newdest.mp3");
+	 globalCoop_main_wait2DotZero();
+	
+	$omag.headwatch( $picard, 5 );
+	
+	globalCoop_dialog_waitForDialog( $picard );
+	globalCoop_main_waitZeroDot2();
+	
+	//What about me?
+	thread coop_playDialogNoHead_20000($omag,"ent_m7/omag_aboutme.mp3");
+	wait( .3 );
+	
+	//--- make picard turn towars omag
+	$picard.headwatch( $omag, 10 );
+	
+	//--- wait for omag to finish speaking
+	globalCoop_dialog_waitForDialog( $omag );
+	globalCoop_main_waitZeroDot2();
+	
+	//You had better hope your information leads to the location of the Master Control Facility before the Exomorphs attack another planet.
+	coop_playDialogNoHead_20000($picard,"ent_m7/picard_betterhope.mp3");
+	globalCoop_main_waitZeroDot2();
+	
+	$picard.resetHead( 10 );
+	globalCoop_main_waitZeroDot5();
+
+	//--- End Thread
+	thread cinematicInGameWithPicardIGM7End();
+}
+
+//---------------------
+// cinematicInGameWithPicardIGM7Skipthread
+// skipthread that calls the skipthread routines
+//------------------------
+void cinematicInGameWithPicardIGM7Skipthread()
+{
+	//--- kill the cinematicInGameWithPicardIGM7 thread
+	skipthread( "Null" );
+	killthread( "cinematicInGameWithPicardIGM7" );
+	
+	thread cinematicInGameWithPicardIGM7End();
+}
+
+//---------------------
+// cinematicInGameWithPicardIGM7End
+// wrapup the cinematicInGameWithPicardIGM7
+//------------------------
+void cinematicInGameWithPicardIGM7End()
+{
+	//--- fade out and set the level up
+	camfadeout05();
+	wait_06();
+	
+	globalCoop_dialog_stopAll();
+	
+	thread omag_workIGM7();
+	
+	if(!cvar_bool_multiplayer)
+	{
+		//She won't comment about the Instilation Trip untill now.
+		setNextDialog( $jameson, 1 );
+	}
+	
+	globalCommon_AiDummyHide( $picard );
+	$picard.resetHead();
+	$omag.resetHead();
+	globalCoop_main_waitZeroDot5();
+	
+	$doorBrig.unlock();
+	
+	if(doesEntityExist(ePlayerCinOmag))
+	{
+		ePlayerCinOmag.immobilize(0);
+	}
+	camfadein05();
+	wait( 7 );
+	
+	setFloatVar( "game.checkEntMission7RoomsVisited", 2 );
+	setNextDialog( $korban, 10 );
+	
+	setFloatVar( "game.IGM7GoToBrig", 2 );
+	setFloatVar( "game.IGM7GoToArmory", 1 );
+	justLoadedDeckThreadIGM7();
+	
+	//Korban to Munro.  Please join me in the Armory.
+	globalCoop_dialog_play($korban,"ent_m7/korban_armory.mp3", 1, 10000, 1 );
+	
+	//go to brig
+	//go to armory
+	thread globalCoop_objectives_update("complete",1,0);
+	thread globalCoop_objectives_update("incomplete",2,1);
+}
+
+
+///////////////////////////
+// korbanOnUseWaitIGM7
+// Wait for player to talk to actor
+///////////////////////////
+void korban_workIGM7()
+{
+	setNextDialog( $korban, 1 );
+	setDialogFunction( $korban, "korbanDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $korban, "", "", 0 );
+		talkUntilDone( $korban );
+	}
+}
+
+///////////////////////////
+// korbanDialog7_1
+// Player and actor talk
+///////////////////////////
+void korbanDialog7_1()
+{	
+	$korban.setFloatVar( "pauseRandomAnimate", 1 );
+	wait_025();
+	$korban.anim( "ent-island-scan" );
+	coop_headWatch($korban);
+	
+	//Those Klingons on the K7 Starbase were not honorable.
+	coop_playDialogNoHead_128($korban,"ent_m7/korban_nothonor.mp3");
+
+	setNextDialog( $korban, 2 );
+	$korban.resethead();
+	setDialogFinished( $korban );
+	$korban.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// korbanDialog7_2
+// Player and actor talk
+///////////////////////////
+void korbanDialog7_2()
+{	
+	$korban.setFloatVar( "pauseRandomAnimate", 1 );
+	wait_025();
+	$korban.anim( "ent-island-scan" );
+	coop_headWatch($korban);
+		
+	//Lurok, son of Gahlag was once a powerful Klingon in the High Council.
+	coop_playDialogNoHead_128($korban,"ent_m7/korban_lurok.mp3");
+
+	setNextDialog( $korban, 3 );
+	$korban.resethead();
+	setDialogFinished( $korban );
+	$korban.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// korbanDialog7_3
+// Player and actor talk
+///////////////////////////
+void korbanDialog7_3()
+{
+	$korban.setFloatVar( "pauseRandomAnimate", 1 );
+	wait_025();
+	$korban.anim( "ent-island-scan" );
+	coop_headWatch($korban);
+		
+	//He resigned out of protest when the High Council agreed to temporarily join forces with the Romulans during the Dominion War.
+	coop_playDialogNoHead_128($korban,"ent_m7/korban_resigned.mp3");
+
+	setNextDialog( $korban, 4 );
+	$korban.resethead();
+	setDialogFinished( $korban );
+	$korban.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// korbanDialog7_4
+// Player and actor talk
+///////////////////////////
+void korbanDialog7_4()
+{	
+	$korban.setFloatVar( "pauseRandomAnimate", 1 );
+	wait_025();
+	$korban.anim( "ent-island-scan" );
+	coop_headWatch($korban);
+		
+	//All of Lurok's loyal followers left the Empire as well.  Now we know where they ended up.
+	coop_playDialogNoHead_128($korban,"ent_m7/korban_loyal.mp3");
+
+	setNextDialog( $korban, 5 );
+	$korban.resethead();
+	setDialogFinished( $korban );
+	$korban.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// korbanDialog7_5
+// Player and actor talk
+///////////////////////////
+void korbanDialog7_5()
+{	
+	$korban.setFloatVar( "pauseRandomAnimate", 1 );
+	wait_025();
+	$korban.anim( "ent-island-scan" );
+	coop_headWatch($korban);
+	
+	//I am currently looking at Lurok's toy you took from him.  We should be able to put it to good use.
+	thread coop_playDialogNoHead_128($korban,"ent_m7/korban_toy.mp3");
+
+	setNextDialog( $korban, 1 );
+	$korban.resethead();
+	setDialogFinished( $korban );
+	$korban.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// korbanDialog7_10
+// Player and actor talk
+///////////////////////////
+void korbanDialog7_10()
+{	
+	$korban.setFloatVar( "pauseRandomAnimate", 1 );
+	wait_025();
+	$korban.anim( "ent-island-scan" );
+	coop_headWatch($korban);
+	
+	setFloatVar( "game.IGM7GoToArmory", 2 );
+	setFloatVar( "game.IGM7HoloDeck", 1 );
+	justLoadedDeckThreadIGM7();
+	
+	//go to armory
+	thread globalCoop_objectives_update("complete",2,1);
+	
+	//make Holo Mission triggerable
+	$triggerHoloDeck.thread( "startHoloTrainingMissionIGM7" );	
+	globalCoop_main_waitAFrame();	
+	
+	$holoDeckWeaponStand.show();
+	globalCommon_SpawnScriptModel( "weapons/staticmodel-tetryon.tik", "tetryonGatlingGun", '-12488 -335  32', 0 );	
+	globalCoop_main_waitAFrame();
+	$tetryonGatlingGun.missionobjective( 1 );
+	thread makeWeaponBob( $tetryonGatlingGun );
+		
+	//I have studied the Tetryon Gun the Klingon dropped. I'll show you what it can do. You can test it in a special training program on the holodeck.
+	coop_playDialogNoHead_128($korban,"ent_m7/korban_tetryon.mp3");
+	
+	//go play whith dolls in the holodeck 
+	thread globalCoop_objectives_update("incomplete",3,1);
+
+	setNextDialog( $korban, 1 );
+	$korban.resethead();
+	setDialogFinished( $korban );
+	$korban.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+
+
+///////////////////////////
+// checkForStevensonDialogChangeIGM7
+// Checks to see if it is time to talk about mission objectives
+///////////////////////////
+void checkForStevensonDialogChangeIGM7()
+{
+	$triggerSickBay.thread( "" );
+	
+	if(getFloatVar( "game.checkEntMission7RoomsVisited" ) == 5 )
+	{
+		setNextDialog( $stevenson, 10 );
+		
+		//Make it so stevenson Goes and is ready to talk if it hasn't happened yet
+		//Makes sure work threads arn't called twice.
+		if( kretarStevensonHaveTalked == 0 )
+		{		
+			$enterSickBayOfficeTrigger.thread( "" );
+			
+			thread kretar_workIGM7();
+			thread stevenson_workIGM7(); 
+		}
+	}
+	else
+	{
+		$triggerSickBay.thread( "checkForStevensonDialogChangeIGM7" );
+	}
+}
+
+///////////////////////////
+// stevensonOnUseWaitIGM7
+// Wait for player to talk to actor
+///////////////////////////
+void stevenson_workIGM7()
+{
+	//setNextDialog( $stevenson, 1 );
+	setDialogFunction( $stevenson, "stevensonDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $stevenson, "", "", 0 );
+		talkUntilDone( $stevenson );
+	}
+}
+
+///////////////////////////
+// stevensonDialog7_1
+// Player and actor talk
+///////////////////////////
+void stevensonDialog7_1()
+{
+	$stevenson.anim( "ent-datapad-scan" );
+	coop_headWatchTurnTo($stevenson);
+	
+	//I'm impressed that you to battled your way through a Klingon Starbase without getting injured.
+	thread coop_playDialogNoHead_128($stevenson,"ent_m7/doc_impressed.mp3");
+	globalCoop_dialog_waitForDialog( $stevenson );
+
+	setNextDialog( $stevenson, 2 );
+	$stevenson.resethead();
+	$stevenson.turnTowardsEntity( $kretar );
+	globalCoop_main_waitZeroDot5();
+	$stevenson.anim( "ent-datapad-use" );
+	setDialogFinished( $stevenson );
+}
+
+///////////////////////////
+// stevensonDialog7_2
+// Player and actor talk
+///////////////////////////
+void stevensonDialog7_2()
+{
+	$stevenson.anim( "ent-datapad-scan" );
+	coop_headWatchTurnTo($stevenson);
+	
+	//You're due for a physical, Munro.
+	thread coop_playDialogNoHead_128($stevenson,"ent_m7/doc_physical.mp3");
+	globalCoop_dialog_waitForDialog( $stevenson );
+
+	setNextDialog( $stevenson, 1 );
+	$stevenson.resethead();
+	$stevenson.turnTowardsEntity( $kretar );
+	globalCoop_main_waitZeroDot5();
+	$stevenson.anim( "ent-datapad-use" );
+	setDialogFinished( $stevenson );
+}
+
+///////////////////////////
+// stevensonDialog7_10
+// Player and actor talk
+///////////////////////////
+void stevensonDialog7_10()
+{
+	$stevenson.anim( "ent-datapad-scan" );
+	coop_headWatchTurnTo($stevenson);
+	
+	//go to sickbay
+	thread globalCoop_objectives_update("complete",5,1);
+	
+	//Welcome to Sickbay. Ready to become someone else? 
+	coop_playDialogNoHead_128($stevenson,"ent_m7/doctor_ready.mp3");
+	//Let's get started.
+	globalCoop_dialog_play($scriptmunro,"ent_m7/munro_started.mp3", 1, 10000, 1 );
+
+	//--- fade out
+	camfadeout05();
+	wait( .75 );
+
+	setFloatVar( "game.globalMissionEnterprise", 8 );
+	noIntermission();
+	//coop_loadMap();
+	globalCoop_mission_completed("m10l1-romulan_installation");
+}
+
+//===================================================================================================================
+// Ambient Actors
+//===================================================================================================================
+
+//---------------------
+// ambientActorsIGM7	
+// Set up ambient Actors
+//---------------------
+void ambientActorsIGM7()
+{
+	if(cvar_bool_multiplayer)
+	{
+		wait(2);	
+	}
+	globalCommon_SpawnActor( "char/ferengi_oolpax.tik", "omag", '-9748 -500 12', 270 );
+	globalCommon_SpawnActor( "char/starfleet_crew-male2.tik", "dorchev", '-9728 -1592 24', 90 );
+	globalCoop_main_waitAFrame();
+	
+	globalCommon_SpawnActor( "char/starfleet_crew-female4.tik", "kretar", '-11744 -848  2', 180 );
+	globalCommon_SpawnActor( "char/starfleet_crew-female3.tik", "stevenson", '-11793.30 -825.30  0.00', 345 );
+	globalCoop_main_waitAFrame();
+	
+	globalCommon_SpawnActor( "char/hazardteam_sf-chang.tik", "chang", '-12423 -1307  0', 300 );
+	globalCommon_SpawnScriptModel( "enviro/enterprise_electronic_laptop.tik", "laptop", '-11757 -848 46', 0 );
+	globalCoop_main_waitAFrame();
+	
+	
+	
+	globalCommon_SpawnActor( "char/hazardteam_sf-redshirt5.tik", "ketcherside", '-11122.10 -2354.10  0.00', 10 );
+	if(cvar_bool_multiplayer == 0 && getFloatVar( "game.checkEntMission7RoomsVisited" ) != 5 || cvar_bool_multiplayer == 1 && getCvarInt("coop_igmR") != 5)
+	{
+		globalCommon_SpawnActor( "char/hazardteam_sf-redshirt.tik", "law", '-11058.10 -2346.10  0.00', 190 );
+		$law.pushable( 0 );
+		$ketcherside.pushable( 0 );
+		$law.headwatch( $ketcherside, 5 );
+		$ketcherside.headwatch( $law, 5 );
+		thread randomlyAnimateActor( $law, "conv" );
+		thread randomlyAnimateActor( $ketcherside, "conv" );
+	}
+	else
+	{
+		$ketcherside.ai_on();
+		$ketcherside.setnodeid( 51 );
+		$ketcherside.pushable( 1 );	
+	}
+	globalCoop_main_waitAFrame();
+
+	
+//This Calls The Conversation unless
+	$triggerSickBay.thread( "checkForStevensonDialogChangeIGM7" );
+//It is time to talk about getting turned into a Romulan by checking this thread
+	$enterSickBayOfficeTrigger.thread( "kretarStevensonTalkIGM7" );
+	
+	$stevenson.pushable( 0 );
+	$dorchev.pushable( 0 );
+	$kretar.pushable( 0 );
+	
+	globalCommon_AiActorUseWeapon( $stevenson, "EnterpriseDatapad" );
+	$stevenson.anim( "ent-datapad-use" );	
+	$laptop.anim( "open_idle" );
+	
+	$kretar.headwatch( $stevenson, 5 );
+	$stevenson.headwatch( $kretar, 5 );
+	globalCoop_main_waitAFrame();
+	
+	thread randomlyAnimateActor( $kretar, "ent-table-laptop" );
+	globalCoop_main_waitAFrame();
+	
+	thread randomlyAnimateActor( $chang, "ent-island" );
+	thread chang_workIGM7();
+	globalCoop_main_waitAFrame();
+	
+	thread randomlyAnimateActor( $dorchev, "ent-stand" );
+	thread dorchev_workIGM7();
+	
+//spawn her in sp only
+	if(!cvar_bool_multiplayer)
+	{
+		globalCommon_SpawnActor( "char/hazardteam_sf-redshirt6.tik", "jameson", '-10432 -2048 26', 0 );
+		$jameson.setnodeid( 50 );
+		$jameson.alias( "jamesonIGMA1", "localization/sound/dialog/ent_m1/kretar_hello1.mp3" ); //Hello, Lieutenant
+		$jameson.dialog( "jamesonIGMA" );	
+		$jameson.ai_on();
+	}
+}
+
+///////////////////////////
+// lawKetchersideTalkIGM7
+// Wait for player to talk to actor
+///////////////////////////
+void lawKetchersideTalkIGM7()
+{
+	$triggerBottomHall0.thread( "" );
+	
+	$ketcherside.setFloatVar( "pauseRandomAnimate", 1 );
+	$law.setFloatVar( "pauseRandomAnimate", 1 );
+	wait_025();
+	$ketcherside.anim( "idle" );
+	$law.anim( "idle" );
+	
+	//I heard one of the plasma conduits needs a retro-fit.
+	coop_playDialogNoHead_64($ketcherside,"ent_m7/crewm1_plasma.mp3");
+	//Yeah, I heard two of them did Engineering's still scrambling after the Idryll rampage.
+	coop_playDialogNoHead_64($law,"ent_m7/crewm2_scramb.mp3");
+	//What did you expect?
+	coop_playDialogNoHead_64($ketcherside,"ent_m7/crewm1_whatex.mp3");
+	//I certainly didn't expect Idryll to roam free around our hallways
+	coop_playDialogNoHead_64($law,"ent_m7/crewm2_hallw.mp3");
+	//What are you talking about
+	coop_playDialogNoHead_64($ketcherside,"ent_m7/crewm1_whatt.mp3");
+	//The female, Picard just lets her wander free.  At a minimum she should be confined to quarters, Put in the brig, if you ask me.
+	coop_playDialogNoHead_64($law,"ent_m7/crewm2_picardf.mp3");
+	//Kleeya?  She didn't have anything to do with that attack..
+	coop_playDialogNoHead_64($ketcherside,"ent_m7/crewm1_sheanything.mp3");
+	//Oh, it's "Kleeya" now?
+	coop_playDialogNoHead_64($law,"ent_m7/crewm2_ohkl.mp3");
+	//That's her name
+	coop_playDialogNoHead_64($ketcherside,"ent_m7/crewm1_thatname.mp3");
+	//I'm sure it is, I'm sure you know all about her
+	coop_playDialogNoHead_64($law,"ent_m7/crewm2_allabt.mp3");
+	//Ah, I see.
+	coop_playDialogNoHead_64($ketcherside,"ent_m7/crewm1_ahis.mp3");
+	//What?
+	coop_playDialogNoHead_64($law,"ent_m7/crewm2_what.mp3"); 
+	//You're jealous, this isn't about her being an Idryll
+	coop_playDialogNoHead_64($ketcherside,"ent_m7/crewm1_jealous.mp3");
+	//Jealous!?  I think you're just being blinded by her beauty.
+	coop_playDialogNoHead_64($law,"ent_m7/crewm2_blind.mp3");
+	//Calm down.
+	coop_playDialogNoHead_64($ketcherside,"ent_m7/crewm1_think.mp3");
+	//She's definitely cast a spell on you.  You're so predictable.
+	coop_playDialogNoHead_64($law,"ent_m7/crewm2_smug.mp3");
+	
+	$ketcherside.resethead();
+	$law.resethead();
+	
+	$ketcherside.setnodeid( 51 );
+	if(!cvar_bool_multiplayer)
+	{
+		$ketcherside.alias( "ketchersideIGMA1", "localization/sound/dialog/ent_m7/law_raninto.mp3" ); //I’m surprised you made it out of that rickety old starbase.
+		$ketcherside.alias( "ketchersideIGMA2", "localization/sound/dialog/ent_m7/law_lobes.mp3" ); //I hear the scum of the quadrant call that base home.
+		$ketcherside.alias( "ketchersideIGMA3", "localization/sound/dialog/ent_m7/law_box.mp3" ); //We should do the galaxy a favor and close that place down.
+		$ketcherside.dialog( "ketchersideIGMA" );
+		$law.alias( "lawIGMA1", "localization/sound/dialog/ent_m7/kretar_help2.mp3" ); //Can I help you?
+		$law.dialog( "lawIGMA" );
+	}
+	$ketcherside.ai_on();
+
+	$law.setnodeid( 52 );
+	$law.ai_on();
+	
+	$law.pushable( 1 );
+	$ketcherside.pushable( 1 );	
+}
+
+///////////////////////////
+// kretarStevensonTalkIGM7
+// Wait for player to talk to actor
+///////////////////////////
+void kretarStevensonTalkIGM7()
+{
+	$enterSickBayOfficeTrigger.thread( "" );
+
+	if(getFloatVar("game.IGM7GoToBreifingRoom") == 0)
+	{
+		$stevenson.turnTowardsEntity( $kretar );
+		globalCoop_main_waitZeroDot5();
+
+		$kretar.setFloatVar( "pauseRandomAnimate", 1 );
+		wait_025();
+		$kretar.anim( "ent-table-laptop-scan" );
+		$stevenson.anim( "ent-datapad-scan" );
+	}
+	kretarStevensonHaveTalked = 1;
+	if(getFloatVar("game.IGM7GoToBreifingRoom") == 0)
+	{
+		//The analysis was amazing…
+		coop_playDialogNoHead_64($kretar,"ent_m7/kretar_analy.mp3");
+		//They're killing machines…
+		coop_playDialogNoHead_64($stevenson,"ent_m7/medic2_killingmach.mp3");
+		//Exactly, Dr. Alain in Zoology agrees… It's stunning the degree of precision developed for the xenomorphs…  Each one designed PERFECTLY for it's job…  Amazing
+		coop_playDialogNoHead_64($kretar,"ent_m7/kretar_alain.mp3");
+		//Yeah, but from what I've seen and heard, each of these "amazing" creatures of yours is getting bigger, stronger, faster, and to some degree or another, more deadly.
+		coop_playDialogNoHead_64($stevenson,"ent_m7/medic2_bigger.mp3");
+		//Seems a fair assessment; I assume you have a point, aside from voicing the obvious….
+		coop_playDialogNoHead_64($kretar,"ent_m7/kretar_fairass.mp3");
+		//I'm not making a point… I'm asking a question.
+		coop_playDialogNoHead_64($stevenson,"ent_m7/medic2_quest.mp3");
+		//Which is?
+		coop_playDialogNoHead_64($kretar,"ent_m7/kretar_which.mp3"); 
+		//What's next ?
+		coop_playDialogNoHead_64($stevenson,"ent_m7/medic2_next.mp3");
+	}
+	
+	$kretar.setFloatVar( "pauseRandomAnimate", 0 );
+	thread kretar_workIGM7();
+	
+	$stevenson.anim( "ent-datapad-use" );
+	setNextDialog( $stevenson, 1 );
+	thread stevenson_workIGM7();	
+}
+
+///////////////////////////
+// dorchevOnUseWaitIGM7
+// Wait for player to talk to actor
+///////////////////////////
+void dorchev_workIGM7()
+{
+	setNextDialog( $dorchev, 1 );
+	setDialogFunction( $dorchev, "dorchevDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $dorchev, "", "", 0 );
+		talkUntilDone( $dorchev );
+	}
+}
+
+///////////////////////////
+// dorchevDialog7_1
+// Player and actor talk
+///////////////////////////
+void dorchevDialog7_1()
+{
+	$dorchev.setFloatVar( "pauseRandomAnimate", 1 );
+	wait_025();
+	$dorchev.anim( "ent-stand-scan" );
+	coop_headWatch($dorchev);
+	
+	//I'm busy Munro.
+	coop_playDialogNoHead_128($dorchev,"ent_m7/dorchev_busy2.mp3");
+
+	setNextDialog( $dorchev, 1 );
+	$dorchev.resethead();
+	setDialogFinished( $dorchev );
+	$dorchev.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// kretarOnUseWaitIGM7
+// Wait for player to talk to actor
+///////////////////////////
+void kretar_workIGM7()
+{
+	setNextDialog( $kretar, 1 );
+	setDialogFunction( $kretar, "kretarDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $kretar, "", "", 0 );
+		talkUntilDone( $kretar );
+	}
+}
+
+///////////////////////////
+// kretarDialog7_1
+// Player and actor talk
+///////////////////////////
+void kretarDialog7_1()
+{
+	$kretar.setFloatVar( "pauseRandomAnimate", 1 );
+	wait_025();
+	$kretar.anim( "ent-table-laptop-scan" );
+	coop_headWatch($kretar);
+	
+	//Do you need medical attention?
+	coop_playDialogNoHead_128($kretar,"ent_m7/kretar_medatt2.mp3");
+	
+	setNextDialog( $kretar, 2 );
+	$kretar.resethead();
+	setDialogFinished( $kretar );
+	$kretar.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// kretarDialog7_2
+// Player and actor talk
+///////////////////////////
+void kretarDialog7_2()
+{
+	$kretar.setFloatVar( "pauseRandomAnimate", 1 );
+	wait_025();
+	$kretar.anim( "ent-table-laptop-scan" );
+	coop_headWatch($kretar);
+	
+	//Can I help you?
+	coop_playDialogNoHead_128($kretar,"ent_m7/kretar_help2.mp3");
+	
+	setNextDialog( $kretar, 1 );
+	$kretar.resethead();
+	setDialogFinished( $kretar );
+	$kretar.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// changOnUseWaitIGM7
+// Wait for player to talk to actor
+///////////////////////////
+void chang_workIGM7()
+{
+	setNextDialog( $chang, 1 );
+	setDialogFunction( $chang, "changDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $chang, "", "", 0 );
+		talkUntilDone( $chang );
+	}
+}
+
+///////////////////////////
+// changDialog7_1
+// Player and actor talk
+///////////////////////////
+void changDialog7_1()
+{
+	$chang.setFloatVar( "pauseRandomAnimate", 1 );
+	wait_025();
+	$chang.anim( "ent-island-scan" );
+	coop_headWatch($chang);
+
+	//Hey Munro, I'm getting ready to do some weapons training.
+	coop_playDialogNoHead_128($chang,"ent_m7/chang_weapons.mp3");
+
+	setNextDialog( $chang, 2 );
+	$chang.resethead();
+	setDialogFinished( $chang );
+	$chang.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// changDialog7_2
+// Player and actor talk
+///////////////////////////
+void changDialog7_2()
+{
+	$chang.setFloatVar( "pauseRandomAnimate", 1 );
+	wait_025();
+	$chang.anim( "ent-island-scan" );
+	coop_headWatch($chang);
+
+	//I'm kinda busy now, can we chat later?
+	coop_playDialogNoHead_128($chang,"ent_m7/chang_busy1.mp3");
+	
+	setNextDialog( $chang, 1 );
+	$chang.resethead();
+	setDialogFinished( $chang );
+	$chang.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// omagOnUseWaitIGM7
+// Wait for player to talk to actor
+///////////////////////////
+void omag_workIGM7()
+{
+	setNextDialog( $omag, 1 );
+	setDialogFunction( $omag, "omagDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $omag, "", "", 0 );
+		talkUntilDone( $omag );
+	}
+}
+
+///////////////////////////
+// omagDialog7_1
+// Player and actor talk
+///////////////////////////
+void omagDialog7_1()
+{
+	coop_headWatch($omag);
+	
+	//You think you can hold me for long?  Remember Rule 25 There’s always a way out.
+	coop_playDialogNoHead_128($omag,"ent_m7/omag_wayout.mp3");
+	
+	setNextDialog( $omag, 2 );
+	$omag.resethead();
+	setDialogFinished( $omag );
+}
+
+///////////////////////////
+// omagDialog7_2
+// Player and actor talk
+///////////////////////////
+void omagDialog7_2()
+{
+	coop_headWatch($omag);
+	
+	//Rule 44 Never confuse wisdom with luck.  You got lucky Munro- don’t count on it lasting forever.
+	coop_playDialogNoHead_128($omag,"ent_m7/omag_confuse.mp3");
+	
+	setNextDialog( $omag, 3 );
+	$omag.resethead();
+	setDialogFinished( $omag );
+}
+
+///////////////////////////
+// omagDialog7_3
+// Player and actor talk
+///////////////////////////
+void omagDialog7_3()
+{
+	coop_headWatch($omag);
+	
+	//You can’t blame me for making money off the Idryll and Romulans. Rule 13, Anything worth doing is worth doing for money.
+	coop_playDialogNoHead_128($omag,"ent_m7/omag_blame.mp3");
+	
+	setNextDialog( $omag, 1 );
+	$omag.resethead();
+	setDialogFinished( $omag );
+}
+
+
+////////////////////////////////
+//  startHoloTrainingMissionIGM7
+//  Start the holo mission
+////////////////////////////////
+void startHoloTrainingMissionIGM7()
+{
+	$triggerHoloDeck.thread( "" );
+	
+	globalCoop_dialog_stopAll();
+	
+	thread tetryonGatlingGunWaitIGM7();
+}
+
+////////////////////////////////
+// Wait till player picks up grenade launcher
+////////////////////////////////
+void tetryonGatlingGunWaitIGM7()
+{
+	$tetryonGatlingGun.ontouch( "tetryonGatlingGunGoIGM7" );
+	pause();
+}
+
+////////////////////////////////
+// start mission
+////////////////////////////////
+void tetryonGatlingGunGoIGM7()
+{
+	vector originStash;
+	
+	$tetryonGatlingGun.notouch();
+	$tetryonGatlingGun.remove();
+	$tetryonGatlingGun.missionobjective( 0 );
+	
+	globalCoop_level_hideAndNotSolid($holoDeckWeaponStand);	
+	lockHoloDoor();
+	
+	globalCoop_player_giveAll("weapons/worldmodel-tetryon.tik",.2);
+	
+//This is a massive weapon. It will reduce your speed considerably. It justifies its weight by acting like a mobile turret. The Primary Fire trigger deploys a rapid-fire spread. The Secondary Fire dispenses twice the energy at a much faster rate, but slows you even more. Try it.
+//	globalCoop_dialog_play($korban,"ent_m7/korban_massive.mp3", 1, 10000, 1 );
+	
+	camfadeout05();
+	
+	dontSaveOrientation();
+	globalCoop_mission_completed("ent-training_weap4");
+	//coop_loadMap();
+}
+
+////////////////////////////////
+// end Mission
+////////////////////////////////
+void holoMissionIGM7Over()
+{
+	setFloatVar( "game.checkEntMission7RoomsVisited",4 );
+	
+	$enterSickBayOfficeTrigger.thread( "" );
+	
+	if(!cvar_bool_multiplayer)
+	{
+		waitforplayer();
+		
+		//*********************************************************************************************
+		//This is a bandade to fix a code bug
+		//$player.warp( '-12488 -852 -8' );
+		//*********************************************************************************************
+		$player.immobilize( 0 );
+		camfadeout05();
+		wait_06();
+		
+		unlockHoloDoor();
+		$player.take( "tetryonGatlingGun" );
+		$player.health( 100 );
+	}
+	else
+	{
+		waitforplayer();
+		globalCoop_main_waitForWarmupTime();
+		wait(2);
+	//delete stuff from previouse mission
+		stuffCmd("seta coop_igmR 4\n");
+	}
+	
+	cam_fadein( 2, 0, 0, 0, 1, 0 );
+	wait(1);
+	
+	//Good job.
+	globalCoop_dialog_play($korban,"ent_m7/korban_goodjob2.mp3", 1, 10000, 1 );
+	//Almost as good as a Klingon!
+	//globalCoop_dialog_play($korban,"ent_m7/korban_almost.mp3", 1, 10000, 1 ); 
+	
+	if(!cvar_bool_multiplayer)
+	{
+		//Actors for Dialog
+		globalCommon_SpawnActor( "char/starfleet_tuvok.tik", "tuvok", '-10116 -992 12', 90 );
+		globalCommon_AiDummyHide( $tuvok );
+	}
+	else
+	{
+		spawn("script_model","model","fx/fx-dummy.tik","targetname","tuvok");
+	}
+
+	justLoadedDeckThreadIGM7();	
+	
+	globalCoop_main_wait2DotZero();
+	
+	setFloatVar( "game.IGM7GoToBreifingRoom", 1 );
+	justLoadedDeckThreadIGM7();
+	
+	//Turn Exit Triggers On
+	$triggerExit.triggerable();
+	
+	//Set up next scene
+	//Tuvok to Munro. Report to the briefing room.
+	globalCoop_dialog_play($tuvok,"ent_m7/tuvok_briefing.mp3", 1, 10000, 1 );
+	if(cvar_bool_multiplayer)
+	{
+		thread globalCoop_objectives_update("incomplete",4,1);
+		$tuvok.remove();
+	}
+	
+	thread globalCoop_level_onUse($elevatorButton,"turboLiftDeckChangeGo");
+	
+//make omag work
+	globalCineFX_PositionObject( $omag, $nodeOmag_AtCell2Doorway );
+	omag_workIGM7();
+//make turbolifting work
+	
+}
+
+
+//===================================================================================================================
+// Deck Change Check
+//===================================================================================================================
+//---------------------
+// checkForDeckChangeIGM7	
+//---------------------
+void checkForDeckChangeIGM7()
+{
+	if( getFloatVar( "game.checkEntMission7RoomsVisited" ) == 4		||
+		cvar_bool_multiplayer == 1 && getCvarInt("coop_igmR") == 4)
+	{
+		setNextDialog( $stevenson, 10 );
+		setFloatVar("level.deckToChangeToIGM",71);
+		if(cvar_bool_multiplayer)
+		{
+			stuffcmd("seta coop_igm 7\n");
+			stuffcmd("seta coop_igmT 71\n");
+			stuffcmd("seta coop_igmR 4\n");
+			stuffcmd("seta coop_igmH 0\n");
+		}
+		//Hazard Operations
+		thread coop_playDialogNoHead_20000($scriptmunro,"ent_m1/munro_dhazaps.mp3");
+		
+		thread setTurboLiftTriggerIGM7();
+		
+		//$elevatorButton.thread("");
+	}
+}
+
+//---------------------
+// makse it so turbo lift doesn't move sound in and open its doors.
+//---------------------
+void setTurboLiftTriggerIGM7()
+{
+	//Wait here so the trigger has time to be set right before level change
+	wait( 6.45 );
+	//Turn Exit Triggers On
+	$triggerExit.nottriggerable();
+}
+
+

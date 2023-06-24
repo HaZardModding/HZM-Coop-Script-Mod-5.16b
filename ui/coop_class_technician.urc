@@ -1,0 +1,103 @@
+menu "coop_class_technician" 128 480 NONE 0
+bgcolor 0 0 0 0
+align center right
+//direction from_left 0.1
+depth 0.3
+noresize
+gamefocus
+showcommand	"exec coop_mod/cfg/clean_technician.cfg\n"
+
+resource 
+widget
+{
+    name "coop_class_technician_bg"
+    rect 0 270 128 32
+    fgcolor 			1.00 1.00 1.00 1.00
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    shader "coop_hud_classTech_bg"
+}
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////CLASS STATS
+////////////////////////////////////////////////////////////////////////////////
+resource
+Label
+{
+	name "DefaultTechsShadow"
+	rect 23 280 18 18
+	fgcolor 0.00 0.00 0.00 1.00
+	bgcolor 0.50 0.50 0.50 0.00
+	borderstyle "NONE"
+	linkcvar "coop_ct"
+	font serpentinemedium-12
+	horizontaljustify center
+	verticaljustify top
+}
+resource
+Label
+{
+	name "DefaultTechs"
+	rect 21 279 18 18
+	fgcolor 0.6 1 0.2 1
+	bgcolor 0.50 0.50 0.50 0.00
+	borderstyle "NONE"
+	linkcvar "coop_ct"
+	font serpentinemedium-12
+	horizontaljustify center
+	verticaljustify top
+}
+//MEDIC/////////////////////////////////////////////////////////////////////////
+resource
+Label
+{
+	name "DefaultMedicsShadow"
+	rect 62 280 18 18
+	fgcolor 0.00 0.00 0.00 1.00
+	bgcolor 0.50 0.50 0.50 0.00
+	borderstyle "NONE"
+	linkcvar "coop_cm"
+	font serpentinemedium-12
+	horizontaljustify center
+	verticaljustify top
+}
+resource
+Label
+{
+	name "DefaultMedics"
+	rect 60 279 18 18
+	fgcolor 1.00 1.00 1.00 1.00
+	bgcolor 0.50 0.50 0.50 0.00
+	borderstyle "NONE"
+	linkcvar "coop_cm"
+	font serpentinemedium-12
+	horizontaljustify center
+	verticaljustify top
+}
+//HEAVYWEAPONS//////////////////////////////////////////////////////////////////
+resource
+Label
+{
+	name "DefaultHeavysShadow"
+	rect 108 280 18 18
+	fgcolor 0.00 0.00 0.00 1.00
+	bgcolor 0.50 0.50 0.50 0.00
+	borderstyle "NONE"
+	linkcvar "coop_ch"
+	font serpentinemedium-12
+	horizontaljustify center
+	verticaljustify top
+}
+resource
+Label
+{
+	name "DefaultHeavys"
+	rect 106 279 18 18
+	fgcolor 1.00 1.00 1.00 1.00
+	bgcolor 0.50 0.50 0.50 0.00
+	borderstyle "NONE"
+	linkcvar "coop_ch"
+	font serpentinemedium-12
+	horizontaljustify center
+	verticaljustify top
+}
+end.

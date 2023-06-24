@@ -1,0 +1,508 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:        m6-deck1_bridge_redalert	  
+//  Script By:    Benson R
+//  Geometry By:  Benson R, Richard H.
+//  Created on:   9/6/2002
+//
+//  Last Edited By:  Benson R
+//
+//-----------------------------------------------------------------
+
+//-------------------------------------------------------------------------------------------------
+void main();
+void coop_findAndTargetnameEntities();
+
+//--- setup routines
+void setupWorld();
+void setupAI();
+void setupPlayer();
+void setupStartingObjectives();
+
+void spawnIdryll( entity spawner, string direction );
+void IdryllDeath_west();
+void IdryllDeath_east();
+void IdryllDeath_shieldpeeps();
+
+//--- visual functions
+void sparksRandom( entity entSparks );
+
+//--- sequence functions
+void bridgeBattle_done();
+void picardDeath();
+void coop_endLevel();
+
+//--------------------------------
+//--- level variables
+float numIdryllSpawned = 0;
+float numIdryllDead = -3;
+float maxIdryllToSpawn = 9;
+float idryllnospawn_east = 0;
+float idryllnospawn_west = 0;
+float idryllnospawn_shieldpeeps = 0;
+entity cinematicArm_TossRifle;
+float coop_bool_cinematicArm_TossRifle_ArmEnd_active = 0;
+
+//INCLUDES//////////////////////////////////////////////////////////////////////
+//-------------------------------------------------------------------------------------------------
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/global/global_common.scr"
+#include "maps/global_scripts/global_math.scr"
+#include "coop_mod/maps/global/global_cinematicFX.scr"
+#include "maps/global_scripts/global_array.scr"
+#include "coop_mod/maps/global/global_spawnWave.scr"
+#include "coop_mod/maps/missions/6/m6-deck1_cin.scr"
+//-------------------------------------------------------------------------------------------------
+void main()
+{
+	globalCoop_server_precacheSingleplayer();
+	globalCoop_main_camFadeOut(.1);
+
+	soundtrack( "music/m6l1_bridge.mus" );
+	
+	thread coop_findAndTargetnameEntities();
+	thread globalCommon_AiDummy( $krindo, "" );
+	thread globalCommon_AiDummy( $tuvok, "" );
+	thread globalCommon_AiDummy( $telsia, "" );
+	thread globalCommon_AiDummy( $munro, "" );
+
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_string_nextMapToCheck			= "m6-exterior";//set the map we gona load next while we are in testmode
+//Set spawnangles for this level
+	coop_float_spawnAngle0 				= 270;
+	coop_float_spawnAngle1 				= 207;
+	coop_float_spawnAngle2 				= 234;
+	coop_float_spawnAngle3 				= 230;
+	coop_float_spawnAngle4 				= 230;
+	coop_float_spawnAngle5 				= 230;
+	coop_float_spawnAngle6 				= 298;
+	coop_float_spawnAngle7 				= 298;
+	coop_float_spawnAngle8 				= 260;
+	coop_vector_spawnOrigin1 			= '2433 -4773 0';
+	coop_vector_spawnOrigin2 			= '2379 -4706 0';
+	coop_vector_spawnOrigin3 			= '2287 -4536 -16';
+	coop_vector_spawnOrigin4 			= '2242 -4592 -16';
+	coop_vector_spawnOrigin5 			= '2224 -4664 -16';
+	coop_vector_spawnOrigin6 			= '1635 -4576 -16';
+	coop_vector_spawnOrigin7 			= '1680 -4660 -16';
+	coop_vector_spawnOrigin8 			= '1742 -4498 -16';
+	
+//Definie Objective
+ 	coop_string_objectiveItem1			= "RepelInvaders";
+	coop_string_objectiveItem2			= "GetToBridge";
+	coop_string_objectiveItem3			= "RepairPhotonTorpedos";
+
+	//"GetToBridge"
+//definie weapons
+	coop_string_weapon1 = "models/weapons/worldmodel-BurstRifle.tik";
+	coop_string_weapon3 = "models/weapons/worldmodel-Tricorder-stx.tik";
+	coop_string_weapon2 = "models/weapons/worldmodel-Phaser-stx.tik";
+	coop_string_weapon4 = "models/weapons/worldmodel-CompressionRifle.tik";
+	coop_string_weapon5 = "models/weapons/worldmodel-GrenadeLauncher.tik";
+	if(getCvarInt("g_gameType") != 1)//SP only
+		coop_string_weapon6 = "models/weapons/worldmodel-FieldAssaultRifle.tik";
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	thread setupAI();
+	//--- run setup functions
+	setupWorld();
+	//--- setup the player
+	thread setupPlayer();
+	wait( 1 );
+	//--- starting cinematic
+	thread cinematicArm_TossRifle_Start();
+}
+
+void coop_findAndTargetnameEntities()
+//find entities without targetname and vive em a targetname
+{	
+	float fEntity,fFind;
+	entity e;
+	for(fEntity=0;fEntity<1023;fEntity++){
+		e=getEntity("*"+fEntity);
+		if(doesEntityExist(e)){
+			if(e.getOrigin() == '2151 -4806 64'){
+				e.targetname("doorConRoom");
+				e.lock();
+				fFind++;
+			}
+			if(e.getOrigin() == '2118 -4789 64'){
+				e.targetname("doorConRoom");
+				e.lock();
+				fFind++;
+			}
+			if(fFind>1){
+				return;
+			}
+		}
+	}
+}
+
+
+
+
+//-------------------------------------------------------------------------------------------------
+// idryll spawning code
+//-------------------------------------------------------------------------------------------------
+
+//---------------------
+// setupWorld
+// setup world objects
+//---------------------
+void setupWorld()
+{
+	//--- set the sky box
+	$sky.rendereffects( "+skyorigin" );	
+	//--- triggers
+	$triggerEnd_MunroInTurbolift.nottriggerable();
+	
+	//--- sparks
+	thread sparksRandom( $sparksRandom1 );
+	thread sparksRandom( $sparksRandom2 );
+	thread sparksRandom( $sparksRandom3 );
+	thread sparksRandom( $sparksRandom4 );
+	thread sparksRandom( $sparksRandom5 );
+	thread sparksRandom( $sparksRandom6 );
+	thread sparksRandom( $sparksRandom7 );
+	
+	//--- lock doors
+	$readyRoomDoor.lock();
+	
+	//--- viewscreen
+	$viewscreenPortal.hide();
+}
+
+
+//---------------------
+// setupAI
+// setup AI
+//---------------------
+void setupAI()	 
+{
+	//--- setup picard
+	globalCoop_actor_aiOff($picard);
+	$picard.hide();
+	$picard.health( 400 );
+	$picard.pushable( 0 );
+	
+	if(!cvar_bool_multiplayer){
+		//--- death cinematic
+		globalCommon_AiDummy( $deathMunro, "idle" );
+		globalCommon_AiDummy( $deathChell, "sit_right" );
+		globalCommon_AiDummy( $deathJurot, "sit_elbows" );
+		globalCommon_AiDummy( $deathChang, "sit_lean" );
+		wait( .5 );
+		
+		globalCommon_AiDummy( $deathTelsia, "sit_right" );
+		globalCommon_AiDummy( $deathSydney, "sit_elbows" );
+		globalCommon_AiDummy( $deathIdryllGuard1, "idle" );
+		globalCommon_AiDummy( $deathIdryllGuard2, "idle" );
+
+		//--- make them use no weapon
+		$deathMunro.useActorWeapon( "none" );
+		$deathChell.useActorWeapon( "none" );
+		$deathJurot.useActorWeapon( "none" );
+		$deathChang.useActorWeapon( "none" );
+		$deathTelsia.useActorWeapon( "none" );
+		$deathSydney.useActorWeapon( "none" );
+		
+		//--- facial morphs
+		$deathMunro.morph( "exp_brows_down" );
+		$deathChell.morph( "exp_Fear" );
+		$deathJurot.morph( "exp_Skeptical" );
+		$deathChang.morph( "exp_Anger" );
+		$deathTelsia.morph( "exp_Serious" );
+		$deathSydney.morph( "exp_Fear" );
+	}
+}
+
+//---------------------
+// setupPlayer
+// setup the player
+//---------------------
+void setupPlayer()
+{
+	if(!cvar_bool_multiplayer){
+		waitForPlayer();
+		$player.loadobjectives( "m6-deck8" );
+	}
+}
+
+
+//---------------------
+// setupStartingObjectives
+// setup the starting objectives for the player
+//---------------------
+void setupStartingObjectives()
+{
+	if(!cvar_bool_multiplayer)
+		$player.loadobjectives( "m6-deck1_bridge_redalert" );
+	
+	//--- set objective
+	globalCoop_objectives_update("incomplete",1,0);//RepelInvaders
+	globalCoop_objectives_update("incomplete",2,0);//GetToBridge
+	
+	//$player.setobjectiveshow( "RepelInvaders", 1 );
+	//$player.setobjectiveshow( "GetToBridge", 1 );
+	wait( 1 );
+	thread globalCoop_objectives_update("complete",2,1);//GetToBridge
+	//$player.setobjectivecomplete( "GetToBridge", 1 );
+}
+
+//---------------------
+// bridgeBattle_done
+// when all the bridge spawning wave idryll are dead
+//---------------------
+void bridgeBattle_done()
+{
+	wait( 1 );
+	
+	//--- make the turbolift trigger triggerable
+	$triggerEnd_MunroInTurbolift.triggerable();
+
+	//--- set objective
+	globalCoop_objectives_update("incomplete",1,1);//RepelInvaders
+	//$player.setobjectivecomplete( "RepelInvaders", 1 );
+	
+	//--- reset picards killthread
+	$picard.immortal( 1 );
+
+	//--- start the end cinematic
+	thread cinematicEnd();	
+}
+
+//---------------------
+// Function: picardDeath
+// Comments:
+//
+//---------------------
+void picardDeath()
+{
+	globalCoop_mission_fail();
+	//$player.missionfailed();
+}
+
+
+//-------------------------------------------------------------------------------------------------
+
+//---------------------
+// sparksRandom
+// turns the spark emitters on and off
+//---------------------
+void sparksRandom( entity entSparks )
+{
+	float fltRandomTime;
+	
+	//--- hide the sparks to start
+	entSparks.hide();
+	
+	//--- wait a random amount of time before starting
+	fltRandomTime = randomFloat( 1 ) + .75;
+	wait( fltRandomTime );
+	
+	//--- begin the loop
+	while( doesEntityExist( entSparks ) )
+	{
+		if( doesEntityExist( entSparks ) )
+		{
+    		//--- show the sparks and play a sound
+    		entSparks.show();
+    		entSparks.loopsound ( "sound/environment/electric/fritz5.wav", .5, 62 );
+    	}
+
+		//--- wait a random amount of time
+		fltRandomTime = randomfloat( .5 ) + .5;
+		wait( fltRandomTime );
+
+		if( doesEntityExist( entSparks ) )
+		{
+    		//--- hide the sparks and stop the sound
+    		entSparks.hide();
+            entSparks.stoploopsound();
+        }
+
+		//--- wait a random amount of time
+		fltRandomTime = randomfloat( 1 ) + .3;
+		wait( fltRandomTime );
+	}
+}
+
+	
+//-------------------------------------------------------------------------------------------------
+// spawnIdryll - functionality for spawning a catwalk idryll, see:
+//	IdryllDeath_west and IdryllDeath_east
+//-------------------------------------------------------------------------------------------------
+void spawnIdryll( entity spawner, string direction )
+{
+	entity e;
+	float spawntries;
+	float MAX_SPAWN_TRIES, SPAWN_TRY_DELAY;
+	float peeptoattack;
+	
+	numIdryllSpawned++;
+	spawntries = 0;
+	MAX_SPAWN_TRIES = 10;
+	SPAWN_TRY_DELAY = 0.5;
+	
+	if( direction == "west" )
+	{
+		spawner.modelname( "char/idryll-m6-rebel-rifle-noshield-f1.tik" );	 
+		spawner.spawneffectname( "TransportIn" , "Idryll" );
+		e = spawner.spawnnow();
+		while( !doesEntityExist( e ) && (spawntries < MAX_SPAWN_TRIES) )
+		{
+			wait( SPAWN_TRY_DELAY );
+			e = spawner.spawnnow();
+		}
+		if( doesEntityExist( e ) )
+		{
+			e.setnodeid( 41 );
+			e.killthread( "IdryllDeath_" + direction );
+		}
+	}
+	else if( direction == "east" )
+	{
+		spawner.modelname( "char/idryll-m6-rebel-rifle-noshield-f1.tik" );	 
+		spawner.spawneffectname( "TransportIn" , "Idryll" );
+		e = spawner.spawnnow();
+		while( !doesEntityExist( e ) && (spawntries < MAX_SPAWN_TRIES) )
+		{
+			wait( SPAWN_TRY_DELAY );
+			e = spawner.spawnnow();
+		}
+		if( doesEntityExist( e ) )
+		{
+			e.setnodeid( 42 );
+			e.killthread( "IdryllDeath_" + direction );
+		}
+	}
+	else if( direction == "shieldpeeps" )
+	{
+		spawner.modelname( "char/idryll-m6-rebel-rifle-shield-m1.tik" );
+		spawner.spawneffectname( "TransportIn" , "Idryll" );
+		e = spawner.spawnnow();
+		while( !doesEntityExist( e ) && (spawntries < MAX_SPAWN_TRIES) )
+		{
+			wait( SPAWN_TRY_DELAY );
+			e = spawner.spawnnow();
+		}
+		if( doesEntityExist( e ) )
+		{
+			e.setnodeid( 43 );
+			e.killthread( "IdryllDeath_" + direction );
+		}
+	}
+	else
+	{
+		// should never happen
+		return;
+	}
+	
+	if( doesEntityExist( e ) )
+	{
+		peeptoattack = randomint( 5 );
+		thread globalCoop_actor_healthMultiplicatePerPlayer(e);
+		
+		if( peeptoattack != 4 )
+		{
+			e.attack(globalCoop_return_playerClosestActive(e));
+		}
+		else if( peeptoattack == 4 )
+		{
+			e.attack( $picard );
+		}
+	}
+		
+	// this is spawning the last guy who will ever be spawned
+	if( numIdryllSpawned == maxIdryllToSpawn )
+	{
+		$spawner1.remove();
+		$spawner2.remove();
+		$spawner3.remove();
+		$spawner4.remove();
+		$spawner5.remove();
+	}
+	
+}
+
+//-------------------------------------------------------------------------------------------------
+// IdryllDeath_west - called when the east catwalk idryll in the cargo bay dies;
+// 	This will continue to spawn more guys forever until the spawner is removed, which should
+//	happen from a trigger when the player gets too close.
+//-------------------------------------------------------------------------------------------------
+void IdryllDeath_west()
+{
+	numIdryllDead++;
+
+	if( ! doesEntityExist( $spawner1 ) )
+		return;
+
+	wait( 1 );
+	spawnIdryll( $spawner1, "west" );
+}
+
+//-------------------------------------------------------------------------------------------------
+// IdryllDeath_east - called when the east catwalk idryll in the cargo bay dies;
+// 	This will continue to spawn more guys forever until the spawner is removed, which should
+//	happen from a trigger when the player gets too close.
+//-------------------------------------------------------------------------------------------------
+void IdryllDeath_east()
+{
+	numIdryllDead++;
+
+	if( ! doesEntityExist( $spawner2 ) )
+		return;
+
+	wait( 1 );
+	spawnIdryll( $spawner2, "east" );
+}
+
+
+//-------------------------------------------------------------------------------------------------
+// IdryllDeath_east - called when the east catwalk idryll in the cargo bay dies;
+// 	This will continue to spawn more guys forever until the spawner is removed, which should
+//	happen from a trigger when the player gets too close.
+//-------------------------------------------------------------------------------------------------
+void IdryllDeath_shieldpeeps()
+{
+	float randomidryllspawnflt;
+	entity randomidryllspawnent;
+	
+	numIdryllDead++;
+	
+	if( ! doesEntityExist( $spawner3 ) ) // if 3 is gone, then 4 and 5 are too
+		return;
+	
+	wait( 2 );
+	randomidryllspawnflt = randomint( 3 ) + 3;
+	randomidryllspawnent = getentity( "spawner" + randomidryllspawnflt );
+	spawnIdryll( randomidryllspawnent, "shieldpeeps" );
+}
+
+
+//===================================================================================================================================================
+//===================================================================================================================================================
+
+
+//-----------------------------------
+void inaccessible_sound()
+{
+	entity e;
+	e = getcurrententity();
+	if(doesEntityExist(e))
+		e.playsound( "sound/doors/door_locked.wav", 1, .7, 90 );
+}
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed("m6-exterior");
+}

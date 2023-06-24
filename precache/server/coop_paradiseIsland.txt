@@ -1,0 +1,32 @@
+cache models/weapons/staticmodel-attrex-rifle.tik
+cache models/weapons/staticmodel-fieldassaultrifle.tik
+cache models/weapons/staticmodel-rom-disruptor.tik
+cache models/weapons/staticmodel-sniperrifle.tik
+
+cache models/char/romulan-m11-rebel-sniper-f.tik
+cache models/char/m8-drull_leviathan.tik
+cache models/char/alien-type1c-basher.tik
+cache models/char/alien-type3-quad.tik
+cache models/char/alien-type3-quad-elite.tik
+cache models/char/alien-type4-predator.tik
+cache models/char/alien-type5-commander.tik
+cache models/char/alien-type6-crab.tik
+
+cache models/efx/metal_debris-med.tik
+cache models/efx/metal_debris-lg1.tik
+cache models/efx/metal_container-med.tik
+cache models/efx/metal_pipe.tik
+cache models/efx/glass_debris-lg.tik
+
+cache models/vehicle/e-shuttle-int.tik
+cache models/vehicle/d-shuttle-ext.tik
+cache models/item/gs_excelsior1.tik
+cache models/enviro/drull2_tree3.tik
+cache models/enviro/drull2_tree5.tik
+cache models/enviro/drull1_plant2.tik
+cache models/plant/drull_plant-small.tik
+cache models/plant/drull_plant-vines.tik
+cache models/plant/sfa_diff_plant.tik
+cache models/fx/fx-lightcorona-red-blink.tik
+cache models/vehicle/e-shuttle-door.tik
+cache models/sky/swampneb1-stardome.tik

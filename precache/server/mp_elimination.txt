@@ -1,0 +1,3 @@
+cache localization/sound/dialog/dm/comp_pyelim.mp3
+cache localization/sound/dialog/dm/comp_btelim.mp3
+cache localization/sound/dialog/dm/comp_rtelim.mp3

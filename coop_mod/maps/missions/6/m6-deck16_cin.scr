@@ -1,0 +1,387 @@
+//--- cinematic functions
+void cinematicBombPlant();
+void cinematicBombPlant_Skipthread();
+void cinematicBombPlant_Go();
+
+void cinematicWarpCoreEject();
+void cinematicWarpCoreEject_Skipthread();
+void cinematicWarpCoreEject_MoveCore();
+
+void cinematicDeath();
+void cinematicDeath_Skipthread();
+
+
+
+//---------------------
+// cinematicBombPlant
+// cinematic of Idryll planting a bomb
+//---------------------
+void cinematicBombPlant()
+{
+	//--- if the warp core is goin' down the pooper, no soup for player!!!
+	if( boolBlowingWarpCore == TRUE )
+	{
+		return;
+	}
+	
+	//--- spawn cinematic cameras
+	spawn( "Camera", "targetname", "cam1" );
+	spawn( "Camera", "targetname", "cam2" );
+
+	//--- start cinematic commands
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.5);
+
+	allowMusicDucking ( 0 );
+	music ( "aux1" );
+	wait( .6 );
+
+	//--- warp the engineers
+	$crewEngineer1.warpTo( "$nodeEngineerRetreat2" );
+	$crewEngineer2.warpTo( "$nodeEngineerRetreat4" );
+	$crewEngineer3.warpTo( "$nodeEngineerRetreat5" );
+
+	cam.load( "m6_Deck16_Bomb_Shot1" );
+	cam.load( "m6_Deck16_Bomb_Shot2" );
+
+	wait( .1 );
+
+	//------------------------------------------------
+	//--- shot1 - establishing shot coming up on the idryll
+
+	//--- set the camera on the path
+	globalCoop_cin_fov($cam1, 70 );
+	globalCoop_cin_follow($cam1, $m6_Deck16_Bomb_Shot1 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+
+	wait( .1 );
+
+	//--- set the skipthread
+	skipthread( "cinematicBombPlant_Skipthread" );
+
+	//--- fade in
+	globalCoop_main_camFadeIn(.5);
+	wait( 4 );
+
+	//--- zoom the camera
+	thread globalCineFX_CameraFOVLerp( $cam1, 70, 50, 3, "rampupdown" );
+
+	//--- start the guys planting the bomb
+	thread cinematicBombPlant_Go();
+	wait( 8 );
+
+	//------------------------------------------------
+	//--- shot2 - the explosion
+
+	//--- set the camera on the path
+	globalCoop_cin_fov($cam2, 80 );
+	globalCoop_cin_follow($cam2, $m6_Deck16_Bomb_Shot2 );
+	globalCoop_cin_cut($cam2);
+
+	globalCoop_cin_cuecamera( $cam2 );
+	wait( 3 );
+
+	thread cinematicBombPlant_Skipthread();
+}
+
+//---------------------
+// cinematicBombPlant_Skipthread
+// cinematic of Idryll planting a bomb
+//---------------------
+void cinematicBombPlant_Skipthread()
+{
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematicBombPlant" );
+	killthread( "cinematicBombPlant_Go" );
+
+	//fade to black
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	//--- clean up the cinematic
+	globalCoop_level_remove($idryllBomberA);
+	globalCoop_level_remove($idryllBomberB);
+
+	//--- hide the bomb
+	$bomb14.hide();
+
+	//--- trigger the damage object if it hasn't been already
+	if( doesEntityExist( $tubeCenter3Bottom ) )
+	{
+    	//--- trigger the damage object
+    	triggerEntity( $tubeCenter3Bottom );
+	}
+
+	globalCoop_cin_end();
+	wait( .2 );
+
+	//--- fade in
+	globalCoop_main_camFadeIn(.5);
+	wait( .75 );
+	allowMusicDucking ( 1 );
+	music ( "normal" );
+
+
+	//--- remove the camera paths
+	globalCineFX_CameraPathRemove( $m6_Deck16_Bomb_Shot1 );
+	globalCineFX_CameraPathRemove( $m6_Deck16_Bomb_Shot2 );
+
+	thread puzzleWarpCore_IdryllStart();
+}
+
+//---------------------
+// cinematicBombPlant_Skipthread
+// cinematic of Idryll planting a bomb
+//---------------------
+void cinematicBombPlant_Go()
+{
+	triggerEntity( $spawnBomberA_Zone4 );
+	triggerEntity( $spawnBomberB_Zone4 );
+	wait( .1 );
+
+	//--- setup run the bombers over
+	$idryllBomberA.ai_off();
+	$idryllBomberA.immortal ( 1 );	//prevent grenades shot before the cinematic starts from killing them
+	$idryllBomberA.removeActorWeapon( "IdryllM6RebelPistolShield" );
+
+	$idryllBomberB.ai_off();
+	$idryllBomberB.immortal ( 1 );
+	$idryllBomberB.removeActorWeapon( "IdryllM6RebelPistolShield" );
+
+	$idryllBomberA.walkTo( "$nodeBombA14", "run" );
+	$idryllBomberB.walkTo( "$nodeBombB14", "run" );
+	waitFor( $idryllBomberB );
+
+	//--- plant the bomb
+	$idryllBomberA.anim( "rebel_plant" );
+	waitForAnimation( $idryllBomberA, "rebel_plant" );
+
+	//--- show the bomb
+	$bomb14.show();
+
+	//--- arm the bomb
+	$idryllBomberA.anim( "rebel_set" );
+	$idryllBomberB.anim( "rebel_set" );
+	wait( 4 );
+
+	//--- beam out the bombers
+	thread bomberSpawnWave_BeamOutBomber( $idryllBomberA );
+	thread bomberSpawnWave_BeamOutBomber( $idryllBomberB );
+	wait( 1 );
+
+	$idryllBomberA.immortal ( 0 );
+	$idryllBomberB.immortal ( 0 );
+
+	//--- position the bomb explosion spawner
+	$spawnBombExplosion.origin( $bomb14.getOrigin() );
+	$spawnBombExplosion.angles( $bomb14.getAngles() );
+	wait( .1 );
+
+	//--- spawn the explosion
+	triggerEntity( $spawnBombExplosion );
+
+	//--- hide the bomb
+	$bomb14.hide();
+
+	//--- trigger the damage object
+	triggerEntity( $tubeCenter3Bottom );
+
+	//--- spawn an earthquake
+	$tubeCenter3Bottom.earthquake( 1, 1.5 );
+}
+
+//---------------------
+// cinematicWarpCoreEject
+// cinematic of the warp core ejecting
+//---------------------
+void cinematicWarpCoreEject()
+{
+	//--- spawn cinematic cameras
+	if(!doesEntityExist($cam1))
+		spawn( "Camera", "targetname", "cam1" );
+	if(!doesEntityExist($cam2))
+		spawn( "Camera", "targetname", "cam2" );
+
+	//--- start cinematic commands
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	cam.load( "m6_Deck16_Shot1" );
+	wait( .2 );
+
+	//--- set the camera on the path
+	globalCoop_cin_fov($cam1, 60 );
+	globalCoop_cin_follow($cam1, $m6_Deck16_Shot1 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( .25 );
+	//--- change the music
+	forcemusic( "aux3" );
+    allowMusicDucking( 0 );
+	//--- set the skipthread
+	skipthread( "cinematicWarpCoreEject_Skipthread" );
+
+	//--- fade in
+	globalCoop_main_camFadeIn(1);
+	wait( 2.5 );
+
+	//--- eject the core
+	thread cinematicWarpCoreEject_MoveCore();
+	wait( 7.5 );
+
+	//--- call the end routines
+	thread cinematicWarpCoreEject_Skipthread();
+}
+
+
+//---------------------
+// cinematicWarpCoreEject_Skipthread
+// cinematic of the warp core ejecting skipthread
+//---------------------
+void cinematicWarpCoreEject_Skipthread()
+{
+	//kill the cinematic
+	$rightWarpcoreSpeaker.stoploopsound ();
+	$leftWarpcoreSpeaker.stoploopsound ();
+	$centerWarpcoreSpeaker.stoploopsound ();
+
+	music ( "normal" );
+
+	skipthread( "null" );
+	killthread( "cinematicWarpCoreEject" );
+
+	//fade to black
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	globalCoop_cin_end();
+	wait( .2 );
+
+	//--- fade in
+	globalCoop_main_camFadeIn(.5);
+	wait( 1 );
+
+    //--- end the sequence
+    puzzleWarpCore_Done();
+}
+
+
+//---------------------
+// move the warp core
+void cinematicWarpCoreEject_MoveCore()
+{
+	$cinematicWarpCore.angles( '0 0 0' );
+	$cinematicWarpCore_Origin1.angles( '0 0 0' );
+	$cinematicWarpCore_Origin2.angles( '0 0 0' );
+	wait( .1 );
+
+	$cinematicWarpCore.bind( $cinematicWarpCore_Origin1 );
+	$cinematicWarpCore_Origin1.bind( $cinematicWarpCore_Origin2 );
+	wait( .1 );
+
+	$cinematicWarpCore_Origin2.origin( vecCinematicWarpCoreOrigin );
+
+	$cinematicWarpCore_Origin2.time( 10 );
+	$cinematicWarpCore_Origin2.moveDown( 486 );
+	$cinematicWarpCore_Origin2.moveNorth( 206 );
+	$cinematicWarpCore_Origin2.moveEast( 256 );
+
+	$cinematicWarpCore_Origin1.rotateX( 45 );
+	$cinematicWarpCore_Origin1.rotateY( 60 );
+	//$cinematicWarpCore_Origin1.rotateZ( 30 );
+	waitFor( $cinematicWarpCore_Origin2 );
+}
+
+//---------------------
+// cinematicDeath
+// death cinematic of the enterprise blowing up
+//---------------------
+void cinematicDeath()
+{
+	killthread  ( "cinematicBombPlant" );
+	killthread  ( "cinematicBombPlant_Go" );
+	killthread  ( "cinematicBombPlant_Skipthread" );
+
+	if( boolCinematicDeathStarted == TRUE )
+	{
+		return;
+	}
+
+	boolCinematicDeathStarted = TRUE;
+
+	//--- spawn cinematic cameras
+	if(!doesEntityExist($cam1))
+		spawn( "Camera", "targetname", "cam1" );
+	if(!doesEntityExist($cam2))
+		spawn( "Camera", "targetname", "cam2" );
+	
+	//--- start cinematic commands
+	globalCoop_cin_start();
+	coop_bool_cameraFadedOut=1;
+
+	//--- load camera paths
+	cam.load( "m6_Deck16_Death_Shot1" );
+	wait( .1 );
+
+	//--- hide the cinematic warp core
+	$cinematicWarpCore.hide();
+
+	//--- set the camera on the path
+	globalCoop_cin_fov($cam1, 40 );
+	globalCoop_cin_follow($cam1, $m6_Deck16_Death_Shot1 );
+	globalCoop_cin_cut($cam1);
+
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( .1 );
+
+	//--- change the music
+	forcemusic( "aux2" );
+    allowMusicDucking( 0 );
+
+	//--- fade in
+	cam_fadeIn( 1, 1, 1, 1, 1, 0 );
+
+	//--- set the skipthread
+	globalCoop_cin_skipThread( "cinematicDeath_Skipthread" );
+
+	thread globalCineFX_CameraFOVLerp( $cam1, 40, 80, 10, "rampupdown" );
+	wait( 4 );
+
+	//--- trigger the explosion
+	triggerEntity( $spawnExplosionEnterprise );
+	wait( .25 );
+
+	//--- screen shake
+	$enterprise.earthquake( .25, 1 );
+	$enterprise.forcealpha( 1 );
+	$enterpriseDamage.forcealpha( 1 );
+	$enterprise.fade( 1 );
+	$enterpriseDamage.fade( 1 );
+	wait( .5 );
+
+	//--- fade in
+	cam_fadeOut( 2, 1, 1, 1, 1, 0 );
+	
+	$enterprise.hide();
+	wait( 3.25 );
+
+	//--- fail the mission
+	thread cinematicDeath_Skipthread();
+}
+
+
+//---------------------
+// cinematicDeath_Skipthread
+// skipthread for cinematic
+//---------------------
+void cinematicDeath_Skipthread()
+{
+	if(cvar_bool_multiplayer){//multiplayer
+		thread globalCoop_mission_fail();
+		return;
+	}
+	$player.missionFailed();
+}

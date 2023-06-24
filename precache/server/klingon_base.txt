@@ -1,0 +1,6 @@
+// cache models/weapons/worldmodel-phaser-STX.tik
+// cache models/weapons/worldmodel-tricorder-STX.tik
+// cache models/weapons/worldmodel-fieldassaultrifle.tik
+// cache models/weapons/worldmodel-burstrifle.tik
+// cache models/weapons/worldmodel-grenadelauncher.tik
+// cache models/weapons/worldmodel-photon.tik

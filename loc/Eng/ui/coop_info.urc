@@ -1,0 +1,312 @@
+menu "coop_info" 300 480 NONE 1
+bgcolor 0 0 0 0
+align right
+noresize
+depth 0.4
+gamefocus
+direction from_right 0.4
+//fadein 0.5
+fadedelay 12
+
+resource 
+Widget
+{
+    rect 0 300 300 180
+    bgcolor 0 0 0 0.85
+    borderstyle "NONE"
+}
+resource 
+Label
+{
+    name "coop_infoTitle"
+	title "SERVER INFORMATION"
+    rect 0 303 300 24
+    fgcolor 			0.80 0.20 0.20 1.00
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    
+   	font serpentinemedium-14
+	horizontaljustify center
+	verticaljustify center
+	fadedelay 12
+	hidecommand "ui_removehud coop_info"
+}
+resource 
+Label
+{
+    name "coop_infoSkill"
+	title "Difficulty"
+    rect 0 330 300 34
+    fgcolor 			0.80 0.20 0.20 1.00
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    
+   	font serpentinemedium-12
+	horizontaljustify left
+	verticaljustify center
+}
+resource 
+Label
+{
+    //name "coop_infoSkillValue"
+	title "$$Easy$$"
+    rect 0 330 300 34
+	fgcolor 			1 1 1 0.75
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    
+   	font serpentinemedium-12
+	horizontaljustify right
+	verticaljustify center
+	cvarvisibility coop_iSkill 0 ==
+}
+resource 
+Label
+{
+    //name "coop_infoSkillValue"
+	title "$$Normal$$"
+    rect 0 330 300 34
+	fgcolor 			1 1 1 0.75
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    
+   	font serpentinemedium-12
+	horizontaljustify right
+	verticaljustify center
+	cvarvisibility coop_iSkill 1 ==
+}
+resource 
+Label
+{
+    //name "coop_infoSkillValue"
+	title "$$Hard$$"
+    rect 0 330 300 34
+	fgcolor 			1 1 1 0.75
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    
+   	font serpentinemedium-12
+	horizontaljustify right
+	verticaljustify center
+	cvarvisibility coop_iSkill 2 ==
+}
+resource 
+Label
+{
+    //name "coop_infoSkillValue"
+	title "$$VeryHard$$"
+    rect 0 330 300 34
+	fgcolor 			1 1 1 0.75
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    
+   	font serpentinemedium-12
+	horizontaljustify right
+	verticaljustify center
+	cvarvisibility coop_iSkill 3 ==
+}
+resource 
+Label
+{
+    name "coop_infoClass"
+	title "Allow Player Speciality"
+    rect 0 350 300 34
+    fgcolor 			0.80 0.20 0.20 1.00
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    
+   	font serpentinemedium-12
+	horizontaljustify left
+	verticaljustify center
+}
+resource 
+Label
+{
+    //name "coop_infoClassValue"
+	title "$$Yes$$"
+    rect 0 350 300 34
+	fgcolor 			1 1 1 0.75
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    
+   	font serpentinemedium-12
+	horizontaljustify right
+	verticaljustify center
+	cvarvisibility coop_iDisClass 0 ==
+}
+resource 
+Label
+{
+    //name "coop_infoClassValue"
+	title "$$No$$"
+    rect 0 350 300 34
+	fgcolor 			1 1 1 0.75
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    
+   	font serpentinemedium-12
+	horizontaljustify right
+	verticaljustify center
+	cvarvisibility coop_iDisClass 1 ==
+}
+resource 
+Label
+{
+    name "coop_infoTech"
+	title "Only Technician Modulates"
+    rect 0 370 300 34
+    fgcolor 			0.80 0.20 0.20 1.00
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    
+   	font serpentinemedium-12
+	horizontaljustify left
+	verticaljustify center
+}
+resource 
+Label
+{
+    //name "coop_infoTechValue"
+	title "$$Yes$$"
+    rect 0 370 300 34
+	fgcolor 			1 1 1 0.75
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    
+   	font serpentinemedium-12
+	horizontaljustify right
+	verticaljustify center
+	cvarvisibility coop_iTechOnly 1 ==
+}
+resource 
+Label
+{
+    //name "coop_infoTechValue"
+	title "$$No$$"
+    rect 0 370 300 34
+	fgcolor 			1 1 1 0.75
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    
+   	font serpentinemedium-12
+	horizontaljustify right
+	verticaljustify center
+	cvarvisibility coop_iTechOnly 0 ==
+}
+resource 
+Label
+{
+    name "coop_infoTerminals"
+	title "Health/Energy Terminals"
+    rect 0 390 300 34
+    fgcolor 			0.80 0.20 0.20 1.00
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    
+   	font serpentinemedium-12
+	horizontaljustify left
+	verticaljustify center
+}
+resource 
+Label
+{
+    //name "coop_infoTerminalsValue"
+	title "$$Yes$$"
+    rect 0 390 300 34
+	fgcolor 			1 1 1 0.75
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    
+   	font serpentinemedium-12
+	horizontaljustify right
+	verticaljustify center
+	cvarvisibility coop_iDisDisp 0 ==
+}
+resource 
+Label
+{
+    //name "coop_infoTerminalsValue"
+	title "$$No$$"
+    rect 0 390 300 34
+	fgcolor 			1 1 1 0.75
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    
+   	font serpentinemedium-12
+	horizontaljustify right
+	verticaljustify center
+	cvarvisibility coop_iDisDisp 1 ==
+}
+resource 
+Label
+{
+    name "coop_infoSpeed"
+	title "$$PlayerSpeed$$"
+    rect 0 410 300 34
+    fgcolor 			0.80 0.20 0.20 1.00
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    
+   	font serpentinemedium-12
+	horizontaljustify left
+	verticaljustify center
+}
+resource 
+Label
+{
+    name "coop_infoSpeedValue"
+	title ""
+    rect 0 410 300 34
+	fgcolor 			1 1 1 0.75
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    
+   	font serpentinemedium-12
+	horizontaljustify right
+	verticaljustify center
+}
+resource 
+Label
+{
+    name "coop_infoFireMove"
+	title "Move-Firing Modificator"
+    rect 0 430 300 34
+    fgcolor 			0.80 0.20 0.20 1.00
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    
+   	font serpentinemedium-12
+	horizontaljustify left
+	verticaljustify center
+}
+resource 
+Label
+{
+    name "coop_infoFireMoveValue"
+	title ""
+    rect 0 430 300 34
+	fgcolor 			1 1 1 0.75
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    
+   	font serpentinemedium-12
+	horizontaljustify right
+	verticaljustify center
+}
+resource 
+Label
+{
+    name "coop_infoUse"
+	title "Change at: Coop Objectives->Menu"
+    rect 0 455 300 34
+	//fgcolor 			1 1 1 0.75
+	fgcolor 			0 1 1 0.75
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+    
+   	font serpentinemedium-10
+	horizontaljustify center
+	verticaljustify center
+}
+end.
+

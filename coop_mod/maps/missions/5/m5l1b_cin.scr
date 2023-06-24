@@ -1,0 +1,255 @@
+void cinematicScoutingParty();
+void cinematicScoutingPartySkipthread();
+void cinematicScoutingPartyEnd();
+void liftDown();
+void liftDownSkipThread();
+
+void cinematicScoutingParty()
+{
+//spawn cam, load paths
+	spawn( "Camera", "targetname", "cam1" );
+	cam.load( "m5l1b_sparty1" );
+	cam.load( "m5l1b_sparty2" );
+	
+	globalCoop_cin_start();
+	
+	//--- Fade Out
+	globalCoop_main_camFadeOut(.5);
+	wait ( .6 );
+	
+	forcemusic ("aux4");
+
+	// --- Setup
+	$scriptmunro.ai_off();
+	$chell.ai_off();
+	$telsia.ai_off();
+	$korban.ai_off();
+
+	wait( .25 );
+
+	$scriptmunro.anim( "idle" );
+	$chell.anim( "idle" );
+	$telsia.anim( "idle" );
+	$korban.anim( "idle" );
+	$scriptmunro.show();
+	$scriptminro.solid();
+
+	wait( .25 );
+	
+	$scriptmunro.origin( '1088 7820 1344' );
+	$chell.origin( '1064 7888 1344' );
+	$telsia.origin( '1054 7764 1344' );
+	$korban.origin( '1160 7712 1344' );
+
+	$scriptmunro.angles( '0 90 0' );
+	$chell.angles( '0 25 0' );
+	$telsia.angles( '0 65 0' );
+	$korban.angles( '0 120 0' );
+	
+	$chell.useactorweapon( "tricorder" );
+	$chell.anim( "tricorder_fire" );
+	
+	$scriptmunro.anim( "fieldassaultrifle_idle" );
+	
+	// --- Que Cams
+	globalCoop_cin_follow($cam1,$m5l1b_sparty1);
+	globalCoop_cin_cut($cam1);
+	wait( .5 );
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( .3 );
+	
+	// --- Skip Thread
+	globalCoop_cin_skipThread( "cinematicScoutingPartySkipthread");
+		
+	//--- Start & Fade in
+	globalCoop_main_camFadeIn(.5);
+	wait( 1.5 );
+	
+	globalCoop_cin_follow($cam1,$m5l1b_sparty2);
+	wait( 6 );
+
+//Chell, any lifesigns?
+	globalCoop_dialog_play($scriptmunro,"m5l1/munro_chellcheck.mp3", 1, 10000, 0 );
+//They’ve been dead for several days.
+	globalCoop_dialog_play($chell,"m5l1/chell_nosigns.mp3", 1, 10000, 0 );
+//I guess we found the Idryll scouting party.
+	globalCoop_dialog_play($telsia,"m5l1/telsia_guesswe.mp3", 1, 10000, 0 );
+
+	//--- End Thread
+	thread cinematicScoutingPartyEnd();
+}
+
+void cinematicScoutingPartySkipthread()
+{
+	//--- kill the cinematicScoutingParty thread
+	skipthread( "Null" );
+	killthread( "cinematicScoutingParty" );
+    forcemusic ("normal");
+	//--- call the ending of the cinematicScoutingParty
+	thread cinematicScoutingPartyEnd();
+}
+
+void cinematicScoutingPartyEnd()
+{
+	//--- fade out and set the level up
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	killAllTalking();
+
+	$chell.useactorweapon( "CompressionRifle" );
+	$chell.anim( "idle" );
+
+	$scriptmunro.origin( '1088 7820 1344' );
+	$chell.origin( '1064 7888 1344' );
+	$telsia.origin( '1054 7764 1344' );
+	$korban.origin( '1160 7712 1344' );
+
+	$scriptmunro.angles( '0 90 0' );
+	$chell.angles( '0 25 0' );
+	$telsia.angles( '0 65 0' );
+	$korban.angles( '0 120 0' );
+
+	$scriptmunro.hide();
+	$scriptminro.notsolid();
+	$player.origin( '1028 7800 1344' );
+	$player.show();
+	$player.solid();
+	forcemusic ("normal");
+
+	globalCoop_cin_end();
+	
+	globalCoop_main_camFadeIn(.5);
+	wait( .5 );
+	
+//Remove path, keep trafic low
+	globalCoop_level_removePath($m5l1b_sparty1);
+	globalCoop_level_removePath($m5l1b_sparty2);
+	
+	//$player.setobjectivecomplete( "FindScouting", 1 );
+	thread globalCoop_objectives_update("complete",2,1);
+
+	$chell.ai_on();
+	$telsia.ai_on();
+	$korban.ai_on();
+	
+	if(cvar_bool_multiplayer){//multiplayer
+	//Set new spawn locations
+		coop_float_spawnAngle1			= 90;
+		coop_float_spawnAngle2			= 90;
+		coop_float_spawnAngle3			= 90;
+		coop_float_spawnAngle4			= 90;
+		coop_float_spawnAngle5			= 90;
+		coop_float_spawnAngle6			= 90;
+		coop_float_spawnAngle7			= 90;
+		coop_float_spawnAngle8			= 90;
+		coop_vector_spawnOrigin1 		= '90 9878 1360';
+		coop_vector_spawnOrigin2 		= '160 9878 1360';
+		coop_vector_spawnOrigin3 		= '230 9878 1360';
+		coop_vector_spawnOrigin4 		= '300 9878 1360';
+		coop_vector_spawnOrigin5 		= '370 9878 1360';
+		coop_vector_spawnOrigin6 		= '440 9878 1360';
+		coop_vector_spawnOrigin7 		= '510 9878 1360';
+		coop_vector_spawnOrigin8 		= '580 9878 1360';
+	//make players respawn exactly here...
+		globalCoop_applaySpawnOriginOnReSpwanOrigin();
+		
+	//Relocate class selection
+		globalCoop_level_warpDroptofloor($coop_class_MedicModel,'70 10770 1400');
+		globalCoop_level_warpDroptofloor($coop_class_HeavyWeaponsModel,'-30 10770 1400');
+		globalCoop_level_warpDroptofloor($coop_class_TechnicianModel,'-130 10770 1400');
+	}
+	wait(3);
+//Allow Bug Spawn Near Chell Door
+	$cityRoofChellProtectSpawn.triggerable();
+//Allow trigger be used to get chell to open the door
+	wait(3);
+	$cityRoofDoor1_trigger.triggerable();
+}
+
+
+void liftDown()
+{
+	$endLiftDoorSW.playsound( "sound/ships/drull/drull-beepaccept.wav", 6, 1, 500 );
+	thread globalCoop_objectives_update("complete",4,1);
+	globalCoop_main_waitForTeam('-1151 15893 140','-420 -420 -200','420 420 600');	
+	
+	//--- Fade Out
+	globalCoop_main_camFadeOut(.5);
+	wait ( .6 );
+	
+	cam.load( "m5l1b_end" );
+	
+	globalCoop_cin_start();
+	
+	forcemusic ("aux4");
+
+	// --- Setup
+	$chell.ai_off();
+	$telsia.ai_off();
+	$korban.ai_off();
+	
+	$scriptmunro.show();
+	$scriptminro.solid();
+
+	$korban.origin( '-1142 15808 152' );
+	$telsia.origin( '-1088 15872 160' );
+	$chell.origin( '-1216 15872 160' );
+	$scriptmunro.origin( '-1162 15928 160' );
+
+	$korban.angles( '0 270 0' );
+	$telsia.angles( '0 270 0' );
+	$chell.angles( '0 270 0' );
+	$scriptmunro.angles( '0 270 0' );
+
+	// --- Cams
+	globalCoop_cin_follow($cam1,$m5l1b_end );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+	globalCoop_cin_cuecamera( $cam1 );
+
+	//$player.setobjectivecomplete( "EnterRuins ", 1 );
+	$arch_waypointRuinEntrance1.missionobjective( 0 );
+
+	wait( .2 );	//--- Start & Fade in
+	globalCoop_main_camFadeIn(.5);
+
+	// --- Skip Thread
+	globalCoop_cin_skipThread( "liftDownSkipThread");
+
+	wait( 1 );
+
+	$endLiftDoorSW.playsound( "sound/environment/machine/mech_move1.wav", 8, 1.5, 1500 );
+	$endLiftDoorSE.playsound( "sound/environment/machine/mech_move1.wav", 8, 1.5, 1500 );
+	thread globalAccelMove_Rotate( $endLiftDoorSW, '0 90 0', 2, "rampupdown", "" );
+	thread globalAccelMove_Rotate( $endLiftDoorSE, '0 -90 0', 2, "rampupdown", "" );
+	
+	wait( 2.1 );
+
+	$endLift.playsound( "sound/environment/machine/lift3.wav", 5, 1.5, 1500 );
+	$endLift.time( 10 );
+	$endLift.moveDown( 2024 );
+	
+	wait( 2 );
+
+	thread liftDownSkipThread();
+}
+
+void liftDownSkipThread()
+{
+	killthread( "liftDown" );
+	globalCoop_level_removePath($m5l1b_end);
+    forcemusic ("normal");
+	wait( .1 );
+
+	globalCoop_main_camFadeOut(.5);
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		globalCoop_cin_end();
+		wait( 1 );
+		thread globalCoop_level_triggerEntity($endLevelTrigger);
+	}else{
+		thread coop_endLevel();
+	}
+}
+

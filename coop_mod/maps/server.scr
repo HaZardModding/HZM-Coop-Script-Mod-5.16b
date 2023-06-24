@@ -1,0 +1,416 @@
+//-----------------------------------------------------------------------------------
+// Script By:	Christian Sebastian Strahl (Chrissstrahl)
+// Created on:	2008.??.??
+// E-Mail:		chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+// CONTAINS SERVER RELATED JOBS
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2012 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+void globalCoop_server_setup()
+//----------------------------------------------------------------------
+// Ensures the mod is proper configured, this is also meant to make singleplayer work correctly
+// FAILSAVE - THIS PROBABLY SAVES YOUR ARSE WHILE HOSTING AND YOU WON'T EVEN NOTICE IT!
+//----------------------------------------------------------------------
+{
+	float fMultiuse,fCorrect;
+	fMultiuse = coop_float_build;
+
+//Enforce some misc settings that are required
+	stuffCMD("exec coop_mod/cfg/server/enforcer.cfg\n");
+	
+//linux servers running in singleplayer mode	
+	if(coop_vector_linuxForcerebootTransporting_x == 1 && getCvarInt("g_gametype") != 1)
+	{
+		fCorrect=1;
+		stuffCMD("exec coop_mod/cfg/server/fixsettings.cfg\n");
+	}
+//Check if server has been updates and remembers the update
+	if(cvar_bool_multiplayer)
+	{
+		if(""+fMultiuse != getCvar("coop_ver"))
+		{
+			fCorrect=1;
+			stuffCMD("seta coop_ver "+coop_float_build+"\n");
+			stuffCMD("exec coop_mod/cfg/server/setup.cfg\n");
+		}
+		else
+		{
+			//fix:
+			//different filececksum in base will disconnect
+			//Game running in SOLOMATCH
+			if(	getCvarInt("sv_pure") == 1					||
+				getCvarInt("g_gametype") != 1				||
+				getCvarInt("mp_modifier_instantKill") == 1	)
+			{
+				fCorrect=1;
+				stuffCMD("exec coop_mod/cfg/server/fixsettings.cfg\n");
+			}
+			else if(cvar_integer_sv_maxClients < 2)
+			{
+				fCorrect = 1;
+				stuffCMD("set sv_maxclients 4\n");			
+			}
+		}
+	}
+//LOAD A MAP TO HAVE THE SETTINGS TAKE EFFECT///////////////////////////////////
+	if(fCorrect)
+	{
+		stuffCmd("seta coop_lvlL 0\n");
+		globalCoop_main_waitAFrame();
+		globalCoop_server_loadGivenMapNow(cvar_string_mapname);
+	}
+//do not turn on collision in multiplayer, issue is that players can't hit each other
+//on a deathmatch that well anymore!!!
+}
+
+void globalCoop_server_settingsChanged()
+//----------------------------------------------------------------------
+// notify the mod that certain server/game settings changed
+//----------------------------------------------------------------------
+{
+	if(!coop_bool_settingsChanged)
+	{
+		globalCoop_huds_textOrHudAll("coop_info","");
+		coop_bool_settingsChanged=1;
+	//wait for the settings to be written into CVARS
+		globalCoop_main_waitAFrame();
+	//grab the latest values and update
+		cvar_bool_coop_techOnly		= getCvarInt("coop_techOnly");
+		cvar_bool_coop_disClass		= getCvarInt("coop_disClass");
+		cvar_integer_coop_skill		= getCvarInt("coop_skill");
+		cvar_float_weapMoveSpeed	= getCvarInt("coop_weapSpeed");
+		cvar_float_maxSpeed			= getCvarInt("coop_maxSpeed");
+		cvar_float_weapMoveSpeed	= (cvar_float_weapMoveSpeed/100);
+		$world.physicsVar("maxspeed",cvar_float_maxSpeed);
+		globalCoop_server_settingsUpdate();
+		globalCoop_main_waitZeroDot5();
+	//allow changes again
+		coop_bool_settingsChanged=0;
+	}
+}
+
+
+void globalCoop_server_settingsUpdate()
+//----------------------------------------------------------------------
+// send updated info to clients
+//----------------------------------------------------------------------
+{
+	globalCoop_player_transmittToAll("seta coop_iSkill "+cvar_integer_coop_skill+"\nseta coop_iDisClass "+cvar_bool_coop_disClass);
+	globalCoop_player_transmittToAll("seta coop_iTechOnly "+cvar_bool_coop_techOnly+"\nseta coop_iDisDisp "+getCvarInt("coop_disDisp"));
+	globalCoop_player_transmittToAll("globalwidgetcommand coop_infoFireMoveValue title "+cvar_float_weapMoveSpeed+"\nglobalwidgetcommand coop_infoSpeedValue title "+cvar_float_maxSpeed);
+}
+
+
+void globalCoop_server_precacheSingleplayer()
+//----------------------------------------------------------------------
+// Precaches Animations,Models and Sounds for the current level
+// MUST BE EXECUTED AS VERY FIRST FUNCTION!
+//----------------------------------------------------------------------
+{
+	if(getcvarint("g_gametype") != 1)//sp+solo
+	{
+		cam.load("cache_"+getcvar("mapname"));
+	}
+}
+
+void globalCoop_server_soundSingleplayer()
+//----------------------------------------------------------------------
+// Loads sound entities for singleplayer
+// These have been removed since they cause to much traffic for multiplayer
+//----------------------------------------------------------------------
+{
+	if(getcvarint("g_gametype") != 1)//sp+solo
+	{
+		cam.load("sound_"+getcvar("mapname"));
+	}
+}
+
+void globalCoop_server_loadGivenMapNow(string sMap)
+//----------------------------------------------------------------------
+// Reboots the server and forces all players to reconnect
+//----------------------------------------------------------------------
+{
+//if we have a delay here, the game gets stuck in the loading screen when firing up a server with sv_maxclinets < 1 while trying tio correct
+//ENSURE WE LOAD ANY MAP
+	if(sMap == ""){
+		sMap = "zoo1";
+	}
+	string sMapCommand,sMapCommand2;
+	sMapCommand = "map ";//can not set on declaration, game bug listen sv with 2 or more players!
+	if(getCvarInt("cheats"))
+	{
+		sMapCommand = "devmap ";
+	}
+	stuffCMD("set g_gametype "+cvar_bool_multiplayer+"\n"+sMapCommand+sMap+"\n");
+}
+
+void globalCoop_server_restartDelayed()
+//----------------------------------------------------------------------
+// Restarts the map with a delay
+//----------------------------------------------------------------------
+{
+	if(getLevelTime() > 240)//240
+	{
+		wait(10);
+		if(globalCoop_server_reboot() != 1 || cvar_float_dedicated < 1)
+		{
+			if(cvar_string_mapname != "zoo1")
+			{
+				stuffCMD("restart\n");
+			}
+		}
+	}
+}
+
+void globalCoop_server_applayCorrectSettings()
+//----------------------------------------------------------------------
+// Applays the proper settings to the server
+// This is the absolute NEWBIE FAILSAVE!
+// THIS PROBABLY SAVES YOUR ARSE WHILE HOSTING AND YOU WON'T EVEN KNOW IT!
+//----------------------------------------------------------------------
+{
+	stuffCMD("g_aimviewangles 1\n");//allow 3rd person fire to hit
+	float fCorrect;
+	if(	coop_vector_linuxForcerebootTransporting_x == 1 && getCvarInt("g_gametype") != 1 )
+	{
+		fCorrect = 1;
+		stuffCmd("g_gametype 1\n");
+	}
+//MULTIPLAYER///////////////////////////////////////////////////////////////////
+	else if(cvar_bool_multiplayer == 1)
+	{
+//THIS MOD CAN NOT WORK IN DESINTEGRATION, THIS TAKES THE AIs WEAPONs away!!!
+//SOLOMATCH - Coop ain't running on solomatch dude
+		if(getCvarInt("mp_modifier_instantKill") == 1 || getCvarInt("g_gametype") == 2)
+		{
+			fCorrect = 1;
+			stuffCMD("set mp_modifier_instantKill 0\n");
+			stuffCmd("set g_gametype 1\n");
+		}
+
+//SV_MAXCLIENTS
+		else if(cvar_integer_sv_maxClients < 2)
+		{
+			fCorrect = 1;
+			stuffCMD("set sv_maxclients 4\n");
+		}
+
+	}
+//LOAD A MAP TO HAVE THE SETTINGS TAKE EFFECT///////////////////////////////////
+	if(fCorrect)
+	{
+		stuffCmd("seta coop_lvlL 0\n");
+		globalCoop_main_waitAFrame();
+		globalCoop_server_loadGivenMapNow(cvar_string_mapname);
+	}
+}
+
+float globalCoop_server_reboot()
+//----------------------------------------------------------------------
+// CHECK AND CALL SERVER REBOOT IF NEEDED
+//----------------------------------------------------------------------
+{
+float fReboot;
+	if(	globalCoop_server_checkRebootByMap(cvar_string_mapname) >= 5 || //loadad maps limit hit
+		coop_vector_linuxForcerebootTransporting_y == 1 ||//forceReboot
+		cvar_float_dedicated < 1)//flushtikis (!will not reboot!)
+	{
+		fReboot=1;
+		thread globalCoop_server_rebootPerform();
+	}
+	return fReboot;
+}
+
+void globalCoop_server_rebootPerform()
+//----------------------------------------------------------------------
+// Reboots the server and forces all players to reconnect
+//----------------------------------------------------------------------
+{
+//Is this a Multiplayer Game
+	if(cvar_bool_multiplayer)
+	{
+//CHECK FOR SERVER TYPE
+		if(cvar_float_dedicated >= 1)
+		{
+//Check if we are allowed to reboot
+			if(getCvarInt("coop_disReboot") != 1)
+			{
+//have letterbox gone away, or else players will not see HUD text!
+				globalCoop_cin_clearletterbox();
+//SIGNAL THE MOD THAT A SERVER REBOT IS PERFORMED
+				coop_vector_svnextmaporrebootDoloadnextmimapWaitingForTeam_x=1;
+//PERFORM REBOOT NOW
+				globalCoop_main_printTimeAndString("============= REBOOTING SERVER =============");
+//INFORM PLAYERS ABOUT THE REBOOT
+//AwaitingConnection - Warten auf Verbindung
+					globalCoop_main_countDown("^5$$ServerInfo$$: ^2$$AwaitingConnection$$^3 - $$ConnectToServer$$ in:^5 ",4);
+//IF LEVEL IS NOT COMPLETE; LOAD CURRENT MAP ON REBOOT,
+//OTHERWISE DO NOT OVERWRITE WHAT HAS BEEN SAVED IN MISSIONCOMPLETE THREADS
+				if(!coop_bool_nextMapIsSet)
+				{
+					stuffCMD("seta coop_sv_startcmd \"map "+cvar_string_mapname+"\"\n");
+				}
+///THIS IS A MAGIC CODE PASSAGE! (MACIG=never ever question or alter it!) ///
+//KEEP PRINT MSG, IT IS THE ONYL WAY TO SYNC WITH CONSOLE
+				print("SET: seta coop_svRebooted 1; & seta coop_lvlL 0;\n");//do not delte!!!->scny!!!!
+				stuffCMD("seta coop_svRebooted 1\nseta coop_lvlL 0\n");
+//TRIGGER LEVEL END TRIGGER, AVOIDS THE disconnect SYMBOL and sometimes the Server has Quit message
+//I don't think we need this - deactivated coop-a5-buil8
+				//thread globalCoop_level_triggerLevelChange();
+//FORCE PLAYERS TO RECONNECT
+				thread globalCoop_player_reconnectAll();
+//MAGIC VALUE, DO NOT CHANGE EVER!
+				wait(0.04);//0.04 seams to be the best //0.045 PING RANGE:50-150
+//END OF MAGIC VALUE -> EVEN RUDINI WOUDN'T TOUCH THIS ONE!
+				stuffCMD("quit \n");
+				pause();
+/// End of the Magic ///
+			}
+		}
+		else
+		{
+//RESET IF WE KNOW FOR SURE THAT THI IS A LISTEN SERVER
+			stuffCMD("seta coop_lvlL 0\n");
+		}
+//FLUSH TIKIS ANYWAY, PERFECT FOR LISTEN SERVERS AND SP!!!
+		stuffCMD("flushtikis\n");
+	}
+}
+
+
+
+void globalCoop_server_rebootTimer()
+//----------------------------------------------------------------------
+// Reboots the server if the level time is up
+//----------------------------------------------------------------------
+{	
+	float fWaitTime;
+	fWaitTime = getCvarInt("mp_timelimit");
+	if(fWaitTime <= 0 )
+	{
+		fWaitTime = 60;
+	}
+	stuffCMD("set mp_timeLimit "+fWaitTime+" \n");
+	fWaitTime = ((fWaitTime * 60) - getLevelTime() );
+	wait(fWaitTime);//was plus -4
+	thread globalCoop_main_globalMessage("^3$$TimeRanOut$$");
+//END LEVEL
+	globalCoop_level_endProcedur();
+//while in cinematic or in a event which leads to the level end, this variable is set to allow next map load instad of server reloading current map
+	if(coop_vector_svnextmaporrebootDoloadnextmimapWaitingForTeam_y == 1)
+	{
+		globalCoop_level_callReliably("coop_endLevel");
+		wait(10);
+	}
+//Fail Mission
+	globalCoop_mission_failWithReason("TimeRanOut");
+//add server loading hud
+	globalCoop_huds_AddAll("coop_serverLoading");
+}
+
+
+void globalCoop_server_checkAllMaps()
+//----------------------------------------------------------------------
+// TEST EVERY SINGLE MAP IF IT DOES NOT CHRASH! START WITH THE MAP 'secret1'
+//----------------------------------------------------------------------
+{
+	if(cvar_bool_coop_developer){
+		if(getCvarInt("coop_diag") == 1)
+		{
+			float fTime=10;
+			if(cvar_float_dedicated < 1)
+			{
+				fTime=1;
+			}
+			globalCoop_main_printTimeAndString("Coop DIAG.: "+cvar_string_mapname+" -> "+coop_string_nextMapToCheck);
+		//set next map to be checked
+			stuffcmd("seta coop_diagM "+coop_string_nextMapToCheck+"\n");
+			globalCoop_main_countDown("^5SERVER^3 IS IN ^5DIAGNOSE-MODE^3, NEXT MAP(^5"+coop_string_nextMapToCheck+"^3) ^5LOADING^3 IN^5::^5 ",fTime);
+			if(coop_string_nextMapToCheck == "secret1")
+			{
+				stuffcmd("seta coop_diag 0\n");
+			}
+			thread globalCoop_mission_completed(coop_string_nextMapToCheck);
+		}
+	}
+}
+
+
+float globalCoop_server_checkRebootByMap(string sMap)
+//----------------------------------------------------------------------
+// Check if the server shall be rebooted
+//----------------------------------------------------------------------
+{
+float	fReboot = 2,
+		fLevelsLoadad;
+//decide when to reboot
+	if(	sMap == "zoo1" || sMap == "credits" || sMap == "ent-deck")
+			fReboot = 0;
+	if(	sMap == "secret1"		||
+		sMap == "secret2"		||
+		sMap == "secret3"		||
+		sMap == "ent-training1" ||
+		sMap == "ent-training2"	||
+		sMap == "ent-training3" ||
+		sMap == "ent-training4"	||
+		sMap == "m5l2a-drull_ruins1")
+			fReboot = 1;
+	if(	sMap == "m3l1a-forever" ||
+		sMap == "m5l1b-drull_ruins2" ||
+		sMap == "m7l1a-attrexian_colony" ||
+		sMap == "m11l1a-drull_ruins3" ||
+		sMap == "coop_paradiseIsland")
+			fReboot = 4;
+	fLevelsLoadad = getCvarInt("coop_lvlL");
+	fReboot += fLevelsLoadad;
+	return fReboot;
+}
+
+
+void globalCoop_server_listenServerControll()
+//----------------------------------------------------------------------
+// IMPORTANT RUTINE TO MANAGE THE COMMAND OVER FLOW ON A LISTEN SERVER
+//----------------------------------------------------------------------
+{
+	if(cvar_bool_multiplayer){
+		if(cvar_float_dedicated < 1){
+			if(doesEntityExist($player)){
+				globalCoop_player_waitForFreeReliableServerCommand($player);
+			}
+			else{
+				entity ePlayer;
+				float fPlayerIdInUse;
+				
+				for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++){
+					globalCoop_main_waitAFrame();
+					ePlayer = getentity("player"+ fPlayerIdInUse);
+					if(doesEntityExist(ePlayer))
+					{
+						globalCoop_player_waitForFreeReliableServerCommand(ePlayer);
+						return;
+					}
+				}
+			}
+		}
+//ELSE JUST WAIT ANOTHER FRAME
+		else{
+			globalCoop_main_waitAFrame();
+		}
+	}else{
+		waitForPlayer();
+		globalCoop_player_waitForFreeReliableServerCommand($player);
+	}
+}
+
+

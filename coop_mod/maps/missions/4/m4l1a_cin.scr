@@ -1,0 +1,557 @@
+void cinematic_introEnterprise();
+void cinematic_introEnterprise_skipthread();
+void cinematic_introMunro();
+void cinematic_introMunro_skipthread();
+void cinematic_introMunro_ended_inizialRest();
+void cinematicArm_WeaponsDude_ArmEnd();
+void cinematicArm_WeaponsDude_Start();
+void attrexian_followStop();
+void attrexian_followStop_skipthread();
+
+
+void cinematic_introEnterprise()
+{
+	$sky.rendereffects( "-skyorigin" );		
+	cam.load ( "coop_m4l1a_spawn1" );
+	
+	globalCoop_cin_start();
+	
+	$entSaucer.origin ( $entBody.getorigin ());
+	$entNacelles.origin ( $entBody.getorigin ());
+	
+	$entSaucer.bind   ( $entOrigin );
+	$entBody.bind     ( $entOrigin );
+	$entNacelles.bind ( $entOrigin );
+
+	$entSkyOrigin.rendereffects ( "+skyorigin" );
+
+	$shuttle.origin ( $shuttleDoor.getorigin () );
+	$shuttle.bind ( $shuttleOrigin );
+	$shuttleDoor.bind ( $shuttleOrigin );
+	
+//--- set music
+	allowMusicDucking( 0 );
+	music ("aux1");
+	
+	globalCoop_main_wait1DotZero();
+	
+	globalCoop_cin_follow($entIntroCam, $m4Intro_Camera1 );
+	globalCoop_cin_fov($entIntroCam, 70 );
+	globalCoop_cin_cut($entIntroCam);
+	globalCoop_cin_cuecamera( $entIntroCam );
+
+	$shuttleOrigin.followpath ( $m4Intro_ShuttlePath1 );
+	globalCoop_main_wait1DotZero();
+	globalCoop_main_camFadeIn(1);
+	
+	stuffcmd ( "locationprint 0 70 \"$$M4Stardate$$\" 10.0\n" );
+	
+	globalCoop_cin_skipThread( "cinematic_introEnterprise_skipthread" );
+	wait ( 5 );
+	
+	globalCoop_cin_follow($entIntroCam2, $m4Intro_Camera2 );
+	globalCoop_cin_fov($entIntroCam2, 60 );
+	globalCoop_cin_cut($entIntroCam2);
+	globalCoop_main_wait2DotZero();
+	globalCoop_cin_cuecamera( $entIntroCam2 );
+	wait ( 11.50 );
+	
+	$shuttleOrigin.followpath ( $m4Intro_ShuttlePath2 );
+	wait ( 5.5 );
+	
+	thread cinematic_introEnterprise_skipthread();
+}
+
+void cinematic_introEnterprise_skipthread()
+{
+	skipthread("null");
+	killthread("cinematic_introEnterprise");
+	stuffcmd ( "locationprint 0 70 \"\" 10.0\n" );
+	
+	
+	
+	globalCoop_main_camFadeOut(1);
+	globalCoop_main_wait1DotZero();	
+	$entSkyOrigin.rendereffects ( "-skyorigin" );
+	
+//remove cam paths, to reduce the entity count, avoid enties exceeding the limits
+	globalCoop_level_removePath($m4Intro_ShuttlePath1);
+	globalCoop_level_removePath($m4Intro_ShuttlePath2);
+	globalCoop_level_removePath($m4Intro_Camera1);
+	globalCoop_level_removePath($m4Intro_Camera2);
+	
+	thread cinematic_introMunro();
+}
+
+
+void cinematic_introMunro()
+//ENT-E In Space, Shuttle aproacing the Starbase
+{
+	globalCoop_level_triggerEntity($munroSpawner);
+//Rename cameras to reduce entity count, recylce instead of wasting
+	$entIntroCam.targetname("cam1");
+	$entIntroCam2.targetname("cam2");
+
+	cam.load ( "coop_m4l1a_spawn2" );	
+//--- bind the shuttle together
+	$shuttle_ext.bind( $shuttle_origin );
+	$shuttle_int.bind( $shuttle_origin );
+	$shuttle_door.bind( $shuttle_origin );
+	coop_saveStatments_notsolid2($shuttle_ext,$shuttle_int);
+	$shuttle_door.notsolid();
+	
+	globalCoop_main_waitZeroDot5();
+	$munro.ai_off();
+	$munro.hide();
+	
+//--- change the music
+    allowMusicDucking( 0 );
+	music( "aux6" );
+
+//setup sky
+	$sky.rendereffects( "+skyorigin" );
+	
+	globalCoop_cin_follow($cam1, $m4l1a_intro01 );
+	
+//--- fly the shuttle into the hanger
+	$shuttle_origin.playsound( "sound/vehicles/shuttlecraft/shuttle_decelerate.wav", 7 ,1 ,4000 );
+	$shuttle_origin.followpath( $shuttle_path1 );
+	
+//--- start the first shot
+	globalCoop_cin_cuecamera( $cam1 );
+	
+//--- fade in	
+	globalCoop_main_wait1DotZero();
+	globalCoop_main_camFadeIn(1);
+	
+//--- set skipthread
+	globalCoop_cin_skipThread("cinematic_introMunro_skipthread");
+	wait( 7 );
+	
+	globalCoop_main_camFadeOut(.5);
+	globalCoop_main_waitZeroDot5();
+
+//--- start the second shot
+	$munro.show();
+	$munro.useactorweapon( "none" );
+		
+	globalCoop_cin_follow($cam2, $m4l1a_intro02 );
+	globalCoop_cin_cuecamera( $cam2 );
+	globalCoop_main_waitZeroDot5();
+	globalCoop_main_camFadeIn(.5);
+//--- play the shuttle door opening animation
+	$shuttle_door.loopsound( "sound/vehicles/shuttlecraft/shuttle_door_open.wav", 1 ,1024 );
+	globalCoop_actor_animateWaitForAnimation($shuttle_door,"opening");
+	$shuttle_door.anim( "open_idle" );
+
+	$shuttle_door.stoploopsound();
+	$shuttle_door.playsound( "sound/vehicles/shuttlecraft/shuttle_door_openclose_stop.wav", 10 ,1 ,1024 );
+
+	$munro.walkto( "intro_munroNode1" );
+	globalCoop_main_wait2DotZero();
+		
+//--- start the third shot
+	globalCoop_cin_follow($cam1, $m4l1a_intro03 );
+	globalCoop_main_wait1DotZero();
+	globalCoop_cin_cuecamera( $cam1 );
+	waitfor( $munro );
+
+	coop_svstDialog10000($sydney,"m4l1/syd_outthere.mp3");
+	coop_svstWaitZeroDot2Dot25();
+	
+	globalCoop_cin_cuecamera( $cam1 );
+	globalCoop_main_waitZeroDot5();
+		
+	globalCoop_actor_animateWaitForAnimation($munro,"tap_comm");
+	$munro.anim( "idle" );
+	coop_svstDialog10000($munro,"m4l1/munro_reportin.mp3");
+	thread hazardTeamReportInShuttleBay();
+
+//--- start the third shot
+	globalCoop_cin_follow($cam2, $m4l1a_intro04 );
+	$munro.walkto( "intro_munroNode2" );
+	coop_svstWaitZeroDot2Dot25();
+		
+	globalCoop_cin_cuecamera( $cam2 );
+	globalCoop_actor_useWeapon($munro,"FieldAssaultRifle");
+
+//--- start the third shot
+	globalCoop_cin_follow($cam1, $m4l1a_intro05 );
+	$munro.walkto( "intro_munroNode3" );
+	coop_svstWaitZeroDot2Dot25();
+	globalCoop_cin_cuecamera( $cam1 );
+		
+	$shuttle_origin.playsound( "sound/vehicles/shuttlecraft/shuttle_beep2.wav", 10 ,1 ,1024 );
+
+//--- play the shuttle door closing animation
+	$shuttle_door.loopsound( "sound/vehicles/shuttlecraft/shuttle_door_open.wav", 1 ,1024 );
+	globalCoop_actor_animateWaitForAnimation($shuttle_door,"closing");
+	$shuttle_door.anim( "closed" );
+
+	$shuttle_door.stoploopsound();
+	$shuttle_door.playsound( "sound/vehicles/shuttlecraft/shuttle_door_openclose_stop.wav", 10 ,1 ,800 );
+	$shuttle_origin.playsound( "sound/vehicles/shuttlecraft/shuttle_takeoff.wav", 10 ,1 ,1024 );
+
+//--- start the final shot
+	globalCoop_cin_follow($cam1, $m4l1a_intro06 );
+		
+//--- fly the shuttle out of the hanger
+	$shuttle_origin.followpath( $shuttle_path10 );
+	wait( 24 );//wait for dialogs and such
+	thread cinematic_introMunro_skipthread();
+}
+
+//---------------------
+// Intro Cinematic End
+// End the intro cinematic
+//---------------------
+void cinematic_introMunro_skipthread()
+{	
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematic_introMunro" );
+	killthread( "hazardTeamReportInShuttleBay" );
+
+	globalCoop_main_camFadeOut(1);
+	globalCoop_main_wait1DotZero();
+	
+//stop shuttle fly in sound
+	$shuttle_origin.stopSound(7);
+	
+//Move munro
+	$munro.origin( '-4260 8180 -160' );
+	
+// remove the shuttle
+	coop_svstRemoveShuttle();
+
+//remove paths, to reduce the entity count, avoid enties exceeding the limits
+//-A path has multiple entities connected/targeted
+	globalCoop_level_removePath($m4l1a_intro01);
+	globalCoop_level_removePath($m4l1a_intro02);
+	globalCoop_level_removePath($m4l1a_intro03);
+	globalCoop_level_removePath($m4l1a_intro04);
+	globalCoop_level_removePath($m4l1a_intro05);
+	globalCoop_level_removePath($m4l1a_intro06);
+	globalCoop_level_removePath($shuttle_path1);
+	globalCoop_level_removePath($shuttle_path10);
+	
+//Silence!
+	coop_saveStatments_stopDialog2($munro,$chell);
+	coop_saveStatments_stopDialog2($chang,$jurot);
+	coop_saveStatments_stopDialog2($sydney,$player);
+	
+	globalCoop_cin_end();
+	
+//Inizial the rest of the level
+	thread cinematic_introMunro_ended_inizialRest();
+	globalCoop_main_wait1DotZero();
+	
+	globalCoop_main_camFadeIn(1);
+	
+//Only sp, it's to inaccurate for mp, ppl use to kill Avak'stas
+	globalCoop_player_giveAll("models/weapons/worldmodel-FieldAssaultRifle.tik",0);
+	
+//Set Objectives
+	globalCoop_objectives_update("incomplete",1,0);
+	globalCoop_objectives_update("incomplete",2,1);
+	//wait( 6 );
+	thread shuttleBayWaveBattle();	
+}
+
+void cinematic_introMunro_ended_inizialRest()
+{
+	if(cvar_bool_multiplayer){//Multiplayer
+		//spawn Class Selection
+		thread globalCoop_class_setup("HeavyWeapons",'-4173 9760 -510');
+		thread globalCoop_class_setup("Technician",'-4373 9760 -510');
+		thread globalCoop_class_setup("Medic",'-4273 9760 -510');
+	}else{
+		$player.loadobjectives("m4l1a-attrexian_station");
+	}
+	
+// setup dynamic lights
+	thread dynamicLights();
+// setup hallway decompression sequence
+	hallway_decompression_setup();
+	
+// setup cart puzzle
+	cart_setup();
+
+// barricaded attrexian setup
+	attrexian_barricade_setup();
+	
+// shuttlebay wave setup
+	thread shuttleBayWaveBattle_setup();
+	
+// warehouse wave setup
+	warehouseWaveBattle_setup();
+	
+// move busted hallway into position
+ 	$busted_station_smoke2.hide();
+	$busted_station_smoke1.hide();
+	$busted_station_smoke2.bind( $busted_station );
+	$busted_station.time( .01 );
+	$busted_station.moveEast( 384 );
+	
+// setup dynamic lights
+	$world.light_lightstyle( "attrexianMuzzleFlash" , "aaaaaaaaaaaaaaaaaabaaaaaaaaaaaa" , 0 );
+	$world.light_lightstyle( "lightBoomLights" , "zzzzzzzzzzzzzyzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz" , 0 );	
+	$world.light_lightstyle( "coridor_flicker" , "zaaaazzzzaaaazzzzzdadaadamadamadamadamadamzzzaaaazzzzaaaaaazzaadam" , 0 );	
+	
+//Replace the puzzles
+	thread globalCoop_puzzle_replace($cartPuzzle,"cartPuzzle_Solved",30);
+	thread globalCoop_puzzle_replace($steamPuzzle,"steamPuzzle_Solved",5);
+	
+//baricade aliens
+	$guseater1.killthread( "guseaters_death" );
+	$guseater2.killthread( "guseaters_death" );
+	$guseater3.killthread( "guseaters_death" );
+	
+	$avakstas.killthread( "weaponDudeDead" );
+	$attrexian_barricade.anim( "cowerl" );
+	$avakstas.anim( "cower" );
+	
+	$avakstas.setactorflag("cannotuse" , 1.0 ); //Cant +use
+	$attrexian_barricade.setactorflag("cannotuse" , 1.0 ); //Cant +use	
+	
+// bind the elevator together and move it into position
+	$elevatorTrigger.bind( $elevator );
+	$arch_lift.bind( $elevator );
+	coop_svstMoveDown($elevator,-160,.1);
+}
+
+
+
+//---------------------
+// Attrexian Cinematic
+// Munro talks with two attrexians in a hallway
+//---------------------
+//thread globalCoop_main_executeInSp("coop_mod/cfg/maps/m4l1a/WeaponsDude_Start.cfg\n");
+void cinematicArm_WeaponsDude_Start()
+{
+//open secound locker door, for redudant security system visualisation, so it can be closed
+	$locker_door2.open($weapon_dude);
+	
+//--- armature cinematics
+	cinematicArm_WeaponsDude = createCinematic( "m4l1_attrexinfo" );
+	cinematicArm_WeaponsDude.setendthread( "cinematicArm_WeaponsDude_ArmEnd" );
+
+	coop_svstWaitZeroDot2Dot25();
+	//--- fade out
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	//--- starting cinematic commands
+	globalCoop_cin_start();
+	
+	globalCommon_AiDummyHide( $attrexian_barricade );
+	globalCommon_AiDummyHide( $weapon_dude );
+	
+	//--- change the music
+	forcemusic( "aux4" );
+	wait( 1.25 );
+
+	$weapon_dude.stopdialog();
+	
+	//--- start the armature
+	cinematicArm_WeaponsDude.beginCinematic( "m4l1_attrexinfo" );
+	globalCoop_main_waitZeroDot5();
+	
+	//--- fade in
+	//globalCoop_main_camFadeIn(.5);
+	globalCoop_main_waitZeroDot5();
+
+	//--- set the skipthread
+	globalCoop_cin_skipThread( "cinematicArm_WeaponsDude_ArmEnd" );
+}
+
+
+//---------------------
+// Attrexian Cinematic skipthread
+// Munro talks with two attrexians in a hallway
+//---------------------
+void cinematicArm_WeaponsDude_ArmEnd()
+{
+	//kill the cinematic
+	skipthread( "null" );
+
+	//fade to black
+	globalCoop_main_camFadeOut(.5);
+	globalCoop_main_waitZeroDot5();
+
+	//--- end the armature cinematics, FALSE means don't launch the end thread
+	cinematicArm_WeaponsDude.endCinematic( FALSE );
+
+	killthread( "cinematicArm_WeaponsDude_Start" );
+	
+	//--- show the attrexians
+	globalCommon_AiDummy( $attrexian_barricade, "" );
+	globalCommon_AiDummy( $weapon_dude, "" );
+
+	//--- set the player
+	if(!cvar_bool_multiplayer){//If Single Player
+		$player.warp( '-948 7293 65' );
+	//--- lock the dumb door
+		$jimmyjuicer.lock();
+		$jimmyjuicerlight_green.remove();
+		$jimmyjuicerlight_red.show();	
+	//--- make everybody look at each other
+		$player.turnTowardsEntity( $weapon_dude );
+		$attrexian_barricade.turnTowardsEntity( $player );
+		$weapon_dude.turnTowardsEntity( $player );
+	}
+	
+	$weapon_dude.killthread("weaponDudeDead");
+	$weapon_dude.setactorflag("cannotuse" , 0.0 ); //Can +use again
+	$attrexian_barricade.setactorflag("cannotuse" , 0.0 ); //Can +use again
+		
+	//--- release the cinematic
+	globalCoop_cin_end();
+	wait( .75 );
+
+	thread globalCoop_objectives_update("active",5,1);
+	//$player.setobjectiveshow( "HelpAttrexian" , 1 );
+
+	globalCoop_main_camFadeIn(.5);
+	globalCoop_main_waitZeroDot5();
+
+	thread trigger_player_escorts_attrexian();
+}
+
+//---------------------
+// Attrexian Cinematic
+// Munro talks with attrexian in a hallway after going to weapons locker
+//---------------------
+void attrexian_followStop()
+{
+//door to the level end
+	coop_saveStatments_removeShow($indecisonDoor_Red,$indecisonDoor_Green);
+	$indecisonDoor.unlock();
+
+	removeActorsNamed( "Lurker" );
+	removeActorsNamed( "Chewer" );
+
+	string strArmOrigin;
+
+	//--- fade out
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.5);
+	globalCoop_main_waitZeroDot5();
+	
+	globalCommon_AiDummyHide( $attrexian_barricade );
+	
+	if( weaponDudeIsAlive == 1 )
+	{
+		if(!cvar_bool_multiplayer){//singleplayer
+			$player.use ( "AttrexianRifle" );
+		}
+	
+	//--- set the cinematic
+    	cinematicArm_WeaponsDudeReturn = createCinematic( "m4l1-alive" );
+		
+	//--- set the origin
+		strArmOrigin = "m4l1-alive";
+		
+	//--- hide the weapons dude
+		globalCommon_AiDummyHide( $weapon_dude );
+		
+		//--- jack about with the +use dialog some more
+		setfloatvar( "level.FromWeaponsLocker", FALSE );
+		setfloatvar( "level.AfterWeaponsLocker", TRUE );
+	}
+	else
+	{
+		if(!cvar_bool_multiplayer){//singleplayer
+			$player.use ( "FieldAssaultRifle" );
+		}
+	
+	//--- set the cinematic
+    	cinematicArm_WeaponsDudeReturn = createCinematic( "m4l1-dead" );
+
+	//--- set the origin
+		strArmOrigin = "m4l1-dead";
+	}
+	
+//--- set the armatures end thread
+	cinematicArm_WeaponsDudeReturn.setendthread( "attrexian_followStop_skipthread" );
+	globalCoop_main_waitZeroDot5();
+	
+//--- start the armature
+    music ("aux5","normal");
+
+	cinematicArm_WeaponsDudeReturn.beginCinematic( strArmOrigin );
+	globalCoop_main_waitZeroDot2();
+	
+//--- fade in
+	globalCoop_main_camFadeIn(.5);
+	
+//--- set the skipthread
+	globalCoop_cin_skipThread( "attrexian_followStop_skipthread" );
+}
+
+
+//---------------------
+// Attrexian Cinematic
+// Munro talks with two attrexian in a hallway after going to weapons locker
+//---------------------
+void attrexian_followStop_skipthread()
+{
+	//kill the cinematic
+	skipthread( "null" );
+
+	//fade to black
+	globalCoop_main_camFadeOut(.5);
+	globalCoop_main_waitZeroDot5();
+
+	if(weaponDudeIsAlive==1)
+	{
+		$weapon_dude.updatebosshealth( 0 , 0 );
+	}
+
+	//--- end the armature cinematics, FALSE means don't launch the end thread
+	cinematicArm_WeaponsDudeReturn.endCinematic( FALSE );
+	killthread( "attrexian_followStop" );
+	
+	//--- show the attrexians
+	globalCommon_AiDummy( $attrexian_barricade, "" );
+	$attrexian_barricade.warp( '-1107 6994 65' );
+	
+	if(weaponDudeIsAlive==1)
+	{
+		globalCommon_AiDummy( $weapon_dude, "" );
+		$weapon_dude.warp( '-973 6998 65' );
+	}
+
+	//--- set the player
+	if(!cvar_bool_multiplayer){//If Single Player
+		//--- make everybody look at each other
+		$player.warp( '-944 7138 65' );
+		$player.turnTowardsEntity( $attrexian_barricade );
+		$attrexian_barricade.turnTowardsEntity( $player );
+		
+		if(weaponDudeIsAlive==1)
+		{
+			$weapon_dude.turnTowardsEntity( $player );
+		}		
+	}
+
+	//--- release the cinematic
+	globalCoop_cin_end();
+	wait( .75 );
+	globalCoop_main_camFadeIn(.5);
+	
+	if(weaponDudeIsAlive==1)
+	{
+		thread globalCoop_objectives_update("complete",6,1);
+		//$player.setobjectivecomplete( "GetBackAttrexian" , 1 );
+	}
+	
+//leave eleveator door open, so players do not get stuck in there
+	$elevatorDoor.wait(-1);
+	coop_svstDialog10000(globalCoop_return_playerClosestPreferActive($elevatorDoor),"m4l1/munro_reportin.mp3");
+	coop_svstDialog10000($chell,"m4l1/chell_secsta.mp3");
+	coop_svstDialog10000($chang,"m4l1/chang_kicking.mp3");
+	coop_svstDialog10000($jurot,"m4l1/jurot_foundmed.mp3");
+	coop_svstDialog10000($sydney,"m4l1/syd_report.mp3");
+}
+

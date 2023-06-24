@@ -1,0 +1,888 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	      ent-deck11 - MISSION 3
+//  Script By:    K.Thompson
+//  Created on:   08/12/2002
+//	Last Edited:  08/12/2002 - kt
+//-----------------------------------------------------------------
+
+void setupMission3Deck11();
+void playerReachedSecretIGM3();
+
+void queTelsiaForIGM3Cinematic();
+
+void cinematicTelsiaGreetsMunro();
+void entDeck8IGM3Option1();
+void entDeck8IGM3Option2();
+
+void useLibraryTerminalIGM3();
+void useLibraryTerminalIGM3Page0();
+void useLibraryTerminalIGM3Page1();
+void useLibraryTerminalIGM3Page2();
+void useLibraryTerminalIGM3Page3();
+void useLibraryTerminalIGM3Page4();
+void useLibraryTerminalIGM3Page5();
+void useLibraryTerminalIGM3Page6();
+
+void telsiaTalkingDialogPage1IGM3();
+void telsiaTalkingDialogPage2IGM3();
+void telsiaTalkingDialogPage3IGM3();
+
+void telsia_workIGM3();
+void telsiaDialog3_1();
+
+void picardCommsMunroIGM3();
+
+void ambientActorsIGM3();
+
+void alisonrusselTalkIGM3();
+void hideAlisonAndRusselIGM3();
+void sendAlisonAndRusselOnPatrolIGM3();
+
+void miyamoto_workIGM3();
+void miyamotoDialog3_1();
+void miyamotoDialog3_2();
+void miyamotoDialog3_3();
+
+float telsiaFollowsMunroIGM3 = 0;
+float numberOfTimesTalkedWithTelsiaIGM3 = 0;
+float chellHasCalledMunro = 0;
+
+//===================================================================================================================
+// Setup 
+//===================================================================================================================
+
+//---------------------
+// setupMission3Deck11	
+// does all the setup stuff for the mission
+//---------------------
+void setupMission3Deck11()
+{
+	coop_string_objectiveItem1			= "IGM3TalkWithPicard";
+	coop_string_objectiveItem2			= "IGM3GoToLibaray";
+	coop_string_objectiveItem3			= "IGM3MeetInBriefingRoom";
+	coop_string_objectiveItem4			= "IGM3GoToTransporterRoom";
+	
+	spawn( "Camera", "targetname", "cam1" );
+	spawn( "Camera", "targetname", "cam2" );
+	spawn( "Camera", "targetname", "cam3" );
+	spawn( "Camera", "targetname", "cam4" );
+	spawn( "Camera", "targetname", "cam5" );
+	spawn( "Camera", "targetname", "cam6" );
+	spawn( "Camera", "targetname", "cam7" );
+			
+	cam.load( "cam_igm3_deck11_1" );
+	cam.load( "cam_igm3_deck11_2" );
+	cam.load( "cam_igm3_deck11_3" );
+	cam.load( "cam_igm3_deck11_4" );
+	cam.load( "cam_igm3_deck11_5" );
+	cam.load( "cam_igm3_deck11_6" );
+	cam.load( "cam_igm3_deck11_7" );
+	
+	globalCommon_SpawnActor( "char/hazardteam_sf-munro.tik", "scriptmunro", '-10116 -596 0', 295 );
+	globalCommon_SpawnActor( "char/hazardteam_sf-telsia.tik", "telsia", '-10144 -1344 4', 90 );
+	
+	$scriptmunro.hide();
+	$scriptmunro.notsolid();
+	
+	globalArchetype_Setup ( $triggerLibraryUse1Archetype, "LibraryTerminal" );
+	$triggerLibraryUse1Archetype.missionobjective( 1 );
+	
+	ambientActorsIGM3();
+	
+	$munroApproachingLibrary.thread( "queTelsiaForIGM3Cinematic" ); 
+	
+	//Setup Secret
+	//Unlock Secret Door.
+	$secretDoor.unlock();
+	$secretTrigger.thread( "playerReachedSecretIGM3" );
+	spawn( "trigger_secret", "targetname", "secretSpawner_trigger" );
+	trigger( "$secretSpawner" );
+	
+	wait(1);
+	
+	globalCoop_objectives_update("complete",1,1);//state,slot,show
+	globalCoop_objectives_update("inComplete",2,1);//state,slot,show
+}
+
+//---------------------
+// used to place secret pieces in level 
+//------------------------
+void playerReachedSecretIGM3()
+{
+	$secretTrigger.thread( "" );
+	trigger( "$secretSpawner_trigger" );
+}
+
+//---------------------
+// queTelsiaForIGM3Cinematic	
+// Make Telsia Exit Libaray To talk with Munro.
+//---------------------
+void queTelsiaForIGM3Cinematic()
+{
+	$munroApproachingLibrary.thread( "" ); 
+
+	$telsia.walkto( "telsiaCinematicNode1" );
+	wait( 1 );
+	thread cinematicTelsiaGreetsMunro();
+}
+
+//---------------------
+// cinematicTelsiaGreetsMunro
+// setup and begin cinematicTelsiaGreetsMunro
+//---------------------
+void cinematicTelsiaGreetsMunro()
+{
+	//--- Fade Out
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.5);
+	wait ( .6 );
+	
+	// --- Setup
+	$scriptmunro.show();
+	$scriptmunro.solid();
+	
+	hideAlisonAndRusselIGM3();
+	
+	// --- Que Cams
+	globalCoop_cin_follow($cam1,$cam_igm3_deck11_1 );
+	globalCoop_cin_follow($cam2,$cam_igm3_deck11_2 );
+	globalCoop_cin_follow($cam3,$cam_igm3_deck11_3 );
+	globalCoop_cin_follow($cam4,$cam_igm3_deck11_4 );
+	globalCoop_cin_follow($cam5,$cam_igm3_deck11_5 );
+	globalCoop_cin_follow($cam6,$cam_igm3_deck11_6 );
+	globalCoop_cin_follow($cam7,$cam_igm3_deck11_7 );
+	
+	globalCoop_cin_fov($cam1, 60 );
+	globalCoop_cin_fov($cam2, 10 );
+	globalCoop_cin_fov($cam3, 10 );
+	globalCoop_cin_fov($cam4, 30 );
+	globalCoop_cin_fov($cam5, 30 );
+	globalCoop_cin_fov($cam6, 60 );
+	globalCoop_cin_fov($cam7, 60 );
+
+	$cam1.cut();
+	$cam2.cut();
+	$cam3.cut();
+	$cam4.cut();
+	$cam5.cut();
+	$cam6.cut();
+	$cam7.cut();
+	
+	globalCoop_cin_cuecamera( $cam1 );
+	
+	// --- Skip Thread
+	//No Skip thread allowed
+	//skipthread( "cinematicTelsiaGreetsMunroSkipthread");
+	
+	$telsia.walkto( "telsiaCinematicNode1" );
+	$scriptmunro.walkto( "telsiaCinematicNode2" );
+	
+	wait( .05 );
+	
+	//--- Start & Fade in
+	globalCoop_main_camFadeIn(.5);
+	wait( .6 );
+	
+	$telsia.walkto( "telsiaCinematicNode1" );
+	$scriptmunro.walkto( "telsiaCinematicNode2" );
+	waitfor( $scriptmunro );
+	
+	$telsia.walkto( "telsiaCinematicNode1" );
+	waitfor( $telsia );
+	
+////////////////////////////////////////////////////////////////////////////////
+//	thread entDeck8IGM3Option1();
+//	return;
+////////////////////////////////////////////////////////////////////////////////
+	
+	globalCoop_dialog_play($telsia,"ent_m3/telsia_himunro2.mp3", 1, 10000, 0); //Hi, Munro.
+	
+	globalCoop_cin_cuecamera( $cam3 );
+	globalCoop_dialog_play($scriptmunro,"ent_m3/munro_up.mp3", 1, 10000, 0); //Telsia. I'm glad to see you up and around.
+	
+	globalCoop_cin_cuecamera( $cam2 );
+	globalCoop_dialog_play($telsia,"ent_m3/telsia_fine.mp3", 1, 10000, 0); //I'm fine. There's no lasting damage from my time in the pattern buffer.
+	
+	globalCoop_cin_cuecamera( $cam3 );
+	globalCoop_dialog_play($scriptmunro,"ent_m3/munro_lucky.mp3", 1, 10000, 0); //You're lucky. That was quite a stunt.
+
+	globalCoop_cin_cuecamera( $cam2 );
+	globalCoop_dialog_play($telsia,"ent_m3/telsia_ready.mp3", 1, 10000, 0); //I’m ready to go back on duty.
+	
+	globalCoop_cin_cuecamera( $cam3 );
+	globalCoop_dialog_play($scriptmunro,"ent_m3/munro_iwant.mp3", 1, 10000, 0); //Good. Because I want you and Gonzalez on the Hazard Team.
+	
+	globalCoop_cin_cuecamera( $cam2 );
+	globalCoop_dialog_play($telsia,"ent_m3/telsia_gladgonz.mp3", 1, 10000, 0); //I'm glad to see Gonzalez on the team. He's an experienced combat tactician.
+	
+	globalCoop_cin_cuecamera( $cam3 );
+	globalCoop_dialog_play($scriptmunro,"ent_m3/munro_almost.mp3", 1, 10000, 0); //Almost as experienced as you. I need your expertise to help me figure out these aliens.
+	
+	globalCoop_cin_cuecamera( $cam4 );
+	globalCoop_dialog_play($telsia,"ent_m3/telsia_thatall.mp3", 1, 10000, 0); //Is that all you need?
+	
+	globalCoop_cin_cuecamera( $cam5 );
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$telsia.branchdialog( "entDeck11IGM3BranchingDialog" );
+		pause();
+	}else{
+		thread entDeck8IGM3Option1();
+	}
+}
+
+//////////////////////////////////////
+//  entDeck8IGM3Option1
+//  Optional Text and Dialog 1
+//////////////////////////////////////
+void entDeck8IGM3Option1()
+{
+	if(cvar_bool_multiplayer)
+	{
+		$triggerLibraryUse1.thread( "mom_basic" );
+		$triggerLibraryUse1.setStringVar("uservar1","coop_ent-console_page1-IGM3");
+		$triggerLibraryUse1.setStringVar("uservar2","library");
+		$triggerLibraryUse1.setStringVar("uservar3","library_noMenu");
+		globalCoop_main_waitAFrame();
+		
+		$triggerLibraryUse2.thread( "mom_basic" );
+		$triggerLibraryUse2.setStringVar("uservar1","coop_ent-console_page1-IGM3");
+		$triggerLibraryUse2.setStringVar("uservar2","library");
+		$triggerLibraryUse2.setStringVar("uservar3","library_noMenu");
+		globalCoop_main_waitAFrame();
+		
+		$triggerLibraryUse3.thread( "mom_basic" );
+		$triggerLibraryUse3.setStringVar("uservar1","coop_ent-console_page1-IGM3");
+		$triggerLibraryUse3.setStringVar("uservar2","library");
+		$triggerLibraryUse3.setStringVar("uservar3","library_noMenu");
+		globalCoop_main_waitAFrame();
+		
+		$triggerLibraryUse4.thread( "mom_basic" );
+		$triggerLibraryUse4.setStringVar("uservar1","coop_ent-console_page1-IGM3");
+		$triggerLibraryUse4.setStringVar("uservar2","library");
+		$triggerLibraryUse4.setStringVar("uservar3","library_noMenu");
+		globalCoop_main_waitAFrame();
+		globalArchetype_Setup ( $triggerLibraryUse2Archetype, "LibraryTerminal" );
+		globalArchetype_Setup ( $triggerLibraryUse3Archetype, "LibraryTerminal" );
+		globalArchetype_Setup ( $triggerLibraryUse4Archetype, "LibraryTerminal" );
+		globalCoop_main_waitAFrame();
+	}
+	else
+	{
+		$triggerLibraryUse1.thread( "useLibraryTerminalIGM3" );
+		//this makes sure you are forced to stand near telsia if she is there
+		$triggerLibraryUse2.thread( "" );
+		$triggerLibraryUse3.thread( "" );
+		$triggerLibraryUse4.thread( "" );
+	}
+	
+	globalCoop_dialog_play($scriptmunro,"ent_m3/munro_helpme.mp3", 1, 10000, 0 ); //I wouldn't mind having you help me do some research on the Attrexians.
+	
+	//Increase Telsia Float Var
+	globalCommon_LoveChoice_Telsia(); 
+	
+	globalCoop_cin_cuecamera( $cam7 );
+	
+	wait( .2 );
+	$telsia.turnToAngle( 0 );
+	wait( .5 );
+	$telsia.anim( "walk" );
+	wait( 1.5 );
+	
+	telsiaFollowsMunroIGM3 = 1;
+	
+	//--- fade out and set the level up
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+	
+	
+	entity ePlayer;
+	ePlayer=globalCoop_return_playerClosestPreferActive($scriptmunro);
+	ePlayer.origin('-10157 -876 0');
+	ePlayer.angle(327);
+//co-op mod cinematic position restore overwrite
+	ePlayer.setVectorVar("coop_cinematic_location",'-10157 -876 0');
+	ePlayer.setVectorVar("coop_cinematic_viewangles",'0 327 0');
+	
+	$scriptmunro.hide();
+	$scriptmunro.notsolid();
+	
+	$telsia.origin( '-9580 -978  0' );
+	globalCommon_AiActorUseWeapon( $telsia, "tricorder" );
+	$telsia.angle( 0 );
+	$telsia.anim( "tricorder_use_loop" );
+	$telsia.resethead();
+	
+	sendAlisonAndRusselOnPatrolIGM3();
+
+	globalCoop_cin_end();
+	globalCoop_main_camFadeIn(.5);
+	
+//	wait( .6 );	
+	
+//	$telsia.walkto( "libraryNode0" );
+//	waitfor( $telsia );
+}
+
+//////////////////////////////////////
+//  entDeck8IGM3Option2
+//  Optional Text and Dialog 2
+//////////////////////////////////////
+void entDeck8IGM3Option2()
+{
+	if(cvar_bool_multiplayer)
+	{
+		$triggerLibraryUse1.thread( "mom_basic" );
+		$triggerLibraryUse1.setStringVar("uservar1","coop_ent-console_page1-IGM3");
+		$triggerLibraryUse1.setStringVar("uservar2","library");
+		$triggerLibraryUse1.setStringVar("uservar3","library_noMenu");
+		globalCoop_main_waitAFrame();
+		
+		$triggerLibraryUse2.thread( "mom_basic" );
+		$triggerLibraryUse2.setStringVar("uservar1","coop_ent-console_page1-IGM3");
+		$triggerLibraryUse2.setStringVar("uservar2","library");
+		$triggerLibraryUse2.setStringVar("uservar3","library_noMenu");
+		globalCoop_main_waitAFrame();
+		
+		$triggerLibraryUse3.thread( "mom_basic" );
+		$triggerLibraryUse3.setStringVar("uservar1","coop_ent-console_page1-IGM3");
+		$triggerLibraryUse3.setStringVar("uservar2","library");
+		$triggerLibraryUse3.setStringVar("uservar3","library_noMenu");
+		globalCoop_main_waitAFrame();
+		
+		$triggerLibraryUse4.thread( "mom_basic" );
+		$triggerLibraryUse4.setStringVar("uservar1","coop_ent-console_page1-IGM3");
+		$triggerLibraryUse4.setStringVar("uservar2","library");
+		$triggerLibraryUse4.setStringVar("uservar3","library_noMenu");
+		globalCoop_main_waitAFrame();
+	}
+	else
+	{
+		$triggerLibraryUse1.thread( "useLibraryTerminalIGM3" );
+		$triggerLibraryUse2.thread( "useLibraryTerminalIGM3" );
+		$triggerLibraryUse3.thread( "useLibraryTerminalIGM3" );
+		$triggerLibraryUse4.thread( "useLibraryTerminalIGM3" );	
+	}
+	// triggerLibraryUse1Archetype isn't called here to prevent the objective from being removed to early
+	globalArchetype_Setup ( $triggerLibraryUse2Archetype, "LibraryTerminal" );
+	globalArchetype_Setup ( $triggerLibraryUse3Archetype, "LibraryTerminal" );
+	globalArchetype_Setup ( $triggerLibraryUse4Archetype, "LibraryTerminal" );
+	globalCoop_main_waitAFrame();
+
+	globalCoop_dialog_play($scriptmunro,"ent_m3/munro_thatsit.mp3", 1, 10000, 0 ); //Yeah, that's about it.
+
+	globalCoop_cin_cuecamera( $cam6 );
+	
+	wait( .2 );
+	$telsia.turnToAngle( 270 );
+	wait( .5 );
+	$telsia.anim( "walk" );
+	wait(.5 );
+
+	//--- fade out and set the level up
+	globalCoop_main_camFadeOut(2);
+	wait( 4.1 );
+	
+	entity ePlayer;
+	ePlayer=globalCoop_return_playerClosestPreferActive($scriptmunro);
+	ePlayer.origin('-10157 -876 0');
+	ePlayer.angle(327);
+//co-op mod cinematic position restore overwrite
+	ePlayer.setVectorVar("coop_cinematic_location",'-10157 -876 0');
+	ePlayer.setVectorVar("coop_cinematic_viewangles",'0 327 0');
+	
+	$scriptmunro.hide();
+	$scriptmunro.notsolid();
+	
+	$telsia.remove();
+	telsiaFollowsMunroIGM3 = 0;
+	
+	sendAlisonAndRusselOnPatrolIGM3();
+		
+	globalCoop_cin_end();
+	globalCoop_main_camFadeIn(.5);
+	wait( .6 );
+}
+
+//////////////////////////////////////
+//  useLibraryTerminalIGM3
+//  Function wait untill a libaray terminal is used then bring up the UI
+// Also should change objective
+//////////////////////////////////////
+void useLibraryTerminalIGM3()
+{
+	if(!cvar_bool_multiplayer){
+		$triggerLibraryUse1.thread( "" );
+		$triggerLibraryUse2.thread( "" );
+		$triggerLibraryUse3.thread( "" );
+		$triggerLibraryUse4.thread( "" );	
+	}
+	
+	useLibraryTerminalIGM3Page1();
+	//if( getfloatvar ("game.checkEntMission3RoomsVisited" ) == 2 ){
+	if( chellHasCalledMunro == 0 && cvar_bool_multiplayer != 1)
+	{
+		$triggerLibrary.thread( "picardCommsMunroIGM3" );
+	}
+}
+
+//////////////////////////////////////
+//  useLibraryTerminalIGM3
+//  Function to remove any libaray terminal UI up and wait till it is used agian
+//////////////////////////////////////
+void useLibraryTerminalIGM3Page0()
+{
+	if(!cvar_bool_multiplayer)
+	{
+		
+	
+		$player.playsound( "sound/misc/menu/select.wav", 10 ,0.75 ,100 );
+		$player.removehud("ent-console_page6-IGM3");
+		$player.playsound( "sound/misc/menu/reject.wav", 10 ,0.75 ,100 );
+	}
+	else
+	{
+		thread picardCommsMunroIGM3();	
+	}
+	
+	//This makes sure the player can traverse the menu system untill he exits
+	//Problem with out: Play coun't access page 1 after first time
+	if( numberOfTimesTalkedWithTelsiaIGM3 == 3 )
+	{
+		if( telsiaFollowsMunroIGM3 == 1 )
+		{
+			numberOfTimesTalkedWithTelsiaIGM3 ++;
+			thread telsia_workIGM3();
+		}
+	}
+	
+	//Turn Exit Triggers On
+	thread globalCoop_objectives_update("complete",2,1);//state,slot,show
+	$triggerExit.triggerable();
+	$triggerLibraryUse1Archetype.missionobjective( 0 );
+
+	// stop any dialog currently happening
+	killthread( "telsiaTalkingDialogPage1IGM3" );
+	killthread( "telsiaTalkingDialogPage2IGM3" );
+	killthread( "telsiaTalkingDialogPage3IGM3" );
+	killAllTalking();
+}
+
+void useLibraryTerminalIGM3Page1()
+{
+	if(!cvar_bool_multiplayer)
+	{
+		$player.playsound( "sound/misc/menu/select.wav", 10 ,0.75 ,100 );
+		$player.addhud("ent-console_page1-IGM3");
+		$player.removehud("ent-console_page2-IGM3");
+	}
+	
+	// This checks to see if telsia is there and or needs to speak.
+	if( numberOfTimesTalkedWithTelsiaIGM3 == 0 )
+	{
+		if( telsiaFollowsMunroIGM3 == 1 )
+		{
+			numberOfTimesTalkedWithTelsiaIGM3 ++;
+			thread telsiaTalkingDialogPage1IGM3();
+		}
+	}
+}
+
+void useLibraryTerminalIGM3Page2()
+{
+	if(!cvar_bool_multiplayer)
+	{
+		$player.playsound( "sound/misc/menu/select.wav", 10 ,0.75 ,100 );
+		$player.addhud("ent-console_page2-IGM3");
+		$player.removehud("ent-console_page1-IGM3");
+		$player.removehud("ent-console_page3-IGM3");
+	}
+}
+
+void useLibraryTerminalIGM3Page3()
+{
+	if(!cvar_bool_multiplayer)
+	{
+		$player.playsound( "sound/misc/menu/select.wav", 10 ,0.75 ,100 );
+		$player.addhud("ent-console_page3-IGM3");
+		$player.removehud("ent-console_page2-IGM3");
+		$player.removehud("ent-console_page4-IGM3");
+	}
+	// This check to see if telsia is there and or needs to speak.
+	if( numberOfTimesTalkedWithTelsiaIGM3 == 1 )
+	{
+		if( telsiaFollowsMunroIGM3 == 1 )
+		{
+			numberOfTimesTalkedWithTelsiaIGM3 ++;
+			thread telsiaTalkingDialogPage2IGM3();
+		}
+	}
+}
+
+void useLibraryTerminalIGM3Page4()
+{
+	if(!cvar_bool_multiplayer)
+	{
+		$player.playsound( "sound/misc/menu/select.wav", 10 ,0.75 ,100 );
+		$player.addhud("ent-console_page4-IGM3");
+		$player.removehud("ent-console_page3-IGM3");
+		$player.removehud("ent-console_page5-IGM3");
+	}
+}
+
+void useLibraryTerminalIGM3Page5()
+{
+	if(!cvar_bool_multiplayer)
+	{
+		$player.playsound( "sound/misc/menu/select.wav", 10 ,0.75 ,100 );
+		$player.addhud("ent-console_page5-IGM3");
+		$player.removehud("ent-console_page4-IGM3");
+		$player.removehud("ent-console_page6-IGM3");
+	}
+
+	// This check to see if telsia is there and or needs to speak.
+	if( numberOfTimesTalkedWithTelsiaIGM3 == 2 )
+	{
+		if( telsiaFollowsMunroIGM3 == 1 )
+		{
+			numberOfTimesTalkedWithTelsiaIGM3 ++;
+			thread telsiaTalkingDialogPage3IGM3();
+		}
+	}
+}
+
+void useLibraryTerminalIGM3Page6()
+{
+	if(!cvar_bool_multiplayer)
+	{
+		$player.playsound( "sound/misc/menu/select.wav", 10 ,0.75 ,100 );
+		$player.addhud("ent-console_page6-IGM3");
+		$player.removehud("ent-console_page5-IGM3");
+	}
+	setfloatvar("level.playerReadAttrexian",1);
+}
+
+
+void telsiaTalkingDialogPage1IGM3()
+{
+	globalCoop_dialog_play($telsia,"ent_m3/telsia_suspenct.mp3", 1, 10000, 0); //Hmm... no usual suspect here. The Attrexians seem to have made very few enemies. 
+	globalCoop_dialog_play($scriptmunro,"ent_m3/munro_pretty.mp3", 1, 10000, 0); //Pretty good for an expanding mini-empire with over twenty colony planets. 
+	globalCoop_dialog_play($telsia,"ent_m3/telsia_neutral.mp3", 1, 10000, 0); //Especially a mini-empire so close to the Neutral Zone.
+	globalCoop_dialog_play($scriptmunro,"ent_m3/munro_expand.mp3", 1, 10000, 0); //They were lucky enough to expand into systems not claimed by other races. 
+	globalCoop_dialog_play($telsia,"ent_m3/telsia_romulans.mp3", 1, 10000, 0); //And smart enough to stay out of the way of the Romulans. 
+}
+
+
+void telsiaTalkingDialogPage2IGM3()
+{
+	killthread( "telsiaTalkingDialogPage1IGM3" );
+	killAllTalking();
+	
+	globalCoop_dialog_play($scriptmunro,"ent_m3/munro_races.mp3", 1, 10000, 0); //There's some unrest on Attrexian planets populated by other races.
+	globalCoop_dialog_play($telsia,"ent_m3/telsia_empires.mp3", 1, 10000, 0); //Same with many stellar empires.
+	globalCoop_dialog_play($scriptmunro,"ent_m3/munro_smugg.mp3", 1, 10000, 0); //Ongoing problem with smugglers. 
+	globalCoop_dialog_play($telsia,"ent_m3/telsia_same.mp3", 1, 10000, 0); //Same with the Federation. 
+	globalCoop_dialog_play($scriptmunro,"ent_m3/munro_angry.mp3", 1, 10000, 0); //But no angry species of semi-intelligent, exoskeletal aliens.
+}
+
+void telsiaTalkingDialogPage3IGM3()
+{
+	killthread( "telsiaTalkingDialogPage2IGM3" );
+	killAllTalking();
+	
+	globalCoop_dialog_play($telsia,"ent_m3/telsia_candidate.mp3", 1, 10000, 0); //The Attrexians are a Federation candidate. If they join, Starfleet will get some prime bases near the Neutral Zone. Does that give the Romulans a motivation to attack them?
+	globalCoop_dialog_play($scriptmunro,"ent_m3/munro_private.mp3", 1, 10000, 0); //With what? Their private army of semi-intelligent, exoskeletal aliens? 
+	globalCoop_dialog_play($telsia,"ent_m3/telsia_invasion.mp3", 1, 10000, 0); //Then we may be looking at the first wave of an extra-dimensional invasion.
+}
+
+///////////////////////////
+// telsia_workIGM3
+// Wait for player to talk to actor
+///////////////////////////
+void telsia_workIGM3()
+{
+	setNextDialog( $telsia, 1 );
+	setDialogFunction( $telsia, "telsiaDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $telsia, "", "", 0 );
+		talkUntilDone( $telsia );
+	}
+}
+
+///////////////////////////
+// telsiaDialog3_1
+// Player and actor talk
+///////////////////////////
+void telsiaDialog3_1()
+{	
+	$telsia.anim( "tricorder_scan-look" );
+	$telsia.headwatch( $player, 10 );
+	$telsia.turntowardsplayer();
+
+	globalCoop_dialog_play($telsia,"ent_m4/telsia_timetog.mp3", 1, 128, 0); //Are you going to finish that research?
+
+	setNextDialog( $telsia, 1 );
+	$telsia.resethead();
+	$telsia.angle( 0 );
+	$telsia.anim( "tricorder_use_loop" );
+	setDialogFinished( $telsia );
+}
+
+//////////////////////////
+// Summons Munro to deck 8
+//////////////////////////
+void picardCommsMunroIGM3()
+{
+//call this only once...
+	if(chellHasCalledMunro){
+		return;
+	}
+	chellHasCalledMunro = 1;	
+	$triggerLibrary.thread( "" );
+	
+	
+	globalCommon_SpawnActor( "char/starfleet_picard.tik", "picard", '-11068 -1722 -200', 270 );
+	$picard.hide();
+	$picard.notsolid();
+	
+	wait( .5 );
+	
+	globalCoop_dialog_play($picard,"ent_m3/picard_reportbrief.mp3", 1, 10000, 1); //Lieutenant Munro.  Report to the Hazard Team briefing room.
+	globalCoop_dialog_play($scriptmunro,"ent_m3/munro_onway2.mp3", 1, 10000, 1); //On my way.	
+	wait( .5 );
+	
+	//Objectives
+	globalCoop_objectives_update("complete",1,0);//state,slot,show
+	globalCoop_objectives_update("complete",2,0);//state,slot,show
+	thread globalCoop_objectives_update("inComplete",3,1);//state,slot,show
+	
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		setfloatvar("level.deckToChangeToIGM",71);
+	}
+	else{
+		stuffCMD("seta coop_igmT 71\n");
+	}
+}
+
+//===================================================================================================================
+// Ambient Actors
+//===================================================================================================================
+//---------------------
+// ambientActorsIGM3	
+// Set up ambient Actors
+//---------------------
+void ambientActorsIGM3()
+{
+	globalCommon_SpawnActor( "char/starfleet_crew-female2.tik", "miyamoto", '-9804.00 -836.00  4.00', 0 );
+		
+	thread miyamoto_workIGM3();
+	
+	thread randomlyAnimateActor( $miyamoto, "ent-library-seat" );
+
+	globalCommon_SpawnActor( "char/starfleet_crew-female5.tik", "alison", '-9640 596 0', 290 );
+	$alison.pushable( 0 );
+	globalCommon_SpawnActor( "char/starfleet_crew-male5.tik", "russel", '-9624 548 0', 110 );
+	$russel.pushable( 0 );
+
+	$triggerHallConversation1.thread( "alisonrusselTalkIGM3" );
+
+	$alison.headwatch( $russel, 5 );
+	$russel.headwatch( $alison, 5 );
+
+	thread randomlyAnimateActor( $alison, "conv" );
+	thread randomlyAnimateActor( $russel, "conv" );
+}
+
+////////////////////////////
+// Actors Converse
+/////////////////////////////
+void alisonrusselTalkIGM3()
+{
+	$triggerHallConversation1.thread( "" );
+
+	$alison.setFloatVar( "pauseRandomAnimate", 1 );
+	$russel.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+	$alison.anim( "idle" );
+	$russel.anim( "idle" );
+	
+	globalCoop_dialog_play($alison,"ent_m3/alison_justtell.mp3", 1, 128, 0); //Would you like to join me in the holodeck?  I’m starting a holoprogram to view the flora of Andoria.
+	globalCoop_dialog_play($russel,"ent_m3/crewm_forlastt.mp3", 1, 128, 0); //Sounds interesting.
+	globalCoop_dialog_play($alison,"ent_m3/alison_nerv.mp3", 1, 128, 0); //You might want to bring a weapon.
+	globalCoop_dialog_play($russel,"ent_m3/crewm_donttime.mp3", 1, 128, 0); //What do we need weapons for?
+	globalCoop_dialog_play($alison,"ent_m3/alison_certf.mp3", 1, 128, 0); //The flora are not necessarily friendly.  In fact they’re carnivorous.
+	globalCoop_dialog_play($russel,"ent_m3/crewm_subtle.mp3", 1, 128, 0); //What about the safety protocols?
+	globalCoop_dialog_play($alison,"ent_m3/alison_sweet.mp3", 1, 128, 0); //How do you study plants in their environment if you eliminate their ability to interact with their surroundings?
+	globalCoop_dialog_play($russel,"ent_m3/crewm_callsec.mp3", 1, 128, 0); //I don’t really think I’m up for being eaten by a plant today.
+	globalCoop_dialog_play($alison,"ent_m3/alison_special.mp3", 1, 128, 0); //Come on.  It’ll be fun.
+	globalCoop_dialog_play($russel,"ent_m3/crewm_itwasnt.mp3", 1, 128, 0); //I just remembered I have an appointment with the ship’s counselor.
+
+	$alison.setFloatVar( "pauseRandomAnimate", 0 );
+	$russel.setFloatVar( "pauseRandomAnimate", 0 );
+	
+	$alison.resethead();
+	$russel.resethead();
+	
+	$alison.setnodeid( 50 );
+	$alison.alias( "alisonIGMA1", "localization/sound/dialog/ent_m1/alison_kindaBusy.mp3" ); //Please don’t disturb me.
+	$alison.dialog( "alisonIGMA" );
+	
+	$russel.setnodeid( 51 );
+	$russel.alias( "russelIGMA1", "localization/sound/dialog/ent_m2/stratton_busy1.mp3" ); //Sorry.  No time for chit-chat.
+	$russel.dialog( "russelIGMA" );
+	
+	//This is here to make them patrol when necessary
+	$alison.ai_on();
+	$russel.ai_on();
+}
+
+// Hide these actors and AI off incase they are in view
+// I origin them to make sure they are not potentialy stuck
+// in the player at the end of the cinematic
+void hideAlisonAndRusselIGM3()
+{	
+	$alison.ai_off();
+	$alison.hide();
+	$alison.notsolid();
+	$alison.origin( '-9640 596 0' );
+	$russel.ai_off();
+	$russel.hide();
+	$russel.notsolid();
+	$russel.origin( '-9624 548 0' );
+}
+
+//Show these actors and AI on after cinematic and make patrol enve if conversation has
+// not been triggered.
+void sendAlisonAndRusselOnPatrolIGM3()
+{	
+	$triggerHallConversation1.thread( "" );	
+	$alison.show();
+	$alison.solid();
+	$alison.resethead();
+	$alison.ai_on();
+	$russel.show();
+	$russel.solid();
+	$russel.resethead();
+	$russel.ai_on();
+}
+
+///////////////////////////
+// miyamotoOnUseWaitIGM3
+// Wait for player to talk to actor
+///////////////////////////
+void miyamoto_workIGM3()
+{
+	setNextDialog( $miyamoto, 1 );
+	setDialogFunction( $miyamoto, "miyamotoDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $miyamoto, "", "", 0 );
+		talkUntilDone( $miyamoto );
+	}
+}
+
+///////////////////////////
+// miyamotoDialog3_1
+// Player and actor talk
+///////////////////////////
+void miyamotoDialog3_1()
+{
+	$miyamoto.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+	$miyamoto.anim( "ent-library-seat-scan" );
+	$miyamoto.headwatch(globalCoop_return_playerClosestPreferActive($miyamoto), 10 );
+	
+	globalCoop_dialog_play($miyamoto,"ent_m3/myamoto_helpyou.mp3", 1, 128, 0); //Can I help you?
+
+	setNextDialog( $miyamoto, 2 );
+	$miyamoto.resethead();
+	setDialogFinished( $miyamoto );
+	$miyamoto.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// miyamotoDialog3_2
+// Player and actor talk
+///////////////////////////
+void miyamotoDialog3_2()
+{
+	$miyamoto.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+	$miyamoto.anim( "ent-library-seat-scan" );
+	$miyamoto.headwatch(globalCoop_return_playerClosestPreferActive($miyamoto), 10 );
+
+	globalCoop_dialog_play($miyamoto,"ent_m3/myamoto_whatit.mp3", 1, 128, 0); //What is it?
+
+	setNextDialog( $miyamoto, 3 );
+	$miyamoto.resethead();
+	setDialogFinished( $miyamoto );
+	$miyamoto.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// miyamotoDialog3_3
+// Player and actor talk
+///////////////////////////
+void miyamotoDialog3_3()
+{
+	$miyamoto.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+	$miyamoto.anim( "ent-library-seat-scan" );
+	$miyamoto.headwatch(globalCoop_return_playerClosestPreferActive($miyamoto), 10 );
+	
+	globalCoop_dialog_play($miyamoto,"ent_m3/myamoto_sorry.mp3", 1, 128, 0); //Sorry, I can't talk right now.
+
+	setNextDialog( $miyamoto, 1 );
+	$miyamoto.resethead();
+	setDialogFinished( $miyamoto );
+	$miyamoto.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+//===================================================================================================================
+// Deck Change Check
+//===================================================================================================================
+//---------------------
+// checkForDeckChangeIGM3	
+//---------------------
+void checkForDeckChangeIGM3()
+{
+	if(chellHasCalledMunro)
+	{
+		if(!cvar_bool_multiplayer){//Singleplayer
+			setfloatvar(  "level.deckToChangeToIGM", 71 );
+		}
+		else{
+			stuffcmd("seta coop_igmT 71\n");
+		}
+		globalCoop_dialog_play($scriptmunro,"ent_m1/munro_dhazop2.mp3", 1, 10000, 0 ); //Hazard Ops.
+	}
+}
+
+// --------------- TOOLTIPS
+
+void libraryTerminal_tooltipNext( float page ) {
+if(cvar_bool_multiplayer){return;}
+SendClientCommand( $player,"globalwidgetcommand ent_console_page"+page+"_toolip title $$ENT_CONSOLE_NEXTPAGE$$");}
+void libraryTerminal_tooltipPrev( float page ) {
+if(cvar_bool_multiplayer){return;}
+SendClientCommand( $player,"globalwidgetcommand ent_console_page"+page+"_toolip title $$ENT_CONSOLE_PREVPAGE$$");}
+
+void libraryTerminal_tooltipNextPage1()	{libraryTerminal_tooltipNext(1);}
+void libraryTerminal_tooltipNextPage2()	{libraryTerminal_tooltipNext(2);}
+void libraryTerminal_tooltipNextPage3()	{libraryTerminal_tooltipNext(3);}
+void libraryTerminal_tooltipNextPage4()	{libraryTerminal_tooltipNext(4);}
+void libraryTerminal_tooltipNextPage5()	{libraryTerminal_tooltipNext(5);}
+void libraryTerminal_tooltipExit()		{if(cvar_bool_multiplayer){return;}
+SendClientCommand( $player,"globalwidgetcommand ent_console_page6_toolip title $$ENT_CONSOLE_EXIT$$");}
+
+void libraryTerminal_tooltipPrevPage2()	{libraryTerminal_tooltipPrev(2);}
+void libraryTerminal_tooltipPrevPage3()	{libraryTerminal_tooltipPrev(3);}
+void libraryTerminal_tooltipPrevPage4()	{libraryTerminal_tooltipPrev(4);}
+void libraryTerminal_tooltipPrevPage5()	{libraryTerminal_tooltipPrev(5);}
+void libraryTerminal_tooltipPrevPage6()	{libraryTerminal_tooltipPrev(6);}
+

@@ -1,0 +1,33 @@
+cg_targetedPlayerName ""
+ui_inventoryfile "global/inventory.scr"
+
+C s_show_loopsounds "0"
+C s_show_sounds "0"
+s_show_num_active_sounds "0"
+
+r_gfxinfo
+
+cg_mpgametype "1"
+cg_gametype "0"
+
+cl_disableloadinginbackground "1"
+
+com_toolserver 0/1
+
+//coop server detecting if this is a dedicated server or not and so can not run in g_gametype 0
+cl_running "1"
+sv_running "0"
+  
+availablemaps
+maplist
+
+inventory
+inv_restart
+
+widgetcommand
+cmd
+gdb_getstringproperty
+gdb_getfloatproperty
+gdb_setstringproperty
+gdb_setfloatproperty
+

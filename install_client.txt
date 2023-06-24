@@ -1,0 +1,83 @@
+FOR THE GAME:                STAR TREK ELITE FORCE II
+GAME VERSION:                All official releases, except the demo!
+CLASSIFICATION:              Modification
+EXECUTION TYPE:              Server sided (LevelScript - Morpheus Scripting System)
+MODUS:                       Multiplayer
+CREATOR:                     HaZardModding
+
+
+NOTE==========================================================================
+==============================================================================
+This is the CLIENT version, you can NOT host a Coop Server with it, there
+for you require the SERVER or FULL version of this Modification.
+
+This version is ideal for users that like to join Coop Servers but also
+want to keep their Singleplayer Campaign unchanged as it was shipped.
+
+
+COMPATIBILITY=================================================================
+==============================================================================
+! -> Not compatible to previous versions
+
+
+INSTALLATION INSTRUCTIONS=====================================================
+==============================================================================
+1. Shut-down all running instances of the game Star Trek(R) Elite Force II.
+
+2. If you did not use the Installer, delete these old files of this mod:
+    z_hzm_co-op_v1.0.pk3
+    zzz_co-op_inventory.pk3
+    hzm_co-op_matrix-2.0.pk3
+    zzz_co-op_clientside.pk3
+    hzm_co-op_matrix-2.1.pk3
+    zzz_co-op_maps_secrets-2.0.pk3
+    zzz_co-op_maps_secrets-2.1.pk3
+    zz_advanced_health_hud_mod.pk3
+    zzz_co-op_maps_trainings-2.1.pk3
+	zzzzzz_co-op_hzm_script_mod_mini.pk3
+    zzzzzzz_co-op_hzm_script_mod_pak50.pk3
+    zzzzzzzzzzzzzzzzzzzzzzzzzzz_co-op_hzm_script_mod_zPak50.pk3
+	zzzzzz_co-op_hzm_script_mod_vlp.pk3
+	zzzzzz_co-op_hzm_script_mod.pk3
+	zzzzzz_co-op_hzm_script_mod_clientonly.pk3
+	
+3. For manual Installation, copy these files into your 'base' folder:
+    zzzzzz_co-op_hzm_script_mod_english.pk3
+    zzzzzz_co-op_hzm_script_mod_clientonly.pk3
+	
+
+WHAT IS THE 'BASE' FOLDER=====================================================
+==============================================================================
+The Elite Force II 'base' folder is located within the Game directory, you need
+to go to the location you have installed the game Star Trek Elite Force II.
+EXAMPLE: c:\games\activision\EF2\base\
+
+In this folder there are more files with the extension .pk3, also the file
+'pak0.pk3' if you can't find your base folder using your Operating System
+search to look for: pak0.pk3
+
+
+HOW TO START THIS MODIFICATION================================================
+==============================================================================
+You require to join a existing Coop Server, this CLIENT version can not start
+a own Coop Server.
+
+You can connect to any Server which has accordingly configured, regardles
+if the Server is a LOCAL (LAN) or Internet (DEDICATED) Server.
+
+If you can not see any Servers online do use the provided file
+ef2_master_server_client_toggle.bat and follow the instructions.
+
+More informations about this subject are provided with the SERVER respectively
+the FULL version.
+
+
+DE-INSTALLATION===============================================================
+==============================================================================
+1.	Shut-down all running instances of the game Star Trek(R) Elite Force II.
+2.	Should you have been unable to remove this modification via Programms or
+Software (Controllpanel), delete the following files from your base folder:
+	zzzzzz_co-op_hzm_script_mod.pk3
+	zzzzzz_co-op_hzm_script_mod_clientonly.pk3
+	zzzzzz_co-op_hzm_script_mod_english.pk3
+

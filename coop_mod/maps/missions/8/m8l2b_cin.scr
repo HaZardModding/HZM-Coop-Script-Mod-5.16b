@@ -1,0 +1,216 @@
+void cinematicArm_Predator_Start();
+void cinematicArm_Predator_ArmEnd();
+void cinematicShuttleFly();
+void cinematicShuttleFly_Skipthread();
+void cinematicShuttleFly_ScaleShuttleUp();
+void cinematicShuttleFly_ScaleShuttleDown();
+
+
+//---------------------
+// cinematicArm_Predator_Start
+// predator introduction
+//---------------------
+void cinematicArm_Predator_Start()
+{
+//--predator introduction
+	cinematicArm_Predator = createCinematic( "m8l2-pred" );
+	cinematicArm_Predator.setendthread( "cinematicArm_Predator_ArmEnd" );
+//--- starting cinematic commands
+	globalCoop_cin_start();
+	allowmusicducking(0);
+
+
+	//--- fade out
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+	
+	globalCommon_AiDummyHide( $krindo );
+	
+	//--- start the armature
+	cinematicArm_Predator.beginCinematic( "m8l2-pred" );
+	wait( .25 );
+	
+	//--- fade in
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+    forcemusic ("aux1");
+	//--- set the skipthread
+	globalCoop_cin_skipThread( "cinematicArm_Predator_ArmEnd" );
+}
+
+//---------------------
+// cinematicArm_Predator_ArmEnd
+// predator introduction
+//---------------------
+void cinematicArm_Predator_ArmEnd()
+{
+	//--kill the cinematic
+	skipthread( "null" );
+	//--fade to black
+	cam_fadeout( .5, 0, 0, 0, 1, 0 );
+	wait( .6 );
+	//--end the armature cinematics, FALSE means don't launch the end thread
+
+	cinematicArm_Predator.endCinematic( FALSE );
+    forcemusic ("normal");
+
+	killthread( "cinematicArm_Predator_Start" );
+	
+	//--set AI and position them
+	globalCommon_AiDummy( $krindo, "" );
+	$krindo.warp( $nodeKrindo_PostCinematic.getOrigin() );
+	$krindo.turntoangle( 360 );
+
+	//--set the player
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.warp( $nodePlayer_PostCinematic.getOrigin() );
+		$player.turntowardsentity( $krindo );
+	}
+	$krindo.anim( "ent-curvedconsole-gesture" );
+	
+	//--release the cinematic
+	
+	globalCoop_cin_end();
+	wait( .75 );
+
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+	wait( .75 );
+	
+	//--some hack thing
+	hack = 1;
+	
+	//--start the predator fight
+	thread triggerBattleBegin();
+	
+	//--activate krindo
+	//globalCommon_AiActor( $krindo );
+
+	//--set triggers
+	$triggerEndRoom_KrindoTerminal.triggerable();
+}
+
+
+//---------------------
+// cinematicShuttleFly
+// idryll shuttle leaves the planet
+//---------------------
+void cinematicShuttleFly()
+{
+	//--- start cinematic commands
+	spawn("camera","targetname","cam1");
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	allowmusicducking(0);
+    forcemusic ("aux2");
+
+	//--- load the camera paths
+	cam.load( "m8l2b_ShuttleFly_Shot1" );
+	cam.load( "m8l2b_ShuttleFly_Shuttle" );
+	
+	//--- world fog stuff
+	$world.entity_fade_dist( 100000 );
+	$world.farplane( 0 );
+	$world.farplane_cull( 0 );
+	
+	//--- the shuttle
+	$shuttleSpace_Body.scale( .05 );
+	$shuttleSpace_Door.scale( .05 );
+	wait( .5 );
+
+	//--------------------------------------------------------
+	//shot1 establishing, shuttle leaving the planet
+	    	
+	globalCoop_cin_fov($cam1, 90 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_follow($cam1, $m8l2b_ShuttleFly_Shot1 );
+	wait( .2 );
+
+	//--- scale the shuttle as it flies by
+	thread cinematicShuttleFly_ScaleShuttleUp();
+	$shuttleSpace_Origin.followPath( $m8l2b_ShuttleFly_Shuttle );
+	
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( .1 );
+
+	//--- fade in
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+	wait( 4 );
+	
+	//--- slightly zoom in
+	thread globalCineFX_CameraFOVLerp( $cam1, 90, 70, 4, "rampupdown" );
+	wait( 1 );
+	
+	//--- start to scale it down
+	thread cinematicShuttleFly_ScaleShuttleDown();
+	wait( 1 );
+	
+	//--- end the cinematic
+	thread cinematicShuttleFly_Skipthread();
+}
+
+//---------------------
+// cinematicShuttleFly_Skipthread
+// skipthread for cinematic
+//---------------------
+void cinematicShuttleFly_Skipthread()
+{
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematicShuttleFly" );
+
+	//--- fade in
+	cam_fadeout( .5, 0, 0, 0, 1, 0 );
+	wait( .6 );
+	
+	if(!cvar_bool_multiplayer){
+		//--- release the cinematic
+		noncinematic();
+		clearLetterbox( .1 );
+	
+		spawn ( "trigger_changelevel", "targetname", "trigger_changeToIGM", "map", "ent-deck8" );
+		setfloatvar ( "game.globalMissionEnterprise", 6 );
+		wait ( 1 );
+		trigger ( "$trigger_changeToIGM" );
+	}
+	else{
+		wait(.5);
+		thread coop_endLevel();
+	}
+}
+
+
+//---------------------
+// 	cinematicShuttleFly_ScaleShuttleUp
+// 	scale the shuttle up on the first part of it's path
+//---------------------
+void cinematicShuttleFly_ScaleShuttleUp()
+{
+	float i;
+	
+	for( i = .01 ; i <= .25 ; i += .003 )
+	{
+    	$shuttleSpace_Body.scale( i );
+    	$shuttleSpace_Door.scale( i );
+    	wait( .1 );
+    }
+}
+
+//---------------------
+// 	cinematicShuttleFly_ScaleShuttleDown
+// 	scale the shuttle down on the last part of it's path
+//---------------------
+void cinematicShuttleFly_ScaleShuttleDown()
+{
+	float i;
+	
+	killthread( "cinematicShuttleFly_ScaleShuttleUp" );
+	
+	for( i = .15 ; i >= .01 ; i -= .002 )
+	{
+    	$shuttleSpace_Body.scale( i );
+    	$shuttleSpace_Door.scale( i );
+    	wait( .1 );
+    }
+}
+

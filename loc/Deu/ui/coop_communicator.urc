@@ -1,0 +1,1291 @@
+menu "coop_communicator" 256 256 NONE 0.1
+align  center
+bgcolor 0 0 0 0
+hideDuringLoad
+borderstyle NONE
+direction from_right 0.2
+depth 0.1
+//noresize
+fadein 0.3
+
+resource
+Widget
+{
+	ordernumber 10
+	name "coop_hud_objective_bg"
+	rect 0 0 256 256
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "none"
+	shader coop_hud_communicator_bg
+}
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////Tab buttons
+////////////////////////////////////////////////////////////////////////////////
+resource
+Button
+{
+	title " "
+	name "Orders"
+	rect 0 20 72 14
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle "INDENT_BORDER"
+	stuffcommand "seta coop_comL 1"
+	hoverbordercolor 0 1 1 1
+	font serpentinemedium-12
+	//clicksound sound/misc/menu/click.wav
+	clicksound sound/environment/computer/holo_yes.wav
+	cvarvisibility "coop_comT" 0
+}
+
+
+resource
+Button
+{
+	title " "
+	name "Confirm"
+	rect 87 20 72 14
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle "INDENT_BORDER"
+	stuffcommand "seta coop_comL 2"
+	hoverbordercolor 0 1 1 1
+	font serpentinemedium-12
+	clicksound sound/environment/computer/holo_yes.wav
+	cvarvisibility "coop_comT" 0
+}
+
+resource
+Button
+{
+	title " "
+	name "Notify"
+	rect 173 20 72 14
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle "INDENT_BORDER"
+	stuffcommand "seta coop_comL 3"
+	hoverbordercolor 0 1 1 1
+	font serpentinemedium-12
+	clicksound sound/environment/computer/holo_yes.wav
+	cvarvisibility "coop_comT" 0
+}
+resource
+Button
+{
+	title " "
+	name "Orders"
+	rect 0 20 72 14
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle "INDENT_BORDER"
+	stuffcommand "seta coop_comL 11"
+	hoverbordercolor 0 1 1 1
+	font serpentinemedium-12
+	//clicksound sound/misc/menu/click.wav
+	clicksound sound/environment/computer/holo_yes.wav
+	cvarvisibility "coop_comT" 1
+}
+
+
+resource
+Button
+{
+	title " "
+	name "Confirm"
+	rect 87 20 72 14
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle "INDENT_BORDER"
+	stuffcommand "seta coop_comL 12"
+	hoverbordercolor 0 1 1 1
+	font serpentinemedium-12
+	clicksound sound/environment/computer/holo_yes.wav
+	cvarvisibility "coop_comT" 1
+}
+
+resource
+Button
+{
+	title " "
+	name "Notify"
+	rect 173 20 72 14
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle "INDENT_BORDER"
+	stuffcommand "seta coop_comL 13"
+	hoverbordercolor 0 1 1 1
+	font serpentinemedium-12
+	clicksound sound/environment/computer/holo_yes.wav
+	cvarvisibility "coop_comT" 1
+}
+resource
+Button
+{
+	title "$$ChatPromptAll$$"
+	name "sendto1"
+	rect 100 230 48 14
+	fgcolor 0 1 1 1
+	bgcolor 0 0 0 1
+	borderstyle "NONE"
+	font serpentinemedium-10
+	clicksound sound/environment/computer/holo_yes.wav
+	stuffcommand "seta coop_comT 1;seta coop_comL 11;"
+	cvarvisibility "coop_comT" 0
+}
+resource
+Button
+{
+	title "$$ChatPromptTeam$$"
+	name "sendto2"
+	rect 100 230 48 14
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0 0 0 1
+	borderstyle "NONE"
+	font serpentinemedium-10
+	clicksound sound/environment/computer/holo_yes.wav
+	stuffcommand "seta coop_comT 0;seta coop_comL 1;"
+	cvarvisibility "coop_comT" 1
+}
+resource
+Button
+{
+	title "MAP"
+	name "Orders"
+	rect 100 230 48 14
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0 0 0 1
+	borderstyle "NONE"
+	stuffcommand "seta coop_comL 6"
+	font serpentinemedium-10
+	clicksound sound/environment/computer/holo_yes.wav
+	cvarvisibility "g_gametype" 0
+}
+resource
+Button
+{
+	title "Administer"
+	name "Admin"
+	rect 2 230 100 14
+	fgcolor .4 .6 .5 1
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle "NONE"
+	stuffcommand "seta coop_comL 4"
+	font serpentinemedium-10
+	clicksound sound/environment/computer/holo_yes.wav
+	cvarvisibility "coop_comL" 4 !=
+}
+
+resource
+Button
+{
+	title "Setze rcon"
+	name "setrecon"
+	rect 2 230 100 14
+	hoverfgcolor 1 1 1 1
+	fgcolor .4 .6 .5 1
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle "NONE"
+	horizontaljustify left
+	font serpentinemedium-10
+	cvarvisibility "coop_comL" 4
+	stuffcommand "seta coop_comL 5"
+}
+
+resource
+Field
+{
+	title "rconPassword"
+	name "setrecon"
+	linkcvar "rconPassword"
+	maxcharacters   32
+	rect 0 60 256 24
+	fgcolor .7 .9 .8 1
+	bgcolor 0.00 0.00 0.00 1
+	borderstyle "NONE"
+	horizontaljustify left
+	font serpentinemedium-8
+	cvarvisibility "coop_comL" 5
+}
+resource
+label
+{
+	//title "Hit ENTER while in focus of the input-field, to applay the rcon password!"
+	title "Drücken sie ENTER im Eingabefeld um das rconPassword zu übernehmen!"
+	name "setreconinfo"
+	rect 2 100 252 80
+	fgcolor 1 1 1 1
+	bgcolor 0.00 0.00 0.00 1
+	borderstyle "NONE"
+	verticaljustify top
+	//horizontaljustify left
+	font serpentinemedium-12
+	cvarvisibility "coop_comL" 5
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////Order
+////////////////////////////////////////////////////////////////////////////////
+//Fallback!=====================================================================
+resource
+Button
+{
+	title "Rückzug!"
+	name "Rückzug!"
+	rect 2 40 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say_team =\/\\= : Fallback! : =\/\\= : Rueckzug!\n taunt 3\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "1"
+}
+//Incomming...==================================================================
+resource
+Button
+{
+	title "Eingehend!"
+	name "Eingehend!"
+	rect 2 60 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say_team =\/\\= : Incomming! : =\/\\= : Eingehend!\n taunt 6\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "1"
+}
+//Take Cover!===================================================================
+resource
+Button
+{
+	title "In Deckung!"
+	name "In Deckung!"
+	rect 2 80 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say_team =\/\\= : Take cover! : =\/\\= : In Deckung!\n taunt 4\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "1"
+}
+//Follow me!====================================================================
+resource
+Button
+{
+	title "Folgen Sie mir!"
+	name "Folgen Sie mir!"
+	rect 2 100 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say_team =\/\\= : Follow me! : =\/\\= : Folgen Sie mir!\n taunt 0\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "1"
+}
+//Lead the way!=================================================================
+resource
+Button
+{
+	title "Gehen Sie vorran!"
+	name "Gehen Sie vorran!"
+	rect 2 120 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say_team =\/\\= : Lead the way! : =\/\\= : Gehen Sie vorran!\n taunt 7\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "1"
+}
+//Meet with me!====================================================================
+resource
+Button
+{
+	title "Stoßen Sie zu mir!"
+	name "Stoßen Sie zu mir!"
+	rect 2 140 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say_team =\/\\= : Meet with me! : =\/\\= : Stossen Sie zu mir!\n taunt 0\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "1"
+}
+//Cover me!=====================================================================
+resource
+Button
+{
+	title "Geben Sie mir Deckung!"
+	name "Geben Sie mir Deckung!"
+	rect 2 160 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say_team =\/\\= : Cover me! : =\/\\= : Geben Sie mir Deckung!\n taunt 5\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "1"
+}
+//Take next Objective!==========================================================
+resource
+Button
+{
+	title "Übernehmen Sie n. Ziel!"
+	name "Übernehmen Sie n. Ziel!"
+	rect 2 180 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say_team =\/\\= : Take next Objective! : =\/\\= : Uebernehmen Sie naechstes Ziel!\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "1"
+}
+//Hold this position!===========================================================
+resource
+Button
+{
+	title "Halten Sie diese Position!"
+	name "Halten Sie diese Position!"
+	rect 2 200 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say_team =\/\\= : Hold this position! : =\/\\= : Halten Sie diese Position!\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "1"
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////Confirm
+////////////////////////////////////////////////////////////////////////////////
+//Affirmative...================================================================
+resource
+Button
+{
+	title "Positiv..."
+	name "Positiv..."
+	rect 2 40 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say_team =\/\\= : Affirmative... : =\/\\= : Positiv...\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "2"
+}
+//Negative...===================================================================
+resource
+Button
+{
+	title "Negativ..."
+	name "Negativ..."
+	stuffcommand "say_team =\/\\= : Negative... : =\/\\= : Negativ...\n togglemenu coop_communicator"
+	rect 2 60 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "2"
+}
+//Modulating...=============================================================
+resource
+Button
+{
+	title "Moduliere..."
+	name "Moduliere..."
+	rect 2 80 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say_team =\/\\= : Modulating... : =\/\\= : Moduliere... \n taunt 9\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "2"
+}
+//Following you...===========================================================
+resource
+Button
+{
+	title "Folge Ihnen..."
+	name "Folge Ihnen..."
+	rect 2 100 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say_team =\/\\= : Following you... : =\/\\= : Folge Ihnen...\n taunt 8\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "2"
+}
+//Leading the way!==============================================================
+resource
+Button
+{
+	title "Gehe vorran..."
+	name "Gehe vorran..."
+	rect 2 120 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say_team =\/\\= : Leading the way... : =\/\\= : Gehe vorran...\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "2"
+}
+//Covering you...====================================================================
+resource
+Button
+{
+	title "Gebe Deckung..."
+	name "Gebe Deckung..."
+	stuffcommand "say_team =\/\\= : Covering you... : =\/\\= : Gebe Deckung...\n togglemenu coop_communicator"
+	rect 2 140 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "2"
+}
+//Holding position...===========================================================
+resource
+Button
+{
+	title "Halte Position..."
+	name "Halte Position..."
+	rect 2 160 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say_team =\/\\= : Holding position... : =\/\\= : Halte Position...\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "2"
+}
+//I'm retreating================================================================
+resource
+Button
+{
+	title "Ziehe mich zurück..."
+	name "Ziehe mich zurück..."
+	rect 2 180 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say_team =\/\\= : I'm retreating... : =\/\\= : Ziehe mich zurueck...\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "2"
+}
+//Taking next Objective=========================================================
+resource
+Button
+{
+	title "Übernehme n. Missionsziel..."
+	name "Übernehme n. Missionsziel..."
+	rect 2 200 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say_team =\/\\= : I take the next Objective... : =\/\\= : ich uebernehme naechstes Missionsziel...\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "2"
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////Notify
+////////////////////////////////////////////////////////////////////////////////
+//I'm Back...===================================================================
+resource
+Button
+{
+	title "Bin zurück..."
+	name "Bin zurück..."
+	stuffcommand "say_team =\/\\= : I'm back... : =\/\\= : Bin zurueck...\n togglemenu coop_communicator"
+	rect 2 40 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "3"
+}
+//I'm waiting here...===========================================================
+resource
+Button
+{
+	title "Ich warte hier..."
+	name "Ich warte hier..."
+	rect 2 60 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say_team =\/\\= : I'm waiting here... : =\/\\= : Ich warte hier...\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "3"
+}
+//Stand STILL, please !=========================================================
+resource
+Button
+{
+	title "STILL halten, bitte !"
+	name "STILL halten, bitte !"
+	rect 2 80 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say_team =\/\\= : Stand STILL, please ! : =\/\\= : STILL halten, bitte !\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "3"
+}
+//Be right back...================================================================
+resource
+Button
+{
+	title "Bin gleich wieder da..."
+	name "Bin gleich wieder da..."
+	rect 2 100 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say_team =\/\\= : Be right back... : =\/\\= : Bin gleich wieder da...\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "3"
+}
+//I need backup...============================================
+resource
+Button
+{
+	title "Ich brauche Unterstützung..."
+	name "Ich brauche Unterstützung..."
+	stuffcommand "say_team =\/\\= : I need backup... : =\/\\= : Ich brauche Unterstuetzung...\n togglemenu coop_communicator"
+	rect 2 120 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "3"
+}
+//I need a Weapon Expert!!!============================================
+resource
+Button
+{
+	title "Ich brauche einen Waffenex..."
+	name "Ich brauche einen Waffenex..."
+	stuffcommand "say_team =\/\\= : I need a Weapon Expert!!! : =\/\\= : Ich brauche einen Waffenexperte!!!\n togglemenu coop_communicator"
+	rect 2 160 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "3"
+}
+//I need a Technican!!!============================================
+resource
+Button
+{
+	title "Ich brauche einen Techniker!!!"
+	name "Ich brauche einen Techniker!!!"
+	stuffcommand "say_team =\/\\= : I need a Technican!!! : =\/\\= : Ich brauche einen Techniker!!!\n togglemenu coop_communicator"
+	rect 2 180 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "3"
+}
+//I need a Medic!!!============================================
+resource
+Button
+{
+	title "Ich brauche einen Doctor!!!"
+	name "Ich brauche einen Doctor!!!"
+	stuffcommand "say_team =\/\\= : I need a Medic!!! : =\/\\= : Ich brauche einen Doctor!!!\n togglemenu coop_communicator"
+	rect 2 200 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "3"
+}
+////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////REMOTE CONSOLE
+////////////////////////////////////////////////////////////////////////////////
+//CLEAR CACHE===================================================================
+resource
+Button
+{
+	title "Cache säubern (nur listen sv)"
+	name "clearcache"
+	rect 2 40 252 18
+	fgcolor 1 .2 0 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 1 0 0 .6
+	hoverfgcolor 0 1 1 1
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "flushtikis; centerprint \"^5REMOTE:^8 LOKALER CACHE GESÄUBERT!\"\n"
+	font serpentinemedium-12
+	clicksound sound/environment/computer/lcars_yes.wav
+	cvarvisibility "coop_comL" "4"
+}
+//SNIPER========================================================================
+resource
+SwitchBox
+{
+	name "sniper"
+	rect 2 60 252 18
+	hoverfgcolor 1 1 1 1
+	fgcolor 1 .2 0 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle	"NONE"
+	linkcvar "temp_mp_modifier_InstantKill"
+	font serpentinemedium-12
+	option		"$$InstantKill$$"	"rcon mp_modifier_InstantKill 0;seta temp_mp_modifier_InstantKill 0;centerprint \"^5REMOTE:^8 ALLE WAFFEN gesetz, restarten oder eine karte laden!\"" 0
+	option		"Alle Waffen"		"rcon mp_modifier_InstantKill 1;seta temp_mp_modifier_InstantKill 1;centerprint \"^5REMOTE:^8 SNIPER gesetz, restarten oder eine karte laden!\"" 1
+    clicksound sound/environment/computer/holo_yes.wav
+	cvarvisibility "coop_comL" "4"
+}
+
+resource
+SwitchBox
+{
+	name "gametype"
+	rect 2 80 252 18
+	hoverfgcolor 1 1 1 1
+	fgcolor 1 .2 0 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle	"NONE"
+	linkcvar "temp_mp_gameType"
+	font serpentinemedium-12
+	option		"$$TeamHolomatch$$"		"rcon mp_gameType 0;seta temp_mp_gameType 0;centerprint \"^5REMOTE:^8 $$Holomatch$$ gesetz, restarten oder eine karte laden!\"" 0
+	option		"$$CaptureTheFlag$$"	"rcon mp_gameType 1;seta temp_mp_gameType 1;centerprint \"^5REMOTE:^8 $$TeamHolomatch$$ gesetz, restarten oder eine karte laden!\"" 1
+	option		"$$Holomatch$$"			"rcon mp_gameType 2;seta temp_mp_gameType 2;centerprint \"^5REMOTE:^8 $$CaptureTheFlag$$ gesetz, restarten oder eine karte laden!\"" 2
+    clicksound sound/environment/computer/holo_yes.wav
+	cvarvisibility "coop_comL" "4"
+}
+
+//restart=======================================================================
+resource
+Button
+{
+	title "restart (änderungen akzept.)"
+	name "restart"
+	rect 2 200 252 18
+	fgcolor 1 .2 0 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 1 0 0 .6
+	hoverfgcolor 0 1 1 1
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "rcon restart \n"
+	font serpentinemedium-12
+	clicksound sound/environment/computer/holo_change.wav
+	cvarvisibility "coop_comL" "4"
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////Order
+////////////////////////////////////////////////////////////////////////////////
+//Fallback!=====================================================================
+resource
+Button
+{
+	title "Rückzug!"
+	name "Rückzug!"
+	rect 2 40 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say =\/\\= : Fallback! : =\/\\= : Rueckzug!\n taunt 3\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "11"
+}
+//Incomming...==================================================================
+resource
+Button
+{
+	title "Eingehend!"
+	name "Eingehend!"
+	rect 2 60 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say =\/\\= : Incomming! : =\/\\= : Eingehend!\n taunt 6\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "11"
+}
+//Take Cover!===================================================================
+resource
+Button
+{
+	title "In Deckung!"
+	name "In Deckung!"
+	rect 2 80 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say =\/\\= : Take cover! : =\/\\= : In Deckung!\n taunt 4\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "11"
+}
+//Follow me!====================================================================
+resource
+Button
+{
+	title "Folgen Sie mir!"
+	name "Folgen Sie mir!"
+	rect 2 100 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say =\/\\= : Follow me! : =\/\\= : Folgen Sie mir!\n taunt 0\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "11"
+}
+//Lead the way!=================================================================
+resource
+Button
+{
+	title "Gehen Sie vorran!"
+	name "Gehen Sie vorran!"
+	rect 2 120 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say =\/\\= : Lead the way! : =\/\\= : Gehen Sie vorran!\n taunt 7\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "11"
+}
+//Meet with me!====================================================================
+resource
+Button
+{
+	title "Stoßen Sie zu mir!"
+	name "Stoßen Sie zu mir!"
+	rect 2 140 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say =\/\\= : Meet with me! : =\/\\= : Stossen Sie zu mir!\n taunt 0\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "11"
+}
+//Cover me!=====================================================================
+resource
+Button
+{
+	title "Geben Sie mir Deckung!"
+	name "Geben Sie mir Deckung!"
+	rect 2 160 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say =\/\\= : Cover me! : =\/\\= : Geben Sie mir Deckung!\n taunt 5\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "11"
+}
+//Take next Objective!==========================================================
+resource
+Button
+{
+	title "Übernehmen Sie n. Ziel!"
+	name "Übernehmen Sie n. Ziel!"
+	rect 2 180 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say =\/\\= : Take next Objective! : =\/\\= : Uebernehmen Sie naechstes Ziel!\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "11"
+}
+//Hold this position!===========================================================
+resource
+Button
+{
+	title "Halten Sie diese Position!"
+	name "Halten Sie diese Position!"
+	rect 2 200 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say =\/\\= : Hold this position! : =\/\\= : Halten Sie diese Position!\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "11"
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////Confirm
+////////////////////////////////////////////////////////////////////////////////
+//Affirmative...================================================================
+resource
+Button
+{
+	title "Positiv..."
+	name "Positiv..."
+	rect 2 40 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say =\/\\= : Affirmative... : =\/\\= : Positiv...\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "12"
+}
+//Negative...===================================================================
+resource
+Button
+{
+	title "Negativ..."
+	name "Negativ..."
+	stuffcommand "say =\/\\= : Negative... : =\/\\= : Negativ...\n togglemenu coop_communicator"
+	rect 2 60 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "12"
+}
+//Modulating...=============================================================
+resource
+Button
+{
+	title "Moduliere..."
+	name "Moduliere..."
+	rect 2 80 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say =\/\\= : Modulating... : =\/\\= : Moduliere... \n taunt 9\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "12"
+}
+//Following you...===========================================================
+resource
+Button
+{
+	title "Folge Ihnen..."
+	name "Folge Ihnen..."
+	rect 2 100 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say =\/\\= : Following you... : =\/\\= : Folge Ihnen...\n taunt 8\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "12"
+}
+//Leading the way!==============================================================
+resource
+Button
+{
+	title "Gehe vorran..."
+	name "Gehe vorran..."
+	rect 2 120 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say =\/\\= : Leading the way... : =\/\\= : Gehe vorran...\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "12"
+}
+//Covering you...====================================================================
+resource
+Button
+{
+	title "Gebe Deckung..."
+	name "Gebe Deckung..."
+	stuffcommand "say =\/\\= : Covering you... : =\/\\= : Gebe Deckung...\n togglemenu coop_communicator"
+	rect 2 140 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "12"
+}
+//Holding position...===========================================================
+resource
+Button
+{
+	title "Halte Position..."
+	name "Halte Position..."
+	rect 2 160 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say =\/\\= : Holding position... : =\/\\= : Halte Position...\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "12"
+}
+//I'm retreating================================================================
+resource
+Button
+{
+	title "Ziehe mich zurück..."
+	name "Ziehe mich zurück..."
+	rect 2 180 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say =\/\\= : I'm retreating... : =\/\\= : Ziehe mich zurueck...\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "12"
+}
+//Taking next Objective=========================================================
+resource
+Button
+{
+	title "Übernehme n. Missionsziel..."
+	name "Übernehme n. Missionsziel..."
+	rect 2 200 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say =\/\\= : I take the next Objective... : =\/\\= : ich uebernehme naechstes Missionsziel...\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "12"
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////Notify
+////////////////////////////////////////////////////////////////////////////////
+//I'm Back...===================================================================
+resource
+Button
+{
+	title "Bin zurück..."
+	name "Bin zurück..."
+	stuffcommand "say =\/\\= : I'm back... : =\/\\= : Bin zurueck...\n togglemenu coop_communicator"
+	rect 2 40 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "13"
+}
+//I'm waiting here...===========================================================
+resource
+Button
+{
+	title "Ich warte hier..."
+	name "Ich warte hier..."
+	rect 2 60 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say =\/\\= : I'm waiting here... : =\/\\= : Ich warte hier...\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "13"
+}
+//Stand STILL,please !=============================================================
+resource
+Button
+{
+	title "STILL halten, bitte!"
+	name "STILL halten, bitte!"
+	rect 2 80 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say =\/\\= : Stand STILL, please ! : =\/\\= : STILL halten, bitte!\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "13"
+}
+//Be right back...================================================================
+resource
+Button
+{
+	title "Bin gleich wieder da..."
+	name "Bin gleich wieder da..."
+	rect 2 100 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "say =\/\\= : Be right back... : =\/\\= : Bin gleich wieder da...\n togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "13"
+}
+//I need backup...============================================
+resource
+Button
+{
+	title "Ich brauche Unterstützung..."
+	name "Ich brauche Unterstützung..."
+	stuffcommand "say =\/\\= : I need backup... : =\/\\= : Ich brauche Unterstuetzung...\n togglemenu coop_communicator"
+	rect 2 120 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "13"
+}
+//I need a Weapon Expert!!!============================================
+resource
+Button
+{
+	title "Ich brauche einen Waffenex..."
+	name "Ich brauche einen Waffenex..."
+	stuffcommand "say =\/\\= : I need a Weapon Expert!!! : =\/\\= : Ich brauche einen Waffenexperte!!!\n togglemenu coop_communicator"
+	rect 2 160 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "13"
+}
+//I need a Technican!!!============================================
+resource
+Button
+{
+	title "Ich brauche einen Techniker!!!"
+	name "Ich brauche einen Techniker!!!"
+	stuffcommand "say =\/\\= : I need a Technican!!! : =\/\\= : Ich brauche einen Techniker!!!\n togglemenu coop_communicator"
+	rect 2 180 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "13"
+}
+//I need a Medic!!!============================================
+resource
+Button
+{
+	title "Ich brauche einen Doctor!!!"
+	name "Ich brauche einen Doctor!!!"
+	stuffcommand "say =\/\\= : I need a Medic!!! : =\/\\= : Ich brauche einen Doctor!!!\n togglemenu coop_communicator"
+	rect 2 200 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0 1 1 1
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "13"
+}
+///////////////////////////////////////////////////////////////////////////////}
+//////////////////////////////////////////////////////////////////////CO-OP MAPS
+///////////////////////////////////////////////////////////////////////////////{
+//NEXTMAP=======================================================================
+resource
+Button
+{
+	title "Nächste Coop Karte"
+	name "nextmap"
+	rect 2 40 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "vstr coop_nMap\n"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "6"
+}
+//PREVIOUS======================================================================
+resource
+Button
+{
+	title "Vorherige Coop Karte"
+	name "previous"
+	rect 2 60 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "vstr coop_pMap\n"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "6"
+}
+//NEXTMISSION===================================================================
+resource
+Button
+{
+	title "Nächste Coop Mission"
+	name "nextmission"
+	rect 2 80 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "vstr coop_nMission\n"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "6"
+}
+//RESTART=======================================================================
+resource
+Button
+{
+	title "neustarten"
+	name "restart"
+	rect 2 100 252 18
+	borderstyle "NONE"//INDENT_BORDER
+	stuffcommand "restart\n"
+	font serpentinemedium-12
+	clicksound sound/player/CommunicatorBeep.wav
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	hoverbgcolor 0.51 0.76 0.91 0.7
+	hoverfgcolor 1 1 1 1
+	cvarvisibility "coop_comL" "6"
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////CLOSE BUTTON
+////////////////////////////////////////////////////////////////////////////////
+resource
+Button
+{
+	title "    "
+	name "coop_communicator_closeButton"
+	rect 	162 236 84 14
+	fgcolor 0.99 0.80 0.20 1.00
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "None"
+	stuffcommand "togglemenu coop_communicator"
+	font serpentinemedium-12
+	clicksound sound/misc/menu/back1.wav
+}
+end.
+

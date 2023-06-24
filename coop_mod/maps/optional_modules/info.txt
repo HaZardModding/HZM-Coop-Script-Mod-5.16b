@@ -1,0 +1,5 @@
+//This module-scripts shall be included only as they are needed (In the level-script)
+
+//callVolume.scr
+//requires you to include first:
+//#include "coop_mod/maps/optional_modules/teammate.scr"

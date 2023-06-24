@@ -1,0 +1,14 @@
+cache models/char/klingon-m9-merc-batleth-m1.tik
+cache models/char/klingon-m9-merc-batleth-m2.tik
+cache models/char/klingon-m9-merc-batleth-f1.tik
+cache models/char/klingon-m9-merc-batleth-f2.tik
+cache models/char/klingon-m9-merc-knife-m1.tik
+cache models/char/klingon-m9-merc-knife-m2.tik
+cache models/weapons/staticmodel-batleth.tik
+cache models/fx/fx-fire-medium.tik
+cache models/fx/fx-fire-torch.tik
+
+cache sound/environment/lava/lava_loop2.wav
+cache sound/ships/enterprise/ent_forcefield.wav
+cache sound/environment/fire/fire_med01.wav
+cache sound/ships/enterprise/ent_beep_confirm.wav

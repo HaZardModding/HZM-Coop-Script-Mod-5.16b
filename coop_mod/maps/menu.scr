@@ -1,0 +1,351 @@
+void globalCoop_menu_respawn(entity ePlayer, string sClass)
+{
+	if(doesEntityExist(ePlayer))
+	{
+		string sText;
+		vector vRespawn;
+		sText = "^5INFO:^8 You will respawn at the default respawn position\n";
+	//set respawn here when using the button that also reads technician, otherwise reset
+		if(sClass == "Technician")
+		{
+			vRespawn = ePlayer.getOrigin();
+			sText = "^5INFO:^8 You will respawn here from now on\n";
+			ePlayer.setVectorVar("globalCoop_respawnHereAngles",ePlayer.getAngles());
+		}
+		ePlayer.setVectorVar("globalCoop_respawnHere",vRespawn);
+		ePlayer.hudprint(sText);
+	}
+}
+
+
+void globalCoop_menu_changeSkill(float fSkill,string sSkill, entity ePlayer)
+//start skill vote
+{
+	if(globalCoop_vote("$$SkillLevel$$:^0_^8$$"+sSkill+"$$^0_^8?",ePlayer))
+	{
+		stuffcmd("seta coop_skill "+fSkill+"\n");
+		string sMsg;
+		if(fSkill==3)
+		{
+			thread globalCoop_huds_textOrHudAll("coop_msgManual","^3Attention^8: Weapon AUTO-RELOAD is disabled !");
+		}
+		else
+		{
+			globalCoop_huds_RemoveAll("coop_msgManual");
+		}
+		centerprint("^5Coop INFO:^8 Skill set to $$"+sSkill+"$$"+sMsg);
+		globalCoop_server_settingsChanged();
+	}
+}
+void globalCoop_menu_changeWeapMoveSpeed(float fSpeed,entity ePlayer)
+//start max weapon move speed vote
+{
+	float fFireSpeed;
+	fFireSpeed = getCvarInt("coop_weapSpeed");
+	if(fFireSpeed < 15)
+	{
+		fFireSpeed=65;
+	}
+	fFireSpeed=(fFireSpeed/100);	
+	
+	if(globalCoop_vote("Set^0_^8fireing^0_^8moving^0_^8speed^0_^8to:^0_^8->"+(fSpeed / 100)+"^0_^8?^0_^8Current:^0_^8->"+fFireSpeed,ePlayer))
+	{
+		//centerprint("^5Coop INFO:^8 Fire-move-speed has been changed to: "+(fSpeed / 100)+" was "+fFireSpeed);
+		stuffcmd("seta coop_weapSpeed "+fSpeed+"\n");
+		globalCoop_server_settingsChanged();
+	}
+}
+
+void globalCoop_menu_changeMaxSpeed(float fSpeed,entity ePlayer)
+//start max move speed vote
+{
+	float fCurrentSpeed;
+	fCurrentSpeed = cvar_float_maxSpeed;
+	
+	if(globalCoop_vote("Set^0_^8$$PlayerSpeed$$^0_^8to:^0_^8->"+fSpeed+"^0_^8?^0_^8Current:^0_^8->"+fCurrentSpeed,ePlayer))
+	{
+		//centerprint("^5Coop INFO:^8 $$PlayerSpeed$$ changed to: "+fSpeed+" was "+fCurrentSpeed);
+		stuffcmd("seta coop_maxSpeed "+fSpeed+"\n");
+		globalCoop_server_settingsChanged();
+	}
+}
+
+void globalCoop_menu_changeSpeed(float fWSpeed,float fMspeed,entity ePlayer)
+//change eigther weapon speed or max move speed
+{
+	if(doesEntityExist(ePlayer))
+	{
+		if(ePlayer.getFloatVar("globalCoop_menu_toggleSpeedActive"))
+		{
+		//set weapon move speed only if it is not equal to 0
+			if(fWSpeed > 0)
+			{
+				globalCoop_menu_changeWeapMoveSpeed(fWSpeed,ePlayer);
+			}
+		}
+		else
+		{
+			globalCoop_menu_changeMaxSpeed(fMspeed,ePlayer);
+		}
+	}
+}
+
+void globalCoop_menu_changeClassOrPersonal(string sClass,entity ePlayer)
+//change eigther weapon speed or max move speed
+{
+	if(doesEntityExist(ePlayer))
+	{
+	//exit mom menu
+		mom_exitMenuPlayer(ePlayer);
+	//decide which one to pick
+		if(ePlayer.getFloatVar("globalCoop_menu_togglePersonalActive"))
+		{
+			if(sClass == "Medic")
+			{
+				float fFollowMe;
+				fFollowMe = globalCoop_return_integerPlayerId(ePlayer);
+			//ai follow this player
+				if(globalCoop_vote("AI-Teammates^0_^8follow:^0_^8->^0_^8Player"+fFollowMe,ePlayer))
+				{
+					coop_integer_playerToFollow = fFollowMe;
+					globalCoop_level_callReliably("globalCoop_teammate_follow");
+				}
+			}
+			else
+			{
+			//respawn here or not
+				globalCoop_menu_respawn(ePlayer,sClass);
+			}
+		}
+		else
+		{
+		//player change class to given
+			ePlayer.setStringVar("globalCoop_className",sClass);	
+			globalCoop_class_setupPlayer(ePlayer);
+		}
+	}
+}
+
+//This script contains the code for the coop menu system
+void globalCoop_menu()
+//this function is started once the trigger is used
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+	ePlayer.setFloatVar("globalCoop_menu_toggleSpeedActive",0);
+	ePlayer.setFloatVar("globalCoop_menu_togglePersonalActive",0);
+}
+
+void globalCoop_menu_One()
+//this function is called when option 1 is used
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+	globalCoop_menu_changeSkill(0,"Easy",ePlayer);
+}
+void globalCoop_menu_Two()
+//this function is called when option 2 is used
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+	globalCoop_menu_changeSkill(1,"Normal",ePlayer);
+}
+
+void globalCoop_menu_Three()
+//this function is called when option 3 is used
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+	globalCoop_menu_changeSkill(2,"Hard",ePlayer);
+}
+void globalCoop_menu_Four()
+//this function is called when option 4 is used
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+	globalCoop_menu_changeSkill(3,"VeryHard",ePlayer);
+}
+
+void globalCoop_menu_Five()
+//this function is called when option 5 is used
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+	globalCoop_menu_changeClassOrPersonal("Medic",ePlayer);
+}
+
+void globalCoop_menu_Six()
+//this function is called when option 6 is used
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+	globalCoop_menu_changeClassOrPersonal("Technician",ePlayer);
+}
+
+void globalCoop_menu_Seven()
+//this function is called when option 7 is used
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+	globalCoop_menu_changeClassOrPersonal("HeavyWeapons",ePlayer);
+}
+void globalCoop_menu_Eight()
+//this function is called when option 8 is used
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+	float fDisp,fDispSet=1;
+	string sVote;
+	sVote = "^1DISABLE";
+	fDisp = getCvarInt("coop_disDisp");
+	
+	if(fDisp)
+	{
+		sVote = "^2ENABLE";
+	}
+
+	if(globalCoop_vote(sVote+"^0_^8Health/Energy^0_^8Terminals^0_^8?",ePlayer))
+	{
+		if(fDisp==1)
+		{
+			fDispSet=0;
+			centerprint("^5Coop INFO:^8 Health/Energy Terminals will be ^2ENABLED^8 on next Map load");
+		}
+		else
+		{
+			removeclass("Dispenser");
+		}
+		stuffcmd("seta coop_disDisp "+fDispSet+"\n");
+		globalCoop_server_settingsChanged();
+	}
+}
+void globalCoop_menu_Nine()
+//this function is called when option 9 is used
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+	float fClass,fClassSet=1;
+	string sVote;
+	sVote = "^1DISABLE";
+	fClass = getCvarInt("coop_disClass");
+	if(fClass==1)
+	{
+		sVote = "^2ENABLE";
+		fClassSet=0;
+	}
+	//ePlayer.hudprint("fClass current("+fClass+") toggle to("+fClassSet+") 0=ON/1=OFF\n");
+	
+	if(globalCoop_vote(sVote+"^0_^8Player^0_^8Classes^0_^8?",ePlayer))
+	{
+		centerprint("^5Coop INFO:^8 Player Classes have been "+sVote+"D");
+		stuffcmd("seta coop_disClass "+fClassSet+"\n");
+		globalCoop_main_waitAFrame();
+		if(fClassSet)
+		{
+			globalCoop_player_transmittToAll("exec coop_mod/cfg/clean_classesAll.cfg");
+			//globalCoop_level_hide($coop_class_MedicModel);
+			//globalCoop_level_hide($coop_class_TechnicianModel);
+			//globalCoop_level_hide($coop_class_HeavyWeaponsModel);
+		}
+		else
+		{
+			globalCoop_player_transmittToAll("exec coop_mod/cfg/restore_class.cfg");
+			//globalCoop_level_show($coop_class_MedicModel);
+			//globalCoop_level_show($coop_class_TechnicianModel);
+			//globalCoop_level_show($coop_class_HeavyWeaponsModel);
+		}
+		globalCoop_server_settingsChanged();
+	}
+}
+//this function is called when option 0 is used
+void globalCoop_menu_Zero()
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+	float fClass,fClassSet=1;
+	string sVote;
+	sVote = "^1ENABLE";
+	fClass = getCvarInt("coop_techOnly");
+	if(fClass==1)
+	{
+		sVote = "^2DISABLE";
+		fClassSet=0;
+	}
+	if(globalCoop_vote(sVote+"^0_^8only^0_^8$$Technician$$^0_^8can^0_^8solve^0_^8Puzzles^0_^8?",ePlayer))
+	{
+		//centerprint("^5Coop INFO:^8 "+sVote+"D ^8Puzzles requiring $$Technician$$ to be solved");
+		stuffcmd("seta coop_techOnly "+fClassSet+"\n");
+		globalCoop_server_settingsChanged();
+	}
+}
+//this function is called when option 10 is used
+void globalCoop_menu_Ten()
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());	
+	if(globalCoop_vote("$$PromptRestoreDefaults$$",ePlayer))
+	{
+		stuffcmd("exec coop_mod/cfg/server/reset_coop.cfg");
+		centerprint("$$ServerOptionChanged$$: ^5Coop Mod ^8$$Default$$ $$Settings$$");
+		globalCoop_server_settingsChanged();
+	}
+}
+
+//this function is called when option 11 is used
+void globalCoop_menu_Eleven()
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+	
+	float fToggle;
+	fToggle = ePlayer.getFloatVar("globalCoop_menu_toggleSpeedActive");
+	
+	if(fToggle)
+	{
+		ePlayer.setFloatVar("globalCoop_menu_toggleSpeedActive",0);
+	}
+	else
+	{
+		ePlayer.setFloatVar("globalCoop_menu_toggleSpeedActive",1);
+	}
+}
+//this function is called when option 12 is used
+void globalCoop_menu_Twelve()
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+	globalCoop_menu_changeSpeed(35,200,ePlayer);
+}
+//this function is called when option 13 is used
+void globalCoop_menu_Thirteen()
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+	globalCoop_menu_changeSpeed(65,240,ePlayer);
+}
+//this function is called when option 14 is used
+void globalCoop_menu_Fourteen()
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+	globalCoop_menu_changeSpeed(100,300,ePlayer);
+}
+void globalCoop_menu_Fifteen()
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+	
+	float fToggle;
+	fToggle = ePlayer.getFloatVar("globalCoop_menu_togglePersonalActive");
+	
+	if(fToggle)
+	{
+		ePlayer.setFloatVar("globalCoop_menu_togglePersonalActive",0);
+	}
+	else
+	{
+		ePlayer.setFloatVar("globalCoop_menu_togglePersonalActive",1);
+	}
+}
+
+

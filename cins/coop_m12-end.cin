@@ -1,0 +1,309 @@
+//-----------------------------------------------
+// Cinematic Name: c:\projects\ef2\ef2\base\cins\m12-end.cin
+// Export Version: 1
+// Export Date:    Sat Apr 26 17:47:59 2003
+//-----------------------------------------------
+
+Origins
+{
+    Origin
+    {
+          name          "m12-end"
+          origin         0.000000 0.000000 0.000000
+          yaw            0.000000
+    }
+}
+
+
+Actors
+{
+    Actor
+    {
+        name          "armMunro"
+        tiki          "char/hazardteam_sf-munro.tik"
+        anim          "cin-m12-end-munro"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         2026.121094 -4948.350586 -0.788298
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "armPicard"
+        tiki          "char/starfleet_picard.tik"
+        anim          "cin-m12-end-picard"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         1949.020874 -4999.907715 -0.574669
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "armRomgeneral"
+        tiki          "char/romulan_stx-commander.tik"
+        anim          "cin-m12-end-rom"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         1951.649292 -6080.360840 -351.954376
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "armPaco"
+        tiki          "char/starfleet_crew-male4.tik"
+        anim          "cin-m12-end-paco"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         1992.280151 -5314.397461 -31.822098
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "armRico"
+        tiki          "char/starfleet_crew-male3.tik"
+        anim          "cin-m12-end-rico"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         1910.043823 -5311.757813 -31.698704
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "armTuvok"
+        tiki          "char/starfleet_tuvok.tik"
+        anim          "cin-m12-end-tuvok"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         1753.327637 -5016.411621 0.000000
+        yaw            -90.000000
+    }
+}
+
+
+Cameras
+{
+    Camera
+    {
+        name         "cam2-m12-end"
+        camfile      "cam2-m12-end"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+		selfRemoving false
+    }
+    Camera
+    {
+        name         "cam3-m12-end"
+        camfile      "cam3-m12-end"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+		selfRemoving false
+    }
+    Cut
+    {
+        toCamera     "cam2-m12-end"
+        frame         0
+        fadeout       0
+        fadein        20
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m12-end"
+        frame         28
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam2-m12-end"
+        frame         64
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m12-end"
+        frame         103
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam2-m12-end"
+        frame         156
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m12-end"
+        frame         241
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam2-m12-end"
+        frame         344
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m12-end"
+        frame         440
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam2-m12-end"
+        frame         604
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m12-end"
+        frame         696
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam2-m12-end"
+        frame         795
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m12-end"
+        frame         872
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam2-m12-end"
+        frame         1058
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m12-end"
+        frame         1177
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam2-m12-end"
+        frame         1360
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m12-end"
+        frame         1489
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam2-m12-end"
+        frame         1616
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m12-end"
+        frame         1753
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam2-m12-end"
+        frame         1789
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m12-end"
+        frame         1848
+        fadeout       0
+        fadein        0
+        lerp          false
+    } 
+    Cut
+    {
+        toCamera     "cam2-m12-end"
+        frame         1889
+        fadeout       20
+        fadein        0
+        lerp          false
+    }    
+}

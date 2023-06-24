@@ -1,0 +1,208 @@
+///////////////////////////////////////////////////////////////////
+// I N C L U D E S
+///////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/global/global_spawnWave.scr"
+#include "coop_mod/maps/global/global_cinematicFX.scr"
+#include "coop_mod/maps/global/global_common.scr"
+#include "coop_mod/maps/global/global_flyin.scr"
+#include "coop_mod/maps/missions/?/?_cin.scr"
+
+H:\Music\Games\EF2\music\attrexian\att_m4l2_action.mp3
+
+///////////////////////////////////////////////////////////////////
+// M I S C 
+///////////////////////////////////////////////////////////////////
+
+//move class selection
+	thread globalCoop_level_moveToPos($coop_class_MedicModel,'1468 -1945 72');
+	thread globalCoop_level_moveToPos($coop_class_TechnicianModel,'1513 -1866 72');
+	thread globalCoop_level_moveToPos($coop_class_HeavyWeaponsModel,'1616 -1832 72');
+
+if(!cvar_bool_multiplayer){//Singleplayer
+globalCoop_main_waitForWarmupTime();
+globalCoop_server_precacheSingleplayer();
+globalCoop_main_waitAFrame();
+globalCoop_main_waitZeroDot2();
+globalCoop_main_waitZeroDot5();
+globalCoop_main_wait1DotZero();
+globalCoop_main_wait2DotZero();
+globalCoop_check_existingLivingEntity(
+globalCoop_return_integerPlayersQuantity( //all=0,living=1,noSpec=2
+
+
+///////////////////////////////////////////////////////////////////
+// M I S S I O N   -   O B J E C  T I V E S
+///////////////////////////////////////////////////////////////////
+thread globalCoop_objectives_update("incomplete",1,0);//state,slot,show
+thread globalCoop_objectives_update("complete",1,0);//state,slot,show
+globalCoop_mission_fail();
+globalCoop_mission_failWithReason(
+globalCoop_mission_accomplished();
+globalCoop_mission_completed(
+
+www.chrissstrahl.de/temp/coop_gbs-deu.pk3
+www.chrissstrahl.de/temp/coop_gbs-eng.pk3
+www.chrissstrahl.de/temp/coop_gbs.pk3
+www.chrissstrahl.de/temp/coop_gbs2.pk3
+
+
+///////////////////////////////////////////////////////////////////
+// A C T O R S
+///////////////////////////////////////////////////////////////////
+globalCoop_actor_aiOff(
+globalCoop_actor_healthMultiplicatePerPlayer(
+
+
+///////////////////////////////////////////////////////////////////
+// D I A L O G
+///////////////////////////////////////////////////////////////////
+globalCoop_dialog_play(,"
+globalCoop_dialog_waitForDialog(
+
+
+///////////////////////////////////////////////////////////////////
+// P L A Y E R
+///////////////////////////////////////////////////////////////////
+entity ePlayer;
+ePlayer=globalCoop_return_playerClosestPreferActive($telsia);
+$telsia.headwatch( ePlayer, 10 );
+$telsia.turntowardsentity(ePlayer);
+
+globalCoop_return_playerClosestPreferActive(
+
+
+///////////////////////////////////////////////////////////////////
+// C I N E M A T I C
+///////////////////////////////////////////////////////////////////
+coop_bool_cameraFadedOut=1;
+globalCoop_cin_start();
+globalCoop_main_camFadeOut(.5);
+globalCoop_main_camFadeIn(.5);
+globalCoop_cin_end();
+globalCoop_cin_cut(
+globalCoop_cin_fov(
+globalCoop_cin_follow(
+globalCoop_cin_followWatch(,
+globalCoop_cin_watch(,
+globalCoop_cin_skipThread
+globalCoop_cin_cuecamera
+globalCineFX_CameraFOV
+
+if(!cvar_bool_multiplayer){//Singleplayer
+	$player.origin( '-11048 1800 2' );
+}else{
+	float fPlayer;
+	entity ePlayer;
+	for(fPlayer=1;fPlayer<=coop_integer_maxPlayers;fPlayer++){
+		ePlayer=getEntity("player"+fPlayer);
+		if(doesEntityExist(ePlayer)){
+			ePlayer.setVectorVar("coop_cinematic_location",'-11048 1800 2');
+			ePlayer.setVectorVar("coop_cinematic_viewangles",'0 160 0');
+		}
+	}
+}
+
+
+///////////////////////////////////////////////////////////////////
+// I N F O R M A T I O N   G E A T H E R I N G   M I S S I O N S
+///////////////////////////////////////////////////////////////////
+	if(cvar_bool_multiplayer){
+		stuffcmd("seta coop_lcK 0\n");//likes kleeya
+		stuffcmd("seta coop_lcT 0\n");//likes Telsia
+	}else{
+		setfloatvar("game.globalKleeyaChoice",0);
+		setfloatvar("game.globalTelsiaChoice",0);
+	}
+
+
+	if(cvar_bool_multiplayer){
+		float fIgmR;
+		fIgmR = getcvarint("coop_igmR");
+		setFloatVar("game.checkEntMission4RoomsVisited",fIgmR);
+	}
+
+	if(cvar_bool_multiplayer){
+		stuffCMD("seta coop_igm 0\n");
+	}else{
+		setfloatvar("game.globalMissionEnterprise",0);
+	}
+
+	missionEnterprise = getCvarInt("coop_igm");
+	if(!cvar_bool_multiplayer){
+		missionEnterprise=getfloatvar("game.globalMissionEnterprise");
+	}
+	if(missionEnterprise < 1){
+		missionEnterprise=1;
+		setfloatvar("game.globalMissionEnterprise",1);
+	}
+
+	if(cvar_bool_multiplayer){
+		stuffcmd("seta coop_igmT 0\n");
+	}else{
+		setfloatvar("level.deckToChangeToIGM",0);
+	}
+	
+	if(cvar_bool_multiplayer){
+		=getCvarInt("coop_igmT");
+	}else{
+		=getfloatvar("level.deckToChangeToIGM");
+	}
+
+	
+	if(cvar_bool_multiplayer){
+		stuffcmd("seta coop_igmR 0\n");
+	}else{
+		setfloatvar("game.checkEntMission4RoomsVisited",0);
+	}
+
+
+///////////////////////////////////////////////////////////////////
+// E N T I T I E S
+///////////////////////////////////////////////////////////////////
+globalCoop_level_triggerEntity
+globalCoop_level_remove($
+globalCoop_level_removePath($
+
+
+void coop_findAndTargetnameEntities()
+//find entities without targetname and vive em a targetname
+{	
+	float fEntity,fFind;
+	entity e;
+	for(fEntity=0;fEntity<1023;fEntity++){
+		e=getEntity("*"+fEntity);
+		if(doesEntityExist(e)){
+			if(e.getOrigin() == '2151 -4806 64'){
+				e.targetname("doorConRoom");
+				e.lock();
+				fFind++;
+			}
+			if(e.getOrigin() == '2118 -4789 64'){
+				e.targetname("doorConRoom");
+				e.lock();
+				fFind++;
+			}
+			if(fFind>1){
+				return;
+			}
+		}
+	}
+}
+
+
+	float fRounds,fPlayerz;
+	fPlayerz = globalCoop_return_integerPlayersQuantity(2);//0=all,1=alive,2=nospectators
+	
+	fPlayerz = (fPlayerz * 2);
+	
+	for(fRounds=0;fRounds<=fPlayerz;fRounds++)
+	{
+		while(globalCoop_check_existingLivingEntity($kaffeeverfaerbtdiezaehne))
+		{
+			wait(0.2);
+		}
+		globalCoop_level_triggerEntity($AlienGroup2SpawnMultiplayer);
+		wait(0.1);
+	}
+

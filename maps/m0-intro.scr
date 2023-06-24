@@ -1,0 +1,194 @@
+//-----------------------------------------------------------------
+//  EF2 Level Script File
+//
+//  Level:        m0-intro
+//  Script By:    Benson R, Adam
+//  Geometry By:  Benson R, Adam
+//  Created on:   10/2/2002
+//
+//  Last Edited By: Chrisstrahl for making this not charsing the server in Multiplayer
+//-----------------------------------------------------------------
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+void main();
+void setupWorld();
+void cinematicMain();
+void exitRoutine();
+void coop_addhud(entity ePlayer);
+void coop_justSpawnedplayer1();
+void coop_justSpawnedplayer2();
+void coop_justSpawnedplayer3();
+void coop_justSpawnedplayer4();
+void coop_justSpawnedplayer5();
+void coop_justSpawnedplayer6();
+void coop_justSpawnedplayer7();
+void coop_justSpawnedplayer8();
+void coop_endLevel();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/main.scr"
+
+void main()
+{
+	$sky.notsolid();
+	globalCoop_main_camFadeOut(.01);
+	thread setupWorld();
+	soundtrack( "music/m0.mus" );
+	
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_string_nextMapToCheck			= "m1l1a-borg_sphere";//set the map we gona load next while we are in testmode
+//Set spawnangles for this level
+	coop_float_spawnAngle0 				= 270;//SpawnOrigin0 Angle
+//spawnorigins, Spawn Players on those locations, at map start
+	coop_vector_spawnOrigin1 			= $pathCinematicIntro_TempExterior.getOrigin();
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+	//--- set the soundtrack
+	allowmusicducking ( 0 );
+
+	waitForPlayer();
+	wait( 1 );
+
+	thread cinematicMain();
+}
+
+void coop_clanPlayerHuds(entity ePlayer)
+{
+	float ffffffffffffffffff;
+	while(doesEntityExist(ePlayer))
+	{
+		globalCoop_player_transmitter(ePlayer,"exec coop_mod/cfg/clean_classesAll.cfg;ui_removehud coop_info");
+		globalCoop_player_transmitter(ePlayer,"ui_removehud coop_update;ui_removehud coop_msgManual");
+		if(ffffffffffffffffff > 5)
+		{
+			return;
+		}
+		ffffffffffffffffff++;
+		wait(0.25);
+	}
+}
+
+void coop_addhud(entity ePlayer)
+{
+	thread coop_clanPlayerHuds(ePlayer);
+	wait(2);
+	if(doesEntityExist(ePlayer))
+	{
+		ePlayer.removehud("coop_cinIntro");
+	}
+	globalCoop_huds_Add(ePlayer,"coop_cinIntro");
+}
+
+void coop_justSpawnedplayer1(){thread coop_addhud($player1);}
+void coop_justSpawnedplayer2(){thread coop_addhud($player2);}
+void coop_justSpawnedplayer3(){thread coop_addhud($player3);}
+void coop_justSpawnedplayer4(){thread coop_addhud($player4);}
+void coop_justSpawnedplayer5(){thread coop_addhud($player5);}
+void coop_justSpawnedplayer6(){thread coop_addhud($player6);}
+void coop_justSpawnedplayer7(){thread coop_addhud($player7);}
+void coop_justSpawnedplayer8(){thread coop_addhud($player8);}
+
+//---------------------
+// setupWorld
+// setup world objects
+//---------------------
+void setupWorld()
+{
+	//--- set the sky box
+	//$sky.rendereffects( "+skyorigin" );
+	
+	spawn( "Camera", "targetname", "cam1");
+
+	//--- hide sky camera
+	//$sky.hide();
+
+	//--- rotate the sky dome
+	$skydome.rotateX( 0.2 );
+	$skydome.rotateY( 0.7 );
+}
+
+//---------------------
+// cinematicMain
+// the main cinematic of the level
+//---------------------
+void cinematicMain()
+{
+	globalCoop_main_waitForWarmupTime();
+	globalCoop_cin_start();
+	wait( 1 );
+	clearletterbox(0.1);
+	
+	allowmusicducking (0);
+	//--- setup the cameras
+	globalCoop_cin_follow($cam1,$pathCinematicIntro_TempExterior );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+	if(!cvar_bool_multiplayer){//SP
+		wait( .1 );
+	//--- Begin Text Prologue
+		stuffcmd( "showmenu prologue\n" );
+	}else{
+		globalCoop_cin_skipThread("exitRoutine");
+		wait( 1 );
+	}
+
+	//--- fade in
+	globalCoop_main_camFadeIn(1);
+	wait( 2 );
+	
+	globalCoop_dialog_play($picard,"m0/picard_intro6.mp3",1,99999,0);
+	wait( .2 );
+	globalCoop_dialog_play($picard,"m0/picard_intro7.mp3",1,99999,0);
+	wait( .2 );
+	globalCoop_dialog_play($picard,"m0/picard_intro8.mp3",1,99999,0);
+	wait( 2 );
+	thread exitRoutine();
+}
+
+void exitRoutine()
+{
+	if(!cvar_bool_multiplayer){//SP
+	//--- pop off the text
+		stuffcmd ( "popmenu 0\n" );
+	}
+	killthread( "cinematicMain" );
+
+	globalCoop_main_camFadeOut(1);
+	wait( .5 );
+
+	if(doesEntityExist($picard)){
+		$picard.stopDialog();
+		$picard.remove();
+	}
+	wait( 0.5 );
+
+
+
+	if(cvar_bool_multiplayer){//MP
+		thread coop_endLevel();
+		return;
+	}
+	
+	//--- so no intermission so it will instantly transition
+	noIntermission();
+	
+	//--- change levels
+	stuffCMD("map m1l1a-borg_sphere");
+}
+
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	globalCoop_huds_RemoveAll("coop_cinIntro");
+	wait(2);
+	thread globalCoop_mission_completed("m1l1a-borg_sphere");
+}
+

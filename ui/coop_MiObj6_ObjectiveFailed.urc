@@ -1,0 +1,7 @@
+menu "coop_MiObj6_ObjectiveFailed" 1 1 NONE 0
+bgcolor 0 0 0 0
+borderstyle NONE
+fullscreen 0
+fadedelay 2
+//Co-Op Related, set state to active
+showcommand	"seta coop_six_s 3\n"

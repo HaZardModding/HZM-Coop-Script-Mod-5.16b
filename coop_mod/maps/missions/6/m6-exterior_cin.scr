@@ -1,0 +1,749 @@
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+//	Function Implementations
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+
+//---------------------
+// cinematicIntro
+// establishing shot of munro getting onto the surface of the enterprise
+//---------------------
+void cinematicIntro()
+{
+	inCinematic = 1;
+
+	//--- start cinematic commands
+	globalCoop_cin_start();
+	
+	//--- change the music
+	forcemusic( "aux1" );
+    allowMusicDucking( 0 );
+
+	spawn( "Camera", "targetname", "cam1");//required
+	spawn( "Camera", "targetname", "cam2");//required
+	cam.load( "m6_Ext_Intro" );
+	wait( .1 );
+
+	//--------------------------------------------------------
+	//start high and wide on the enterprise and push all the way into munro
+
+	//--- set the camera on the first path
+	globalCoop_cin_follow($cam1,$m6_Ext_Intro );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_fov($cam1, 70 );
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( .3 );
+
+    //--- fade in
+    globalCoop_main_camFadeIn(1);
+
+	globalCoop_cin_skipThread( "cinematicIntro_Skipthread" );
+    wait( 11.5 );
+
+	thread cinematicIntro_Skipthread();
+}
+
+//---------------------
+// cinematicIntro_Skipthread
+// skipthread
+//---------------------
+void cinematicIntro_Skipthread()
+{
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematicIntro" );
+
+	//fade to black
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+	
+	globalCoop_level_removePath($m6_Ext_Intro);
+
+	//--- hide munro
+	globalCommon_AiDummyHide( $munro );
+	globalCoop_cin_end();
+	globalCoop_player_warpToSpawnOriginAll();
+	wait( .5 );
+	level_ai ( 1 );
+
+	thread globalCoop_dialog_play($tuvok,"m6l2/tuvok_hullbrief.mp3", 1, 80000, 1); //Lieutenant Munro, disable the cruiser’s weapons, engines, and warp drive without destroying the vessel.
+
+	//--- fade in
+	globalCoop_main_camFadeIn(.5);
+	wait( .5 );
+
+	//--- post cinematic
+	inCinematic = 0;
+	
+//MP only
+	if(cvar_bool_multiplayer){
+		wait(3);
+		thread beginStage1();
+	}
+	thread playerRangeCheck();
+}
+
+//---------------------
+// blows the exterior hatch for munro to climbout of
+void cinematicIntro_BlowHatch()
+{
+	$hatchArchetype.remove ();
+	$jtube_hatch_spawn.playsound ( "sound/environment/machine/lift3stop.wav", 3, .6, 10000);
+
+	$jtube_hatch_spawn.playsound ( "sound/impact/explosion/expl_plasmanode1.wav", 3, 2, 10000);
+	$jtube_hatch_spawn.spawnTargetname( "fxJTubeHatchSpawn" );
+
+	triggerEntity($jtube_hatch_spawn);
+	wait( .1 );
+
+	$jtube_hatch.time( 3 );
+	$jtube_hatch.moveUp( 2500 );
+	$jtube_hatch.moveEast( 512 );
+	$jtube_hatch.rotateZ( 360 );
+	$jtube_hatch.rotateX( 360 );
+	waitfor( $jtube_hatch );
+
+	//$fxJTubeHatchSpawn.remove();
+	$jtube_hatch.remove();
+}
+
+
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+
+//---------------------
+// cinematicEndStage1
+// show the auxillary gun turret being raised into position
+//---------------------
+void cinematicEndStage1()
+{
+	STAGE1_ISOVER=1;
+	inCinematic=1;
+
+	//--- start cinematic commands
+	globalCoop_cin_start();
+
+	//--- change the music
+	forcemusic( "aux2" );
+
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+	thread globalCoop_player_takeAll(coop_string_weapon1);
+	coop_string_weapon1="models/weapons/worldmodel-enterprise.tik";
+	thread globalCoop_player_takeAll(coop_string_weapon2);
+	coop_string_weapon2="";
+	globalCoop_main_waitAFrame();
+	
+	thread globalCoop_player_takeAll(coop_string_weapon3);
+	coop_string_weapon3="";	
+	thread globalCoop_player_takeAll(coop_string_weapon4);
+	coop_string_weapon4="";
+	globalCoop_main_waitAFrame();
+	
+	thread globalCoop_player_takeAll(coop_string_weapon5);
+	coop_string_weapon5="";
+	thread globalCoop_player_takeAll(coop_string_weapon6);
+	coop_string_weapon6="";
+	globalCoop_main_waitAFrame();	
+
+	thread globalCoop_dialog_play($tuvok,"m6l2/tuvok_auxpulse.mp3", 1, 80000, 1);
+	//--- set the music
+	forcemusic( "aux2" );
+	allowMusicDucking( 0 );
+
+	//--- Set up Scene
+	$photon_cannon_hatch_steam.scale( 4 );
+	$photon_cannon_hatch_spawn.spawntargetname( "photon_cannon_hatch_ice" );
+	$photon_cannon_hatch_spawn.modelname( "fx/fx-explosion-ice-gas-medium.tik" );
+	$photon_cannon_spawn.spawntargetname( "photon_cannon_ice" );
+	$photon_cannon_spawn.modelname( "fx/fx-explosion-ice-gas-medium.tik" );
+
+	//--- position the cinematic munro
+	globalCommon_AiDummyShow( $munro );
+	entity ePlayer;
+	ePlayer =  globalCoop_return_playerClosestPreferActive($photon_cannon_hatch);
+	$munro.origin( ePlayer.getOrigin() );
+	wait( .1 );
+
+	$munro.turnTowardsEntity( $photon_cannon_hatch );
+
+	//--------------------------------------------------------
+	//establishing shots pulling up on auxiallary cannon
+
+   	cam.load( "m6_Ext_Guncam2" );
+	wait( .1 );
+
+	//--- set the camera on the first path
+	globalCoop_cin_fov($cam1, 80 );
+	globalCoop_cin_follow($cam1,$m6_Ext_Guncam2 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+
+	wait( .2 );
+
+    //--- fade in
+	globalCoop_main_camFadeIn(1);
+
+   	//--- set skipthread
+	globalCoop_cin_skipThread( "cinematicEndStage1_Skipthread" );
+	wait( 8 );
+
+	//--- open the cannon doors
+	$photon_cannon_hatch_steam.show();
+	triggerEntity( $photon_cannon_spawn );
+	wait( .5 );
+
+	thread cinematicEndStage1_OpenCannonHatch();
+
+	//--- raise the cannon
+	thread cinematicEndStage1_RaiseCannon();
+	wait( 1.5 );
+
+	//--- blow the control hatch
+	thread cinematicEndStage1_BlowCannonControlHatch();
+	wait( .5 );
+
+	//--- remove the fx
+	$photon_cannon_hatch_steam.remove();
+	$photon_cannon_hatch_spawn.remove();
+	wait( 5 );
+
+	thread cinematicEndStage1_Skipthread();
+}
+
+
+//---------------------
+// cinematicEndStage1_Skipthread
+// skipthread
+//---------------------
+void cinematicEndStage1_Skipthread()
+{
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematicEndStage1" );
+	killthread( "cinematicEndStage1_OpenCannonHatch" );
+	killthread( "cinematicEndStage1_RaiseCannon" );
+	killthread( "cinematicEndStage1_BlowCannonControlHatch" );
+
+	$tuvok.stopdialog ();
+	//fade to black
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	//--- remove entities
+	if( doesEntityExist( $photon_cannon_hatch_steam ) )
+	{
+		$photon_cannon_hatch_steam.remove();
+	}
+
+	if( doesEntityExist( $photon_cannon_hatch_spawn ) )
+	{
+		$photon_cannon_hatch_spawn.remove();
+	}
+
+	if( doesEntityExist( $photon_cannon_hatch ) )
+	{
+		$photon_cannon_hatch.remove();
+	}
+
+	if( doesEntityExist( $photon_cannon_hatch_ice ) )
+	{
+		$photon_cannon_hatch_ice.remove();
+	}
+	
+//make sure the cannon is raised and the hatch is open
+	$entTurret.anim ( "idle_above" );
+	globalCoop_level_remove($photon_cannon_doora);
+	globalCoop_level_remove($photon_cannon_doorb);
+	globalCoop_level_remove($photon_cannon_hatch);
+
+	//--- hide the cinematic munro
+	globalCommon_AiDummyHide( $munro );
+
+	//--- change the music
+	forcemusic( "aux3" );
+
+	globalCoop_cin_end();
+	
+	//--- post cinematic
+	inCinematic = 0;
+	beginStage2 ();
+}
+
+//---------------------
+// open the hatch to the cannon
+void cinematicEndStage1_OpenCannonHatch()
+{
+	$photon_cannon_hatch_spawn.playsound ( "sound/environment/machine/factory_pneuup2.wav", 3, 1, 10000);
+	$photon_cannon_doora.time( 3 );
+	$photon_cannon_doora.moveSouth( 160 );
+	$photon_cannon_doorb.time( 3 );
+	$photon_cannon_doorb.moveNorth( 160 );
+	waitFor( $photon_cannon_doora );
+}
+
+//---------------------
+// raise the cannon
+void cinematicEndStage1_RaiseCannon()
+{
+	$entTurret.anim ( "raise" );
+	waitforanimation ( $entTurret, "raise" );
+
+	$entTurret.anim ( "idle_above" );
+}
+
+//---------------------
+// blow off the control hatch for the cannon
+void cinematicEndStage1_BlowCannonControlHatch()
+{
+	$photon_cannon_hatch_spawn.playsound ( "sound/impact/explosion/expl_plasmanode1.wav", 3, 2, 10000);
+	$photon_cannon_hatch.time( 3 );
+	$photon_cannon_hatch.moveUp( 2048 );
+	$photon_cannon_hatch.moveEast( 512 );
+	$photon_cannon_hatch.rotateZ( 360 );
+	$photon_cannon_hatch.rotateX( 360 );
+	triggerEntity( $photon_cannon_hatch_spawn );
+	waitFor( $photon_cannon_hatch );
+}
+
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+void scaleTheShuttleDoods();
+void transitionToM7 ();
+void endStage2Cinematic()
+{
+	globalCoop_huds_RemoveAll("m6CapitalShipHealth");
+	globalCoop_huds_RemoveAll("m6SabotageTimer");
+	globalCoop_main_globalCommand("putaway");
+	
+	//$player.setobjectivecomplete ( "DisableIdryllCommandShip" , 1 );
+	thread globalCoop_objectives_update("complete",2,1);
+	
+	wait ( .1 );
+	globalCoop_player_takeAll("EnterpriseCannon");
+	
+	globalCoop_cin_start();
+	inCinematic = 0;
+	//--- Fade out
+	globalCoop_main_camFadeOut(1);
+	//--- change the music
+	forcemusic( "success" );
+
+	$f1.remove ();
+	$f2.remove ();
+	$f3.remove ();
+	$f4.remove ();
+
+	removeclass ( "projectile" );
+	cam.load ( "m6_Ext_EndShot1" );
+	cam.load ( "m6_exterior_capShipDisabled" );
+	cam.load ( "m6ext_shuttle" );
+	wait ( .1 );
+	$munro.show();
+	$munro.warpto ( "endCinematicNode" );
+	$munro.model ( "char/hazardteam_evosuit-munro.tik" );
+	vector v;
+	v = $capShipOrigin.getangles ();
+	globalCineFX_CameraPathRotate ( $m6_exterior_capShipDisabled , v_y , '-43264 35672 4336' ,$capShipOrigin.getorigin ());
+
+	$capShipOrigin.time ( 10 );
+	$capShipOrigin.rotateYUp ( 3 );
+	$capShipOrigin.rotateXDown ( 2 );
+
+	globalCoop_cin_follow($cam1, $m6_exterior_capShipDisabled );
+	globalCoop_cin_fov($cam1, 70 );
+	$capShipOrigin.endpath ();
+	$capShipOrigin.loopsound ( "sound/ships/drull/drull_dead.wav" , 1 , 40384 );
+	wait ( .05 );
+
+	//--- Set up Scene
+	$munro.anim( "idle" );
+	$munro.turntoangle( 170 );
+	$munro.headwatchtarget( "capShipOrigin", 100 );
+
+
+	//after all that required stuff, allow the player to skip the cinematic
+	globalCoop_cin_skipThread( "transitionToM7" );
+
+	//--- Fade in
+	globalCoop_main_camFadeIn(1);
+
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera ( $cam1 );
+	wait ( 6.0 );
+
+	thread globalCoop_dialog_play($picard,"m6l2/picard_nicely.mp3", 1, 80000, 1);
+
+	globalCoop_main_camFadeOut(.5);
+	globalCoop_cin_follow($cam2, $m6_Ext_EndShot1 );
+	globalCoop_cin_fov($cam2, 70 );
+	globalCoop_cin_cut($cam2);
+	wait ( .5 );
+	globalCoop_cin_cuecamera ( $cam2 );
+	globalCoop_main_camFadeIn(.5);
+
+	$finalShuttle.bind ( $finalShuttleOrigin );
+	$finalShuttleDoor.bind ( $finalShuttleOrigin );
+
+	wait ( 4 );
+
+	$munro.displayeffect ( "TransportOut" , "Federation" );
+	$finalShuttleOrigin.followpath  ( $shuttlePath );	//start it moving a bit early
+	wait ( .9 );
+	globalCoop_main_camFadeOut(.5);
+	wait ( 3 );
+
+
+	$finalShuttle.show ();
+	$finalShuttleDoor.show ();
+	$entShuttleSurface.show ();
+	$finalShuttleOrigin.playsound ( "sound/vehicles/shuttlecraft/shuttle_accelerate.wav" , 3 , 1 , 10000 );
+
+	globalCoop_main_camFadeIn(.5);
+
+	globalCoop_cin_follow($cam1, $m6ext_shuttle );
+	globalCoop_cin_cut($cam1);
+
+	//$cam1.watch ( "finalShuttleOrigin" );
+
+	globalCoop_cin_cuecamera ( $cam1 );
+
+	wait ( 6 );
+	thread scaleTheShuttleDoods ();
+	wait ( 4 );
+
+ 	//stuffcmd("ui_hud 1\n");
+
+	thread transitionToM7 ();
+
+}
+
+void transitionToM7 ()
+{
+	skipthread ( "null" );
+	killthread ( "endStage2Cinematic" );
+
+	globalCoop_main_camFadeOut(.5);
+	wait ( .5 );
+
+	globalCoop_cin_end();
+	
+ 	//--- level transistion
+	if(!cvar_bool_multiplayer){//Singleplayer
+		spawn ( "trigger_changelevel", "targetname", "trigger_endlevel", "map", "m7l1a-attrexian_colony" );
+		wait ( .1 );
+		triggerentity ( $trigger_endlevel );
+	}
+	else
+	{
+		thread coop_endLevel();
+	}
+}
+
+
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+
+void scaleTheShuttleDoods ()
+{
+	float i;
+	for ( i = .05 ; i>=0.01;i-=.001 )
+	{
+		$finalShuttle.scale ( i );
+		$finalShuttleDoor.scale ( i );
+		wait ( .1 );
+	}
+}
+
+void doExplodeSaucer ()
+{
+	float i;
+	for ( i =0 ; i < 5 ; i ++ )
+	{
+		triggerentity ( $saucerExp1 );
+		wait ( .5 );
+		triggerentity ( $saucerExp2 );
+		wait ( .5 );
+		triggerentity ( $saucerExp3 );
+		wait ( .25 );
+		triggerentity ( $saucerExp1 );
+		wait ( 2 );
+	}
+}
+
+void doExplodeSaucer2 ()
+{
+	float i;
+	for ( i =0 ; i < 5 ; i ++ )
+	{
+		triggerentity ( $saucerExp5 );
+		wait ( .5 );
+		triggerentity ( $saucerExp6 );
+		wait ( .5 );
+		triggerentity ( $saucerExp7 );
+		wait ( 2 );
+	}
+}
+
+
+void doEnterpriseExplosions ()
+{
+	float i;
+	string s;
+	entity e;
+	for ( i = 1 ; i <=11 ; i++ )
+	{
+		s = "saucerExp" + i;
+		e = getentity ( s );
+		e.scale ( .01 + randomfloat ( .01 ));
+
+	}
+	$saucerExpBig.scale ( .5 );
+	$saucerExpBig.modelname ( "models/fx/fx-explosion-enterprise-huge.tik" );
+
+	$entNacelles.forcealpha ( 1 );
+	$entBody.forcealpha ( 1 );
+	$entSaucer.forcealpha ( 1 );
+
+	thread doExplodeSaucer ();
+	thread doExplodeSaucer2 ();
+
+	wait ( 1 );
+	$entDamage.show ();
+	wait ( 3.5 );
+
+	killthread ( "doExplodeSaucer" );
+	killthread ( "doExplodeSaucer2" );
+
+	triggerentity ( $saucerExp8 );
+	wait ( .5 );
+	triggerentity ( $saucerExp9 );
+	wait ( .5 );
+	triggerentity ( $saucerExp10 );
+	wait ( .25 );
+	triggerentity ( $saucerExp11 );
+	wait ( .25 );
+
+	wait ( 1 );
+	triggerentity ( $saucerExpBig );
+
+	$entNacelles.fadeout ( 0.5 );
+	$entBody.fadeout ( 0.5 );
+	$entSaucer.fadeout ( 0.5 );
+	$entDamage.remove ();
+
+	wait ( .25 );
+
+	$entOrigin.earthquake( .25, 1 );
+}
+void missionFailedCinematicSkipthread ();
+void missionFailedCinematic()
+{
+	if ( inCinematic == 1 )
+		return;
+	globalCoop_main_camFadeOut(1);
+
+	inCinematic = 1;
+
+	$entSurface.remove ();
+	if(!cvar_bool_multiplayer)
+	{
+		$player.removehud("m6CapitalShipHealth");
+		$player.removehud("m6SabotageTimer");
+	}
+	else
+	{
+		globalCoop_huds_RemoveAll("coop_m6CapitalShipHealth");
+		globalCoop_huds_RemoveAll("coop_m6SabotageTimer");	
+	}
+	
+	$explosionRibbon.show ();
+	$fighterExp.scale ( .05 );
+	$fighterExp.modelname ( "models/fx/fx-explosion-enterprise-small.tik" );
+	//$fighterExp.modelname ( "models/fx/fx-drull-ship-explode.tik" );
+
+	$cinFighter1.bind ( $cinFighterOrigin1 );
+	$cinFighter2.bind ( $cinFighterOrigin2 );
+	$capital.bind ( $capitalOrigin );
+
+	cam.load ( "m6Ext_FighterPath1" );
+	cam.load ( "m6Ext_FighterPath2" );
+	cam.load ( "m6Ext_CapitalPath" );
+	globalCoop_main_waitAFrame();
+	cam.load ( "m6Ext_ExplosionCamera1" );
+	cam.load ( "m6Ext_ExplosionCamera2" );
+	cam.load ( "m6Ext_ExplosionCamera3" );
+	wait ( .1 );
+
+	$planet.hide ();
+
+	killthread ( "runCapShip" );
+	inCinematic = 1;
+	//--- Fade out
+	globalCoop_cin_start();
+
+	//get rid of the hud
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$turret.unlock ();
+		$player.useentity ( $turret );
+	}
+
+
+	globalCoop_cin_skipThread( "missionFailedCinematicSkipthread" );
+	$entDamage.hide ();
+	globalCoop_cin_follow($cam1, $m6Ext_ExplosionCamera1 );
+	globalCoop_cin_fov($cam1, 70 );
+	globalCoop_cin_cut($cam1);
+	wait ( .5 );
+	$cinFighterOrigin1.followpath ( $m6Ext_FighterPath1 );
+	$cinFighterOrigin2.followpath ( $m6Ext_FighterPath2 );
+	wait ( .5 );
+
+	//--- change the music
+	forcemusic( "aux2" );
+    allowMusicDucking( 0 );
+
+	globalCoop_cin_cuecamera ( $cam1 );
+ 	globalCoop_main_camFadeIn(1);
+	wait  ( 1 );
+	thread doEnterpriseExplosions ();
+	wait ( 1.25 );
+	$cinFighterOrigin2.endpath ();
+	triggerentity ( $fighterExp );
+	$cinFighter2.remove ();
+	$cinFighter2.scale ( .01 );
+	wait ( 2 );
+
+	$capitalOrigin.followpath ( $m6Ext_CapitalPath );
+
+	wait ( 10 );
+
+	thread missionFailedCinematicSkipthread ();
+}
+
+void missionFailedCinematicSkipthread ()
+{
+	globalCoop_cin_end();
+	killthread ( "missionFailedCinematic" );
+	cam_fadeout( 2, 0, 0, 0, 1, 0 );
+	globalCoop_level_removePath($m6Ext_FighterPath1);
+	globalCoop_level_removePath($m6Ext_FighterPath2);
+	globalCoop_level_removePath($m6Ext_CapitalPath);
+	globalCoop_level_removePath($m6Ext_ExplosionCamera1);
+	globalCoop_level_removePath($m6Ext_ExplosionCamera2);
+	globalCoop_level_removePath($m6Ext_ExplosionCamera3);
+	globalCoop_mission_failWithReason("EnterpriseDestroyed");
+}
+
+
+
+
+//---------------------
+// cinematicDeathBrig
+// player fails mission, showing hazard team in the brig
+//---------------------
+void cinematicDeathBrig_Skipthread();
+void cinematicDeathBrig()
+{
+	//--- death cinematic
+	globalCommon_AiDummy( $deathMunro, "idle" );
+	globalCommon_AiDummy( $deathChell, "sit_right" );
+	globalCommon_AiDummy( $deathJurot, "sit_elbows" );
+	globalCommon_AiDummy( $deathChang, "sit_lean" );
+	wait( 3 );
+	globalCommon_AiDummy( $deathTelsia, "sit_right" );
+	globalCommon_AiDummy( $deathSydney, "sit_elbows" );
+	globalCommon_AiDummy( $deathIdryllGuard1, "idle" );
+	globalCommon_AiDummy( $deathIdryllGuard2, "idle" );
+
+	//--- start cinematic commands
+	globalCoop_cin_start();
+	globalCoop_main_camFadeIn(.5);
+	wait( .6 );
+	$deathMunro.origin('-9780.00 -372.00  0.00');
+	$deathMunro.angle(270);
+	$deathChell.origin('-9656.00 -392.00  2.00');
+	$deathChell.angle(180);
+	$deathJurot.origin('-9656.00 -452.00  2.00');
+	$deathJurot.angle(180);
+	$deathChang.origin('-9656.00 -500.00  0.00');
+	$deathChang.angle(180);
+	$deathTelsia.origin('-9656.00 -554.00  0.00');
+	$deathTelsia.angle(180);
+	$deathSydney.origin('-9490.00 -558.00  0.00');
+	$deathSydney.angle(180);	
+	
+	if(!cvar_bool_multiplayer)
+	{
+		cam.load( "m6_DeathBrig_Shot1" );
+	}
+	else
+	{
+		cam.load( "coop_m6_DeathBrig_Shot1" );
+	}
+	wait( .1 );
+
+	//--- set the camera on the first path
+	globalCoop_cin_follow($cam1,$m6_DeathBrig_Shot1 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_fov($cam1, 60 );
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam1 );
+
+    //--- fade in
+    globalCoop_main_camFadeIn(1);
+    wait( 6 );
+
+    //--- walk munro to the front of the cell
+    $deathMunro.walkto( "$nodeDeathMunro_WalkTo1", "walk" );
+    wait( 2 );
+
+    //--- make munro and guard2 watch the guards
+    $deathMunro.headWatchTarget( "deathIdryllGuard1", 4 );
+    $deathIdryllGuard2.headWatchTarget( "deathIdryllGuard1", 4 );
+    wait( 1 );
+
+	//--- change munro's expression as the guard walks by
+    $deathMunro.morph( "exp_Disgust" );
+
+    //--- walk the guard across the cells
+    $deathIdryllGuard1.walkto( "$nodeDeathIdryllGuard1_WalkTo1", "walk" );
+    wait( 2.5 );
+
+	//--- open the brig door
+	$doorBrig.open( $world );
+	wait( .5 );
+
+	$deathIdryllGuard2.headWatchTarget( "deathMunro", 4 );
+	wait( 3.5 );
+
+    //--- close the door
+	$doorBrig.sound_locked("");//fix mp issue
+    $doorBrig.lock();//fix mp issue
+    $doorBrig.close();
+	wait(1);
+	thread cinematicDeathBrig_Skipthread();
+}
+
+
+//---------------------
+// cinematicDeathBrig_Skipthread
+// skipthread
+//---------------------
+void cinematicDeathBrig_Skipthread()
+{
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematicDeathBrig" );
+
+	//--- fade to black
+	globalCoop_main_camFadeOut(.2);
+	wait( .2 );
+	
+	globalCoop_level_removePath($m6_DeathBrig_Shot1);
+	
+	//--- fail the mission
+	globalCoop_mission_fail();
+}
+

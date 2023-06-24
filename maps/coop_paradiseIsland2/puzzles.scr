@@ -1,0 +1,243 @@
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////PUZZLE STUFF////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void puzzle_use()
+{
+//CREATE ENTITY VAR
+entity eTrigger;
+//PUT ENTITY WHICH CALLED THIS THREAD INTO THIS VAR, A TRIGGER OR A OBJECT WILL BE VALID, CALLING THREAD DIRECLY WILL NOT WORK
+	eTrigger = getCurrentEntity();
+//CHECK IF TRIGGER/OBJECT DOES INDEED EXIST
+	if(doesEntityEXIST(eTrigger)){
+//CREATE ENTITY VAR FOR THE PLAYER
+		entity ePlayer;
+		ePlayer = eTrigger.getLastActivatingEntity();
+		if(doesEntityEXIST(ePlayer)){
+			if(!checkTricorderInHands(ePlayer)){
+				ePlayer.use("Tricorder-ROM");
+				ePlayer.use("Tricorder");
+				ePlayer.use("Tricorder-STX");
+				ePlayer.hudprint("$$NeedToUse$$ $$TricorderDesc1$$\n");
+			}
+		}
+	}
+}
+
+
+void puzzle_modulate()
+//----------------------------------------------------------------------
+// Gets all triggers and does all stuff to make the thing modulating
+//----------------------------------------------------------------------
+{
+
+//GET THE TRIGGER WHICH DID CALL THIS THREAD
+	entity ePuzzleObject,ePlayer;
+	ePuzzleObject = getCurrentEntity();	
+
+//EXIT IF THE THREAD HAS BEEN CALED FROM CONSOLE	
+	if(!doesEntityExist(ePuzzleObject))
+		return;
+
+	string	sPuzzleTargetname;
+	ePlayer	= ePuzzleObject.getLastActivatingEntity();
+	
+//EXIT IF A COMPONENT IS MISSING
+	if(	!doesEntityExist(ePlayer) ||
+		!doesEntityExist(ePuzzleObject))
+		return;
+	
+		
+
+//EXIT IF: PLAYER MOVES,PUZZLE IS DISABLED,PLAYER IS MODULATING
+	if(	ePlayer.getVelocity() != '0 0 0' ||
+		ePlayer.getFloatVar("modulatingPuzzle") == 1)
+		return;
+	ePlayer.setFloatVar("modulatingPuzzle",0);
+		
+//GET TIME A PLAYER DOES NEED TO MODULATE THIS
+	float fTimeToSolve;
+	
+//GRAB OTHER DATA
+	fTimeToSolve = ePuzzleObject.getFloatvar("puzzle_timeToSolve");
+	
+//DISABLE THE PUZZLE TRIGGER NOW, WHEN EVER IT IS A MODEL OR A (PLAZEBO)TRIGGER
+	ePuzzleObject.nottriggerable();
+		
+//Create vars
+	float	fDistancePlayerToPuzzle;
+	vector	vDistance;
+	vector	vOriginPlayer;
+	vector	vOriginPuzzle;
+			
+//GET/GRAB DATA
+	vOriginPuzzle	= ePuzzleObject.getOrigin();
+	vOriginPlayer	= ePlayer.getOrigin();
+	
+//SET OFFSET (player is carring the origin at his feets, and is [128 MODEL] - [108 Bounding Box] units height)
+	vOriginPlayer_z			+= 64;
+	vDistance 				= vOriginPuzzle - vOriginPlayer;
+	fDistancePlayerToPuzzle	= vectorlength( vDistance );
+
+//IF PLAYER IN RANGE, START TIMMER INLINE, 
+	if(fDistancePlayerToPuzzle <= 75){
+		puzzle_timer(ePlayer,ePuzzleObject,fTimeToSolve);//DYNAMIC TIME RANGE!
+	}
+	
+	if(ePuzzleObject.getFloatvar("puzzle_solved") == 0){
+		ePuzzleObject.triggerable();
+		return;
+	}
+}
+
+
+void puzzle_timer(entity ePlayer,entity ePuzzleObject,float fTime)
+//----------------------------------------------------------------------
+// Displays the tricorder modulating-bar at the Modulating Player
+//----------------------------------------------------------------------
+{
+//EXIT IF DUDE OR TRIGGER IS MISSING
+	if( !doesEntityExist(ePlayer)||
+		!doesEntityExist(ePuzzleObject))
+		return;
+
+//REST STAT, MARK PLAYER
+	ePlayer.setstat("generic",0);
+
+//SEND 100 UPDATES WITHIN THIS MINIMUM TIME (4sec)
+	if(fTime < 4)
+		fTime=4;
+		
+float	fCountdownTimer;
+float	fCountdownTime;
+
+//Get the time for adding the next level to the timer hud
+	fCountdownTime	= fTime / 100;
+	
+	if(doesEntityExist(ePlayer)){
+		ePlayer.addhud("timerhud");
+		ePlayer.loopSound( "sound/weapons/tricorder/tricord_scan.wav" , 2 , 128 );
+	}
+
+//Create vars
+float	fDistancePlayerToPuzzle;
+vector	vDistance;
+vector	vOriginPlayer;
+vector	vOriginPuzzle;
+	
+//retrive information
+	vOriginPuzzle	= ePuzzleObject.getOrigin();
+	fCountdownTimer = ePuzzleObject.getFloatvar("puzzle_process");
+	
+	while(	doesEntityExist(ePlayer) )
+	{
+	//retrive information
+		vOriginPlayer	= ePlayer.getOrigin();
+	//correct ofset (player is carring the origin at his feets, and is 128 units height)
+		vOriginPlayer_z += 64;
+	//Calculate
+		vDistance 				= vOriginPuzzle - vOriginPlayer;
+		fDistancePlayerToPuzzle	=  vectorlength( vDistance );
+
+//check distance,timmer is finished,and active weapon
+		if(	fDistancePlayerToPuzzle > 75 ||
+			fCountdownTimer >= 100 ||
+			checkTricorderInHands(ePlayer) != 1)
+		{
+//CLEAR/RESET PLAYER
+			if(doesEntityExist(ePlayer)){
+				ePlayer.removehud("timerhud");
+				ePlayer.stopLoopSound();
+				ePlayer.setFloatVar("modulatingPuzzle",0);
+			}
+//CHECK IF PUZZLE HAS BEEN SOLVED
+			if(fCountdownTimer >= 100){
+				if(doesEntityExist(ePuzzleObject)){
+				//PLAY SUCCESS SOUND AT THE PLAYER
+					if(doesEntityExist(ePlayer)){
+						ePlayer.playsound ( "sound/weapons/tricorder/tri_puzz_success.wav",3,1,394);
+						ePlayer.stopLoopSound();
+					}
+					
+				//WAIT BEFORE WE REMOVING THE TRIGGER
+					ePuzzleObject.nottriggerable();
+					wait(.05);//avoid trigger getting refered
+				//REMOVE THE PUZZLE
+					ePuzzleObject.remove();
+					string sThread;
+				//GET THE SOLVE THREAD
+					sThread = ePuzzleObject.getStringVar("puzzle_solvedThread");
+					ePuzzleObject = spawn("trigger_once","thread",sThread);
+					wait(.05);//wait a frame
+					triggerEntity(ePuzzleObject);
+				}
+			}
+			
+		//SAVE CURRENT PROGRESS
+			if(doesEntityExist(ePuzzleObject))
+				ePuzzleObject.setFloatvar("puzzle_process",fCountdownTimer);
+			
+		//EXIT THIS FUNCTION NOW
+			return;
+		}
+		
+	//SAVE CURRENT PROGRESS
+		if(doesEntityExist(ePuzzleObject))
+			ePuzzleObject.setFloatvar("puzzle_process",fCountdownTimer);
+	
+//EXIT IF DUDE IS MISSING
+		if(!doesEntityExist(ePlayer))
+			return;
+	
+//UPDATE MODULATION BAR
+		ePlayer.setstat("generic",fCountdownTimer);
+		wait(fCountdownTime);
+		fCountdownTimer++;
+	}
+//RESET
+	fCountdownTimer = 0;
+}
+
+
+void puzzle_add(string sTargetname,float fTimeToSolve,vector vOrigin,string sSolvedThread)
+//----------------------------------------------------------------------
+// Adds Puzzle Objets with multiplayer compatible script varaint
+//----------------------------------------------------------------------
+{
+entity ePuzzleObject,ePuzzleObjectUse;
+
+//SPAWN THE PUZZLE TRIGGER
+	ePuzzleObject = spawn("trigger_multiple","targetname",sTargetname,"thread","puzzle_modulate","origin",vectorToString(vOrigin));
+	vOrigin_z += 64;
+	ePuzzleObjectUse = spawn("trigger_use","thread","puzzle_use","origin",vectorToString(vOrigin));
+	wait(.1);
+//SET CORRECT SIZE ON THE NEW ENTITY (BOUNDING BOX)
+	ePuzzleObjectUse.setSize('-60 -60 -48','60 60 48');
+	ePuzzleObject.setSize('-60 -60 -48','60 60 48');
+	
+//Set vars
+	ePuzzleObject.setFloatvar("puzzle_solved",0);
+	ePuzzleObject.setFloatvar("puzzle_process",0);
+	ePuzzleObject.setFloatvar("puzzle_timeToSolve",fTimeToSolve);
+	ePuzzleObject.setStringVar("puzzle_targetname",sTargetname);
+	ePuzzleObject.setFloatVar("puzzle_solved",0);
+	ePuzzleObject.setStringVar("puzzle_solvedThread",sSolvedThread);
+}
+
+float checkTricorderInHands(entity ePlayer)
+//----------------------------------------------------------------------
+// Check if dude holds tricorder in hands
+//----------------------------------------------------------------------
+{
+//EXIT IF PLAYER IS MISSING
+	if(doesEntityExist(ePlayer)){
+		string sPlayerWeapon;
+		sPlayerWeapon = ePlayer.getActiveWeaponName();
+		if(	sPlayerWeapon == "Tricorder" || sPlayerWeapon == "Tricorder-stx" || sPlayerWeapon == "Tricorder-rom"){
+			return 1;
+		}
+	}
+	return 0;
+}
+

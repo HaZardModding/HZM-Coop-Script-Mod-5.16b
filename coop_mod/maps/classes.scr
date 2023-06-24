@@ -1,0 +1,634 @@
+//-----------------------------------------------------------------------------------
+// Script By:	Christian Sebastian Strahl (Chrissstrahl)
+// Created on:	2008.08.21
+// E-Mail:		chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+// CONTAININS CLASSES RELATED FUNCTIONS
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2012 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+//weaponcommand( String hand, [ String arg1 ], [ String arg2 ], [ String arg3 ], [ String arg4 ], [ String arg5 ], [ String arg6 ], [ String arg7 ] )
+
+float globalCoop_class_checkMsg(entity eDisposer,float fSlaveId,string sType)
+{
+	float fLevelTime,fTrue=0;
+	fLevelTime=getleveltime();
+	if((eDisposer.getFloatVar("globalCoop_classMsg"+sType) + 2.6) < fLevelTime ||
+		eDisposer.getStringVar("globalCoop_classMsgLastType") != sType ||
+		eDisposer.getFloatVar("globalCoop_classMsgLastId") != fSlaveId	)
+	{
+		fTrue=1;
+	}
+	eDisposer.setFloatVar("globalCoop_classMsg"+sType,fLevelTime);
+	eDisposer.setStringVar("globalCoop_classMsgLastType",sType);
+	eDisposer.setFloatVar("globalCoop_classMsgLastId",fSlaveId);
+	return fTrue;
+}
+
+
+void globalCoop_class_setup(string sClass,vector vOrigin)
+{
+	//fake funtion, to maintain compatibility untill i find the time to
+	//change every friken script again
+}
+void globalCoop_class_select()
+{
+	//fake funtion, to maintain compatibility untill i find the time to
+	//change every friken script again
+}
+/*
+void globalCoop_class_setup(string sClass,vector vOrigin)
+//------------------------------------------------------------------------------
+//Setup a Class Selection Item - HeavyWeapons,Medic,Technician
+//------------------------------------------------------------------------------
+{
+	if(cvar_bool_multiplayer==1)
+	{
+		if(vOrigin != '0 0 0')
+		{
+			string sModel;
+			entity eClass;
+			sModel="models/item/mp_specialty_"+sClass+".tik";
+			//globalCoop_main_waitZeroDotZero5(); //removed in build 16
+			eClass = spawn("script_model","model",sModel,"origin",""+vOrigin,"targetname","coop_class_"+sClass+"Model","angles","90 0 0");
+			globalCoop_main_waitAFrame();
+			eClass.notsolid();
+			eClass.dropToFloor();
+			eClass.rendereffects("minlight");//minlight,fullbright
+			vOrigin = eClass.getOrigin();
+			entity eClassTrigger;
+			eClassTrigger = spawn("trigger_multiple","origin",""+vOrigin,"thread","globalCoop_class_select","targetname","coop_class_"+sClass+"ModelTrigger");
+			globalCoop_main_waitAFrame();
+			eClassTrigger.setStringvar("globalCoop_className",sClass);
+			eClassTrigger.wait(.5);
+			eClassTrigger.setSize('8 -8 0','16 0 50');
+			eClassTrigger.bind(eClass);
+			if(cvar_bool_coop_disClass != 0)
+			{
+				eClass.hide();
+				//eClassTrigger.nottriggerable();
+			}
+		}
+	}
+}
+
+void globalCoop_class_select()
+//------------------------------------------------------------------------------
+//Set given class at the player
+//------------------------------------------------------------------------------
+{
+	entity eCaller;
+	eCaller = getCurrentEntity();
+//TRIGGER EXISTS, GO ON, IF NOT THREAD MIGTH BE CALLED FROM THE CONSOLE->IGNORE
+	if(doesEntityExist(eCaller) == 1 && coop_integer_cinematicIsActive == 0 && cvar_bool_coop_disClass == 0)
+	{
+		string sClass;
+		entity ePlayer;
+		ePlayer = eCaller.getlastActivatingEntity();
+		sClass = eCaller.getStringVar("globalCoop_className");
+		globalCoop_server_listenServerControll();
+//EXISTING LIVING PLAYER
+		if(globalCoop_check_existingLivingEntity(ePlayer)){
+			float fTime;
+			fTime = getLevelTime();	
+//IF PLAYER IS NOT UNDER THE 2 SECOUNDS LIMIT, ALLOW SELECTION			
+			if(ePlayer.getFloatVar("globalCoop_class_selectedAt") <= fTime){
+//IF PLAYER DOES NOT HAVE THIS CLASS ALLREADY
+				if(ePlayer.getStringvar("globalCoop_className") != sClass){
+					ePlayer.setStringvar("globalCoop_className",sClass);
+//DIALOD TO PLAY FOR THE SELECTED CLASS
+					string sClassDialog;
+					sClassDialog = "dm/comp_hw.mp3";//HeavyWeapons
+					if(sClass == "Technician"){
+						sClassDialog = "dm/comp_tech.mp3";
+					}
+					if(sClass == "Medic"){
+						sClassDialog = "dm/comp_medic.mp3";
+					}
+//PLAY DIALOG
+					thread globalCoop_dialog_playSimple(ePlayer,sClassDialog,1,85);//recycled var!!!
+//UPDATE INTERNAL STATISTICS
+					thread globalCoop_class_updateInternal();
+//ADD HUD AND SPRITE
+					thread globalCoop_class_setupPlayer(ePlayer);
+				}
+				else{
+					ePlayer.hudPrint("^5Info:^2 You are allready ^5$$"+sClass+"$$^2 !\n");
+				}
+				ePlayer.setFloatVar("globalCoop_class_selectedAt",(fTime + 2));
+			}
+		}
+	}
+}
+*/
+
+void globalCoop_class_setupPlayer(entity ePlayer)
+//------------------------------------------------------------------------------
+//Setup the player for the given class
+//------------------------------------------------------------------------------
+{
+//TELL PLAYER HOW MANY OTHER DUDES HAVE THIS CLASS ALLREADY
+	if(doesEntityExist(ePlayer))
+	{
+		string	sClass;
+		sClass	= ePlayer.getStringvar("globalCoop_className");
+		if(sClass == "")
+		{
+			globalCoop_class_autoSelect(ePlayer);
+			globalCoop_main_waitAFrame();
+			sClass	= ePlayer.getStringvar("globalCoop_className");
+		}
+//GIVE WEAPONS
+		globalCoop_armory_equip(ePlayer);
+//Create vars
+		float	fActive;
+		string	sPrint,sPrint2,sHudName;
+
+		sPrint2		= "$$Item-Armor$$";
+		sHudName	= "Technician";
+//UPDATED CLASS STATISTICS
+		globalCoop_class_update();
+//YOU ARE NOW (what eva)	
+		if(doesEntityExist(ePlayer) ==  1 && cvar_bool_coop_disClass == 0)
+		{
+			if(sClass == "Medic")
+			{
+				sPrint2 = "$$Item-health$$";
+			//force update, in case health stats haven't changed
+				ePlayer.setFloatvar("coop_playerLastHealth",0);
+			}
+			if(sClass == "HeavyWeapons")
+			{
+				sPrint2 = "$$Item-AmmoRegen$$";
+			}
+			if(ePlayer.getFloatVar("coop_hasCoopInstalled"))
+			{
+				if(((ePlayer.getFloatVar("globalCoop_timeEntered") + getCvarInt("mp_warmuptime")) + 3) < getLevelTime())
+				{
+					globalCoop_huds_Add(ePlayer,"coop_msg"+sClass);
+				}
+				//globalCoop_huds_textOrHud(ePlayer,"coop_msg"+sClass,"^5$$"+sClass+"$$^2: $$NeedToUse$$ ^5Tricorder^2 to give ^5"+sPrint2);
+			}
+			else
+			{
+				ePlayer.hudprint("^5$$"+sClass+"$$^2: $$NeedToUse$$ ^5Tricorder^2 to give ^5"+sPrint2+"\n");
+			}
+//PRINT IT TO THE CONSOLE
+			globalCoop_main_printTimeAndString("INFO: "+ePlayer.getTargetName()+" $$BecomesA$$ $$"+sClass+"$$");
+		}
+//inform player about weapon reload to avoid confusion
+		if(cvar_integer_coop_skill==3)
+		{
+			globalCoop_huds_textOrHud(ePlayer,"coop_msgManual","^3Attention^8: Weapon AUTO-RELOAD is disabled !");
+		}
+//SET (NEW) HUDS
+		globalCoop_huds_setup(ePlayer);
+//SETUP MODEL - APPLAY CLASS SPECIFIC ATTRIBUTES - RESISTANCE AND SUCH
+		globalCoop_model_setupPlayer(ePlayer);
+	}
+}
+
+
+void globalCoop_class_update()
+//------------------------------------------------------------------------------
+//Update Class Informations
+//------------------------------------------------------------------------------
+{
+	globalCoop_class_updateInternal();
+//send the data
+	string sTransmitMe;
+	sTransmitMe = "seta coop_cm "+coop_vector_classesinuseTechHeavyMedic_z+
+	";seta coop_ct "+coop_vector_classesinuseTechHeavyMedic_x+
+	";seta coop_ch "+coop_vector_classesinuseTechHeavyMedic_y+"";
+	thread globalCoop_player_transmittToAll(sTransmitMe);
+}
+
+
+void globalCoop_class_updateInternal()
+//------------------------------------------------------------------------------
+//Update INTERNAL Class Informations
+//------------------------------------------------------------------------------
+{
+//UPDATE MOD INTERNAL STATISTIC
+	coop_vector_classesinuseTechHeavyMedic_x = globalCoop_class_returnIntegerClassPlayers("Technician");
+	coop_vector_classesinuseTechHeavyMedic_y = globalCoop_class_returnIntegerClassPlayers("HeavyWeapons");
+	coop_vector_classesinuseTechHeavyMedic_z = globalCoop_class_returnIntegerClassPlayers("Medic");
+}
+
+
+void globalCoop_class_modulating(entity ePlayer)
+//----------------------------------------------------------------------
+// depending on the class the player can do diffrent things with his tricorder in his hands
+//----------------------------------------------------------------------
+{
+//grab player class
+	string sPlayerClass;
+	sPlayerClass = ePlayer.getStringVar("globalCoop_className");
+
+//EXIT IF
+//- Player does not hold tricorder
+//- Player is modulating allready - puzzle (modulating bar thingy)
+//- Player is modulating allready - class (medic healing for example)
+	if(	globalCoop_check_activeWeaponType(ePlayer,"Tricorder") != 1 ||
+		ePlayer.getFloatVar("globalCoop_modulatingPuzzle") == 1		||
+		ePlayer.getFloatVar("globalCoop_modulatingClass") == 1		||
+		cvar_bool_coop_disClass == 1								)
+	{
+		return;
+	}
+	
+//mark now as modulating - class
+	ePlayer.setFloatVar("globalCoop_modulatingClass",1);
+	ePlayer.weaponcommand("dual","scale",1);
+	
+//create varaiables, store data in em, do not read em everytime
+//form the entities, as this has a delay up to one frame, and needs
+//more calculation cycles!
+	entity	eSlave;
+	string	sDisposerClass;
+	float 	fDisposerPlayerId,
+			fSlavePlayerId;
+	
+	fDisposerPlayerId	= globalCoop_return_integerPlayerId(ePlayer);
+	sDisposerClass		= ePlayer.getStringvar("globalCoop_className");
+
+// BUILD TRANSPORTER
+// BUILD TRANSPORTER
+// BUILD TRANSPORTER
+// BUILD TRANSPORTER
+// BUILD TRANSPORTER
+// BUILD TRANSPORTER
+// BUILD TRANSPORTER
+// BUILD TRANSPORTER
+// BUILD TRANSPORTER
+// BUILD TRANSPORTER
+// BUILD TRANSPORTER
+// BUILD TRANSPORTER
+//CHECK IF PLAYER IS CROUCHING, IF SO BUILD A TRANSPORTER, IF CLASS IS TECHNICIAN
+ /* 	if(	globalCoop_check_playerCrouching(ePlayer) && sDisposerClass == "Technician" )
+	{
+		if( $world.getFloatVar("globalCoop_disableBuildTransporter") )
+		{
+			ePlayer.hudprint("^5INFO:^8 Building Transporters has been disabled on this map\n");
+			globalCoop_main_wait2DotZero();
+		}
+		else
+		{
+			entity	eTransporter;
+			float	fLevelTime,
+					fWaitTime,
+					fLastBuildTimeStamp,
+					fLastMessageTimeStamp,
+					fBuildTransporterNumber,
+					fDeconstructTransporterNumber;
+			vector	vOrigin;
+			
+			fLevelTime				= getLevelTime();
+			fLastBuildTimeStamp		= ePlayer.getFloatvar("globalCoop_lastBuildAt");
+			fLastMessageTimeStamp	= ePlayer.getFloatvar("globalCoop_lastMsgAt");
+		
+			//make sure the transporter is not deconstructed while in use
+			if(coop_vector_linuxForcerebootTransporting_z)
+			{
+				ePlayer.hudPrint("^5INFO^2: ^3Transport in Progress^2, you need to wait before you can disassemble the ^5Heisenberg-Kompensator^2...\n");
+			//clear modulating flag
+				globalCoop_level_setFloatVar(ePlayer,"globalCoop_modulatingClass",0);
+				return;
+			}
+		}
+	
+	//check when the last trasnporter was build by this player
+		fWaitTime = ( (fLastBuildTimeStamp + 10) - fLevelTime );		
+		if(fWaitTime > 0)
+		{
+			if((fLastMessageTimeStamp + 2) < fLevelTime)
+			{
+				ePlayer.hudprint("^5INFO^2: You need to wait^5 "+fWaitTime+" ^2secounds before you can use this feature again...\n");
+				ePlayer.setFloatvar("globalCoop_lastMsgAt",fLevelTime);
+			}
+		}
+		else
+		{
+//IF TRANSPORTER TRIGGER 1 DOES NOT EXIST, SET IT TO BE BUILD
+			if(!doesEntityExist($globalCoop_mobileTransporter1))
+			{
+				fBuildTransporterNumber=1;
+			}
+			if(!fBuildTransporterNumber)
+			{
+				if(!doesEntityExist($globalCoop_mobileTransporter2))
+				{
+					fBuildTransporterNumber=2;
+				}
+			}
+//BOTH TRANSPORTERS ARE EXISTING, DECONSTRUCT ONE
+			if(fBuildTransporterNumber==0)
+			{
+			//toogle between transporter 1 and 2
+				fDeconstructTransporterNumber = $world.getFloatVar("globalCoop_transporterLastDeconstucted");
+				if(	fDeconstructTransporterNumber < 2 )
+				{
+					fDeconstructTransporterNumber = 2;
+				}
+				else
+				{
+					fDeconstructTransporterNumber = 1;
+				}
+				$world.setFloatVar("globalCoop_transporterLastDeconstucted",fDeconstructTransporterNumber);
+				ePlayer.hudPrint("^5INFO^2: ^2Deconstructing ^5Transporter^3 "+fDeconstructTransporterNumber+"...\n");
+			//deconstruct a transporter
+				eTransporter = getEntity("globalCoop_mobileTransporter"+fDeconstructTransporterNumber+"Trigger");
+				globalCoop_level_remove(eTransporter);
+				eTransporter = getEntity("globalCoop_mobileTransporter"+fDeconstructTransporterNumber);
+				globalCoop_level_remove(eTransporter);
+			}
+			else
+			{
+//BUILD TRANSPORTER
+				vOrigin = ePlayer.getOrigin();
+				ePlayer.hudPrint("^5INFO^2: ^2Building ^5Transporter^3 "+fBuildTransporterNumber+" ^2of^3 2 ^2...\n");
+				spawn("script_model","model","fx/fx-beamsparkle-boogaloo2.tik","targetname","globalCoop_mobileTransporter"+fBuildTransporterNumber,"scale",".4","origin",""+vOrigin);
+				eTransporter = spawn("trigger_multiple","targetname","globalCoop_mobileTransporter"+fBuildTransporterNumber+"Trigger","thread","globalCoop_player_transporter","origin",""+vOrigin);// "spawnflags","8",
+				
+				globalCoop_main_waitAFrame();
+				
+				eTransporter.wait(2);
+				eTransporter.setSize('-10 -10 0','10 10 20');
+				
+				if(	doesEntityExist($globalCoop_mobileTransporter1Trigger) == 1 &&
+					doesEntityExist($globalCoop_mobileTransporter2Trigger) == 1)
+				{
+					$globalCoop_mobileTransporter1Trigger.target("globalCoop_mobileTransporter2");
+					$globalCoop_mobileTransporter2Trigger.target("globalCoop_mobileTransporter1");
+				}
+			}
+			ePlayer.setFloatvar("globalCoop_lastBuildAt",fLevelTime);			
+		}
+	//clear modulating flag
+		globalCoop_level_setFloatVar(ePlayer,"globalCoop_modulatingClass",0);
+		return;
+	} */
+//CLASS GIVE SPECIAL TO OTHER PLAYERS
+//CLASS GIVE SPECIAL TO OTHER PLAYERS
+//CLASS GIVE SPECIAL TO OTHER PLAYERS
+//CLASS GIVE SPECIAL TO OTHER PLAYERS
+//CLASS GIVE SPECIAL TO OTHER PLAYERS
+//CLASS GIVE SPECIAL TO OTHER PLAYERS
+//CLASS GIVE SPECIAL TO OTHER PLAYERS
+//CLASS GIVE SPECIAL TO OTHER PLAYERS
+//CLASS GIVE SPECIAL TO OTHER PLAYERS
+//CLASS GIVE SPECIAL TO OTHER PLAYERS
+//CLASS GIVE SPECIAL TO OTHER PLAYERS
+//CLASS GIVE SPECIAL TO OTHER PLAYERS
+//CLASS GIVE SPECIAL TO OTHER PLAYERS
+//CLASS GIVE SPECIAL TO OTHER PLAYERS
+//CLASS GIVE SPECIAL TO OTHER PLAYERS
+	float fMaxDistance	= 80;//was 60 build 15
+	eSlave				= globalCoop_return_playerClosest(ePlayer,0,fMaxDistance,1,1,sDisposerClass,0,1);
+	fSlavePlayerId		= globalCoop_return_integerPlayerId(eSlave);
+
+//IF NO VALID PLAYER IN RANGE
+	if(fSlavePlayerId < 0){
+		eSlave				= globalCoop_return_playerClosest(ePlayer,0,fMaxDistance,1,1,sDisposerClass,1,1);
+		fSlavePlayerId		= globalCoop_return_integerPlayerId(eSlave);
+		if(fSlavePlayerId != -1){
+			if(globalCoop_class_checkMsg(ePlayer,fSlavePlayerId,"Same"))
+			{
+				ePlayer.hudPrint("^5INFO^2:^5 Player"+fSlavePlayerId+"^2 does have the same ^5Class^2 as you! (^3you need to select a diffent class^2)\n");
+			}
+			globalCoop_playSound_c3v1r60(ePlayer,"sound/weapons/tricorder/tri_puzz_incorrect.wav");
+			globalCoop_main_wait1Dot5();
+		}
+		globalCoop_level_setFloatVar(ePlayer,"globalCoop_modulatingClass",0);
+		return;
+	}
+	float fSvaleHealth;	
+	fSvaleHealth	= eSlave.getHealth();
+	
+//PLAYER HAS FULL HEALTH - EXIT/////////////////////////////////////////////////
+	if(sDisposerClass == "Medic" && fSvaleHealth >= 100)
+	{
+		if(ePlayer.getFloatVar("coop_hasCoopInstalled") == 0)
+		{
+			if(globalCoop_class_checkMsg(ePlayer,fSlavePlayerId,"Full"))
+			{
+				ePlayer.hudPrint("^5INFO^2:^5 Player"+fSlavePlayerId+"^2 is at ^3FULL HEALTH^2 !!!\n");
+			}
+		}
+		globalCoop_main_wait1Dot5();
+		globalCoop_level_setFloatVar(ePlayer,"globalCoop_modulatingClass",0);
+		return;
+	}
+	if(	globalCoop_check_activeWeaponType(ePlayer,"Tricorder") != 1	||
+		eSlave.isWithinDistanceOf(ePlayer,fMaxDistance) != 1		||
+		ePlayer.getFloatVar("globalCoop_modulatingPuzzle") == 1	)
+	{
+		globalCoop_level_setFloatVar(ePlayer,"globalCoop_modulatingClass",0);
+		return;
+	}
+//PLAY MODULATING SOUND/////////////////////////////////////////////////////////
+	globalCoop_playSound_c3v1r60(ePlayer,"sound/weapons/tricorder/tricord_scan.wav");
+	sDisposerClass="Give";//recycle
+	
+//MEDIC CLASS///////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+	if(sPlayerClass == "Medic")
+	{
+		globalCoop_playSound_c3v1r60(eSlave,"sound/misc/mp_healthshard.wav");
+		globalCoop_huds_textOrHud(ePlayer,"coop_msg01","^2You healed ^5player"+fSlavePlayerId);
+		globalCoop_huds_textOrHud(eSlave,"coop_msg02","^2You got a Hyprospray injection from ^5player"+fDisposerPlayerId);
+		eSlave.health(globalCoop_return_floatHealthNormalized(fSvaleHealth,100));
+		ePlayer.health(globalCoop_return_floatHealthNormalized(ePlayer.gethealth(),25));		
+	}
+//TECH CLASS////////////////////////////////////////////////////////////////////	
+	if(sPlayerClass == "Technician")
+	{
+		globalCoop_playSound_c3v1r60(eSlave,"sound/player/shieldup.wav");
+		globalCoop_huds_textOrHud(ePlayer,"coop_msg03","^2You gave ^5$$Item-Armor$$^2 to ^5player"+fSlavePlayerId);
+		globalCoop_huds_textOrHud(eSlave,"coop_msg04","^2You got ^5$$Item-Armor$$^2 from ^5player"+fDisposerPlayerId);
+		eSlave.addtomyarmor(100);
+		ePlayer.addtomyarmor(50);
+	}
+	if(sPlayerClass == "HeavyWeapons")
+	{
+		globalCoop_playSound_c3v1r60(eSlave,"sound/vehicles/shuttlecraft/shuttle_startup.wav");
+		globalCoop_huds_textOrHud(ePlayer,"coop_msg05","^2You gave ^5$$Ammo-Plasma$$^2, $$Ammo-Fed$$ and $$Ammo-Idryll$$ to ^5player"+fSlavePlayerId);
+		globalCoop_huds_textOrHud(eSlave,"coop_msg06","^2You got ^5$$Ammo-Plasma$$^2, $$Ammo-Fed$$ and $$Ammo-Idryll$$ from ^5player"+fDisposerPlayerId);
+//use this just for the claiming effect
+		globalCoop_armory_giveAmmo(eSlave,1000);
+//GIVE FRACTION OF THE AMMOUNT TO THE SPENDER
+		ePlayer.ammo("Plasma",150);
+		ePlayer.ammo("Idryll",150);
+		ePlayer.ammo("Fed",150);
+	}
+	wait(2.5);
+//REST STATUS
+	if(doesEntityExist(ePlayer)){
+		ePlayer.stopsound(3);
+		ePlayer.setFloatVar("globalCoop_modulatingClass",0);
+	}
+}
+
+
+float globalCoop_class_returnIntegerClassPlayers(string sClass)
+//----------------------------------------------------------------------
+// return int telling us how many players of other classes are existing
+//----------------------------------------------------------------------
+{
+	entity ePlayer;
+	float fPlayerIdInUse,fActive;
+	
+	fPlayerIdInUse=1;
+	while(fPlayerIdInUse<=coop_integer_maxPlayers)
+	{
+		ePlayer = getentity("player"+ fPlayerIdInUse);
+		if(doesEntityExist(ePlayer)){
+			if(ePlayer.getStringVar("globalCoop_className") == sClass)
+			{
+				fActive++;
+			}
+		}
+		fPlayerIdInUse++;
+	}
+	// for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++)
+	// {
+	// ePlayer = getentity("player"+ fPlayerIdInUse);
+	// if(doesEntityExist(ePlayer)){
+	// if(ePlayer.getStringVar("globalCoop_className") == sClass){
+	// fActive++;
+	// }
+	// }
+	// }
+	return fActive;
+}
+
+
+void globalCoop_class_addIndicator(entity ePlayer, string sClassAdd)
+//----------------------------------------------------------------------
+// Adds/removes the ID number sprite to the player
+//----------------------------------------------------------------------
+{
+	float fId;
+	fId = globalCoop_return_integerPlayerId(ePlayer);
+	globalCoop_player_removeSoftlyAttached(ePlayer);
+	if(doesEntityExist(ePlayer)){
+		if(sClassAdd != "" && cvar_bool_coop_disClass == 0)
+		{
+			ePlayer.attachmodel("sysimg/icons/mp/specialty_"+sClassAdd+".spr","origin",.13,"globalCoop_playerClassIndicator",0,0,-1,-1,-1,'0 111.5 0');
+		}
+		ePlayer.attachmodel("sysimg/icons/mp/specialty_Medic.spr","tag_head",0,"globalCoop_player"+fId+"Watch",0,-1,-1,-1,-1,'47 0 0');
+	}
+}
+
+void globalCoop_class_autoSelect(entity ePlayer)
+//----------------------------------------------------------------------
+//PRE SELECTS A CLASS FOR THE NEW PLAYER
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(ePlayer))
+	{
+		if(cvar_bool_coop_disClass == 0)
+		{
+			string	sClass;
+		//IF WE HAVE A TECH
+			if(coop_vector_classesinuseTechHeavyMedic_x >= 1){
+		//CHECK, DO WE NEED A DRUGSELLER
+				if(coop_vector_classesinuseTechHeavyMedic_z < 1){
+					coop_vector_classesinuseTechHeavyMedic_z += 1;
+					sClass = "Medic";
+				}
+		//WE HAVE A MEDICINEMAN AND A TECHNOMAGE, TRASH THE CURRENT PLAYER TO THE INFANTRY
+				else{
+					sClass = "HeavyWeapons";
+					coop_vector_classesinuseTechHeavyMedic_y += 1;
+				}
+			}
+		//WE HAVE NO TECH, I REPEAT WE HAVE NO TECH! WELL, THEN THIS PLAYER MUST BECOME THE CHOSEN ONE
+			else{
+				coop_vector_classesinuseTechHeavyMedic_x += 1;
+				sClass = "Technician";
+			}
+			ePlayer.setStringVar("globalCoop_className",sClass);
+		}
+	}
+}
+
+
+void globalCoop_class_medicUpdateTeamHealthStats()
+//------------------------------------------------------------------------------
+//UPDATE TEAM HEALTH STATUS HUD
+//------------------------------------------------------------------------------
+{
+//CAN BE DISABLED IF SERVER HAS ISSUES WITH TRAFIC, OR THE MAP IS KNOWN TO MAKE TROUBLES
+//if(cvar_bool_coop_disMedicMonitor!=1){
+	float	fPlayerIdInUse,
+			fH,
+			fPlayerActive,
+			fDataHasChanged;
+	string sData;
+	string sData2;
+	entity ePlayer;
+	
+	for(fPlayerIdInUse=1;fPlayerIdInUse<=8;fPlayerIdInUse++)
+	{
+		ePlayer = getEntity("player"+fPlayerIdInUse);
+		fH=0;
+		if(doesEntityExist(ePlayer))
+		{
+		//do not display flat values, display integer values 
+			fH = ePlayer.gethealth();
+			fH = floor(fH);
+			if(fH < 1 && fH > 0)
+			{
+				fH = 1;
+			}
+			if(ePlayer.getFloatvar("coop_playerLastHealth") != fH){
+				fDataHasChanged=1;
+				ePlayer.setFloatvar("coop_playerLastHealth",fH);
+				
+			}
+		}
+		if(!fDataHasChanged){
+			if(fPlayerActive != $world.getFloatVar("coop_activePlayersHealth")){
+				$world.setFloatVar("coop_activePlayersHealth",fPlayerActive);
+				fDataHasChanged=1;
+			}
+		}
+		sData2 = "seta coop_"+fPlayerIdInUse;
+		sData = sData+""+sData2+" "+fH+";";
+	}
+
+//HEALTH OF ANY PLAYER HAS CHANGED, UPDATE!!!
+	if(fDataHasChanged)
+	{
+		fPlayerIdInUse=1;
+		while(fPlayerIdInUse<=coop_integer_maxPlayers)
+		{
+			ePlayer = getEntity("player"+fPlayerIdInUse);
+			if(globalCoop_level_getStringVar(ePlayer,"globalCoop_className") == "Medic")
+			{
+				globalCoop_player_transmitter(ePlayer,sData);
+			}
+			fPlayerIdInUse++;
+		}
+		// for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++)
+		// {
+		// ePlayer = getEntity("player"+fPlayerIdInUse);
+		// if(globalCoop_level_getStringVar(ePlayer,"globalCoop_className") == "Medic"){
+		// globalCoop_player_transmitter(ePlayer,sData);
+		// }
+		// }
+	}
+}
+

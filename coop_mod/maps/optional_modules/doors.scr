@@ -1,0 +1,58 @@
+//-----------------------------------------------------------------------------------
+// Script By:		Christian Sebastian Strahl (Chrissstrahl)
+// Created on:		2009.06.01
+// E-Mail:			chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+// DOOR - INCLUDE IF YOU NEED IT'S FEATURES; INCLUDE ONLY TO THE CURRENT LEVEL SCRIPT!!
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2012 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+
+////////////////////////////////////////////////////////////////////////////////
+//DECLARATIONS
+////////////////////////////////////////////////////////////////////////////////
+void globalCoop_doors_lockInSpOnly(entity eDoor);
+void globalCoop_doors_openOnUse();
+
+////////////////////////////////////////////////////////////////////////////////
+//FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+void globalCoop_doors_lockInSpOnly(entity eDoor)
+//----------------------------------------------------------------------
+//make the door use to open, else lock the door if single player
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eDoor)){
+		if(cvar_bool_multiplayer){
+			eDoor.spawnflags(32);
+			thread globalCoop_level_onUse(eDoor,"globalCoop_doors_openOnUse");
+		}
+		else{
+			eDoor.lock();
+		}
+	}
+}
+
+
+void globalCoop_doors_openOnUse()
+//----------------------------------------------------------------------
+//on use open this door
+//----------------------------------------------------------------------
+{
+entity eDoor;
+	eDoor = getCurrentEntity();
+	if(doesEntityExist(eDoor)){
+		eDoor.open($world);
+	}
+}

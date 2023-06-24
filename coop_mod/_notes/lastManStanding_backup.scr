@@ -1,0 +1,417 @@
+//-----------------------------------------------------------------------------------
+// Script By:	Christian Sebastian Strahl (Chrissstrahl)
+// Created on:	2007.09.29
+// E-Mail:		chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+// CONTAINING LMS-MODE RELATED FUNCTIONS FOR THE HZM CO-OP MOD
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2010 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////Functions
+////////////////////////////////////////////////////////////////////////////////
+void globalCoop_lmsStart()
+//----------------------------------------------------------------------
+// Starts the lms Modus
+//----------------------------------------------------------------------
+{
+	if(cvar_bool_coop_lmsEnable){
+//return;
+		waitForPlayer();
+		globalCoop_main_waitForWarmupTime();
+		float fTime;
+		fTime=coop_vector_lmsStartedPausedWarmuptime_z;
+		wait(4);
+		while(fTime>0)
+		{
+			if(!coop_bool_cinematicIsActive)
+			{
+				if(	fTime == 30 || fTime == 20 || fTime == 14 ||fTime <= 10 )
+				{
+					centerPrint("^5L^2ast ^5M^2an ^5S^2tanding^2 starts in^5 "+fTime+"\n");
+				}
+				fTime-=2;
+			}
+			else
+			{
+				fTime=coop_vector_lmsStartedPausedWarmuptime_z;
+			}
+			globalCoop_main_wait2DotZero();
+		}
+		centerPrint("^5INFO: ^5L^2ast ^5M^2an ^5S^2tanding^2 is now ^5active^2!\n");
+		coop_float_lmsStartedAt	= getLevelTime();
+		coop_vector_lmsStartedPausedWarmuptime_x = 1;
+	}
+}
+
+
+float globalCoop_lmsPlayerJoin(entity ePlayer)
+//----------------------------------------------------------------------
+// Check if the given player can join the game, and handle the player
+//----------------------------------------------------------------------
+{
+float fBool = 0;
+//check if dude does exist
+	if(doesEntityExist(ePlayer)){
+	//assume player can join when he exists
+		fBool = 1;
+	//check if player can join during LMS
+		if(!globalCoop_lmsCheckCanJoin(ePlayer)){
+		//you are dead
+			ePlayer.hudprint("^5INFO:^2 ^3$$EliminatedWait$$\n");
+			globalCoop_player_joinSpectator(ePlayer);
+ 			if(ePlayer.getFloatVar("globalCoop_lmsPlayerIsOut") != 1){
+				ePlayer.setFloatVar("globalCoop_lmsPlayerIsOut",1);
+				if(ePlayer.getFloatVar("globalCoop_timeEntered") <= (coop_float_lmsStartedAt + coop_vector_lmsStartedPausedWarmuptime_z)){
+					if(ePlayer.getFloatVar("globalCoop_lmsPlayerIsOutMessageDisplayed") != 1){
+						ePlayer.setFloatVar("globalCoop_lmsPlayerIsOutMessageDisplayed",1);
+						thread globalCoop_main_globalMessage("^5INFO:^7 "+globalCoop_lmsReturnIntegerDeadPlayers()+"^2 players out of^7 "+globalCoop_return_integerPlayersQuantity(0)+"^2 are ^1dead\n");
+						thread globalCoop_dialog_playSimple($world,"dm/comp_pyelim.mp3",2,9999999);
+						globalCoop_main_waitZeroDot5();
+						thread globalCoop_lmsUpdateActivePlayersStat();
+					}
+				}
+			}
+		//player can not join!
+			fBool=0;
+		}
+	}
+	return fBool;
+}
+
+
+float globalCoop_lmsCheckCanJoin(entity ePlayer)
+//----------------------------------------------------------------------
+// Check if the given player can join the game, and print info player
+//----------------------------------------------------------------------
+{
+//Check if lms is active, if not allow player to join
+	if(	cvar_bool_coop_lmsEnable != 1 || coop_vector_lmsStartedPausedWarmuptime_y == 1){
+		return 1;
+	}
+	
+//Create vars
+	float fBool = 0;
+	float fLives;
+	entity eSpectator;
+//check if dude does exist
+	if(doesEntityExist(ePlayer)){
+		thread globalCoop_lmsAddHud(ePlayer);
+	//Check how long the player is in the game allready
+		if(	coop_float_lmsStartedAt == 0 ||	ePlayer.getFloatVar("globalCoop_timeEntered") <= coop_float_lmsStartedAt){
+			fLives = ePlayer.getFloatVar("globalCoop_lmsDeaths");//recycled!!!!
+			if(fLives < cvar_integer_coop_lmsLifes)
+			{
+				string sCurrentLives;
+				fBool = 1;//allow join
+				fLives = (cvar_integer_coop_lmsLifes - fLives);//recycled!!!!
+			//SET live number color
+				sCurrentLives = "^1 "+fLives;
+			//Inform player that he/she is out...
+				if(fLives <= 1)
+				{
+				//Tell player YOU ARE OUT!
+					if(fLives < 1)
+					{
+						globalCoop_lmsPlayerOutSetup(ePlayer,"^1$$EliminatedWait$$\n ");
+						fBool = 0;//Disallow join
+					}
+				}
+				else
+				{
+					sCurrentLives = "^5 "+fLives;
+					
+				}
+			//don't print message when player is dead
+				if(fLives > 0)
+				{
+					globalCoop_lmsPlayerJoinSetup(ePlayer,"^5INFO:^2 Last Man Standing - You have"+sCurrentLives+"^2 of^5 "+cvar_integer_coop_lmsLifes+" ^2lives left.");
+				}
+			}
+			else
+			{
+				fBool = globalCoop_lmsPlayerReplaceWith(ePlayer);
+			}
+		}
+		else{
+//ALLOW A SECOUND PLAYER TO JOIN
+			fLives = $world.getFloatVar("globalCoop_lmsPlayersRegistred");//Recycled Variable!!!
+			fLives++;
+		//Check if we shall allow this player (if one player has been alone all the time allow a secound one)...
+			if(fLives <= 2){//Recycled Variable!!!
+				fBool = 1;//allow join
+				ePlayer.setFloatVar("globalCoop_timeEntered",(coop_float_lmsStartedAt - 2));
+			}else{
+//REPLACE A (ACTIVE) SPECTATOR
+				fBool = globalCoop_lmsPlayerReplaceWith(ePlayer);
+			}
+		}
+	}
+//RETURN IF PLAYER IS ALLOWED TO JOIN OR NOT
+	return fBool;
+}
+
+
+float globalCoop_lmsReturnIntegerActivePlayers()
+//----------------------------------------------------------------------
+// Check how many players are still active
+//----------------------------------------------------------------------
+{
+entity ePlayer;
+float fActivePlayers;
+float fPlayerIdInUse;
+	for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++){
+		ePlayer = getentity("player"+ fPlayerIdInUse);
+		if(doesEntityExist(ePlayer)){
+			if(ePlayer.getFloatVar("globalCoop_lmsPlayerIsOut") != 1){
+				fActivePlayers++;
+			}
+		}
+	}
+	return fActivePlayers;
+}
+
+
+float globalCoop_lmsReturnIntegerDeadPlayers()
+//----------------------------------------------------------------------
+// Retrurn info string of the player stats
+//----------------------------------------------------------------------
+{
+entity ePlayer;
+float fActivePlayers;
+float fPlayersTotal;
+float fPlayerIdInUse;
+	for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++){
+		ePlayer = getentity("player"+ fPlayerIdInUse);
+		if(doesEntityExist(ePlayer)){
+			if(!ePlayer.getFloatVar("globalCoop_lmsPlayerIsOut")){
+				fActivePlayers++;
+			}
+			fPlayersTotal++;
+		}
+	}
+	fPlayerIdInUse=(fPlayersTotal - fActivePlayers);
+	return fPlayerIdInUse;
+}
+
+
+void globalCoop_lmsPlayerResurrectAll(string sReason)
+//----------------------------------------------------------------------
+// resurrect all players
+//----------------------------------------------------------------------
+{
+	float	fPlayer;
+	entity	ePlayer;
+	
+	for(fPlayer=1;fPlayer<=coop_integer_maxPlayers;fPlayer++){
+		ePlayer = getentity("player"+fPlayer);
+		thread globalCoop_lmsPlayerResurrect(ePlayer,sReason);
+	}
+	
+	cvar_integer_coop_lmsLifes++;
+	globalCoop_main_wait1DotZero();
+	thread globalCoop_lmsUpdateActivePlayersStat();
+}
+
+
+void globalCoop_lmsPlayerResurrect(entity ePlayer,string sReason)
+//----------------------------------------------------------------------
+// Ressurect the given player, allow him to join again.
+//----------------------------------------------------------------------
+{
+//Check if lms is active
+	if(cvar_bool_coop_lmsEnable && doesEntityExist(ePlayer)){
+//RESURRECT DEATH PLAYERS
+		float fDeath;
+		if(ePlayer.getFloatVar("globalCoop_lmsPlayerIsOut")){
+			fDeath =  (cvar_integer_coop_lmsLifes + -1);
+			sReason = "^5INFO: ^2You have been ressurected! ^3("+sReason+"^3) \n";
+		}else{
+			fDeath = ePlayer.getFloatVar("globalCoop_lmsDeaths");
+			fDeath++;
+			sReason = "^5INFO: ^2You got one extra live ^3("+sReason+"^3) \n";
+		}
+		ePlayer.hudprint(sReason);
+		ePlayer.setFloatVar("globalCoop_lmsDeaths",fDeath);
+		ePlayer.setFloatVar("globalCoop_lmsPlayerIsOut",0);
+		ePlayer.setFloatVar("globalCoop_timeEntered",(coop_float_lmsStartedAt - 2));
+//JOIN THE GAME AGAIN
+		globalCoop_player_joinDefaultTeam(ePlayer);
+	}
+}
+
+
+void globalCoop_lmsEndMatch()
+//----------------------------------------------------------------------
+// Ends the match and restart the map
+//----------------------------------------------------------------------
+{
+	if(	coop_vector_mainisactiveLevelcompleteLmslevelend_z  != 0 || //levelend is not allready in use
+		coop_float_lmsStartedAt != 0 && //match has started
+		globalCoop_lmsReturnIntegerActivePlayers() <= 0) //every one is wiped
+	{
+		coop_vector_mainisactiveLevelcompleteLmslevelend_z = 1;
+		globalCoop_mission_failWithReason("PlayerKilled4");
+	}
+}
+
+
+void globalCoop_lmsAddHud(entity ePlayer)
+//----------------------------------------------------------------------
+// Check if the given player can join the game, and handle the player
+//----------------------------------------------------------------------
+{
+	if(cvar_bool_coop_lmsEnable){
+		globalCoop_huds_Add(ePlayer,"coop_lmsStat");
+	}
+}
+
+
+void globalCoop_lmsUpdateActivePlayersStat()
+//----------------------------------------------------------------------
+// Check if the given player can join the game, and handle the player
+//----------------------------------------------------------------------
+{
+	if(cvar_bool_coop_lmsEnable){
+		float fActive;
+		fActive = globalCoop_lmsReturnIntegerActivePlayers();
+		globalCoop_player_transmittToAll("seta coop_lmsStat "+fActive+"\n");
+		if(fActive <= 0){
+			thread globalCoop_lmsEndMatch();
+		}
+	}
+}
+
+
+void globalCoop_lmsSpectatorManager(entity ePlayer)
+//----------------------------------------------------------------------
+// Check if player is spectating and a other player can join instead
+//----------------------------------------------------------------------
+{
+	if(coop_vector_lmsStartedPausedWarmuptime_x == 1)
+	{
+		if(doesEntityExist(ePlayer))
+		{
+//CHECK IF PLAYER HAS SOME LIVE LEFT
+			if(ePlayer.getFloatVar("globalCoop_timeEntered") <= coop_float_lmsStartedAt){
+			//check marked time with the saved time (globalCoop_player_manageCycle)
+				float fTimmer = 10;
+				while(	globalCoop_check_playerSpectator(ePlayer) &&
+						fTimmer > 0	&&
+						ePlayer.getFloatVar("globalCoop_lmsDeaths") < cvar_integer_coop_lmsLifes)
+				{
+//INAVTIVE PRIVATE COUNTDOWN
+					ePlayer.hudPrint("^2LMS: ^3You will be marked inactive, and one other player can join in^5: "+fTimmer+"\n");
+					fTimmer--;
+					globalCoop_main_wait1DotZero();
+				}
+//MARK PLAYER AS INACTIVE
+				if(globalCoop_check_playerSpectator(ePlayer)){
+					globalCoop_lmsPlayerInactiveSetup(ePlayer);
+				}
+//UNMARK AS SPECTATOR
+				else{
+					ePlayer.setFloatVar("globalCoop_lmsPlayerIsSpectating",0);
+				}
+			}
+		}
+	}
+}
+
+
+void globalCoop_lmsSaveMyHealth(entity ePlayer,float fPlayerHealth)
+//----------------------------------------------------------------------
+// save the health of the player 
+//----------------------------------------------------------------------
+{
+	if(coop_vector_lmsStartedPausedWarmuptime_x){
+		if(fPlayerHealth != 100 && fPlayerHealth > 1 && globalCoop_player_returnFloatRespawing(globalCoop_return_integerPlayerId(ePlayer))){
+			ePlayer.setFloatVar("globalCoop_lmsHealth",fPlayerHealth);
+		}
+	}
+}
+
+
+void globalCoop_lmsPlayerOutSetup(entity ePlayer,string sMessage)
+//----------------------------------------------------------------------
+// Tell player he's out
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(ePlayer)){
+		ePlayer.hudprint(sMessage);
+		ePlayer.setFloatVar("globalCoop_lmsPlayerIsOut",1);
+		ePlayer.setFloatVar("globalCoop_lmsDeaths",cvar_integer_coop_lmsLifes);
+	}
+}
+
+
+void globalCoop_lmsPlayerJoinSetup(entity ePlayer,string sMessage)
+//----------------------------------------------------------------------
+// Let the player just play
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(ePlayer)){
+		ePlayer.hudprint(""+sMessage+"\n");
+		ePlayer.setFloatVar("globalCoop_lmsPlayerIsOut",0);
+		ePlayer.setFloatVar("globalCoop_lmsPlayerIsInactive",0);
+		ePlayer.setFloatVar("globalCoop_timeEntered",(coop_float_lmsStartedAt - 2));
+	}
+}
+
+
+void globalCoop_lmsPlayerInactiveSetup(entity ePlayer)
+//----------------------------------------------------------------------
+// Put player into 'stasis'
+//----------------------------------------------------------------------
+{
+	if(globalCoop_check_playerSpectator(ePlayer)){
+		if(ePlayer.getFloatVar("globalCoop_lmsPlayerIsOut") != 1){
+			globalCoop_player_joinSpectator(ePlayer);
+			ePlayer.setFloatVar("globalCoop_lmsPlayerIsInactive",1);
+			if(coop_vector_lmsStartedPausedWarmuptime_x == 1){
+				globalCoop_main_globalMessage("^5INFO: ^2One active player has decided to spectate, you can now join instead!");
+			}
+		}
+	}
+}
+
+
+float globalCoop_lmsPlayerReplaceWith(entity ePlayer)
+//----------------------------------------------------------------------
+// replace a spec with that dude, and tell us too if that works out
+//----------------------------------------------------------------------
+{
+//Check every single spectator if they can be replaced
+	if(doesEntityExist(ePlayer)){
+		entity	eSpectator;
+		float	fId;
+		for(fId=1;fId<=coop_integer_maxPlayers;fId++){
+			eSpectator = getentity("player"+fId);
+			if(globalCoop_check_playerSpectator(eSpectator)){//CHECK ALSO IF PLAYER EXISTS!
+				if(eSpectator.getFloatVar("globalCoop_lmsDeaths") < cvar_integer_coop_lmsLifes){
+					ePlayer.setFloatVar("globalCoop_lmsDeaths",eSpectator.getFloatVar("globalCoop_lmsDeaths"));
+					eSpectator.setFloatVar("globalCoop_lmsPlayerIsOut",1);
+					eSpectator.setFloatVar("globalCoop_lmsDeaths",cvar_integer_coop_lmsLifes);
+					globalCoop_lmsPlayerJoinSetup(ePlayer,"^5INFO:^2 You have taken the spot of the spectating ^5"+globalCoop_return_stringEntityTargetname(eSpectator)+"");
+					return 1;
+				}
+			}
+		}
+	//Tell player YOU ARE OUT!
+		globalCoop_lmsPlayerOutSetup(ePlayer,"^1$$EliminatedWait$$ \n");
+	}
+	return 0;
+}
+

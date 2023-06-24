@@ -1,0 +1,51 @@
+//basement related functions - purpose is to keep the scripts simple
+void basementWasserZufuhr()
+{//toggle water avialable
+	if(!float_basementWasserAbgestellt){
+		$basementBadezimmerValve.rotateX(180);
+		wait(1);
+		$basementBadezimmerValve.rotateX(0);
+//stop water moving up
+		if(float_badezimmerWaschbecken){
+//stop water
+			badezimmerWaschbecken();
+//set var to turn water on with the correct animation type
+			float_basementWasserAbgestellt=1;
+//enable water again
+			badezimmerWaschbecken();
+		}
+		float_basementWasserAbgestellt=1;
+	}else{
+		$basementBadezimmerValve.rotateX(-180);
+		wait(1);
+		$basementBadezimmerValve.rotateX(0);
+//water was on, stop driping and let the water flow
+		if(float_badezimmerWaschbecken==1){
+//turn water off
+			badezimmerWaschbecken();
+//set var to turn water on with the correct animation type
+			float_basementWasserAbgestellt=0;
+//turn it on again
+			badezimmerWaschbecken();
+		}
+//set var now, if water was not on
+		float_basementWasserAbgestellt=0;
+	}
+}
+
+void basementDeskLightToggle()
+{//getlightintensity
+//toggle desk ligth in the headmaster office
+	if($world.getlightintensity("basementDeskLight") ==  0){
+		$world.light_intensity("basementDeskLight",1);
+		$basementDeskLightBeam.show();
+	}else{
+		$world.light_intensity("basementDeskLight",0);
+		$basementDeskLightBeam.hide();
+	}
+}
+
+
+
+
+

@@ -1,0 +1,12 @@
+//resets the scanned code
+menu "coop_reset_scode" 640 480 NONE 1
+borderstyle NONE
+bgcolor 0 0 0 0
+align center
+hideDuringLoad
+depth 0.9
+noresize 1
+fullscreen 0
+gamefocus 1
+showcommand "seta coop_pScanned \"\"\n"
+direction from_top 0

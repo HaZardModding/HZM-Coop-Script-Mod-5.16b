@@ -1,0 +1,806 @@
+//-----------------------------------------------------------------
+//  EF2 Level Script File
+//
+//  Level:	  m11l1a-drull_ruins3
+//  Script By:    Jared Hefty(last edit: Josh Martel on Tuesday, August 27, 2002)
+//  Geometry By:  Luke Whiteside, Richard Heath, Jared Hefty
+//  Created on:   06/12/2002
+//-----------------------------------------------------------------
+
+//=============================================================================
+// Declarations
+//=============================================================================
+void main();
+void init();
+void setupAI();
+void setupGroups();
+void setupPuzzles();
+string 	coop_returnClosestPlayerTargetname(entity eCheck);
+void coop_groupAttack(float fGRoup);
+void setupTower( float tower );
+void displayTargettingIndicator( float tower );
+void barricadeDoorDestroyed();
+void coop_endLevel();
+void coop_findAndManageEntities();
+
+float TOTAL_SPAWN_TRIGGERS = 12;
+
+//=============================================================================
+// Includes
+//=============================================================================
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/global/global_common.scr"
+#include "coop_mod/maps/optional_modules/puzzles.scr"
+#include "coop_mod/maps/optional_modules/teammate.scr"
+#include "coop_mod/maps/missions/11/m11_groupSpawn.scr"
+#include "coop_mod/maps/missions/11/m11_beamInAmmo.scr"
+#include "maps/global_scripts/global_debugUtils.scr"
+#include "maps/global_scripts/global_math.scr"
+#include "maps/global_scripts/global_archetype.scr"
+#include "coop_mod/maps/global/global_tricorderbase.scr"
+#include "maps/global_scripts/global_tricordermod.scr"
+#include "coop_mod/maps/missions/11/m11l1a_cin.scr"
+
+//---------------------
+// main
+// do start up stuff
+//---------------------
+void main()
+{
+	spawn ( "Actor" , "model" , "models/char/hazardteam_munro.tik" , "targetname" , "munro","origin","6494 -2289 50","ai_off","1");
+	globalCoop_main_camFadeOut(.01);
+	globalCoop_server_precacheSingleplayer();
+	thread coop_findAndManageEntities();
+	soundtrack( "music/m11l1a-drull_ruins3.mus" );
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_string_nextMapToCheck			= "m11l2a-drull_ruins3";//set the map we gona load next while we are in testmode
+//Set spawnangles for this level
+	coop_float_spawnAngle0 				= 90;
+//750 cuz korban makes players get stuck                                  
+	coop_vector_spawnOrigin8 			= '-6569 -4312 750';//650
+	coop_vector_spawnOrigin7 			= '-6696 -4304 750';//650
+	coop_vector_spawnOrigin6 			= '-6696 -4230 750';//630
+	coop_vector_spawnOrigin5 			= '-6569 -4230 750';//630
+	coop_vector_spawnOrigin4 			= '-6696 -4150 750';//600
+	coop_vector_spawnOrigin3 			= '-6569 -4150 750';//600
+	coop_vector_spawnOrigin2 			= '-6696 -4080 750';//578
+	coop_vector_spawnOrigin1 			= '-6569 -4080 750';//575
+//Definie Objective
+	coop_string_objectiveItem1			= "FindEntrance";
+	coop_string_objectiveItem2			= "DefeatAlienCommander";
+ //definie weapons
+	coop_string_weapon1 = "models/weapons/worldmodel-BurstRifle.tik";
+	coop_string_weapon2 = "models/weapons/worldmodel-Phaser-stx.tik";
+	coop_string_weapon3 = "models/weapons/worldmodel-Tricorder-stx.tik";
+	coop_string_weapon4 = "models/weapons/worldmodel-attrex-rifle.tik";
+	coop_string_weapon5 = "models/weapons/worldmodel-photon.tik";
+	coop_string_weapon6 = "models/weapons/worldmodel-sniperrifle.tik";	
+	//removed due to to many models issue
+	//coop_string_weapon4 = "models/weapons/worldmodel-GrenadeLauncher.tik";
+	//coop_string_weapon8 = "models/weapons/worldmodel-FieldAssaultRifle.tik";
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	thread init();
+	if(!cvar_bool_multiplayer){
+		waitforplayer();//moved in here build 16
+		$player.playerviewangles ( '0 90 0' );
+		$player.loadobjectives( "m11l1a-drull_ruins3" );
+		wait( .1 );
+		$player.use ( "BurstRifle" );
+	}
+	else{
+	//remove spawners for AI which is to much to handle in mp
+		$tower1Part8.remove();
+		globalCoop_level_remove($t1113);//e1
+		globalCoop_level_remove($t1113);//e2
+		if(	getCvar("coop_eWtik") == "models/weapons/worldmodel-rom-radgun-romhands.tik" ||
+			getCvar("coop_eWtik") == "models/weapons/worldmodel-rom-radgun.tik"
+		)
+		{
+			coop_string_weapon7 = "models/weapons/worldmodel-rom-radgun.tik";
+		}
+	}
+//Set viewModes
+	$world.clearAvailableViewModes();
+	$world.addAvailableViewMode("torpedostrike");
+	$world.addAvailableViewMode("structuralintegrity");
+
+	setupTower( 1 );
+	setupTower( 2 );
+	//setupTower( 3 );	//had to delete this one at the last minute to get rid of issues with a cinematic
+	setupTower( 4 );
+	setupTower( 5 );
+	setupTower( 6 );
+	setupTower( 7 );
+
+	//hacked in stuff for the doors
+	thread displayTargettingIndicator( 8 );
+	thread displayTargettingIndicator( 9 );
+
+//START INTRO CINEMATIC, ENTE IN ORBIT
+	thread EntIntro();
+}
+
+void coop_findAndManageEntities()
+//find entities without targetname and give em a targetname
+{	
+	float fEntity;
+	entity e;
+	for(fEntity=0;fEntity<1023;fEntity++){
+		e=getEntity("*"+fEntity);
+		if(doesEntityExist(e)){
+			if(e.getModelName() == "models/fx/fx-beamsparkle-item.tik"){
+				e.remove();
+			}
+		}
+	}
+}
+
+void init()
+//----------------------------------------------------------------------
+// do more start up stuff
+//----------------------------------------------------------------------
+{
+	$ActivateGroup402.setSize('-400 -128 -128','400 128 1000');
+	thread setupAI();
+//Hide the busted doors behind the fake door
+	$quadDoorNorth.time( .1 );
+	$quadDoorSouth.time( .1 );
+	$quadDoorNorth.rotateYUp( 20 );
+	$quadDoorSouth.rotateYDown( 20 );
+	$quadDoorNorth.moveDown( 768 );
+	$quadDoorSouth.moveDown( 768 );
+	$quadSecurityDoor.moveDown( 256 );
+	$quadDoor.solid();	//for pathnodes
+	$entranceDoor.lock();
+	
+	thread setupPuzzles();
+	
+//spawn Class Selection
+	thread globalCoop_class_setup("Medic",'-6624 -3041 269');
+	thread globalCoop_class_setup("HeavyWeapons",'-6534 -3059 263');
+	thread globalCoop_class_setup("Technician",'-6417 -3044 251');
+	
+	spawn("trigger_once","origin","-1810 562 197","targetname","area2Spawn","thread","coop_spawnLocationSetArea2");
+	wait(3);
+	$area2Spawn.setSize('-300 -300 -200','300 300 10000');
+}
+
+void setupAI()
+//----------------------------------------------------------------------
+//Setup the AI
+//----------------------------------------------------------------------
+{
+	//PRECACHES
+	globalCoop_level_remove($precacheQuad);//this quad is here so that we have the ai state files cached ahead of time for the elite quad encounter later on in the map
+	//we don't need it once the map loading is done and the server has started, so we remove it now
+	globalCoop_level_remove($precacheBasher);
+//COMMANDER
+	$commander.ai_off();
+	vector v;
+	v=$commanderHead.getorigin();
+	v_z+=192;
+	$commanderHead.origin( v );	
+	$commanderHead.bind( $commanderPlat );
+	$commander.hide();
+	$commander.notsolid();
+	$commander.scale(1.5);
+//KORBAN
+	globalCoop_teammate_register($korban);
+	$korban.hide();
+	$munro.hide();
+	$munro.notsolid();
+	$munro.notarget();
+	$korban.setactorflag( "usefollowrangefornodes" , 1 );
+	$korban.useactorweapon( "CompressionRifleEnhanced" );
+	//globalCommon_SetupContextDialog( $korban , "korban" );
+	thread setupGroups();
+	
+	if(cvar_bool_multiplayer)
+	{
+		float fHealth;
+		fHealth=500;
+		$tower1Remove.health(fHealth);
+		$tower2Remove.health(fHealth);
+		$tower3Remove.health(fHealth);
+		$tower4Remove.health(fHealth);
+		$tower5Remove.health(fHealth);
+		$tower6Remove.health(fHealth);
+		$tower7Remove.health(fHealth);
+	}
+}
+
+void setupGroups()
+//----------------------------------------------------------------------
+//Setup the AI groups
+//----------------------------------------------------------------------
+{
+	AIHideGroup	( 100 );
+	AIHideGroup	( 101 );
+
+	AIHideGroup( 200 );
+	CommandToGroup( 200 , "groupdeaththread" , "enableBarricadeDoor" , "" );
+	AIOffGroup 	( 400 );
+	AIOffGroup	( 401 );
+	AIOffGroup 	( 402 );
+	AIOffGroup 	( 403 );
+	AIOffGroup ( 404 );
+
+	AIHideGroup( 600 );
+	AIHideGroup( 601 );
+	AIHideGroup( 602 );
+
+	AIHideGroup	( 667 );	//second wave before commander battle
+
+	//cinematic guys
+	AIHideGroup( 777 );
+	AIHideGroup( 888 );
+	
+//setup a wave battle
+	CommandToGroup( 666 , "groupdeaththread" , "activateGroup667" , "");
+	CommandToGroup( 667 , "groupdeaththread" , "commanderBattle" , "");
+}
+
+void setupPuzzles()
+//----------------------------------------------------------------------
+//Setup the Tricorder Puzzles
+//----------------------------------------------------------------------
+{
+	if(!cvar_bool_multiplayer){
+		//setup barricade door puzzle
+		$barricadeDoorPuzzle.puzzleobject_itemToUse( "Tricorder" );
+		$barricadeDoorPuzzle.puzzleobject_solvedthread( "barricadeDoorSolved" );
+		$barricadeDoorPuzzle.puzzleobject_timeToUse( 2 );
+		$barricadeDoorPuzzle.puzzleobject_itemusedthread( "barricadeDoorPuzzle" );
+		$barricadeDoorPuzzle.missionobjective( 1 );
+	}
+	else{
+		globalCoop_puzzle_replace($barricadeDoorPuzzle,"barricadeDoorSolved",5);
+	}
+	globalArchetype_Setup( $barricadeDoorPuzzleArchetype , "RomulanTricorderDoor" );
+	
+	if(!cvar_bool_multiplayer){
+		//setup cave door puzzle
+		$caveDoorPuzzle.puzzleobject_itemToUse( "Tricorder" );
+		$caveDoorPuzzle.puzzleobject_solvedthread( "caveDoorSolved" );
+		$caveDoorPuzzle.puzzleobject_timeToUse( 2 );
+		$caveDoorPuzzle.puzzleobject_itemusedthread( "caveDoorPuzzle" );
+		$caveDoorPuzzle.missionobjective( 1 );
+	}
+	else{
+		globalCoop_puzzle_replace($caveDoorPuzzle,"caveDoorSolved",5);
+	}
+	globalArchetype_Setup( $caveDoorPuzzleArchetype , "RomulanTricorderDoor" );
+}
+
+
+string 	coop_returnClosestPlayerTargetname(entity eCheck)
+{
+	string sReturn;
+	if(doesEntityExist(eCheck)){
+		entity ePlayer;
+		ePlayer = globalCoop_return_playerClosestPreferActive(eCheck);
+		if(doesEntityExist(ePlayer))
+		{
+			sReturn = ePlayer.getTargetName();
+		}
+	}
+	return sReturn+"";
+}
+
+
+void coop_groupAttack(float fGRoup)
+{
+//SINGLEPLAYER
+	if(!cvar_bool_multiplayer)
+		CommandToGroup(fGRoup,"attack","$player","");
+	else
+		CommandToGroup(fGRoup,"aggressive","1","");
+}
+
+void bigRockMove()
+{
+	while( 1 )
+	{
+		$bigRock.time( 15 );
+		$bigRock.moveDown( 64 );
+		waitfor( $bigRock );
+
+		$bigRock.time( 20 );
+		$bigRock.moveUp( 64 );
+		waitfor( $bigRock );
+	}
+}
+
+void ActivateGroup100()
+{
+	showBeaminEffects = 0;
+	AIShowGroup( 100 );
+	coop_groupAttack(100);
+	CommandToGroup( 100 , "groupdeaththread" , "ActivateGroup101" , "" );
+	showBeaminEffects = 1;
+}
+
+void ActivateGroup101()
+{
+	wait( 1 );
+	AIShowGroup( 101 );
+	coop_groupAttack(101);
+}
+
+void ActivateArea1Group200()
+{
+	showBeaminEffects = 0;	//save on tempmodels
+	AIShowGroup( 200 );
+	showBeaminEffects = 1;
+}
+
+void ActivateGroup300()
+{
+	AIOnGroup( 300 );
+	coop_groupAttack(300);
+	CommandToGroup( 300 , "groupdeaththread" , "ActivateQuad" , "" );
+}
+
+void ActivateGroup400()
+{
+	AIOnGroup( 400 );
+}
+
+
+void ActivateGroup401()
+{
+	AIOnGroup( 401 );
+}
+
+void ActivateGroup402()
+{
+	AIOnGroup( 402 );
+}
+
+void ActivateGroup403()
+{
+	AIOnGroup( 403 );
+}
+
+void ActivateGroup404()
+{
+	AIOnGroup( 404 );
+}
+
+void ActivateQuad()
+{	
+ 	$quadDebris.scale( 2 );
+ 	$quadDebris.modelname( "fx/fx-explosion-door-m11-quadraped.tik" );
+ 	$quadDebris.playsound( "sound/ships/drull/drull_doorpound.wav", 8, 1 , 700 );
+ 	$quadDebris.playsound( "sound/impact/explosion/expl_muffle2.wav", 9, 1 , 700 );
+
+    forcemusic("mystery");
+
+	wait( 2 );
+
+	$quadDoor.earthQuake( 1 , 2 );
+ 	$quadDoor.playsound( "sound/impact/explosion/expl_rockdebr1.wav", 810, 1 , 700 );
+
+	wait( 2 );
+ 	$quadDoor.playsound( "sound/impact/explosion/expl_muffle2.wav", 8, 1 , 700 );
+	$quadDoor.earthQuake( 1 , 2 );
+	wait( 1 );
+
+	if(!cvar_bool_multiplayer){
+		//wait till the player is looking
+		vector v;
+		v = $player.getangles();
+		while( v_y > 45 && v_y < 315 )
+		{
+			v = $player.getangles();
+			wait( .25 );
+		}
+	}
+
+	globalCoop_level_remove($quadDoor);
+ 	$quadDoorNorth.playsound( "sound/ships/drull/drull_doorexplode.wav", 9, 1.3 , 700 );
+ 	$quadDoorNorth.playsound( "sound/impact/explosion/explo_wall1.wav", 10, 1 , 700 );
+
+	$quadDoorNorth.time( 0.30 );
+	$quadDoorSouth.time( 0.20 );
+
+	$quadDoorNorth.rotateYDown( 20 );
+	$quadDoorSouth.rotateYUp( 15 );
+
+	wait( 1 );
+	$quadDoor.earthQuake( 1 , 2 );
+
+	$quadDoorNorth.time( 0.50 );
+	$quadDoorSouth.time( 0.40 );
+
+	$quadDoorNorth.rotateYDown( 90 );
+	$quadDoorSouth.rotateYUp( 90 );
+
+	$quadSecurityDoor.time( 2 );
+	$quadSecurityDoor.moveUp( 256 );
+
+ 	$quadPusher.playsound( "sound/chars/quad/quad_alert.wav", 12, 1.5 , 1000 );
+
+	$quadPusher.speed( 500 );
+	trigger( "$quadEarthquake" );
+	trigger( "$quadDebris" );
+	trigger( "$quadSpawner" );
+	wait( .5 );
+	v = $quad.getOrigin();
+	v_z -= 50;
+	$quad.origin(v);
+	$quad.ai_on();
+	$quad.attack(globalCoop_return_playerClosestPreferActive($quad));
+	wait(1);
+	globalCoop_level_remove($quadPusher);
+	$quadDoorNorth.time( 0.50 );
+	$quadDoorSouth.time( 0.40 );
+	$quad.solid();
+
+	$quadDoorNorth.rotateYUp( 80 );
+	$quadDoorSouth.rotateYDown( 85 );
+
+      forcemusic("action");
+}
+
+void lockBridgeRoomDoor()
+{
+	$bridgeRoomDoor.lock();
+}
+
+void toggleAllEntities( string tname , float doShow )
+{
+	entity e;
+	e = getentity( tname );
+
+	while( doesEntityExist( e ) )
+	{
+		if( doShow )
+			e.show();
+		else
+			e.hide();
+
+		e =  getnextentity( e );
+	}
+}
+
+void removeAllEntities( string tname )
+{
+	entity e;
+	e = getentity( tname );
+
+	while( doesEntityExist( e ) )
+	{
+		globalCoop_level_remove(e);
+		e =  getnextentity( e );
+	}
+}
+
+void collapseTower()
+{
+	entity brushTower,modelTower,targetingIndicator,activator;
+	entity sniper;
+	float tower;
+
+	activator = getCurrentEntity();
+	tower = activator.getfloatvar( "uservar1" );
+
+	brushTower= getentity( "brushTower" + tower ) ;
+	modelTower= getentity( "modelTower" + tower ) ;
+	removeAllEntities( "targetingTower" + tower );
+
+	sniper = getentity( "tower" + tower + "RemoveActor" );
+
+	while( doesEntityExist( sniper ))
+	{
+		sniper.setenemytargeted( 0 );
+		wait( .1 );
+		sniper.kill();
+		sniper = getNextEntity( sniper );
+	}
+
+
+    forcemusic("surprise","action");
+
+	brushTower.hide();
+	while( doesEntityExist( modelTower ))
+	{
+		modelTower.show();
+		modelTower.anim( "collapse" );
+		modelTower = getNextEntity( modelTower );
+	}
+
+	modelTower= getentity( "modelTower" + tower ) ;
+	waitforanimation( modelTower , "collapse" );
+
+	if( tower == 2 )
+	{
+		barricadeDoorDestroyed(); //take out the door too
+	}
+
+	while( doesEntityExist( modelTower ))
+	{
+		modelTower.anim( "dead" );
+		modelTower = getNextEntity( modelTower );
+	}
+	wait( 2 );
+
+	modelTower= getentity( "modelTower" + tower ) ;
+	while( doesEntityExist( modelTower ))
+	{
+		modelTower.forcealpha( 1 );
+		modelTower.fadeout( 2 );
+		modelTower = getNextEntity( modelTower );
+	}
+}
+
+float TARGETING_RETICLE_DISTANCE = 2000;
+
+void displayTargettingIndicator( float tower )
+{
+//EXIT ON MULTIPLAYER
+	if(cvar_bool_multiplayer)
+		return;
+	
+	entity targetingIndicatorOrigin;	//have to use the script model, since brushmodels don't have a nice origin to use
+	vector v;
+	string tname;
+	float hidden = 0;
+	float dist;
+
+	tname = "targetingTower" + tower;
+	targetingIndicatorOrigin = getentity( "modelTower" + tower );
+	v = targetingIndicatorOrigin.getorigin();
+
+	
+	while( doesEntityExist( targetingIndicatorOrigin ))
+	{
+		dist = globalMath_GetXYDistance( v , $player.getorigin());
+		if((hidden==1) &&( dist <= TARGETING_RETICLE_DISTANCE ))
+		{
+//			print( "showing" + tower + "\n" );
+			toggleAllEntities( tname  , 1 );
+			hidden = 0;
+		}
+		else if((hidden==0) &&( dist > TARGETING_RETICLE_DISTANCE ) )
+		{
+//			print( "hiding" + tower + "\n" );
+			toggleAllEntities(tname , 0 );
+			hidden = 1;
+		}
+		wait( .25 );
+	}
+}
+
+
+void setupTower( float tower )
+{
+	entity brushTower,modelTower;
+	brushTower= getentity( "brushTower" + tower ) ;
+	modelTower= getentity( "modelTower" + tower ) ;
+
+	brushTower.show();
+
+	//setup for all parts
+	while( doesEntityExist( modelTower ))
+	{
+		modelTower.notsolid();
+		modelTower.hide();
+		modelTower.anim( "idle" );
+		modelTower = getNextEntity( modelTower );
+	}
+
+	thread displayTargettingIndicator( tower );
+}
+
+void activateGroup601()
+{
+	AIOnGroup( 601 );
+	if(!cvar_bool_multiplayer)
+		CommandToGroup( 601 , "attack" , "$player" ,"" );
+	else
+		CommandToGroup( 601 , "aggressive" , "1" ,"" );
+}
+
+void activateGroup602()
+{
+	AIOnGroup( 602 );
+	if(!cvar_bool_multiplayer)
+		CommandToGroup( 602 , "attack" , "$player" ,"" );
+	else
+		CommandToGroup( 602 , "aggressive" , "1" ,"" );
+}
+
+void activateGroup667()
+{
+	wait( 2 );
+	AIShowGroup( 667 );
+
+	if(!cvar_bool_multiplayer)
+		CommandToGroup( 667 , "attack" , "$player" ,"" );
+	else
+		CommandToGroup( 667 , "aggressive" , "1" ,"" );
+}
+
+void blockCave()
+{
+	
+	AIOnGroup( 666 );
+	if(!cvar_bool_multiplayer){
+	 	$caveBlocker.playsound( "sound/impact/explosion/explo_wall1.wav", 10, 1 , 700 );
+		$caveBlocker.time( .3 );
+		$caveBlocker.moveDown( 512 );
+		waitfor( $caveBlocker );
+
+		triggerEntity( $caveCrater );		//Trap the player in the arena by blocking the cave exit
+		globalCoop_level_remove($caveCraterClip);
+		CommandToGroup( 666 , "attack" , "$player" , "" );
+	}
+	else{
+		coop_vector_spawnOrigin8 			= '6893 0 200';//do not allow telefrag on this boss
+		coop_vector_spawnOrigin7 			= '6800 0 200';//do not allow telefrag on this boss
+		coop_vector_spawnOrigin6 			= '6730 0 200';//do not allow telefrag on this boss
+		coop_vector_spawnOrigin5 			= '6893 -75 200';//do not allow telefrag on this boss
+		coop_vector_spawnOrigin4 			= '6800 -75 200';//do not allow telefrag on this boss
+		coop_vector_spawnOrigin3 			= '6730 -75 200';//do not allow telefrag on this boss
+		coop_vector_spawnOrigin2 			= '6893 -150 200';//do not allow telefrag on this boss
+		coop_vector_spawnOrigin1 			= '6800 -150 200';//do not allow telefrag on this boss
+	//move class selection
+		thread globalCoop_level_moveToPos($coop_class_MedicModel,'5972 20 -20');
+		thread globalCoop_level_moveToPos($coop_class_TechnicianModel,'5980 -70 -20');
+		thread globalCoop_level_moveToPos($coop_class_HeavyWeaponsModel,'5997 -178 -20');
+	//Update respawns
+		globalCoop_applaySpawnOriginOnReSpwanOrigin();
+	//activate AI
+		CommandToGroup( 666 , "aggressive" , "1" , "" );
+	}
+}
+
+
+
+void attackThePlayer()
+{
+	entity caller, activator;
+	caller = getcurrententity();
+	activator = getlastactivatingentity();
+	activator.attack(globalCoop_return_playerClosestPreferActive(activator));
+}
+
+void spawnBarricadeWaveTrigger()
+{
+	triggerentity( $romulanSpawner6 );
+	wait( .5 );
+	triggerentity( $romulanSpawner4 );
+	wait( .5 );
+	triggerentity( $romulanSpawner3 );
+}
+
+//if the player decides to blow the door, clean up a bit
+void caveDoorDestroyed()
+{
+	trigger( "$caveDoorClip" );
+    $caveDoorBlasted.playsound( "sound/impact/explosion/explo_wall1.wav", 10, 1 , 700 );
+	$caveDoorBlasted.show();	//show the wreckage
+	$caveDoorBlasted.solid();
+
+	globalCoop_level_remove($caveDoorPuzzle);	//get rid of the puzzleobject
+	globalCoop_level_remove($caveDoorPuzzleArchetype);//...and archetype
+	globalCoop_level_remove($caveDoors);		//get rid of the real doors
+
+	globalCoop_level_remove($targetingTower9);
+	globalCoop_level_remove($modelTower9);
+}
+
+void caveDoorSolved()
+{
+	$caveDoorPuzzle.playsound( "sound/ships/romulan/rom_beep_yes.wav" , 7, .3, 10000 );
+	globalCoop_level_remove($caveDoorTrigger);
+	globalCoop_level_remove($caveDoorClip);
+	$caveDoors.playsound( "sound/doors/drull_smldoor_01.wav", 11, 1 , 700 );
+	trigger( "$caveDoors" );
+	$caveDoorPuzzle.missionobjective( 0 );
+	globalCoop_level_remove($caveDoorPuzzleArchetype);//...and archetype
+	globalCoop_level_remove($targetingTower9);
+	globalCoop_level_remove($modelTower9);
+}
+
+//barricade puzzle
+void barricadeDoorDestroyed()
+{
+	trigger( "$barricadeDoorExploder" );
+    $barricadeDoorExploder.playsound( "sound/impact/explosion/explo_wall1.wav", 10, 1 , 700 );
+
+	globalCoop_level_remove($barricadeDoors);
+	globalCoop_level_remove($barricadeDoorClip);
+	globalCoop_level_remove($barricadeDoorExploder);
+	globalCoop_level_remove($barricadeDoorPuzzleArchetype);
+	$barricadeDoorPuzzle.missionobjective( 0 );
+
+	globalCoop_level_remove($targetingTower8);
+	globalCoop_level_remove($modelTower8);
+	wait( .5 );
+	globalCoop_level_remove($barricadeDoorTrigger);
+}
+
+void barricadeDoorSolved()
+{
+	$barricadeDoorPuzzle.playsound( "sound/ships/romulan/rom_beep_yes.wav" , 7, .3, 10000 );
+
+	globalCoop_level_remove($barricadeDoorTrigger);
+	globalCoop_level_remove($barricadeDoorClip);
+	globalCoop_level_remove($barricadeDoorExploder);
+	globalCoop_level_remove($barricadeDoorPuzzleArchetype);
+	$barricadeDoorPuzzle.missionobjective( 0 );
+
+	$barricadeDoors.show();
+	trigger( "$barricadeDoors" );
+
+	globalCoop_level_remove($targetingTower8);
+	globalCoop_level_remove($modelTower8);
+}
+
+void secretWeaponFound()
+{
+	globalCoop_player_giveAll("models/weapons/worldmodel-rom-radgun.tik",7);
+	globalCoop_level_remove($secretWeapon);
+	if(cvar_bool_multiplayer)
+	{
+		stuffcmd("seta coop_eWtik models/weapons/worldmodel-rom-radgun.tik\n");
+	}
+	setfloatvar( "game.secretWeapon_RomulanExperimental", TRUE );
+}
+
+
+float entIntroDone = 0;
+void runEntIntro()
+{
+	thread EntIntro();
+
+	while( !entIntroDone )
+		wait( .5 );
+}
+
+void coop_spawnLocationSetArea2()
+//------------------------------------------------------------------------------
+//make Players spawn at area2
+//------------------------------------------------------------------------------
+{
+	if(cvar_bool_multiplayer){
+		coop_float_spawnAngle1 				= 270;
+		coop_float_spawnAngle2 				= 270;
+		coop_float_spawnAngle3 				= 270;
+		coop_float_spawnAngle4 				= 270;
+		coop_float_spawnAngle5 				= 270;
+		coop_float_spawnAngle6 				= 270;
+		coop_float_spawnAngle7 				= 270;
+		coop_float_spawnAngle8 				= 270;
+		coop_vector_spawnOrigin8 			= '-210 494 150';//do not allow telefrag on this boss
+		coop_vector_spawnOrigin7 			= '-280 494 150';//do not allow telefrag on this boss
+		coop_vector_spawnOrigin6 			= '-280 410 150';//do not allow telefrag on this boss
+		coop_vector_spawnOrigin5 			= '-210 410 150';//do not allow telefrag on this boss
+		coop_vector_spawnOrigin4 			= '-280 340 150';//do not allow telefrag on this boss
+		coop_vector_spawnOrigin3 			= '-210 340 150';//do not allow telefrag on this boss
+		coop_vector_spawnOrigin2 			= '-280 270 150';//do not allow telefrag on this boss
+		coop_vector_spawnOrigin1 			= '-210 270 150';//do not allow telefrag on this boss
+	//move class selection
+		thread globalCoop_level_moveToPos($coop_class_MedicModel,'219 -270 -14');
+		thread globalCoop_level_moveToPos($coop_class_TechnicianModel,'218 -332 -12');
+		thread globalCoop_level_moveToPos($coop_class_HeavyWeaponsModel,'216 -424 -12');
+	//update respawnloactaions
+		globalCoop_applaySpawnOriginOnReSpwanOrigin();
+	}
+}
+
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed("m11l2a-drull_ruins3");
+}

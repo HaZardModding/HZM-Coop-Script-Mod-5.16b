@@ -1,0 +1,307 @@
+//-----------------------------------------------------------------------------------
+// Script By:	Christian Sebastian Strahl (Chrissstrahl)
+// Created on:	2009.01.06
+// E-Mail:		chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+// CONTAINING TEAMMATE ACTOR RELATED FUNCTIONS FOR THE HZM CO-OP MOD
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2012 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////DECLARE
+////////////////////////////////////////////////////////////////////////////////
+void globalCoop_teammate_register(entity eActor);
+void globalCoop_teammate_unregister(entity eActor);
+void globalCoop_teammate_context(entity currentActor,string theActorName);
+void globalCoop_teammate_follow();
+void globalCoop_teammate_followUpdate(entity eActor);
+void globalCoop_teammate_followPlayer(entity eActor,entity ePlayer);
+
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////Functions
+////////////////////////////////////////////////////////////////////////////////
+void globalCoop_teammate_register(entity eActor)
+//----------------------------------------------------------------------
+//
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eActor)){
+//MAKE ACCESSABLE VIA USE - COMMANDABLE
+		globalCoop_level_setFloatVar(eActor,"coop_teammate",1);
+//ENLIST & REGISTER
+		string sActorTargetname;
+		sActorTargetname = eActor.getRawTargetname();
+//ADDED 5.0 build 12
+		globalCoop_teammate_context(eActor,sActorTargetname);
+		
+		if(!doesEntityExist(coop_entity_actorTeammate1))
+		{
+			coop_entity_actorTeammate1=eActor;
+			addrosterteammate1(coop_entity_actorTeammate1);
+		}
+		else if(!doesEntityExist(coop_entity_actorTeammate2))
+		{
+			coop_entity_actorTeammate2=eActor;
+			addrosterteammate2(coop_entity_actorTeammate2);
+		}
+		else if(!doesEntityExist(coop_entity_actorTeammate3))
+		{
+			coop_entity_actorTeammate3=eActor;
+			addrosterteammate3(coop_entity_actorTeammate3);
+		}
+		else
+		{
+			coop_entity_actorTeammate4=eActor;
+			addrosterteammate4(coop_entity_actorTeammate4);
+		}
+	}
+}
+
+void globalCoop_teammate_unregister(entity eActor)
+//----------------------------------------------------------------------
+//
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eActor)){
+		globalCoop_level_setFloatVar(eActor,"coop_teammate",0);
+		entity eEmpty;
+		string sActorTargetname;
+		sActorTargetname = eActor.getRawTargetname();
+		if(coop_entity_actorTeammate1.getRawTargetname() == sActorTargetname)
+		{
+			coop_entity_actorTeammate1=eEmpty;
+			removerosterteammate1();
+		}
+		if(coop_entity_actorTeammate2.getRawTargetname() == sActorTargetname)
+		{
+			coop_entity_actorTeammate2=eEmpty;
+			removerosterteammate2();
+		}
+		if(coop_entity_actorTeammate3.getRawTargetname() == sActorTargetname)
+		{
+			coop_entity_actorTeammate3=eEmpty;
+			removerosterteammate3();
+		}
+		if(coop_entity_actorTeammate4.getRawTargetname() == sActorTargetname)
+		{
+			coop_entity_actorTeammate4=eEmpty;
+			removerosterteammate4();
+		}		
+	}
+}
+
+void globalCoop_teammate_follow()
+//----------------------------------------------------------------------
+//Makes all teammates follow the closest player
+//----------------------------------------------------------------------
+{
+	globalCoop_teammate_followUpdate(coop_entity_actorTeammate1);
+	globalCoop_teammate_followUpdate(coop_entity_actorTeammate2);
+	globalCoop_teammate_followUpdate(coop_entity_actorTeammate3);
+	globalCoop_teammate_followUpdate(coop_entity_actorTeammate4);
+	coop_integer_playerToFollow=0;
+}
+
+void globalCoop_teammate_followUpdate(entity eActor)
+//----------------------------------------------------------------------
+//Makes given actor follow an existing player
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eActor))
+	{
+		entity ePlayer;
+		
+		if(coop_integer_playerToFollow > 0)
+		{
+			ePlayer = getEntity("player"+coop_integer_playerToFollow);
+			globalCoop_teammate_followPlayer(eActor,ePlayer);
+		}
+		else
+		{
+			string sTargetname;
+			sTargetname	= eActor.getStringVar("coop_aiOrderFollowTargetname");
+			ePlayer		= getEntity(sTargetname);
+		
+			if(!doesEntityExist(ePlayer))
+			{
+				float fPlayerIdInUse;
+				for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++)
+				{
+					ePlayer = getEntity("player"+fPlayerIdInUse);
+					if(doesEntityExist(ePlayer))
+					{
+						thread globalCoop_teammate_followPlayer(eActor,ePlayer);
+						return;
+					}
+				}
+			}
+		}
+	}
+}
+
+void globalCoop_teammate_followPlayer(entity eActor,entity ePlayer)
+//----------------------------------------------------------------------
+//Follow the Given Player now.
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eActor))
+	{
+		eActor.settendency("follow",1);
+	//check if dude is still alive
+		if(globalCoop_check_existingLivingEntity(ePlayer))
+		{
+		//Set Info for the Hybrid AI
+		float fRounds;
+		float fPlayerID;
+		//Get the player's ID
+			fPlayerID	= globalCoop_return_integerPlayerId(ePlayer);
+		//Do not watch the others!
+			while(fRounds < 9)
+			{
+				if(fPlayerID != fRounds){
+					eActor.settendency("follow_player"+fRounds,0);
+				}
+				fRounds++;
+				globalCoop_main_waitAFrame();
+			}
+			eActor.followrange(450);
+			eActor.followrangemin(164);
+			eActor.followtarget(ePlayer);
+		//Order the AI to follow this player
+			eActor.settendency("follow_player"+fPlayerID,1);
+		//Set the info which player we are following
+			eActor.setStringVar("coop_aiOrderFollowTargetname","player"+fPlayerID);
+			//globalCoop_main_printTimeAndString(eActor.getRawTargetname()+" FOLLOW ->	$player"+fPlayerID);
+		}
+	}
+}
+
+void globalCoop_teammate_context(entity currentActor,string theActorName)
+{//ADDED 5.0 build 12
+//getCvar("g_gametype") != 1)
+//Lines commented out because our game is too big, and we're blowing out MAX_SOUNDS in SV_FindIndex ();
+	string path;
+	path = "localization/sound/dialog/combat/";
+	
+	//-------------------------------------------------------------------------
+	// Context "enteredcombat"
+	//-------------------------------------------------------------------------
+	
+	currentActor.alias( theActorName + "CtxtEnteredCombatA" , path + theActorName + "_anotone.mp3" ); 		//There's another one!
+	currentActor.alias( theActorName + "CtxtEnteredCombatB" , path + theActorName + "_lookout.mp3" ); 		//Look out!!
+	currentActor.alias( theActorName + "CtxtEnteredCombatC" , path + theActorName + "_overthere.mp3" ); 	//Over there!
+	currentActor.alias( theActorName + "CtxtEnteredCombatD" , path + theActorName + "_wevegot.mp3" );		//We've Got Contacts!
+	currentActor.alias( theActorName + "CtxtEnteredCombatE" , path + theActorName + "_incoming.mp3" );		//Incoming!
+	currentActor.alias( theActorName + "CtxtEnteredCombatF" , path + theActorName + "_espotted.mp3" );		//Enemy Spotted!
+	currentActor.alias( theActorName + "CtxtEnteredCombatG" , path + theActorName + "_herecome.mp3" );		//Here They Come
+	currentActor.alias( theActorName + "CtxtEnteredCombatH" , path + theActorName + "_headsup.mp3" );		//Heads up
+	currentActor.alias( theActorName + "CtxtEnteredCombatI" , path + theActorName + "_herewego.mp3" );		//Here we go
+	currentActor.alias( theActorName + "CtxtEnteredCombatJ" , path + theActorName + "_contacts.mp3" );		//Contacts
+	currentActor.dialog( theActorName + "CtxtEnteredCombat" , "contextinitiator" , "enteredcombat" );
+	//let the server digest all of this (it's a lot)
+	globalCoop_main_waitZeroDot2();
+
+	//-------------------------------------------------------------------------
+	// Context "playerattacked"
+	//-------------------------------------------------------------------------
+	currentActor.alias( theActorName + "CtxtPlayerAttackedA" , path + theActorName + "_munwhat.mp3" ); 	//Munro, what are you doing?
+	currentActor.alias( theActorName + "CtxtPlayerAttackedB" , path + theActorName + "_heywat.mp3" ); 		//Hey! Watch it!
+	currentActor.alias( theActorName + "CtxtPlayerAttackedC" , path + theActorName + "_holdfire.mp3" ); 	//Hold your fire
+	currentActor.alias( theActorName + "CtxtPlayerAttackedD" , path + theActorName + "_whoses.mp3" ); 		//Who's side are you on
+	currentActor.alias( theActorName + "CtxtPlayerAttackedE" , path + theActorName + "_watchfire.mp3" ); 	//Watch your fire
+	currentActor.alias( theActorName + "CtxtPlayerAttackedF" , path + theActorName + "_whatyoudo.mp3" ); 	//What are you doing
+	currentActor.alias( theActorName + "CtxtPlayerAttackedG" , path + theActorName + "_checktarg.mp3" ); 	//Munro! Check your targets
+	currentActor.dialog ( theActorName + "CtxtPlayerAttacked" , "contextinitiator" , "playerattacked" );
+	//let the server digest all of this (it's a lot)
+	globalCoop_main_waitZeroDot2();
+
+
+	//-------------------------------------------------------------------------
+	// Context "turnonplayer"
+	//-------------------------------------------------------------------------
+	currentActor.alias( theActorName + "CtxtTurnOnPlayerA" , path + theActorName + "_committr.mp3" ); 	//You're committing treason!
+	currentActor.alias( theActorName + "CtxtTurnOnPlayerB" , path + theActorName + "_ltcomm.mp3" );		//Lieutenant, you are committing treason!
+	currentActor.dialog ( theActorName + "CtxtTurnOnPlayer" , "contextinitiator" , "turnonplayer" );
+	//let the server digest all of this (it's a lot)
+	globalCoop_main_waitZeroDot2();
+
+	//-------------------------------------------------------------------------
+	// Context "incombat" -- General
+	//-------------------------------------------------------------------------
+	currentActor.alias( theActorName + "CtxtInCombatA" , path + theActorName + "_coverme.mp3" ); 		//Cover me!
+	currentActor.alias( theActorName + "CtxtInCombatC" , path + theActorName + "_lookout.mp3" );		//Look out!
+	currentActor.alias( theActorName + "CtxtInCombatD" , path + theActorName + "_toomany.mp3" );		//There are too many of them!
+	currentActor.alias( theActorName + "CtxtInCombatG" , path + theActorName + "_watchout.mp3" );		//Watch out!
+	currentActor.alias( theActorName + "CtxtInCombatH" , path + theActorName + "_wantsome.mp3" );		//Want some more?
+	currentActor.alias( theActorName + "CtxtInCombatI" , path + theActorName + "_brinon.mp3" );			//Bring it on!
+	currentActor.alias( theActorName + "CtxtInCombatJ" , path + theActorName + "_howanot.mp3" );		//How about another one
+	currentActor.alias( theActorName + "CtxtInCombatK" , path + theActorName + "_allyougot.mp3" );		//Is that all you've got?
+	currentActor.dialog ( theActorName + "CtxtInCombat" , "contextinitiator" , "incombat" );
+	//let the server digest all of this (it's a lot)
+	globalCoop_main_waitZeroDot2();
+
+	//-------------------------------------------------------------------------
+	// Context "inpain"
+	//-------------------------------------------------------------------------
+	//currentActor.alias( theActorName + "CtxtInPainC" , path + theActorName + "_pain1.mp3" );		//Arrrghh!
+	//currentActor.dialog ( theActorName + "CtxtInPain" , "contextinitiator" , "inpain" );
+
+	//-------------------------------------------------------------------------
+	// Context "killedenemy"
+	//-------------------------------------------------------------------------
+	currentActor.alias( theActorName + "CtxtKilledEnemyA" , path + theActorName + "_takethat.mp3" ); //Take that!
+	currentActor.alias( theActorName + "CtxtKilledEnemyB" , path + theActorName + "_gotone.mp3" ); 	//Got One!
+	currentActor.dialog ( theActorName + "CtxtKilledEnemy" , "contextinitiator" , "killedenemy" );
+
+
+	//-------------------------------------------------------------------------
+	// Context "enemyadapted"
+	//-------------------------------------------------------------------------
+	currentActor.alias( theActorName + "CtxtEnemyAdaptedA" , path + theActorName + "_adapted.mp3" ); 		//They've adapted
+	currentActor.dialog ( theActorName + "CtxtEnemyAdapted" , "contextinitiator" , "enemyadapted" );
+	//let the server digest all of this (it's a lot)
+	globalCoop_main_waitZeroDot2();
+
+
+	//-------------------------------------------------------------------------
+	// Context "blockedbyplayer"
+	//-------------------------------------------------------------------------
+	currentActor.alias( theActorName + "CtxtBlockedByPlayerA" , path + theActorName + "_exme.mp3" ); 		//Excuse me
+	currentActor.dialog ( theActorName + "CtxtBlockedByPlayer" , "contextinitiator" , "blockedbyplayer" );
+
+
+	//-------------------------------------------------------------------------
+	// Combat +use dialog
+	//-------------------------------------------------------------------------
+	currentActor.alias( theActorName + "PlusUseCombatA" , path + theActorName + "_muntalklater.mp3" ); 	//Munro, talk to me later
+	//currentActor.alias( theActorName + "PlusUseCombatB" , path + theActorName + "_injured.mp3" );		//Are you injured
+	currentActor.alias( theActorName + "PlusUseCombatD" , path + theActorName + "_cantwait.mp3" ); 		//Can't this wait, Alex?
+	currentActor.alias( theActorName + "PlusUseCombatE" , path + theActorName + "_sorrynotime.mp3" ); 	//Sorry, no time to talk
+	currentActor.dialog ( theActorName + "PlusUseCombat" , "combatdialog" , "randompick" );
+	//let the server digest all of this (it's a lot)
+	globalCoop_main_waitZeroDot2();
+
+	//-------------------------------------------------------------------------
+	// Normal +use dialog
+	//-------------------------------------------------------------------------
+	currentActor.alias( theActorName + "PlusUseNormalA" , path + theActorName + "_moveon.mp3" ); 		//We should move on
+	currentActor.alias( theActorName + "PlusUseNormalC" , path + theActorName + "_whatisal.mp3" ); 		//What is it Alex?
+	currentActor.alias( theActorName + "PlusUseNormalD" , path + theActorName + "_whatisit.mp3" ); 		//What is it?
+	currentActor.alias( theActorName + "PlusUseNormalE" , path + theActorName + "_sir9.mp3" ); 			//Sir?
+	//currentActor.alias( theActorName + "PlusUseNormalF" , path + theActorName + "_canihelpu.mp3" ); 	//Can I help you?
+	currentActor.alias( theActorName + "PlusUseNormalG" , path + theActorName + "_alex.mp3" ); 			//Alex?
+	currentActor.dialog ( theActorName + "PlusUseNormal" , "randompick" );
+}
+

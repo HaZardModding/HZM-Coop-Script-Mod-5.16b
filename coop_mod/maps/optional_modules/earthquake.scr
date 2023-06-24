@@ -1,0 +1,65 @@
+//-----------------------------------------------------------------------------------
+// Script By:		Christian Sebastian Strahl (Chrissstrahl)
+// Created on:		2008.10.09
+// E-Mail:			chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+// EARTHQUAKE REPLACEMENT - INCLUDE IF YOU NEED IT'S FEATURES; INCLUDE ONLY TO THE CURRENT LEVEL SCRIPT!!
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2012 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+////////////////////////////////////////////////////////////////////////////////
+//DECLARATIONS
+////////////////////////////////////////////////////////////////////////////////
+void globalCoop_eartquakeAll(float fDuration,float fMagnitude);
+void globalCoop_eartquake(entity ePlayer,float fDuration,float fMagnitude);
+
+
+////////////////////////////////////////////////////////////////////////////////
+//FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+void globalCoop_eartquakeAll(float fDuration,float fMagnitude)
+//----------------------------------------------------------------------
+// sets an earth quake on the player
+//----------------------------------------------------------------------
+{
+	if(cvar_bool_multiplayer){//Multiplayer
+		entity ePlayer;
+		float fPlayerIdInUse;
+		while(fPlayerIdInUse<=coop_integer_maxPlayers){
+			ePlayer = getentity("player"+ fPlayerIdInUse);
+			globalCoop_eartquake(ePlayer,fDuration,fMagnitude);
+			fPlayerIdInUse++;
+			wait(.01);
+		}
+	}
+	else{//Singleplayer
+		globalCoop_eartquake(ePlayer,fDuration,fMagnitude);
+	}
+}
+
+
+void globalCoop_eartquake(entity ePlayer,float fDuration,float fMagnitude)
+//----------------------------------------------------------------------
+// sets an earth quake on the player
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(ePlayer)){
+		if(cvar_bool_multiplayer){
+			ePlayer.earthQuake(fDuration,fMagnitude);
+		}
+		else{//Singleplayer
+			$player.earthQuake(fDuration,fMagnitude);
+		}
+	}
+}

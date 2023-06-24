@@ -1,0 +1,838 @@
+void main();
+void init();
+void cinematicIntro();
+void cinematicIntroEnd();
+void earthquakes();
+void startLiftMove ();
+void finalLiftMove ();
+void coop_waitForTeam();
+void coop_endLevel();
+
+float TOTAL_SPAWN_TRIGGERS = 11;
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  INCLUDES
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/global/global_common.scr"
+#include "coop_mod/maps/missions/11/m11l2a_dialog.scr"
+#include "coop_mod/maps/missions/11/m11_groupSpawn.scr"
+#include "coop_mod/maps/missions/11/m11_beamInAmmo.scr"
+#include "maps/global_scripts/global_math.scr"
+#include "maps/global_scripts/global_acceleratedmovement.scr"
+#include "maps/global_scripts/global_archetype.scr"
+//#include "coop_mod/maps/missions/11/m11l2a_cin.scr"
+
+
+//================================
+// MAIN STARTS HERE!
+//================================
+void main()
+{
+	soundtrack ( "music/m11l2a-drull_ruins3.mus" );
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_string_nextMapToCheck			= "m11l3a-drull_ruins3_boss";//set the map we gona load next while we are in testmode
+//Set spawnangles for this level
+	coop_float_spawnAngle0 				= 270;
+	coop_vector_spawnOrigin8 			= '80 -374 0';
+	coop_vector_spawnOrigin7 			= '0 -374 0';
+	coop_vector_spawnOrigin6 			= '-80 -374 0';
+	coop_vector_spawnOrigin5 			= '80 -444 0';
+	coop_vector_spawnOrigin4 			= '0 -444 0';
+	coop_vector_spawnOrigin3 			= '-80 -444 0';
+	coop_vector_spawnOrigin2 			= '80 -514 0';
+	coop_vector_spawnOrigin1 			= '0 -514 0';
+//Definie Objective
+	coop_string_objectiveItem1			= "StopCommander";
+ //definie weapons
+ 
+	if(	getCvar("coop_eWtik") == "models/weapons/worldmodel-rom-radgun-romhands.tik" ||
+		getCvar("coop_eWtik") == "models/weapons/worldmodel-rom-radgun.tik"
+	)
+	{
+		coop_string_weapon7 = "models/weapons/worldmodel-rom-radgun.tik";
+	}
+	coop_string_weapon6 = "models/weapons/worldmodel-sniperrifle.tik";
+	coop_string_weapon5 = "models/weapons/worldmodel-BurstRifle.tik";
+	coop_string_weapon4 = "models/weapons/worldmodel-Phaser-stx.tik";
+	coop_string_weapon3 = "models/weapons/worldmodel-Tricorder-stx.tik";
+	coop_string_weapon2 = "models/weapons/worldmodel-attrex-rifle.tik";
+//	coop_string_weapon3 = "models/weapons/worldmodel-FieldAssaultRifle.tik";
+//	coop_string_weapon2 = "models/weapons/worldmodel-GrenadeLauncher.tik";
+	coop_string_weapon1 = "models/weapons/worldmodel-photon.tik";
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+	waitforplayer();
+	init();
+//Set viewModes
+	$world.clearAvailableViewModes();
+	$world.addAvailableViewMode("structuralintegrity");
+	
+	if(!cvar_bool_multiplayer){
+		cam_fadeout(.1,0,0,0,1,0);
+		cinematic();
+		$player.loadobjectives ("m11l2a-drull_ruins3");
+		wait (.1 );
+	}
+	
+	globalCoop_objectives_update("incomplete",1,1);
+	thread cinematicIntro();
+}
+
+//========================
+// THREAD INITS
+//========================
+void init()
+{
+	if(!cvar_bool_multiplayer){
+		spawn( "Camera", "targetname", "cam1" );
+		cam.load( "m11l2a_introcam" );
+	}
+
+/* 	$romulanForDialog.ai_off(); //taken off bsp
+	$romulanForDialog.hide();
+	$romulanForDialog.notsolid(); */
+
+	//$world.light_intensity( "flicker1", 0 );
+	$world.light_lightstyle( "flicker1", "zxazcyazauwxazdaawtbzcya" );
+
+	thread earthquakes();
+
+	thread globalArchetype_Setup ( $finalLiftArchetype , "IdryllLiftPanel" );
+
+	AIOffGroup ( 200 );
+	AIHideGroup ( 201 );
+
+	AIOffGroup ( 301 );
+
+	AIHideGroup ( 400 );
+
+	AIOffGroup ( 500 );
+	AIOffGroup ( 600 );
+	AIHideGroup ( 700 );
+
+	AIOffGroup ( 800 );
+
+	AIHideGroup ( 1000 );
+
+	$startLiftDoor1a.bind ( $startLift );
+	$startLiftDoor1b.bind ( $startLift );
+	$startLiftDoor2a.bind ( $startLift );
+	$startLiftDoor2b.bind ( $startLift );
+
+	$finalLiftDoor1a.bind ( $finalLift );
+	$finalLiftDoor1b.bind ( $finalLift );
+	$finalLiftDoor2a.bind ( $finalLift );
+	$finalLiftDoor2b.bind ( $finalLift );
+	
+//spawn Class Selection
+	thread globalCoop_class_setup("Medic",'-222 -860 0');
+	thread globalCoop_class_setup("HeavyWeapons",'-222 -770 85');
+	thread globalCoop_class_setup("Technician",'-222 -680 85');
+	
+}
+
+//---------------------
+// cinematicIntro
+// setup and begin cinematicIntro
+//---------------------
+void cinematicIntro()
+{
+	if(!cvar_bool_multiplayer){
+	    music ("aux1");
+		wait ( 2 );
+		letterbox( .01 );
+		//--- Start & Fade in
+
+		threadname ( "cinematicIntro" );
+		freezeplayer();
+		fakeplayer ();
+
+		wait ( .1 );
+		$fakeplayer.warpto ( "$fakeplayerNode" );
+	}
+
+	thread startLiftMove ();
+
+	if(!cvar_bool_multiplayer){
+		skipthread ( "cinematicIntroEnd" );
+
+		// --- Cue Cams
+		$cam1.follow ( $m11l2a_introcam );
+		$cam1.cut();
+		wait ( 1 );
+		cuecamera ( $cam1 );
+		cam_fadein( .5, 0, 0, 0, 1, 0 );
+		wait ( 5 );
+	}
+	
+	//--- End Thread
+	thread cinematicIntroEnd();
+}
+
+
+//---------------------
+// cinematicIntroEnd
+// wrapup the cinematicIntro
+//------------------------
+void cinematicIntroEnd()
+{
+	if(!cvar_bool_multiplayer){
+		noncinematic ();
+		killthread( "cinematicIntro" );
+
+		//--- fade out and set the level up
+		$player.nodamage ();
+		cam_fadeout( .5, 0, 0, 0, 1, 0 );
+		wait( .5 );
+
+		releaseplayer();
+		removefakeplayer ();
+		cueplayer();
+		clearletterbox( .1 );
+
+		wait ( .5 );
+		cam_fadein( .5, 0, 0, 0, 1, 0 ) ;
+		$player.takedamage ();
+		$player.playerviewangles ( '0 270 0' );
+	}
+	wait(10);
+	//thread globalCoop_dialog_play($finalLift,"m11l2/renrom_today.mp3", 1, 80000, 0); //Today is the day the Empty Crown reveals itself! Today is the day we show the Senate that our way is the only way.
+	thread globalCoop_dialog_playSimple($finalLift,"m11l2/renrom_today.mp3", 1, 80000); //Today is the day the Empty Crown reveals itself! Today is the day we show the Senate that our way is the only way.
+}
+
+void romulanLine1()
+{
+	globalCommon_Autosave();
+	thread globalCoop_dialog_playSimple($finalLift,"m11l2/renrom_steadfast.mp3", 1, 80000); //Remain steadast! We will all be the rulers of a new order!
+}
+
+void romulanLine2()
+{
+	thread globalCoop_dialog_playSimple($finalLift,"m11l2/renrom_fear.mp3", 1, 80000); //Do not let fear overcome you. My lieutenants have told me there is only ONE more Federation troop in the facility! How hard will it be to kill him?
+}
+
+void romulanLine3()
+{
+	globalCommon_Autosave();
+	thread globalCoop_dialog_playSimple($finalLift,"m11l2/renrom_kills.mp3", 1, 80000); //Whoever kills the Federation soldier will be raised to the inner circle of the Empty Crown! Now kill him!
+}
+
+//========================
+// Make a staircase form for player to pass
+//========================
+void makeStairCase()
+{
+	$celingLight1.time( 1 );
+	$celingLight1.moveDown( 560 );
+	waitfor( $celingLight1 );
+
+	$rockStep1.time( 2.5 );
+	$rockStep1.moveDown( 96 );
+
+	$rockStep2.time( 1.75 );
+	$rockStep2.moveDown( 64 );
+
+	$rockStep3.time( 1 );
+	$rockStep3.moveDown( 32 );
+
+	$rockStep4.time( .75 );
+	$rockStep4.moveDown( 32 );
+
+	wait( .05 );
+}
+
+
+vector vectorsubtract ( vector a , vector b )
+{
+	vector toReturn;
+	float x,y,z;
+
+	//function evaluation nastiness
+	x = vectorgetx ( a ); x -= vectorgetx ( b );
+	y = vectorgety ( a ); y -= vectorgety ( b );
+	z = vectorgetx ( a ); z -= vectorgetz ( b );
+
+	toReturn = vectorsetx ( toReturn , x );
+	toReturn = vectorsety ( toReturn , y );
+	toReturn = vectorsetz ( toReturn , z );
+
+	return toReturn;
+}
+
+float abs ( float val )
+{
+	if ( val < 0 )
+		return ( -1 * val );
+	else
+		return val;
+}
+
+//random earthquakes + debris
+void earthquakes ()
+{
+	if(cvar_bool_multiplayer)
+		return;
+	
+	entity quake,debris;
+	vector _origin,forward;
+	float fX, fY, fZ, sign;
+
+
+	float ramdomQuakeIntensity;
+	float randomQuakeLength;
+
+	quake = spawn ( "func_earthquake" , "targetname" , "rockDebrisQuake" );
+
+	while ( 1 )
+	{
+		wait ( randomfloat ( 10 ));
+		_origin = $player.getorigin();
+		quake.origin ( _origin );
+
+		ramdomQuakeIntensity = randomFloat( .5 ) + .1;
+		randomQuakeLength = randomFloat( .4 ) + .4;
+
+		$rockDebrisQuake.duration( ramdomQuakeIntensity );
+		$rockDebrisQuake.magnitude( ramdomQuakeIntensity );
+
+		trigger ( "$rockDebrisQuake" );
+
+		wait ( .25 );
+
+		debris = spawn ( "script_model" ,
+						 "model" , "models/fx/fx-explosion-debris-rocks-dust-brown.tik",
+						 "angles" , "-90 0 0" );
+		forward = vectorforward ( $player.getangles() );
+
+		fX = vectorgetx ( forward );
+		fY = vectorgety ( forward );
+
+		if ( randomint ( 2 ) == 1 )
+		{
+			sign = -1;
+			fX *= -1;
+		}
+
+		fX *= randomfloat ( 1024 );
+		fY *= randomfloat ( 1024 );
+
+		fX += vectorgetx ( _origin );
+		fY += vectorgety ( _origin );
+
+		fX += ( sign * 256 );
+//		fY += 512;
+
+		fZ = vectorgetz ( _origin );
+		fZ += 512;
+
+		forward = _origin;
+		_origin = vectorsetx ( _origin , fX );
+		_origin = vectorsety ( _origin , fY );
+		_origin = vectorsetz ( _origin , fZ );
+		debris.origin ( _origin );
+
+//		_origin = vectorsubtract ( forward , _origin);
+//		print ( "delta " + _origin + "\n" );
+	}
+}
+
+
+void ActivateGroup200()
+{
+	AIOnGroup( 200 );
+}
+
+void ActivateGroup201()
+{
+	thread AIShowGroup( 201 );
+	if(cvar_bool_multiplayer){
+		coop_vector_respawnOrigin8 			= '1810 -1190 170';
+		coop_vector_respawnOrigin7 			= '1812 -1260 170';
+		coop_vector_respawnOrigin6 			= '1812 -1330 170';
+		coop_vector_respawnOrigin5 			= '1812 -1400 170';
+		coop_vector_respawnOrigin4 			= '1812 -1470 170';
+		coop_vector_respawnOrigin3 			= '1812 -1540 170';
+		coop_vector_respawnOrigin2 			= '1812 -1610 170';
+		coop_vector_respawnOrigin1 			= '1812 -1680 170';
+	}
+}
+
+void ActivateGroup301()
+{
+	AIOnGroup(301);
+}
+
+
+void ActivateGroup400 ( )
+{
+	//lock the player in
+	if(!cvar_bool_multiplayer){
+		$ambushDoor1.speed( 200 );
+		$ambushDoor1.lock();
+	}
+	else{
+		coop_float_spawnAngle1 				= 360;
+		coop_float_spawnAngle2 				= 360;
+		coop_float_spawnAngle3 				= 360;
+		coop_float_spawnAngle4 				= 360;
+		coop_float_spawnAngle5 				= 360;
+		coop_float_spawnAngle6 				= 360;
+		coop_float_spawnAngle7 				= 360;
+		coop_float_spawnAngle8 				= 360;
+		coop_vector_spawnOrigin8 			= '5269 -385 170';
+		coop_vector_spawnOrigin7 			= '5269 -455 170';
+		coop_vector_spawnOrigin6 			= '5269 -525 170';
+		coop_vector_spawnOrigin5 			= '5269 -605 170';
+		coop_vector_spawnOrigin4 			= '5340 -385 170';
+		coop_vector_spawnOrigin3 			= '5340 -455 170';
+		coop_vector_spawnOrigin2 			= '5340 -525 170';
+		coop_vector_spawnOrigin1 			= '5340 -605 170';
+		globalCoop_applaySpawnOriginOnReSpwanOrigin();		
+	//move class selection
+		thread globalCoop_level_moveToPos($coop_class_MedicModel,'5265 -327 62');
+		thread globalCoop_level_moveToPos($coop_class_TechnicianModel,'5372 -335 62');
+		thread globalCoop_level_moveToPos($coop_class_HeavyWeaponsModel,'5478 -337 62');
+	}
+	$ambushDoor1.close();
+	$group400Target.groupdeaththread ( "unlockAmbushDoor" );
+	AIShowGroup ( 400 );
+}
+
+void ActivateGroup500 ( );
+void unlockAmbushDoor ( )
+{
+	wait ( 2 );
+	$ambushDoor2.playsound( "sound/doors/drull_bigdoor_stop_01.wav", 13, 1 , 700 );
+    forcemusic ("surprise", "action");
+	$ambushDoor2.unlock ();
+	trigger ( "$ambushDoor2" );
+	ActivateGroup500 ();
+	CommandToGroup ( 500 , "aggressive" , "1" , "" );
+}
+
+void ActivateGroup500 ( )
+{
+	showBeaminEffects = 0;
+	AIOnGroup ( 500 );
+	showBeaminEffects = 1;
+}
+
+void ActivateGroup600 ( )
+{
+	AIOnGroup ( 600 );
+}
+
+void ActivateGroup700 ( )
+{
+	AIShowGroup ( 700 );
+}
+
+void ActivateGroup800 ( )
+{
+	AIOnGroup ( 800 );
+	if(cvar_bool_multiplayer){
+		coop_float_spawnAngle1 				= 270;
+		coop_float_spawnAngle2 				= 270;
+		coop_float_spawnAngle3 				= 270;
+		coop_float_spawnAngle4 				= 270;
+		coop_float_spawnAngle5 				= 270;
+		coop_float_spawnAngle6 				= 270;
+		coop_float_spawnAngle7 				= 270;
+		coop_float_spawnAngle8 				= 270;
+		coop_vector_spawnOrigin8 			= '4674 -1359 170';
+		coop_vector_spawnOrigin7 			= '4604 -1359 170';
+		coop_vector_spawnOrigin6 			= '4534 -1359 170';
+		coop_vector_spawnOrigin5 			= '4464 -1359 170';
+		coop_vector_spawnOrigin4 			= '4394 -1359 170';
+		coop_vector_spawnOrigin3 			= '4324 -1359 170';
+		coop_vector_spawnOrigin2 			= '4254 -1359 170';
+		coop_vector_spawnOrigin1 			= '4184 -1359 170';
+		globalCoop_applaySpawnOriginOnReSpwanOrigin();
+	//move class selection
+		thread globalCoop_level_moveToPos($coop_class_MedicModel,'4259 -1806 -257');
+		thread globalCoop_level_moveToPos($coop_class_TechnicianModel,'4243 -1627 -257');
+		thread globalCoop_level_moveToPos($coop_class_HeavyWeaponsModel,'4242 -1436 -257');
+	}
+}
+
+void ActivateGroup1000 ( )
+{
+	showBeaminEffects = 0;
+	AIShowGroup ( 1000 );
+	showBeaminEffects = 1;
+}
+
+
+void drull_bigdoorM11 ( ) {
+	entity l_part1,l_part2,l_part3,l_part4,
+		   r_part1,r_part2,r_part3,r_part4,
+		   trig,activator;
+
+	trig = getcurrententity ();
+	activator = trig.getLastActivatingEntity ();
+
+	string basename,direction;
+	basename  = trig.getstringvar ( "uservar1" );
+	direction = trig.getstringvar ( "uservar2" );
+
+	l_part1 = getentity ( basename + "left1" );
+	l_part2 = getentity ( basename + "left2" );
+	l_part3 = getentity ( basename + "left3" );
+	l_part4 = getentity ( basename + "left4" );
+
+	r_part1 = getentity ( basename + "right1" );
+	r_part2 = getentity ( basename + "right2" );
+	r_part3 = getentity ( basename + "right3" );
+	r_part4 = getentity ( basename + "right4" );
+
+
+	trig.openportal ();
+	float restoreAIOnComplete = 0.0;
+
+	if (trig)
+	{
+		entity activator;
+		trig.nottriggerable ();
+	}
+	else {
+		print ( "drull_bigdoor::getcurrententity () == null\n" );
+		return;
+	}
+
+
+//-----------------
+//Part 1
+//-----------------
+	l_part1.time ( 2 );
+	r_part1.time ( 2 );
+
+	if ( direction == "ns" ) {
+		l_part1.moveSouth ( 64 );
+		r_part1.moveNorth ( 64 );
+		r_part1.playsound ( "sound/doors/drull_smldoor_01.wav", 8, .9, 500 );
+	}
+	else {
+		r_part1.moveWest ( 64 );
+		l_part1.moveEast ( 64 );
+		r_part1.playsound ( "sound/doors/drull_smldoor_01.wav", 8, .9, 500 );
+	}
+
+	wait ( 0.5 );
+		r_part1.playsound ( "sound/doors/drull_smldoor_stop_01.wav", 8, .9, 500 );
+
+//-----------------
+//Part 2
+//-----------------
+	l_part2.time ( 2 );
+	r_part2.time ( 2 );
+
+	if ( direction == "ns" ) {
+		l_part2.moveSouth ( 60 );
+		r_part2.moveNorth ( 60 );
+		r_part2.playsound ( "sound/doors/drull_smldoor_01.wav", 8, .9, 500 );
+	}
+	else {
+		r_part2.moveWest ( 60 );
+		l_part2.moveEast ( 60 );
+		r_part2.playsound ( "sound/doors/drull_smldoor_01.wav", 8, .9, 500 );
+	}
+	l_part2.moveUp ( 60 );
+	r_part2.moveUp ( 60 );
+
+	wait ( 0.75 );
+
+		r_part2.playsound ( "sound/doors/drull_smldoor_stop_01.wav", 8, .9, 500 );
+
+
+//-----------------
+//Part 3
+//-----------------
+	l_part3.time ( 2 );
+	r_part3.time ( 2 );
+
+	if ( direction == "ns" ) {
+		l_part3.moveSouth ( 48 );
+		r_part3.moveNorth ( 48 );
+		r_part3.playsound ( "sound/doors/drull_smldoor_01.wav", 8, .9, 500 );
+	}
+	else {
+		r_part3.moveWest ( 48 );
+		l_part3.moveEast ( 48 );
+		r_part3.playsound ( "sound/doors/drull_smldoor_01.wav", 8, .9, 500 );
+	}
+	l_part3.moveUp ( 48 );
+	r_part3.moveUp ( 48 );
+
+	wait ( 1.0 );
+
+
+//-----------------
+//Part 4
+//-----------------
+	l_part4.time ( 2 );
+	r_part4.time ( 2 );
+
+	if ( direction == "ns" ) {
+		l_part4.moveSouth ( 24 );
+		r_part4.moveNorth ( 24 );
+		r_part4.playsound ( "sound/doors/drull_smldoor_01.wav", 8, .9, 500 );
+	}
+	else {
+		r_part4.moveWest ( 24 );
+		l_part4.moveEast ( 24 );
+		r_part4.playsound ( "sound/doors/drull_smldoor_01.wav", 8, .9, 500 );
+	}
+	l_part4.moveUp ( 24 );
+	r_part4.moveUp ( 24 );
+}
+
+float runSecretSteam = 0;
+void startSecretSteam ()
+{
+	if ( runSecretSteam )
+		return;	//already started the sequence
+
+	runSecretSteam = 1;
+	while ( runSecretSteam )
+	{
+		$secretSteamHurt1.triggerable ();
+		$secretSteam1.show ();
+		wait ( 1 );
+		$secretSteam1.hide ();
+		$secretSteamHurt1.nottriggerable ();
+
+		wait ( .5 );
+
+		$secretSteamHurt2.triggerable ();
+		$secretSteam2.show ();
+		wait ( 1 );
+		$secretSteam2.hide ();
+		$secretSteamHurt2.nottriggerable ();
+
+		wait ( .5 );
+
+		$secretSteamHurt3.triggerable ();
+		$secretSteam3.show ();
+		wait ( 1 );
+		$secretSteam3.hide ();
+		$secretSteamHurt3.nottriggerable ();
+
+		wait ( .5 );
+
+		$secretSteamHurt1.triggerable ();
+		$secretSteamHurt2.triggerable ();
+		$secretSteamHurt3.triggerable ();
+
+		$secretSteam1.show ();
+		$secretSteam2.show ();
+		$secretSteam3.show ();
+		wait ( 1 );
+		$secretSteam1.hide ();
+		$secretSteam2.hide ();
+		$secretSteam3.hide ();
+
+		$secretSteamHurt1.nottriggerable ();
+		$secretSteamHurt2.nottriggerable ();
+		$secretSteamHurt3.nottriggerable ();
+
+		wait ( .5 );
+
+	}
+}
+
+void stopSecretSteam ()
+{
+	runSecretSteam = 0;
+}
+
+void doorLocked ()
+{
+	 entity e;
+	 e = getcurrententity ();
+	 e.playsound ( "sound/doors/door_locked.wav" , 7, .5, 128 );
+}
+
+
+// -------------
+//	Intro lift
+// -------------
+void startLiftDoor1OpenLeft ();
+void startLiftDoor1OpenRight ();
+void startLiftDoor2OpenLeft ();
+void startLiftDoor2OpenRight ();
+
+
+void startLiftMove()
+{
+	$startLift.playsound( "sound/environment/machine/lift1_loop.wav", 8, 1.5, 1500 );
+	if(!cvar_bool_multiplayer)
+		globalAccelMove( $startLift, '0 0 -492', 8, "rampupdown", "" );
+	else
+		globalAccelMove( $startLift, '0 0 -492', .1, "rampupdown", "" );
+	$startLift.playsound( "sound/environment/machine/lift1_loop_stop.wav", 8, 1.5, 1500 );
+
+	thread startLiftDoor1OpenLeft();
+	thread startLiftDoor1OpenRight();
+	thread startLiftDoor2OpenLeft();
+	thread startLiftDoor2OpenRight();
+}
+
+void startLiftDoor1OpenLeft()
+{
+	$startLiftDoor1a.playsound( "sound/environment/machine/mech_move1.wav", 8, 1.5, 1500 );
+	globalAccelMove_Rotate( $startLiftDoor1a, '0 90 0', 2, "rampupdown", "" );
+	$startLiftDoor1a.playsound( "sound/environment/machine/mech_stop1.wav", 8, 1.5, 1500 );
+}
+
+void startLiftDoor1OpenRight()
+{
+	globalAccelMove_Rotate( $startLiftDoor1b, '0 -90 0', 2, "rampupdown", "" );
+
+}
+
+void startLiftDoor2OpenLeft()
+{
+	$startLiftDoor2a.playsound( "sound/environment/machine/mech_move1.wav", 8, 1.5, 1500 );
+	globalAccelMove_Rotate( $startLiftDoor2a, '0 90 0', 2, "rampupdown", "" );
+	$startLiftDoor2a.playsound( "sound/environment/machine/mech_stop1.wav", 8, 1.5, 1500 );
+}
+
+void startLiftDoor2OpenRight()
+{
+	globalAccelMove_Rotate( $startLiftDoor2b, '0 -90 0', 2, "rampupdown", "" );
+}
+
+// -------------
+//	Exit lift
+// -------------
+
+//keep the player from activating the lift when they're not on it
+float finalLiftUsable = 0;
+
+void deactivateFinalLift ()
+{
+	finalLiftUsable = 0;
+}
+
+void activateFinalLift ()
+{
+	finalLiftUsable = 1;
+}
+
+
+	
+void finalLiftDoor1CloseLeft ();
+void finalLiftDoor1CloseRight ();
+void finalLiftDoor2CloseLeft ();
+void finalLiftDoor2CloseRight ();
+void finalLiftMove()
+{
+
+	if ( finalLiftUsable == 0 ){
+		return;
+	}
+	if(!cvar_bool_multiplayer){
+		$player.immobilize ( 1 );
+	}
+	else{
+		coop_waitForTeam();
+	}		
+
+	
+	$finalLiftMoveTrigger.remove ();
+	thread finalLiftDoor1CloseLeft();
+	thread finalLiftDoor1CloseRight();
+	thread finalLiftDoor2CloseLeft();
+	finalLiftDoor2CloseRight();
+	
+
+
+	$finalLift.playsound( "sound/environment/machine/lift1_loop.wav", 8, 1.5, 1500 );
+	globalAccelMove( $finalLift, '0 0 -1024', 10, "rampupdown", "" );
+	$finalLift.playsound( "sound/environment/machine/lift1_loop_stop.wav", 8, 1.5, 1500 );
+	if(!cvar_bool_multiplayer){
+		triggerentity ( $triggerChangeLevel );
+	}
+}
+
+void finalLiftDoor1CloseLeft()
+{
+	$finalLiftDoor1a.playsound( "sound/environment/machine/mech_move1.wav", 8, 1.5, 1500 );
+	globalAccelMove_Rotate( $finalLiftDoor1a, '0 -90 0', 2, "rampupdown", "" );
+	$finalLiftDoor1a.playsound( "sound/environment/machine/mech_stop1.wav", 8, 1.5, 1500 );
+}
+
+void finalLiftDoor1CloseRight()
+{
+	globalAccelMove_Rotate( $finalLiftDoor1b, '0 90 0', 2, "rampupdown", "" );
+}
+
+void finalLiftDoor2CloseLeft()
+{
+	$finalLiftDoor2a.playsound( "sound/environment/machine/mech_move1.wav", 8, 1.5, 1500 );
+	globalAccelMove_Rotate( $finalLiftDoor2a, '0 -90 0', 2, "rampupdown", "" );
+	$finalLiftDoor2a.playsound( "sound/environment/machine/mech_stop1.wav", 8, 1.5, 1500 );
+}
+
+void finalLiftDoor2CloseRight()
+{
+	globalAccelMove_Rotate( $finalLiftDoor2b, '0 90 0', 2, "rampupdown", "" );
+}
+
+float lavaSecretLiftMoving = 0;
+float liftDown = 0;
+void lavaSecretDown ()
+{
+	if ( lavaSecretLiftMoving || liftDown )
+		return;
+
+	$lavaSecretLift.playsound( "sound/environment/machine/lift1_loop.wav", 8, 1.5, 1500 );
+	lavaSecretLiftMoving = 1;
+	globalAccelMove( $lavaSecretLift, '0 0 -432', 10, "rampupdown", "" );
+	lavaSecretLiftMoving = 0;
+	liftDown = 1;
+	$lavaSecretLift.playsound( "sound/environment/machine/lift1_loop_stop.wav", 8, 1.5, 1500 );
+}
+
+void lavaSecretUp ()
+{
+	if ( lavaSecretLiftMoving  )
+		return;
+
+	if ( !liftDown )
+	{
+		lavaSecretDown ();
+		return;
+	}
+
+	$lavaSecretLift.playsound( "sound/environment/machine/lift1_loop.wav", 8, 1.5, 1500 );
+	liftDown = 0;
+	lavaSecretLiftMoving = 1;
+	globalAccelMove( $lavaSecretLift, '0 0 432', 10, "rampupdown", "" );
+	lavaSecretLiftMoving = 0;
+	$lavaSecretLift.playsound( "sound/environment/machine/lift1_loop_stop.wav", 8, 1.5, 1500 );
+}
+
+void coop_waitForTeam()
+//------------------------------------------------------------------------------
+//waitForPlayers beeing close, end then the Level
+//------------------------------------------------------------------------------
+{
+	globalCoop_main_waitForTeam('4851 -5107 0','-450 -450 0','450 450 800');
+	coop_endLevel();
+}
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed("m11l3a-drull_ruins3_boss");
+}
+

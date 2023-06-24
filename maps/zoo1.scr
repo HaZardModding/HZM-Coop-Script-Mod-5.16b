@@ -1,0 +1,969 @@
+//  Last Edited:	Chrissstrahl - 2008.07.31
+void main();
+void end_level();
+float fCountDown;
+float fCountDownThreadRunning;
+
+float float_selectionLayer1;
+float float_selectionLayer2;
+entity ePlayerMom;
+
+
+void test()
+{
+	stuffCMD("echo arctandegrees(1,0) : "+arctandegrees(1,0)+"\n");
+	stuffCMD("echo arctandegrees(1,1) : "+arctandegrees(1,1)+"\n");
+	stuffCMD("echo arctandegrees(0,1) : "+arctandegrees(0,1)+"\n");
+	stuffCMD("echo arctandegrees(-1,1) : "+arctandegrees(-1,1)+"\n");
+	stuffCMD("echo arctandegrees(-1,0) : "+arctandegrees(-1,0)+"\n");
+	stuffCMD("echo arctandegrees(-1,-1) : "+arctandegrees(-1,-1)+"\n");
+	stuffCMD("echo arctandegrees(0,-1) : "+arctandegrees(0,-1)+"\n");
+	stuffCMD("echo arctandegrees(1,-1) : "+arctandegrees(1,-1)+"\n");
+}
+
+void test2()
+{
+//vectors start with '0 0 0'
+	vector	vOld,
+			vNew,
+			vOffset,
+			vPlayer;
+//floats start with 0
+	float	fAngleOffset;
+	
+//get player1 location
+	vPlayer = $player.getOrigin();
+	
+//get player lift offeset
+	vOffset = (vPlayer - vNew);
+//print data in console
+	stuffCMD("echo vPlayer:"+vPlayer+"\necho vNew:"+vNew+"\necho vOffset:"+vOffset+"\n");
+//get vecor angle
+	fAngleOffset = arctandegrees(vOffset_y, vOffset_x);
+}
+	
+
+
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/main.scr"
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+void main()
+{
+	spawn("trigger_relay","targetname","coop_momMenuAccessTrigger","origin","52 980 205","thread","mom_basic");
+//spawn("script_model","model","fx/fx-bhole1.tik","targetname","dummy","origin","0 100 180");
+//spawn("script_model","model","item/ammo_fed_small.tik","targetname","dummy","origin","-160 100 150","scale",".2");
+//HaZardModdingAdminlogin_spawn();
+
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+//Do not reboot the server when this map ends. If !TRUE SV will reboot
+/////////////////////////////////////////////////////////////////////////
+	coop_string_nextMapToCheck		= "testmorph"; //set the map we gona load next while we are in testmode
+
+
+//Give each player a Item/weapon, the integer stands for the player-ID
+//	coop_string_weapon1 = "models/weapons/worldmodel-Tricorder-stx.tik";
+//coop_vector_spawnOrigins, Spawn Players on those locations, at map start
+	coop_vector_spawnOrigin1 = '-680 188 192';
+ 	coop_vector_spawnOrigin2 = '-680 38 192';
+	coop_vector_spawnOrigin3 = '-800 188 192';
+	coop_vector_spawnOrigin4 = '-800 38 192';
+	coop_vector_spawnOrigin5 = '-900 188 192';
+	coop_vector_spawnOrigin6 = '-900 38 192';
+	coop_vector_spawnOrigin7 = '-1100 188 192';
+	coop_vector_spawnOrigin8 = '-1100 38 192';
+	
+//Give each player a Item/weapon, the integer stands for the player-ID
+	coop_string_weapon1 				= "models/weapons/worldmodel-Tricorder-stx.tik";
+	//coop_string_playerModel				= "models/char/munro_sf.tik";
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	waitForPlayer();
+	if(!cvar_bool_multiplayer)//Singleplayer
+	{
+		cam_fadein( 1, 0, 0, 0, 1, 0 );
+	}
+	else{
+		removeClass("trigger_useonce");
+		removeClass("door");
+		spawn("trigger_use","origin","52 980 205","targetname","coop_selectTrigger","thread","end_level");
+		wait(.1);
+		$coop_selectTrigger.wait(.5);
+	}
+	spawn("script_model","model","fx/fx-dummy.tik","targetname","attrexianstation_pic2","origin","-960 -59 252");
+	wait(.1);
+//setup the mom trigger
+	$coop_momMenuAccessTrigger.setStringVar("uservar1","zoo1_select");
+	$coop_momMenuAccessTrigger.setStringVar("uservar2","select");
+	
+	$attrexianstation_pic2.setSize('-8 -8 -4','8 8 4');
+	$attrexianstation_pic2.contents( "targetable" );
+    $attrexianstation_pic2.archetype( "AttrexianStationSecretPic2" );
+	
+    $attrexianrifle_pic.contents( "targetable" );
+    $attrexianrifle_pic.archetype( "AttrexianRifleSecretPic" );
+    
+    $attrexiancolony_pic.contents( "targetable" );
+    $attrexiancolony_pic.archetype( "AttrexianColonySecretPic" );
+    
+    $attrexianstation_pic1.contents( "targetable" );
+    $attrexianstation_pic1.archetype( "AttrexianStationSecretPic" );
+    
+    $stalker_pic.contents( "targetable" );
+    $stalker_pic.archetype( "StalkerSecretPic" );
+    
+    $idryllruins2_pic.contents( "targetable" );
+    $idryllruins2_pic.archetype( "IdryllRuins2SecretPic" );
+    
+    $attrexianfemale_pic.contents( "targetable" );
+    $attrexianfemale_pic.archetype( "AttrexianFemaleSecretPic" );
+    
+    $commander_pic.contents( "targetable" );
+    $commander_pic.archetype( "CommanderSecretPic" );
+    
+    $quadraped_pic.contents( "targetable" );
+    $quadraped_pic.archetype( "QuadrapedSecretPic" );
+
+    $fedrifle_pic.contents( "targetable" );
+    $fedrifle_pic.archetype( "FedRiflepic" );
+    
+    $attrexianmale_pic.contents( "targetable" );
+    $attrexianmale_pic.archetype( "AttrexianMaleSecretPic" );
+
+    $archeopendra_pic.contents( "targetable" );
+    $archeopendra_pic.archetype( "Archeopendrapic" );
+
+    $imod_pic.contents( "targetable" );
+    $imod_pic.archetype( "IMODpic" );
+	return;
+	$idryllruins1_pic.contents( "targetable" );
+	$idryllruins1_pic.archetype( "IdryllRuins1SecretPic" );
+}
+
+void contDown()
+{
+	string 	sText,
+			sSelected;
+//Update CountDown
+	fCountDown = 10;
+	
+//Check if 5this function is running
+	if(fCountDownThreadRunning > 0)
+		return;
+	fCountDownThreadRunning = 1;
+	
+//wait before we countdown
+	while(fCountDown > 0){
+		sSelected = $coop_selectTrigger.getStringVar("selectedMap");
+		sText = "";
+		if(sSelected == "Request Server Reboot")
+			if(getCvarInt("coop_disReboot") == 1){
+				centerPrint("^1WARNING: ^5SERVER DENIES YOUR REBOOT REQUEST!\n");
+				fCountDown = 10;
+			}
+		if(fCountDown < 6){
+			if("ent-deck8" == sSelected){sText = " (IGM 1)";}
+			centerPrint("^3Load map ^5"+sSelected+""+sText+" ? - ^7In^5 "+fCountDown+"^7 (press use to abort)\n");
+		}
+		wait(1);
+		fCountDown--;
+	}
+	fCountDownThreadRunning = 0;
+	if("Request Server Reboot" == sSelected){
+		wait(1);
+		if(cvar_float_dedicated != 0){
+			centerPrint("^1 R E B O O T I N G !!!\n");
+			wait(1);
+			globalCoop_main_devInfo("globalCoop_server_reboot() - REQUEST::ZOO1");
+			globalCoop_server_rebootPerform();
+		}
+		else
+		{
+			centerPrint("^8Server: ^3Unable to comply!\n");
+		}
+		return;
+	}
+	else{
+		if("IGM1" == sSelected)
+		{
+			sSelected = "ent-deck8";
+			stuffCMD("seta coop_igm 1\n");	//igm mission number
+			stuffCMD("seta coop_igmR 0\n"); //rooms visted
+		}
+		if("IGM2" == sSelected)
+		{
+			sSelected = "ent-deck1_bridge";
+			stuffCMD("seta coop_igm 2\n");	//igm mission number
+			stuffCMD("seta coop_igmR 0\n"); //rooms visted
+		}
+		else if("IGM3" == sSelected)
+		{
+			sSelected = "ent-deck8";
+			stuffCMD("seta coop_igm 3\n");	//igm mission number
+			stuffCMD("seta coop_igmR 0\n"); //rooms visted
+		}
+		else if("IGM4" == sSelected)
+		{
+			sSelected = "ent-deck1_bridge";
+			stuffCMD("seta coop_igm 4\n");	//igm mission number
+			stuffCMD("seta coop_igmR 0\n"); //rooms visted
+		}
+		/*
+		else if("IGM5" == sSelected)
+		{
+			sSelected = "ent-deck8";
+			stuffCMD("seta coop_igm 5\n");
+		}
+		else if("IGM6" == sSelected)
+		{
+			sSelected = "ent-deck8";
+			stuffCMD("seta coop_igm 6\n");
+		}
+		else if("IGM7" == sSelected)
+		{
+			sSelected = "ent-deck8";
+			stuffCMD("seta coop_igm 7\n");
+		}
+		else if("IGM8" == sSelected)
+		{
+			sSelected = "ent-deck8";
+			stuffCMD("seta coop_igm 8\n");
+		}
+		*/
+		centerprint("^1Loading map: ^5"+sSelected+"\n");
+		thread globalCoop_mission_completed(sSelected);
+	}
+}
+
+
+string selectMap(string sCurrentMap)
+{
+	string sReturnMap;
+	if(sCurrentMap == "Request Server Reboot" || sCurrentMap == "" || sCurrentMap == "dm_t4mobius")
+		sReturnMap = "m0-intro";
+	else if(sCurrentMap == "m0-intro")
+		sReturnMap = "m1l1a-borg_sphere";
+	else if(sCurrentMap == "m1l1a-borg_sphere")
+		sReturnMap = "m2l2-sfa";
+	else if(sCurrentMap == "m2l2-sfa")
+		sReturnMap = "m3l1a-forever";
+	else if(sCurrentMap == "m3l1a-forever")
+		sReturnMap = "m4l1a-attrexian_station";
+	else if(sCurrentMap == "m4l1a-attrexian_station")
+		sReturnMap = "m5l1a-drull_ruins1";
+	else if(sCurrentMap == "m5l1a-drull_ruins1")
+		sReturnMap = "m6-deck8_redalert";
+	else if(sCurrentMap == "m6-deck8_redalert")
+		sReturnMap = "m7l1a-attrexian_colony";
+	else if(sCurrentMap == "m7l1a-attrexian_colony")
+		sReturnMap = "m8l1a-drull_ruins2";
+	else if(sCurrentMap == "m8l1a-drull_ruins2")
+		sReturnMap = "m9l1a-klingon_base";
+	else if(sCurrentMap == "m9l1a-klingon_base")
+		sReturnMap = "m10l1-romulan_installation";
+	else if(sCurrentMap == "m10l1-romulan_installation")
+		sReturnMap = "m11l1a-drull_ruins3";
+	else if(sCurrentMap == "m11l1a-drull_ruins3")
+		sReturnMap = "secret1";
+	else if(sCurrentMap == "secret1")
+		sReturnMap = "secret2";
+	else if(sCurrentMap == "secret2")
+		sReturnMap = "ef2_minigame2";
+	else if(sCurrentMap == "ef2_minigame2")
+		sReturnMap = "secret3";
+	else if(sCurrentMap == "secret3")
+		sReturnMap = "IGM1";
+	else if(sCurrentMap == "IGM1")
+		sReturnMap = "IGM2";
+	else if(sCurrentMap == "IGM2")
+		sReturnMap = "IGM3";
+	else if(sCurrentMap == "IGM3")
+		sReturnMap = "IGM4";
+	else if(sCurrentMap == "IGM4")
+		sReturnMap = "credits";
+	else
+		sReturnMap = "Request Server Reboot";
+	
+	$coop_selectTrigger.setStringVar("selectedMap",sReturnMap);
+	$coop_selectTrigger.setFloatVar("lastUsed",getLevelTime());
+	return sReturnMap+"";
+}
+
+void end_level()
+{
+entity e,ePlayer;
+e = getCurrentEntity();
+//While in singleplayer just dissconnect
+	if(!cvar_bool_multiplayer){
+		stuffcmd( "disconnect" );
+		return; //thread globalCoop_mission_completed("secret3");
+	}
+//Check if server has been rebooted and is loading automaticly the next map
+	if(doesEntityExist(e))
+	{
+		ePlayer = e.getLastActivatingEntity();
+		if(doesEntityExist(ePlayer))
+		{
+			if(ePlayer.getFloatVar("coop_hasCoopInstalled"))
+			{
+			//show menu, start mom on player
+				ePlayer.trigger("$coop_momMenuAccessTrigger");
+				return;
+			}
+		}
+		string sMap;
+		thread contDown();
+		e.setFloatVar("lastUsed",getLevelTime());
+		sMap = e.getStringVar("selectedMap");
+		sMap = selectMap(sMap);
+		if("Request Server Reboot" == sMap){
+			centerPrint("^5Requesting Server Reebot!\n");
+		}
+		else{
+			centerPrint("^3Selected Co-Op Map: ^5"+sMap+"\n");
+		}
+	}
+}
+
+
+//MOM MENU FUNCTIONS////////////////////////////////////////////////////////////
+//MOM MENU FUNCTIONS////////////////////////////////////////////////////////////
+//MOM MENU FUNCTIONS////////////////////////////////////////////////////////////
+void select()
+{
+//reset vars
+	float_selectionLayer1 = 0;
+	float_selectionLayer2 = 0;
+//create internal variables, used only inside thie function
+	entity	e;
+	float	fEntity;
+//retrive the memorized entity number
+	fEntity	= $world.getFloatVar("player_select");
+//make sure the entity number is not negative
+	if(fEntity > -1)
+	{
+	//grab that entity
+		e=getEntity("*"+fEntity);
+	//verify that this entity dos exist
+		if(doesEntityExist(e))
+		{
+			ePlayerMom = e;
+		}
+	}
+}
+void select_Zero()
+{
+//reset vars
+	float_selectionLayer1 = 0;
+	float_selectionLayer2 = 0;
+}
+void select_One()
+{
+//selecting traing maps
+	if(float_selectionLayer1 == 0)
+	{
+		float_selectionLayer1 = 1;
+	}
+//player is selecting a training map
+	else if(float_selectionLayer1 == 1)
+	{
+		ePlayerMom.callvote("map","ent-training1");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+//player is selecting a secret map
+	else if(float_selectionLayer1 == 2)
+	{
+		ePlayerMom.callvote("map","secret1");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+//player is selecting a campaign map
+	else if(float_selectionLayer1 == 3)
+	{
+	//selecting intro
+		if(float_selectionLayer2==0)
+		{
+			ePlayerMom.callvote("map","m0-intro");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission1
+		else if(float_selectionLayer2==2)
+		{
+			ePlayerMom.callvote("callvote map m1l1a-borg_sphere");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission2
+		else if(float_selectionLayer2==3)
+		{
+			ePlayerMom.callvote("map","m2l0-sfa");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission3
+		else if(float_selectionLayer2==4)
+		{
+			ePlayerMom.callvote("map","m3l1a-forever");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission4
+		else if(float_selectionLayer2==5)
+		{
+			ePlayerMom.callvote("map","m4l1a-attrexian_station");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission5
+		else if(float_selectionLayer2==6)
+		{
+			ePlayerMom.callvote("map","m5l1a-drull_ruins1");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission6
+		else if(float_selectionLayer2==7)
+		{
+			ePlayerMom.callvote("map","m6l0-attack");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission7
+		else if(float_selectionLayer2==8)
+		{
+			ePlayerMom.callvote("map","m7l1a-attrexian_colony");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission8
+		else if(float_selectionLayer2==9)
+		{
+			ePlayerMom.callvote("map","m8l1a-drull_ruins2");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission9
+		else if(float_selectionLayer2==10)
+		{
+			ePlayerMom.callvote("map","m9l1a-klingon_base");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission10
+		else if(float_selectionLayer2==11)
+		{
+			ePlayerMom.callvote("map","m10l1-romulan_installation");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission11
+		else if(float_selectionLayer2==12)
+		{
+			ePlayerMom.callvote("map","m11l1a-drull_ruins3");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission12
+		else if(float_selectionLayer2==13)
+		{
+			ePlayerMom.callvote("map","m12-end");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	}
+//player is selecting a custom map
+	else if(float_selectionLayer1 == 4)
+	{
+		ePlayerMom.callvote("map","coop_paradiseIsland");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+//player is selecting a GBS MOD map
+	else if(float_selectionLayer1 == 5)
+	{
+		ePlayerMom.callvote("map","coop_gbs1");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+}
+void select_Two()
+{
+//selecting secret maps
+	if(float_selectionLayer1 == 0)
+	{
+		float_selectionLayer1 = 2;
+		return;
+	}
+//player is selecting a training map
+	if(float_selectionLayer1 == 1)
+	{
+		ePlayerMom.callvote("map","ent-training2");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+//player is selecting a secret map
+	else if(float_selectionLayer1 == 2)
+	{
+		ePlayerMom.callvote("map","secret2");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+//player is selecting a campaign map
+	else if(float_selectionLayer1 == 3)
+	{
+	//selecting mission1
+		if(float_selectionLayer2 == 0)
+		{
+			float_selectionLayer2 = 2;
+		}
+	//selecting map of mission1
+		else if(float_selectionLayer2==2)
+		{
+			ePlayerMom.callvote("map","m1l1b-borg_sphere");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission2
+		else if(float_selectionLayer2==3)
+		{
+			ePlayerMom.callvote("map","m2l1-sfa");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission3
+		else if(float_selectionLayer2==4)
+		{
+			ePlayerMom.callvote("map","m3l1b-forever");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission4
+		else if(float_selectionLayer2==5)
+		{
+			ePlayerMom.callvote("map","m4l1b-attrexian_station");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission5
+		else if(float_selectionLayer2==6)
+		{
+			ePlayerMom.callvote("map","m5l1b-drull_ruins1");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission6
+		else if(float_selectionLayer2==7)
+		{
+			ePlayerMom.callvote("map","m6-deck8_redalert");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission7
+		else if(float_selectionLayer2==8)
+		{
+			ePlayerMom.callvote("map","m7l1b-attrexian_colony");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission8
+		else if(float_selectionLayer2==9)
+		{
+			ePlayerMom.callvote("map","m8l1b-drull_ruins2");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission9
+		else if(float_selectionLayer2==10)
+		{
+			ePlayerMom.callvote("map","m9l1b-klingon_base");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission10
+		else if(float_selectionLayer2==11)
+		{
+			ePlayerMom.callvote("map","m10l2a-romulan_installation");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission11
+		else if(float_selectionLayer2==12)
+		{
+			ePlayerMom.callvote("map","m11l2a-drull_ruins3");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	}
+//player is selecting a custom map
+	else if(float_selectionLayer1 == 4)
+	{
+		ePlayerMom.callvote("map","coop_paradiseIsland2");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+//player is selecting a GBS MOD map
+	else if(float_selectionLayer1 == 5)
+	{
+		ePlayerMom.callvote("map","coop_gbs2");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+}
+void select_Three()
+{
+//selecting campaign maps
+	if(float_selectionLayer1 == 0)
+	{
+		float_selectionLayer1 = 3;
+	}
+//player is selecting a training map
+	else if(float_selectionLayer1 == 1)
+	{
+		ePlayerMom.callvote("map","ent-training3");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+//player is selecting a secret map
+	else if(float_selectionLayer1 == 2)
+	{
+		ePlayerMom.callvote("map","ef2_minigame2");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+//player is selecting a campaign map
+	else if(float_selectionLayer1 == 3)
+	{
+	//selecting mission2
+		if(float_selectionLayer2 == 0)
+		{
+			float_selectionLayer2 = 3;
+		}
+	//selecting map of mission1
+		else if(float_selectionLayer2==2)
+		{
+			ePlayerMom.callvote("map","m1l1c-borg_sphere");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission2
+		else if(float_selectionLayer2==3)
+		{
+			ePlayerMom.callvote("map","m2l2-sfa");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission3
+		else if(float_selectionLayer2==4)
+		{
+			ePlayerMom.callvote("map","m3l2-forever");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission4
+		else if(float_selectionLayer2==5)
+		{
+			ePlayerMom.callvote("map","m4l2b-attrexian_station");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission5
+		else if(float_selectionLayer2==6)
+		{
+			ePlayerMom.callvote("map","m5l2a-drull_ruins1");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission6
+		else if(float_selectionLayer2==7)
+		{
+			ePlayerMom.callvote("map","m6-deck16_engineering");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission7
+		else if(float_selectionLayer2==8)
+		{
+			ePlayerMom.callvote("map","m7l2a-attrexian_colony");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission8
+		else if(float_selectionLayer2==9)
+		{
+			ePlayerMom.callvote("map","m8l2a-drull_ruins2");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission9
+		else if(float_selectionLayer2==10)
+		{
+			ePlayerMom.callvote("map","m9l2-klingon_base");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission10
+		else if(float_selectionLayer2==11)
+		{
+			ePlayerMom.callvote("map","m10l2b-romulan_installation");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission11
+		else if(float_selectionLayer2==12)
+		{
+			ePlayerMom.callvote("map","m11l3a-drull_ruins3_boss");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	}
+//player is selecting a custom map
+	else if(float_selectionLayer1 == 4)
+	{
+		ePlayerMom.callvote("map","coop_hatoriaOutpost");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+//player is selecting a GBS MOD map
+	else if(float_selectionLayer1 == 5)
+	{
+		ePlayerMom.callvote("map","coop_gbs3");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+}
+void select_Four()
+{
+//selecting custom maps
+	if(float_selectionLayer1 == 0)
+	{
+		float_selectionLayer1 = 4;
+		return;
+	}
+//player is selecting a training map
+	if(float_selectionLayer1 == 1)
+	{
+		ePlayerMom.callvote("map","ent-training4");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+//player is selecting a secret map
+	else if(float_selectionLayer1 == 2)
+	{
+		ePlayerMom.callvote("map","zoo1");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+//player is selecting a campaign map
+	else if(float_selectionLayer1 == 3)
+	{
+	//selecting mission3
+		if(float_selectionLayer2 == 0)
+		{
+			float_selectionLayer2 = 4;
+		}
+	//selecting map of mission1
+		else if(float_selectionLayer2==2)
+		{
+			ePlayerMom.callvote("map","m1l2a-borg_sphere");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission5
+		else if(float_selectionLayer2==6)
+		{
+			ePlayerMom.callvote("map","m5l2b-drull_ruins1");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission6
+		else if(float_selectionLayer2==7)
+		{
+			ePlayerMom.callvote("map","m6-deck1_bridge_redalert");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission7
+		else if(float_selectionLayer2==8)
+		{
+			ePlayerMom.callvote("map","m7l2b-attrexian_colony");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission8
+		else if(float_selectionLayer2==9)
+		{
+			ePlayerMom.callvote("map","m8l2b-drull_ruins2");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission11
+		else if(float_selectionLayer2==12)
+		{
+			ePlayerMom.callvote("map","m11l3b-drull_ruins3_boss");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	}
+//player is selecting a custom map
+	else if(float_selectionLayer1 == 4)
+	{
+		ePlayerMom.callvote("map","coop_iceStation");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+//player is selecting a GBS MOD map
+	else if(float_selectionLayer1 == 5)
+	{
+		ePlayerMom.callvote("map","coop_gbs4");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+}
+void select_Five()
+{
+//selecting custom maps
+	if(float_selectionLayer1 == 0)
+	{
+		float_selectionLayer1 = 5;
+		return;
+	}
+//player is selecting a secret map
+	if(float_selectionLayer1 == 2)
+	{
+		ePlayerMom.callvote("map","secret3");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+//player is selecting a campaign map
+	else if(float_selectionLayer1 == 3)
+	{
+	//selecting mission4
+		if(float_selectionLayer2 == 0)
+		{
+			float_selectionLayer2 = 5;
+		}
+	//selecting map of mission1
+		else if(float_selectionLayer2==2)
+		{
+			ePlayerMom.callvote("map","m1l2b-borg_sphere");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission5
+		else if(float_selectionLayer2==6)
+		{
+			ePlayerMom.callvote("map","m5l2c-drull_ruins1");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission6
+		else if(float_selectionLayer2==7)
+		{
+			ePlayerMom.callvote("map","m6-exterior");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission7
+		else if(float_selectionLayer2==8)
+		{
+			ePlayerMom.callvote("map","m7l2c-attrexian_colony");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	}
+//player is selecting a custom map
+	else if(float_selectionLayer1 == 4)
+	{
+		ePlayerMom.callvote("map","coop_blArena");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+//player is selecting a GBS MOD map
+	else if(float_selectionLayer1 == 5)
+	{
+		ePlayerMom.callvote("map","coop_gbs5");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+}
+void select_Six()
+{
+//player is selecting a secret map
+	if(float_selectionLayer1 == 2)
+	{
+		ePlayerMom.callvote("map","testmorph");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+//player is selecting a campaign map
+	if(float_selectionLayer1 == 3)
+	{
+	//selecting mission5
+		if(float_selectionLayer2 == 0)
+		{
+			float_selectionLayer2 = 6;
+		}
+	//selecting map of mission1
+		else if(float_selectionLayer2==2)
+		{
+			ePlayerMom.callvote("map","m1l2c-borg_sphere");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	//selecting map of mission7
+		else if(float_selectionLayer2==8)
+		{
+			ePlayerMom.callvote("map","m7l2c-attrexian_colony");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	}
+//player is selecting a custom map
+	else if(float_selectionLayer1 == 4)
+	{
+		ePlayerMom.callvote("map","coop_alien");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+}
+void select_Seven()
+{
+//player is selecting a custom map
+	if(float_selectionLayer1 == 4)
+	{
+		ePlayerMom.callvote("map","coop_bugs");
+		mom_exitMenuPlayer(ePlayerMom);
+	}
+//player is selecting a campaign map
+	if(float_selectionLayer1 == 3)
+	{
+	//selecting mission6
+		if(float_selectionLayer2 == 0)
+		{
+			float_selectionLayer2 = 7;
+		}
+	//selecting map of mission1
+		else if(float_selectionLayer2==2)
+		{
+			ePlayerMom.callvote("map","m1l3-borg_boss");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	}
+}
+void select_Eight()
+{
+//player is selecting a campaign map
+	if(float_selectionLayer1 == 3)
+	{
+	//selecting mission7
+		if(float_selectionLayer2 == 0)
+		{
+			float_selectionLayer2 = 8;
+		}
+	}
+}
+void select_Nine()
+{
+//player is selecting a campaign map
+	if(float_selectionLayer1 == 3)
+	{
+	//selecting mission8
+		if(float_selectionLayer2 == 0)
+		{
+			float_selectionLayer2 = 9;
+		}
+	}
+}
+void select_Ten()
+{
+//player is selecting a campaign map
+	if(float_selectionLayer1 == 3)
+	{
+	//selecting mission9
+		if(float_selectionLayer2 == 0)
+		{
+			float_selectionLayer2 = 10;
+		}
+	}
+}
+void select_Eleven()
+{
+//player is selecting a campaign map
+	if(float_selectionLayer1 == 3)
+	{
+	//selecting mission10
+		if(float_selectionLayer2 == 0)
+		{
+			float_selectionLayer2 = 11;
+		}
+	}
+}
+void select_Twelve()
+{
+//player is selecting a campaign map
+	if(float_selectionLayer1 == 3)
+	{
+	//selecting mission11
+		if(float_selectionLayer2 == 0)
+		{
+			float_selectionLayer2 = 12;
+		}
+	}
+}
+void select_Thirteen()
+{
+//player is selecting a campaign map
+	if(float_selectionLayer1 == 3)
+	{
+	//selecting mission12
+		if(float_selectionLayer2 == 0)
+		{
+			float_selectionLayer2 = 13;
+			ePlayerMom.callvote("map","credits");
+			mom_exitMenuPlayer(ePlayerMom);
+		}
+	}
+}
+
+

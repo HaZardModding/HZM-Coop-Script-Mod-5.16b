@@ -1,0 +1,251 @@
+//-----------------------------------------------
+// Cinematic Name: c:\projects\ef2\ef2\base\cins\m7m8_crash.cin
+// Export Version: 1
+// Export Date:    Tue Apr 29 16:04:12 2003
+//-----------------------------------------------
+
+Origins
+{
+    Origin
+    {
+          name          "m7m8_crash"
+          origin         10496.572266 -8838.347656 -747.033997
+          yaw            0.000000
+    }
+}
+
+
+Actors
+{
+    Actor
+    {
+        name          "armChang"
+        tiki          "char/hazardteam_chang.tik"
+        anim          "cin-m7m8_crash_Chang"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         -75.504883 -73.920898 -61.840576
+        yaw            -209.000006
+    }
+    Actor
+    {
+        name          "armJurot"
+        tiki          "char/hazardteam_jurot.tik"
+        anim          "cin-m7m8_crash_Jurot"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         -50.151367 9.299805 -30.498230
+        yaw            -209.000006
+    }
+    Actor
+    {
+        name          "armKorban"
+        tiki          "char/hazardteam_kourban.tik"
+        anim          "cin-m7m8_crash_Korban"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         43.184570 -26.497070 -36.375427
+        yaw            -209.000006
+    }
+    Actor
+    {
+        name          "armMunro"
+        tiki          "char/hazardteam_munro.tik"
+        anim          "cin-m7m8_crash_Munro"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         63.476563 88.386719 -8.395752
+        yaw            -209.000006
+    }
+    Actor
+    {
+        name          "armSydney"
+        tiki          "char/hazardteam_sydney.tik"
+        anim          "cin-m7m8_crash_Sydney"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         12.337891 -129.844727 -45.725342
+        yaw            -209.000006
+    }
+}
+
+
+Cameras
+{
+    Camera
+    {
+        name         "cam0-m7m8_crash"
+        camfile      "cam0-m7m8_crash"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+    }
+    Camera
+    {
+        name         "cam1-m7m8_crash"
+        camfile      "cam1-m7m8_crash"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+    }
+    Cut
+    {
+        toCamera     "cam0-m7m8_crash"
+        frame         0
+        fadeout       0
+        fadein        20
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam1-m7m8_crash"
+        frame         74
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam0-m7m8_crash"
+        frame         169
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam1-m7m8_crash"
+        frame         197
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam0-m7m8_crash"
+        frame         224
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam1-m7m8_crash"
+        frame         259
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam0-m7m8_crash"
+        frame         336
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam1-m7m8_crash"
+        frame         449
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam0-m7m8_crash"
+        frame         495
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam1-m7m8_crash"
+        frame         565
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam0-m7m8_crash"
+        frame         624
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam1-m7m8_crash"
+        frame         737
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam0-m7m8_crash"
+        frame         807
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam1-m7m8_crash"
+        frame         888
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam0-m7m8_crash"
+        frame         983
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam0-m7m8_crash"
+        frame         1020
+        fadeout       20
+        fadein        0
+        lerp          false
+    }
+}

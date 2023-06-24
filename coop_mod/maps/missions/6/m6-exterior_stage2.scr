@@ -1,0 +1,543 @@
+float TOTAL_COMPONENTS = 3;
+float MAX_LIVES = 4;
+float SHIP_HEALTH = 600;
+float CAPITAL_SHIP_COMPONENT_HEALTH = 1000;
+float CAPITAL_SHIP_HEALTH = 8000;
+
+float shipHealth;
+
+float warpDriveDestroyed = 0;
+float enginesDestroyed = 0;
+float weaponsDestroyed = 0;
+
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+//	Function Implementations
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+
+void coop_stage2ForceRulesOnPlayers();
+
+void enterpriseManuever1 ();
+void enterpriseManuever2 ();
+void enterpriseManuever3 ();
+
+float TOTAL_CAP_CLIPS = 29;
+void capClipsSolid ( float makeSolid )
+{
+	float i;
+	entity e;
+	for ( i=1;i<=TOTAL_CAP_CLIPS;i++)
+	{
+		e = getentity ( "capShipClip" + i );
+		if ( makeSolid )
+			e.solid();
+		else
+			e.notsolid ();
+	}
+}
+
+void initCapClips ()
+{
+	float i;
+	entity e;
+	for ( i=1;i<=TOTAL_CAP_CLIPS;i++)
+	{
+		e = getentity ( "capShipClip" + i );
+		e.handlesDamage ( 1 );
+		e.health ( 10000 );
+		e.bind ( $capShipOrigin );
+		thread globalCommon_OnDamage ( e , "capShipHit" );
+	}
+}
+
+void fireBattery ( entity b1, entity b2 )
+{
+	capClipsSolid ( 0 );
+	b1.projectileattackentity ( "models/projectile/projectile-photonball-idryll-large.tik", "$entSurface" , 5 , 15 );
+	wait ( 1 );
+	b2.projectileattackentity ( "models/projectile/projectile-photonball-idryll-large.tik", "$entSurface" , 5 , 15 );
+	wait ( 2 );
+	capClipsSolid ( 1 );
+}
+
+
+// -----------------
+//  fighter stuff
+// -----------------
+
+void doFighterFollowPath ( entity fighter , entity path );
+void initFighter ( entity e , string p )
+{
+	entity pathEntity;
+	pathEntity = getEntity ( p );
+
+	//these assume the fighters are at a scale of .5
+	//see the .tik for the scale 1.0 sizes
+	e.setsize ('-384 -192 -8', '384 192 192' );
+
+	e.handlesdamage ( 1 );
+	e.health ( SHIP_HEALTH );
+	e.setfloatvar ( "lives" , MAX_LIVES );
+	e.setstringvar ( "path" , p );
+
+	e.show ();
+
+	thread globalCommon_OnDamage ( e , "fighterHit" );
+
+	pathEntity.setfloatvar ( "inuse" , 1 );
+	thread doFighterFollowPath ( e, pathEntity );
+}
+
+float fightersDestroyed = 0;
+void componentDestroyed ( )
+{
+	entity e;
+	e=getcurrententity();
+
+	if ( e.gethealth() > 0 )
+	{
+		$capital_ship.anim ( "damaged" );
+		wait ( .1 );
+		$capital_ship.anim ( "idle" );
+		globalCommon_OnDamage ( e , "componentDestroyed" );
+		return;
+	}
+
+	componentsDestroyed++;
+	e.scale ( 4.0 );
+
+	if ( e.gettargetname () == "$idryll_weapons" )
+	{
+		weaponsDestroyed = 1;
+	}
+	else if ( e.gettargetname () == "$idryll_warpdrive" )
+	{
+		warpDriveDestroyed = 1;
+	}
+	else if ( e.gettargetname () == "$idryll_engines" )
+	{
+		enginesDestroyed = 1;
+	}
+
+	e.show ();
+	e.model ( "models/fx/fx-drull-ship-explode.tik" );
+	wait ( .5 );
+	e.model ( "models/fx/fx-smoke-capitalship-damaged.tik" );
+	//e.remove ();
+
+	if ( componentsDestroyed >=TOTAL_COMPONENTS )
+	{
+		killthread ( "damageSurface" );
+		$entSurface.handlesdamage ( 0 );
+
+		$capShipOrigin.endpath ();
+		$capShipOrigin.time ( 30 );
+		$capShipOrigin.rotateZ ( 1 );
+		$capShipOrigin.rotateY (.5 );
+
+		levelComplete = 1;
+		killthread ( "runCapShip" );
+		removeclass ( "projectile" );
+
+		wait ( 2 );
+
+		endStage2Cinematic();
+	}
+}
+
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+
+void beginStage2 ( )
+{
+	$tuvok.stopdialog ();
+	endStage1Timer ();
+	globalCommon_Autosave ();
+	
+	$search_beam1.remove();
+	$search_fighter1.remove();
+	$search_beam1_origin.remove();
+	wait ( 1 );
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.notsolid ();
+		$player.useentity ( $turret );
+		$turret.time ( .1 );
+		$turret.moveup ( 1024 );	//keep it out of reach of prying hands
+		$entTurret.hide ();
+	}
+	else
+	{
+		coop_vector_spawnOrigin1 = '-19810 12920 1027';//lined up with everyone else (not in the hatch)
+		$world.physicsVar("maxspeed",0);		
+		thread globalCoop_player_warpToSpawnOriginAll();
+		thread coop_stage2ForceRulesOnPlayers();
+	//give enterprise only
+		thread globalCoop_player_giveAll("models/weapons/worldmodel-enterprise.tik",2);	
+	}	
+	$turret.lock ();	//lock the player in
+	$entSurface.solid ();
+	$entSurface.handlesdamage (1);
+	$bob.updatebosshealth(1,1);
+
+	shipHealth = CAPITAL_SHIP_HEALTH;
+
+	thread globalCommon_OnDamage ( $idryll_weapons ,   "componentDestroyed" );
+	thread globalCommon_OnDamage ( $idryll_warpdrive , "componentDestroyed" );
+	thread globalCommon_OnDamage ( $idryll_engines ,   "componentDestroyed" );
+
+	$idryll_weapons.health ( CAPITAL_SHIP_COMPONENT_HEALTH );
+	$idryll_warpdrive.health ( CAPITAL_SHIP_COMPONENT_HEALTH );
+	$idryll_engines.health ( CAPITAL_SHIP_COMPONENT_HEALTH );
+
+	$idryll_weapons.handlesdamage ( 1 );
+	$idryll_warpdrive.handlesdamage ( 1 );
+	$idryll_engines.handlesdamage ( 1 );
+
+	initCapClips ();
+
+	$capital_ship.setsize ('-384 -192 -8', '384 192 192' );
+	$capShipOrigin.followpath ( $capShipPeelOff );
+	wait ( 1 );
+
+	$bob.ai_on();	//bring up the enterprise health hud
+	thread globalCommon_OnDamage ( $entSurface , "damageSurface" );
+
+	globalCoop_main_camFadeIn(.5);
+	waitfor ( $capShipOrigin );
+
+	thread initFighter ( $f1 , "fighterPath1" );
+	thread initFighter ( $f2 , "fighterPath2" );
+	thread initFighter ( $f3 , "fighterPath3" );
+	thread initFighter ( $f4 , "fighterPath4" );
+	wait ( 5 );
+
+	//start the battle
+	thread runCapShip ();
+}
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+
+vector VectorSubtract ( vector v1, vector v2 )
+{
+	vector ret;
+
+	ret_x = v1_x - v2_x;
+	ret_y = v1_y - v2_y;
+	ret_z = v1_z - v2_z;
+
+	return ret;
+}
+
+void runCapShip ()
+{
+	float done = 0;
+	//$player.setobjectiveshow ( "DisableIdryllCommandShip" , 1 );
+	thread globalCoop_objectives_update("incomplete",2,1);
+	
+	thread globalCoop_dialog_play($tuvok,"m6l2/tuvok_disable.mp3", 1, 80000, 1); //Lieutenant Munro, disable the cruiser’s weapons, engines, and warp drive without destroying the vessel.
+	
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.addhud ( "m6CapitalShipHealth" );	
+		$player.setstat ( "mp_generic2" , 100 );
+	}
+	else
+	{
+		globalCoop_huds_AddAll("coop_m6CapitalShipHealth");
+	}
+
+	while ( !done )
+	{
+		if ( !weaponsDestroyed )
+		{
+			capClipsSolid ( 1 );
+			$idryll_weapons.show ();
+			$capShipOrigin.followpath ( $weaponsExposed );
+			$capShipOrigin.playsound ( "sound/ships/drull/drull_flyby2.wav" , 6 , 2 , 2384 );
+			$capShipOrigin.show();
+			wait ( 9 );
+			fireBattery ( $weaponsBattery1,$weaponsBattery2 );
+			waitfor ( $capShipOrigin );
+			capClipsSolid ( 0 );
+			$idryll_weapons.hide ();
+			$capShipOrigin.hide();
+			thread enterpriseManuever1 ( );
+			wait ( 5 );
+		}
+
+		if ( !warpDriveDestroyed )
+		{
+			capClipsSolid ( 1 );
+			$idryll_warpdrive.show ();
+			$capShipOrigin.followpath ( $warpDriveExposed );
+			$capShipOrigin.playsound ( "sound/ships/drull/drull_flyby2.wav" , 6 , 2 , 2384 );
+			$capShipOrigin.show();
+			wait  ( 10 );
+			fireBattery ( $enginesBattery1,$enginesBattery2 );
+			waitfor ( $capShipOrigin );
+			capClipsSolid ( 0 );
+			$capShipOrigin.hide();
+			$idryll_warpdrive.hide ();
+			thread enterpriseManuever3 ( );
+			wait ( 5 );
+		}
+
+		if ( !enginesDestroyed )
+		{
+			capClipsSolid ( 1 );
+			$idryll_engines.show ();
+			$capShipOrigin.followpath ( $enginesExposed );
+			$capShipOrigin.playsound ( "sound/ships/drull/drull_flyby2.wav" , 6 , 1 , 2384 );
+			$capShipOrigin.show();
+			wait ( 8 );
+
+			fireBattery ( $warpDriveBattery1,$warpDriveBattery2 );
+
+			waitfor ( $capShipOrigin );
+			capClipsSolid ( 0 );
+			$capShipOrigin.hide();
+			$idryll_engines.hide ();
+
+			thread enterpriseManuever2 ( );
+			wait ( 5 );
+		}
+
+		if ( weaponsDestroyed && enginesDestroyed && warpDriveDestroyed )
+			done = 1;
+	}
+
+	if(!cvar_bool_multiplayer)
+	{
+		$player.removehud ( "m6CapitalShipHealth" );
+	}
+	else
+	{
+		globalCoop_huds_RemoveAll("coop_m6CapitalShipHealth");
+	}
+	
+	//$player.setobjectivecomplete ( "DisableIdryllCommandShip" , 1 );
+	thread globalCoop_objectives_update("complete",2,1);
+/*	$capShipOrigin.time ( 60 );
+	$capShipOrigin.rotateY ( 1 );
+	$capShipOrigin.moveWest ( 2048 );
+*/
+}
+
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+
+entity choosePath ()
+{
+	float pathAlreadyChosen = 1;
+	float chooseAlternate;
+	chooseAlternate = randomint ( 2 );
+	entity toReturn;
+
+	float i;
+	while ( !doesEntityExist ( toReturn ) && pathAlreadyChosen )
+	{
+		for ( i = 1 ; (i<=4) && pathAlreadyChosen ; i++ )
+		{
+			if ( chooseAlternate )
+				toReturn = getentity ( "fighterPath" + i + "_alt" );
+			else
+				toReturn = getentity ( "fighterPath" + i );
+
+			globalCommon_AssertEntity ( toReturn , "choosePath: ASSERT failed\n" );
+			pathAlreadyChosen = toReturn.getfloatvar ( "inuse" );
+		}
+		wait ( .05 );
+	}
+
+	//print ( " choosing a path " + toReturn.getrawtargetname() + "\n" );
+	toReturn.setfloatvar ( "inuse" , 1 );
+	return toReturn;
+}
+
+void doFighterFollowPath ( entity fighter , entity path )
+{
+	float lastLife,attackThreadID;
+	entity thePath,lastPath;
+	lastLife = fighter.getfloatvar ( "lives" );
+	thePath = path;
+
+	while(lastLife == fighter.getfloatvar ( "lives" ))
+	{
+		fighter.followpath ( thePath , "normalangles" );
+		fighter.playsound ( "sound/ships/drull/drull_flyby1.wav" , 2 , 1.5 , 1384 );
+		wait ( 2 + randomfloat ( .5 ) );
+
+		//do attacks for a couple of seconds
+		fighter.projectileAttackEntity ( "models/projectile/projectile-photonball-idryll.tik" , "$entSurface" , 5 ,20 );
+
+		waitfor ( fighter );
+		wait ( randomfloat ( 3 ) + 2 );
+
+		lastPath = thePath;
+		thePath = choosePath();
+		//avoid choosing the same path twice in a row
+		lastPath.setfloatvar ( "inuse" , 0 );		//done with this path
+	}
+}
+
+void fighterHit ( )	//ship ondamage thread
+{
+	entity e,explosion;
+	e = getcurrententity();		//should be a ship
+
+	if ( e.gethealth () <= 0 )
+	{
+		float c;
+		c = e.getfloatvar ( "lives" );
+		c--;
+
+		if ( c<=0 )	//the ship is ready to _really_ be destroyed
+		{
+			e.scale ( 1 );
+			e.model ( "fx/fx-explosion-spaceship-idryll.tik" );
+			entity p;
+			//we're done with the last path we chose
+			p = getentity ( e.getstringvar ( "path" ));
+			p.setfloatvar ( "inuse" , 0 );
+
+			wait ( .5 );
+			//componentDestroyed();
+		}
+		else		//just fake the explosion and reset the ship
+		{
+			e.setfloatvar ( "lives" , c );
+
+			entity p,oldP;
+			//we're done with the last path we chose
+			oldP = getentity ( e.getstringvar ( "path" ));
+			//get a new random path
+			p = choosePath ();
+
+			//now set the old path to be not-in-use
+			//we didn't do it before since we wanted to avoid choosing the same path
+			//twice in a row
+			oldP.setfloatvar ( "inuse" , 0 );
+
+			//save it off
+			e.setstringvar ( "path" , p.getrawtargetname ());
+			globalCommon_AssertEntity ( p , "No path for fighter" );
+
+			e.hide ();
+			e.health ( SHIP_HEALTH );
+			e.endpath();
+
+			explosion = spawn ( "Explosion" , "model" , "fx/fx-explosion-spaceship-idryll.tik" );
+			explosion.origin ( e.getorigin ());
+			explosion.playsound ( "sound/impact/explosion/expl_drullship.wav" , 2 , 2 , 4384 );
+			e.origin ( p.getorigin () ); //try to get rid of lerping
+			thread doFighterFollowPath ( e , p );
+
+			wait ( .75 );	//try to get rid of lerping
+			e.show ();
+			explosion.remove ();
+			thread globalCommon_OnDamage ( e , "fighterHit" );
+		}
+	}
+	else
+	{
+		e.anim ( "damaged" );	//flash the shields on
+		e.playsound ( "sound/ships/enterprise/ent_impact2.wav" , 4 , 3 , 4384 );
+		waitforanimation ( e , "damaged" );
+		e.anim ( "idle" );
+		thread globalCommon_OnDamage ( e , "fighterHit" );
+	}
+}
+
+void capShipHit ()
+{
+	entity e;
+	e= getCurrentEntity ();
+	$capital_ship.anim ( "shielded" );
+	wait ( .35 );
+	$capital_ship.anim ( "idle" );
+
+	shipHealth -= ( 10000 - e.gethealth());	//hurt the capship appropriately
+
+	if(!cvar_bool_multiplayer)
+	{
+		$player.setstat ( "mp_generic2" , 100 * (shipHealth/CAPITAL_SHIP_HEALTH) );	//update the boss bar
+	}
+
+	//print ( "Capship: " +shipHealth+"\n" );
+	if ( shipHealth <= 0 )		//failed
+	{
+		if(!cvar_bool_multiplayer)
+		{
+			$player.removehud ( "m6CapitalShipHealth" );
+		}
+		$capital_ship.model ( "models/fx/fx-drull-ship-explode.tik" );
+		$capital_ship.playsound ( "sound/ships/drull/drull_capitalshiphit.wav" , 3 , 2 , 4384 );
+		$capital_ship.scale ( 36.0 );
+
+		$idryll_weapons.remove();
+		$idryll_warpdrive.remove();
+		$idryll_engines.remove();
+
+		wait ( 5 );
+		if(!cvar_bool_multiplayer)
+		{
+			$player.missionfailed ( "$$YouDestroyedCapitalShip$$" );
+		}
+		else
+		{
+			globalCoop_mission_failWithReason("YouDestroyedCapitalShip");
+		}
+		return;
+	}
+	e.health ( 10000 );
+	thread globalCommon_OnDamage ( e , "capShipHit" );
+}
+
+void enterpriseManuever1 ()
+{
+	globalAccelMove_RotateZ( $sky, -10, 2.5 , "rampupdown", "" );
+	globalAccelMove_RotateZ( $sky, 10, 5 , "rampupdown", "" );
+}
+
+void enterpriseManuever2 ()
+{
+	globalAccelMove_RotateX( $sky, -12, 2.5 , "rampupdown", "" );
+	globalAccelMove_RotateX( $sky, 12, 5 , "rampupdown", "" );
+}
+
+void enterpriseManuever3 ()
+{
+	globalAccelMove_RotateZ( $sky, -14, 2.5 , "rampupdown", "" );
+	globalAccelMove_RotateZ( $sky, 14, 5 , "rampupdown", "" );
+}
+
+
+void coop_stage2ForceRulesOnPlayers()
+{
+	entity ePlayer;
+	float fPlayerIdInUse;
+	vector vOrigin;
+	while(coop_integer_cinematicIsActive == 0)
+	{
+		fPlayerIdInUse=1;
+		for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++){
+			ePlayer = getentity("player"+ fPlayerIdInUse);
+			if(doesEntityExist(ePlayer)){
+				ePlayer.scale(.2);
+				ePlayer.notsolid();
+				ePlayer.gravity(0);
+				vOrigin=ePlayer.getOrigin();
+				if(vOrigin_z > 1024)
+				{
+					vOrigin_z = 1024;
+					ePlayer.setvelocity('0 0 0');
+					ePlayer.origin(vOrigin);
+				}
+			}
+		}
+		wait(0.5);
+	}
+}
+

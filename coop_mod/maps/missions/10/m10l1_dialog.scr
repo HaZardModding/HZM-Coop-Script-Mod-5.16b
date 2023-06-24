@@ -1,0 +1,268 @@
+
+//--------------------------------------------------------------------------------------
+// Dialog Script
+// 	Contains all dialog setup code for one specific BSP.
+//--------------------------------------------------------------------------------------
+
+float choice = 0;
+float outDoorChoice = 0;
+
+void initOutdoorGuardDialog ( entity e , float requiredSecurityState )
+{
+/* 	if(!cvar_bool_multiplayer){//Singleplayer
+		string aliasName;
+		aliasName = e.getrawtargetname()+"generalDialog1";
+		e.alias (  aliasName , "localization/sound/dialog/m10l1/romguard_canihelp.mp3" );
+
+		outDoorChoice++;
+
+		if ( outDoorChoice == 1 )
+		{
+			aliasName = e.getrawtargetname()+"generalDialog2";
+			e.alias ( aliasName , "localization/sound/dialog/m10l1/romguard_bored.mp3", "anim" , "conv-shakehead");
+		}
+		else if ( outDoorChoice == 2 )
+		{
+			aliasName = e.getrawtargetname()+"generalDialog3";
+			e.alias ( aliasName , "localization/sound/dialog/m10l1/romguard_newrecruit.mp3" );
+		}
+		else if ( outDoorChoice == 3 )
+		{
+			aliasName = e.getrawtargetname()+"generalDialog4";
+			e.alias ( aliasName , "localization/sound/dialog/m10l1/romguard_stopc.mp3" );
+		}
+		else if ( outDoorChoice == 4 )
+		{
+			aliasName = e.getrawtargetname()+"generalDialog5";
+			e.alias ( aliasName , "localization/sound/dialog/m10l1/romguard_hounds.mp3" );
+		}
+
+		if ( outDoorChoice >= 4 )
+			outDoorChoice = 0;
+		
+		e.dialog ( e.getrawtargetname()+"generalDialog");
+	}
+	else{//Multiplayer
+		if(e.getStringVar("coop_dialogString1") == ""){
+			//- globalCoop_dialog_aliasAdd(e,"m10l1/romguard_canihelp.mp3");
+			//- globalCoop_dialog_aliasAdd(e,"m10l1/romguard_bored.mp3");
+			//- globalCoop_dialog_aliasAdd(e,"m10l1/romguard_newrecruit.mp3");
+			//- globalCoop_dialog_aliasAdd(e,"m10l1/romguard_stopc.mp3");
+			//- globalCoop_dialog_aliasAdd(e,"m10l1/romguard_hounds.mp3");
+		}
+	}*/
+}
+
+void initGuardDialog ( entity e , float requiredSecurityState )
+{
+	if(!doesEntityExist(e)){
+		return;
+	}
+	
+	//if(e.getStringVar("coop_dialogString1") == ""){
+		//- globalCoop_dialog_aliasAdd(e,"m10l1/romguard_suggest.mp3");
+		//- globalCoop_dialog_aliasAdd(e,"m10l1/romguard_empty.mp3");
+		//- globalCoop_dialog_aliasAdd(e,"m10l1/romguard_tightw.mp3");
+	//}
+
+/* //  General onuse dialog
+	if(!cvar_bool_multiplayer){//Singleplayer
+		string aliasName;
+		choice++;
+		print ( e.gettargetname () + " choice" + choice + "\n" );
+
+		if ( choice == 1 )
+		{
+			aliasName = e.getrawtargetname()+"generalDialog1";
+			e.alias ( aliasName , "localization/sound/dialog/m10l1/romguard_suggest.mp3" ,"anim" ,"conv-idle1" );
+		}
+		else if ( choice == 2 )
+		{
+			aliasName = e.getrawtargetname()+"generalDialog2";
+			e.alias ( aliasName , "localization/sound/dialog/m10l1/romguard_empty.mp3" );
+		}
+		else if ( choice == 3 )
+		{
+			aliasName = e.getrawtargetname()+"generalDialog3";
+			e.alias ( aliasName , "localization/sound/dialog/m10l1/romguard_tightw.mp3" );
+		}
+
+		if ( choice >= 3 )
+			choice = 0;
+		e.dialog ( e.getrawtargetname()+"generalDialog");
+	}
+	else{//Multiplayer
+		if(e.getStringVar("coop_dialogString1") == ""){
+			//- globalCoop_dialog_aliasAdd(e,"m10l1/romguard_suggest.mp3");
+			//- globalCoop_dialog_aliasAdd(e,"m10l1/romguard_empty.mp3");
+			//- globalCoop_dialog_aliasAdd(e,"m10l1/romguard_tightw.mp3");
+		}
+	} */
+}
+
+void initStationaryTZoneGuardDialog ( entity e )
+{
+	if(!doesEntityExist(e)){
+		return;
+	}
+	
+	//if(e.getStringVar("coop_dialogString1") == ""){
+		//- globalCoop_dialog_aliasAdd(e,"m10l1/doorguard1_backthere.mp3");
+		//- globalCoop_dialog_aliasAdd(e,"m10l1/doorguard1_nodoor.mp3");
+		//- globalCoop_dialog_aliasAdd(e,"m10l1/doorguard1_entert.mp3");
+		//- globalCoop_dialog_aliasAdd(e,"m10l1/doorguard2_watchback.mp3");
+	//}
+
+/* 	if(!cvar_bool_multiplayer){//Singleplayer
+		e.alias ( "stationTDialogNoClearance" , "localization/sound/dialog/m10l1/doorguard1_backthere.mp3" , "anim" , "conv-backthere");
+		e.dialog ( "stationTDialogNoClearance"  , "dependsint", "level.securityAccess","0");
+
+		e.alias ( "stationTDialogClearance" , "localization/sound/dialog/m10l1/doorguard1_nodoor.mp3" );
+		e.dialog ( "stationTDialogClearance"  , "dependsint","level.securityAccess","1");
+
+		e.alias ( "stationTDialogEnter1" , "localization/sound/dialog/m10l1/doorguard1_entert.mp3" , "anim" , "conv-affirmative");
+		e.alias ( "stationTDialogEnter2" , "localization/sound/dialog/m10l1/doorguard2_watchback.mp3" );
+		e.dialog ( "stationTDialogEnter" , "dependsint","level.securityAccess","2");
+	}
+	else{//Multiplayer
+		if(e.getStringVar("coop_dialogString1") == ""){
+			//- globalCoop_dialog_aliasAdd(e,"m10l1/doorguard1_backthere.mp3");
+			//- globalCoop_dialog_aliasAdd(e,"m10l1/doorguard1_nodoor.mp3");
+			//- globalCoop_dialog_aliasAdd(e,"m10l1/doorguard1_entert.mp3");
+			//- globalCoop_dialog_aliasAdd(e,"m10l1/doorguard2_watchback.mp3");
+		}
+	} */
+	initOutdoorGuardDialog ( e , 2 );		//random stuff to say after security clearance is upgraded
+}
+
+void initStationarySecurityGuardDialog ( entity e , float guardNumber)
+{
+	if(!doesEntityExist(e)){
+		return;
+	}
+	
+	//if ( guardNumber == 1 )
+	//{
+		//if(e.getStringVar("coop_dialogString1") == "")
+		//{
+			//- globalCoop_dialog_aliasAdd(e,"m10l1/romguard_clear.mp3");
+			//- globalCoop_dialog_aliasAdd(e,"m10l1/statgueard_noacc.mp3");
+			//- globalCoop_dialog_aliasAdd(e,"m10l1/doorguard2_walled.mp3");
+		//}
+		/*
+ 		if(!cvar_bool_multiplayer){//Singleplayer
+			e.alias ( "stationSecurityGuard1Dialog1" , "localization/sound/dialog/m10l1/statgueard_noacc.mp3" , "anim" , "conv-no" );
+			e.alias ( "stationSecurityGuard1Dialog2" , "localization/sound/dialog/m10l1/doorguard2_walled.mp3" );
+			e.dialog ("stationSecurityGuard1Dialog" , "dependsint","level.securityAccess","0");
+		}
+		else{//Multiplayer
+			if(e.getStringVar("coop_dialogString1") == ""){
+				//- globalCoop_dialog_aliasAdd(e,"m10l1/statgueard_noacc.mp3");
+				//- globalCoop_dialog_aliasAdd(e,"m10l1/doorguard2_walled.mp3");
+			}
+		} */
+	//}
+	//else
+	//{
+		//if(e.getStringVar("coop_dialogString1") == ""){
+			//- globalCoop_dialog_aliasAdd(e,"m10l1/romguard_clear.mp3");
+		//}
+		/*
+		if(!cvar_bool_multiplayer){//Singleplayer
+			e.alias ( "stationSecurityGuard2Dialog1" , "localization/sound/dialog/m10l1/romguard_clear.mp3");
+			e.dialog ("stationSecurityGuard2Dialog" , "dependsint","level.securityAccess","0");
+		}
+		else{//Multiplayer
+			if(e.getStringVar("coop_dialogString1") == ""){
+				//- globalCoop_dialog_aliasAdd(e,"m10l1/romguard_clear.mp3");
+			}
+		}*/
+	
+	//}
+	
+	//if(e.getStringVar("coop_dialogString1") == "" && getFloatVar("level.securityAccess") == 1){
+		//- globalCoop_dialog_aliasAdd(e,"m10l1/romguard_canihelp.mp3");
+	//}
+
+/* 	if(!cvar_bool_multiplayer){//Singleplayer
+		e.alias (  "stationSecurityGuardGeneral"+guardNumber , "localization/sound/dialog/m10l1/romguard_canihelp.mp3" );
+		e.dialog ( "stationSecurityGuardGeneral"+guardNumber , "dependsint" , "level.securityAccess","1");
+	}
+	else{//Multiplayer
+		if(e.getStringVar("coop_dialogString1") == "" && getFloatVar("level.securityAccess") == 1){
+			//- globalCoop_dialog_aliasAdd(e,"m10l1/romguard_canihelp.mp3");
+		}
+	} */
+
+	initOutdoorGuardDialog ( e , 1 );		//random stuff to say after security clearance is upgraded
+}
+
+void initStationaryEntranceGuardDialog ( entity e )
+{
+	if(!doesEntityExist(e)){
+		return;
+	}
+	
+	//if(e.getStringVar("coop_dialogString1") == ""){
+		//- globalCoop_dialog_aliasAdd(e,"m10l1/statgueard_forget.mp3");
+	//}
+	
+/* 	if(!cvar_bool_multiplayer){//Singleplayer
+		e.alias ( "stationaryEntranceGuardDialog2" , "localization/sound/dialog/m10l1/statgueard_forget.mp3" , "anim" , "conv-no" );
+		e.dialog ( "stationaryEntranceGuardDialog" );
+	}
+	else{//Multiplayer
+		if(e.getStringVar("coop_dialogString1") == ""){
+			//- globalCoop_dialog_aliasAdd(e,"m10l1/statgueard_forget.mp3");
+		}
+	} */
+	initOutdoorGuardDialog ( e , -1 );		//random stuff to say after security clearance is upgraded
+}
+
+void initKhoalDialog ( entity e )
+{
+	if(!doesEntityExist(e)){
+		return;
+	}
+	
+	if(e.getStringVar("coop_dialogString1") == "" && getFloatVar("level.securityAccess") == 1){
+		e.anim("chair-gesture1");
+		//thread //- globalCoop_dialog_aliasAdd(e,"m10l1/romguard_carryon.mp3");
+	}
+	
+/* 	if(!cvar_bool_multiplayer){//Singleplayer
+		e.alias ( "khoalDialog1" , "localization/sound/dialog/m10l1/romguard_carryon.mp3" , "anim" , "chair-gesture1");
+		e.dialog ( "khoalDialog", "dependsint","level.securityAccess","1");
+	}
+	else{//Multiplayer
+		if(e.getStringVar("coop_dialogString1") == "" && getFloatVar("level.securityAccess") == 1){
+			e.anim("chair-gesture1");
+			thread //- globalCoop_dialog_aliasAdd(e,"m10l1/romguard_carryon.mp3");
+		}
+	} */
+	e.settalkwatchmode ( "headwatchonly" , 0 );	//don't let him stand up when he's +used
+}
+
+void initFemaleDialog ( entity e )
+{
+	if(!doesEntityExist(e)){
+		return;
+	}
+	
+	//if(e.getStringVar("coop_dialogString1") == ""){
+		//- globalCoop_dialog_aliasAdd(e,"m10l1/outrom1_feelhand.mp3");
+		//- globalCoop_dialog_aliasAdd(e,"m10l1/outrom1_arr.mp3");
+	//}
+	
+/* 	if(!cvar_bool_multiplayer){//Singleplayer
+		e.alias ( "femaleDialog1" , "localization/sound/dialog/m10l1/outrom1_feelhand.mp3" , "anim" , "conv-no" );
+		e.alias ( "femaleDialog2" , "localization/sound/dialog/m10l1/outrom1_arr.mp3" );
+		e.dialog ( "femaleDialog" );
+	}
+	else{//Multiplayer
+		if(e.getStringVar("coop_dialogString1") == ""){
+			//- globalCoop_dialog_aliasAdd(e,"m10l1/outrom1_feelhand.mp3");
+			//- globalCoop_dialog_aliasAdd(e,"m10l1/outrom1_arr.mp3");
+		}
+	} */
+}

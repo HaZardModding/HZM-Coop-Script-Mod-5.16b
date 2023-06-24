@@ -1,0 +1,52 @@
+FOR THE GAME:                STAR TREK ELITE FORCE II
+GAME VERSION:                All official releases, except the demo!
+CLASSIFICATION:              Modification
+EXECUTION TYPE:              Server sided (LevelScript - Morpheus Scripting System)
+MODUS:                       Multiplayer
+CREATOR:                     HaZardModding
+
+
+NOTE==========================================================================
+==============================================================================
+This is the CLIENT version, you can NOT host a Coop Server with it, there
+for you require the SERVER or FULL version of this Modification.
+
+This version is ideal for users that like to join Coop Servers but also
+want to keep their Singleplayer Campaign unchanged as it was shipped.
+
+
+COMPATIBILITY=================================================================
+==============================================================================
+! -> Not compatible to previous versions
+
+
+INSTALLATION INSTRUCTIONS=====================================================
+==============================================================================
+1. Shut-down all running instances of the game Star Trek(R) Elite Force II
+2. Start the Installer and follow the instructions
+
+
+HOW TO START THIS MODIFICATION================================================
+==============================================================================
+You require to join a existing Coop Server, this CLIENT version can not start
+a own Coop Server.
+
+You can connect to any Server which has accordingly configured, regardles
+if the Server is a LOCAL (LAN) or Internet (DEDICATED) Server.
+
+If you can not see any Servers online do use the provided file
+ef2_master_server_client_toggle.bat and follow the instructions.
+
+More informations about this subject are provided with the SERVER respectively
+the FULL version.
+
+
+DE-INSTALLATION===============================================================
+==============================================================================
+1.	Shut-down all running instances of the game Star Trek(R) Elite Force II.
+2.	Should you have been unable to remove this modification via Programms or
+Software (Controllpanel), delete the following files from your base folder:
+	zzzzzz_co-op_hzm_script_mod.pk3
+	zzzzzz_co-op_hzm_script_mod_clientonly.pk3
+	zzzzzz_co-op_hzm_script_mod_english.pk3
+

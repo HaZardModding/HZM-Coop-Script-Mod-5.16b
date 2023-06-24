@@ -1,0 +1,460 @@
+void cinematicIntro_SpaceFlyIn();
+void cinematicIntro_SpaceFlyIn_ScaleShuttleUp();
+void cinematicIntro_SpaceFlyIn_ScaleShuttleDown();
+void cinematicIntro_SpaceFlyIn_LightningStrike();
+void cinematicIntro_SpaceFlyIn_ShuttleSparks();
+void cinematicIntro_Crash();
+void cinematicIntro_Crash_ScaleShuttle();
+
+//---------------------
+// 	cinematicIntro_SpaceFlyIn
+// 	shuttle fly's towards the planet
+//---------------------
+void cinematicIntro_SpaceFlyIn()
+{
+	globalCoop_cin_start();
+	spawn( "Camera", "targetname", "cam1" );
+	spawn( "Camera", "targetname", "cam2" );
+	//--- set the music
+	music( "aux1" );
+	
+	//--- load the camera paths
+	cam.load( "m8l1a_Space_FlyIn_Shuttle" );
+	cam.load( "m8l1a_Space_FlyIn_Shot1" );
+	wait( .25 );
+
+	//--------------------------------------------------------
+	//shot1 shuttle fly's by the camera
+	
+	//--- set camera
+	globalCoop_cin_fov($cam1, 85 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_follow($cam1, $m8l1a_Space_FlyIn_Shot1 );
+	globalCoop_cin_cuecamera( $cam1 );
+	
+	//--- make the shuttle fly it's path and scale it
+	thread cinematicIntro_SpaceFlyIn_ScaleShuttleUp();
+	$shuttleSpace_Origin.followpath( $m8l1a_Space_FlyIn_Shuttle );
+	wait(.2);
+	
+	//--- fade in
+	cam_fadein( 1, 0, 0, 0, 1, 0 );	
+	wait( 1 );
+	
+	//--set skipthread
+	globalCoop_cin_skipThread( "cinematicArm_PostCrash_ArmEnd");
+	wait( 4 );
+	
+	thread cinematicIntro_SpaceFlyIn_ScaleShuttleDown();
+	wait( 4.75 );
+
+	cinematicArm_Flight	= createCinematic( "m8-shuttlecrash" );
+	cinematicArm_Flight.setendthread( "cinematicIntro_Crash" );
+	
+	//--- fade the camera out
+	cam_fadeout( 1, 0, 0, 0, 1 );
+	wait( 2 );
+	
+	globalCoop_level_removePath($m8l1a_Space_FlyIn_Shuttle);//remove shuttle path
+	globalCoop_level_removePath($m8l1a_Space_FlyIn_Shot1);//remove camera path
+	
+	//--------------------------------------------------------
+	//shot2 the armature in the shuttle
+	cinematicArm_Flight.beginCinematic( "m8-shuttlecrash" );
+	boolArmShuttleFlightPlayed = TRUE;
+
+	//--set the world
+	$world.entity_fade_dist( 20000 );
+	$world.farplane_color ( '0.1 0.11 0.1' );
+	$world.farplane ( 4000 );
+	$starDome.hide();
+	wait( .1 );
+
+	//--- fade in
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+	wait( .5 );
+	
+	if(!cvar_bool_multiplayer)
+		$player.earthquake( 2, 1 );
+	wait( 1 );
+	
+	if(!cvar_bool_multiplayer)
+		$player.earthquake( .2, 4 );
+	wait( 4 );
+	
+	//--- THE LIGHTNING STRIKE HAPPENS HERE
+	thread cinematicIntro_SpaceFlyIn_LightningStrike();
+	thread cinematicIntro_SpaceFlyIn_ShuttleSparks();
+	if(!cvar_bool_multiplayer)
+		$player.earthquake( 2, 2 );
+	wait( 2 );
+	
+	if(!cvar_bool_multiplayer)
+		$player.earthquake( .2, 4 );
+	wait( 4 );
+
+	if(!cvar_bool_multiplayer)
+		$player.earthquake( 2, 1 );
+	wait( 1 );
+
+	if(!cvar_bool_multiplayer)
+		$player.earthquake( .2, 4.5 );
+	wait( 5 );	
+}
+
+//---------------------
+// 	cinematicIntro_SpaceFlyIn_ScaleShuttleUp
+// 	scale the shuttle up on the first part of it's path
+//---------------------
+void cinematicIntro_SpaceFlyIn_ScaleShuttleUp()
+{
+	float i;
+	
+	for( i = .1 ; i <= .25 ; i += .005 )
+	{
+    	$shuttleSpace_Body.scale( i );
+    	$shuttleSpace_Door.scale( i );
+    	wait( .12 );
+    }
+}
+
+//---------------------
+// 	cinematicIntro_SpaceFlyIn_ScaleShuttleDown
+// 	scale the shuttle down on the last part of it's path
+//---------------------
+void cinematicIntro_SpaceFlyIn_ScaleShuttleDown()
+{
+	float i;
+	
+	for( i = .25 ; i >= .01 ; i -= .005 )
+	{
+    	$shuttleSpace_Body.scale( i );
+    	$shuttleSpace_Door.scale( i );
+    	wait( .11 );
+    }
+}
+
+//---------------------
+// 	cinematicIntro_SpaceFlyIn_LightningStrike
+// 	flash the lightning
+//---------------------
+void cinematicIntro_SpaceFlyIn_LightningStrike()
+{
+	while( 1 )
+	{
+    	$lightningShuttle1.show();
+    	wait( .3 );
+    	
+    	$lightningShuttle2.show();
+    	wait( .1 );
+    	
+    	$lightningShuttle2.hide();
+    	wait( .2 );
+    	
+    	$lightningShuttle1.hide();
+    	wait( .2 );
+    	$lightningShuttle2.show();
+    	wait( .2 );
+    	
+    	$lightningShuttle2.hide();
+    	$lightningShuttle1.hide();
+    	wait( 1 );
+    }
+}
+
+//---------------------
+// 	cinematicIntro_SpaceFlyIn_ScaleShuttleDown
+// 	activate the interior sparks
+//---------------------
+void cinematicIntro_SpaceFlyIn_ShuttleSparks()
+{
+	while( 1 )
+	{
+    	globalCoop_level_triggerEntity( $spawnerShuttleStrike1 );
+    	wait( .2 );
+    	
+    	globalCoop_level_triggerEntity( $spawnerShuttleStrike4 );
+    	wait( .1 );
+    	globalCoop_level_triggerEntity( $spawnerShuttleStrike2 );
+    	wait( .4 );
+    	
+    	globalCoop_level_triggerEntity( $spawnerShuttleStrike8 );
+    	wait( .1 );
+    	globalCoop_level_triggerEntity( $spawnerShuttleStrike6 );
+    	wait( .4 );
+    	
+    	globalCoop_level_triggerEntity( $spawnerShuttleStrike5 );
+    	wait( .1 );
+    	globalCoop_level_triggerEntity( $spawnerShuttleStrike3 );
+    	wait( .3 );
+    	
+    	globalCoop_level_triggerEntity( $spawnerShuttleStrike7 );
+    }
+}
+
+	
+//---------------------
+// 	cinematicIntro_Crash
+// 	fly by of the shuttle as it crashes
+//---------------------
+void cinematicIntro_Crash()
+{
+	cinematicArm_PostCrash	= createCinematic( "m7m8_crash" );
+	cinematicArm_PostCrash.setendthread( "cinematicArm_PostCrash_ArmEnd" );
+	$world.weather( "rain", 200 );
+	cam.load( "m8l1a_Crash_Shuttle" );
+	cam.load( "m8l1a_Crash_FlyBy_Shot1" );
+	cam.load( "m8l1a_Crash_FlyBy_Shot2" );
+	wait( .1 );
+	
+	//--------------------------------------------------------
+	//shot1 shuttle fly's by the camera
+	
+	//--- set camera
+	globalCoop_cin_fov($cam1,80);
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_follow($cam1, $m8l1a_Crash_FlyBy_Shot1 );
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( .2 );
+
+	//--- make the shuttle fly along it's path
+	$shuttleFlyBy_Origin.followPath( $m8l1a_Crash_Shuttle );
+
+	//--set skipthread
+	//skipthread( "cinematicArm_PostCrash_ArmEnd");
+
+	thread globalCineFX_CameraFOVLerp( $cam1, 80, 60, 4, "rampupdown" );
+
+	//--- fade in
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+	wait( .5 );
+	
+	//--- scale the shuttle up to fake distance
+	thread cinematicIntro_Crash_ScaleShuttle();
+	wait( 4 );
+
+	//--- first lightning
+	$lightningFlyBy1.show();
+	wait( .1 );
+	
+	$lightningFlyBy1.hide();
+	wait( .1 );
+	
+	$lightningFlyBy1.show();
+	wait( .2 );
+	
+	$lightningFlyBy1.hide();
+	wait( .05 );
+	
+	$lightningFlyBy1.hide();
+	wait( .2 );
+
+	$lightningFlyBy1.show();
+	wait( .1 );
+	
+	$lightningFlyBy1.hide();
+	wait( 2 );
+
+	//--- second lightning
+	$lightningFlyBy2.show();
+	wait( .1 );
+	
+	$lightningFlyBy2.hide();
+	wait( .1 );
+	
+	$lightningFlyBy2.show();
+	wait( .2 );
+	
+	$lightningFlyBy2.hide();
+	wait( .05 );
+	
+	$lightningFlyBy2.hide();
+	wait( .2 );
+
+	$lightningFlyBy2.show();
+	wait( .1 );
+	
+	$lightningFlyBy2.hide();
+	wait( .5 );
+
+	cam_fadeout( .3, 0, 0, 0, 1 );
+	wait( .3 );
+
+	//--------------------------------------------------------
+	//shot2 POV as shuttle crashes
+	
+	//--- set camera
+	globalCoop_cin_fov($cam2, 60 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_follow($cam2, $m8l1a_Crash_FlyBy_Shot2 );
+	wait( .2 );
+	
+	thread globalCoop_level_removePath($m8l1a_Crash_FlyBy_Shot1);
+	
+	globalCoop_cin_cuecamera( $cam2 );
+	cam_fadein( .3, 0, 0, 0, 1 );
+	
+	wait( 2.5 );
+	
+	//--- fade to white
+	cam_fadeout( .3, 0, 0, 0, 1 );
+	wait( 2.5 );
+	
+	thread globalCoop_level_removePath($m8l1a_Crash_FlyBy_Shot2);
+	thread globalCoop_level_removePath($m8l1a_Crash_Shuttle);
+	
+	//--- start the armature crash sequence
+	thread cinematicArm_PostCrash_Start();
+}
+
+//---------------------
+// 	cinematicIntro_Crash_ScaleShuttle
+// 	scale the shuttle up on the first part of it's path
+//---------------------
+void cinematicIntro_Crash_ScaleShuttle()
+{
+	float i;
+	
+	for( i = .1 ; i <= .5 ; i += .01 )
+	{
+    	$shuttleFlyBy_Body.scale( i );
+    	$shuttleFlyBy_Nacelle.scale( i );
+    	$shuttleFlyBy_FX.scale( i );
+    	$shuttleFlyBy_Door.scale( i );
+    	wait( .1 );
+    }
+}
+
+//---------------------
+// cinematicArm_PostCrash_Start
+// post crash sequence between 
+//---------------------
+void cinematicArm_PostCrash_Start()
+{
+	$world.weather( "rain", 0 );
+	cinematicArm_PostCrash	= createCinematic( "m7m8_crash" );
+	cinematicArm_PostCrash.setendthread( "cinematicArm_PostCrash_ArmEnd" );
+	wait(.1);
+
+	//--- set the flag that the armature has played
+	boolArmShuttleCrashPlayed = TRUE;
+		
+	//--- show the shuttle
+	$crashedShuttle.show();
+	$crashedShuttle0.show();
+	$crashedShuttle1.show();
+	$crashedShuttle2.show();
+	$crashedShuttle3.show();
+	$crashedShuttle4.show();
+	$crashedShuttle5.show();
+	$crashedShuttle6.show();
+	$crashedShuttle7.show();
+	$crashedShuttle8.show();
+	$crashedShuttle9.show();
+	$crashedShuttleFX.show();
+	$crashedShuttleNacelle.show();
+	$crashedShuttleNacelleFX.show();	
+
+	//--- start the armature
+	cinematicArm_PostCrash.beginCinematic( "m7m8_crash" );
+	wait( .5 );
+	
+	//--- fade in
+	//cam_fadein( 1, 0, 0, 0, 1, 0 );
+
+	//--- set the skipthread
+	//skipthread( "cinematicArm_PostCrash_ArmEnd" );
+}
+
+//---------------------
+// cinematicArm_PostCrash_ArmEnd
+// skipthread for cinematic
+//---------------------
+void cinematicArm_PostCrash_ArmEnd()
+{
+	//--- set the skipthread and kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematicIntro_SpaceFlyIn" );
+	killthread( "cinematicIntro_SpaceFlyIn_ScaleShuttleUp" );
+	killthread( "cinematicIntro_SpaceFlyIn_ScaleShuttleDown" );
+	killthread( "cinematicIntro_SpaceFlyIn_LightningStrike" );
+	killthread( "cinematicIntro_SpaceFlyIn_ShuttleSparks" );
+	killthread( "cinematicIntro_Crash_ScaleShuttle" );
+	killthread( "cinematicIntro_Crash" );
+	killthread( "cinematicArm_PostCrash_Start" );
+	killthread( "cinematicArm_PostCrash_Finish" );
+	
+    cam_fadeout( .5, 0, 0, 0, 1, 0 );
+    wait( .6 );
+
+
+	cinematicArm_Flight.endCinematic( FALSE );
+	cinematicArm_PostCrash.endCinematic( FALSE );
+	
+	globalCoop_level_removePath($m8l1a_Space_FlyIn_Shuttle);
+	globalCoop_level_removePath($m8l1a_Space_FlyIn_Shuttle);
+	globalCoop_level_removePath($m8l1a_Space_FlyIn_Shot1);
+	globalCoop_level_removePath($m8l1a_Crash_Shuttle);
+	globalCoop_level_removePath($m8l1a_Crash_FlyBy_Shot1);
+	globalCoop_level_removePath($m8l1a_Crash_FlyBy_Shot2);
+	
+	//--- setup the player	
+	thread initPlayer();
+
+	//--- setup the world fog
+	$world.entity_fade_dist( 12000 );
+	$world.farplane_color ( '0.1 0.11 0.1' );
+	$world.farplane ( 3250 );
+	$world.farplane_cull( 1 );
+	$world.weather( "rain", 200 );
+	
+	//--- setup the sky
+	$starDome.hide();
+	
+	//--- remove the flyby shuttle
+	$shuttleFlyBy_Body.remove();
+	$shuttleFlyBy_Nacelle.remove();
+	$shuttleFlyBy_FX.remove();
+	$shuttleFlyBy_Door.remove();
+
+	//--- show the crashed shuttle
+	$crashedShuttle.show();
+	$crashedShuttle0.show();
+	$crashedShuttle1.show();
+	$crashedShuttle2.show();
+	$crashedShuttle3.show();
+	$crashedShuttle4.show();
+	$crashedShuttle5.show();
+	$crashedShuttle6.show();
+	$crashedShuttle7.show();
+	$crashedShuttle8.show();
+	$crashedShuttle9.show();
+	$crashedShuttleFX.show();
+	$crashedShuttleNacelle.show();
+	$crashedShuttleNacelleFX.show();	
+	wait( 1 );
+	
+	//--- release the cinematic
+	globalCoop_cin_end();
+	
+	if(cvar_bool_multiplayer)
+	{
+		globalCoop_player_warpToSpawnOriginAll();
+		spawn("trigger_once","thread","coop_waitForTeam","origin","232 3760 10","targetname","coop_triggerLevelEnd");
+		wait(.2);
+		$coop_triggerLevelEnd.setsize('-128 -128 -64','128 128 64');
+		
+		thread globalCoop_class_setup("Medic",'10659 -8732 -750');
+		thread globalCoop_class_setup("HeavyWeapons",'10583 -8695 -750');
+		globalCoop_class_setup("Technician",'10530 -8655 -750');	
+		
+		thread globalCoop_level_moveToPos($coop_class_MedicModel,'10530 -8655 -750');
+		thread globalCoop_level_moveToPos($coop_class_HeavyWeaponsModel,'10659 -8732 -750');//-750
+		thread globalCoop_level_moveToPos($coop_class_TechnicianModel,'10583 -8695 -750');
+	}
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+	wait( .3 );
+	//--- set the music
+	music( "normal" );
+}
+

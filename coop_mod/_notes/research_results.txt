@@ -1,0 +1,309 @@
+M	5e8
+C	5e8
+BB	6e8
+S	4e13
+W	3e6
+lms 2e3
+
+-	skill resets to 1 in Multiplayer, reason unknown
+-	new cvars will not be saved if the client does not also
+	change a default cvar or applay a bind (bind j say j).
+	Once a cvar is sucessfully stored in teh config (seta)
+	then it will be saved and remembred upon chnage, even
+	when there is no additional default command or bind
+	command applied.
+-	Tricorder Puzzles do not work from Singleplayer, they
+	modulate only for client *0 if another player modulates
+	client *0 will see the progressbar
+-	g_eventlimit can be used to run more script commands
+	useful in multiplayer for coop, (stability issues - unknown)
+-	Using flusui disables some ablities of the menus,
+	like cliking outside teh actual ui area will make
+	the mouse louse focus on the menu, gamefocus will be set
+-	Inputfields and Dropdown, checkbox elements do not work
+	right if the menu they are with is using noresize
+-	Disable actor on use (context dialog) .nouse() does not work
+	use .setactorflag("cannotuse" , 1.0 ) instead
+	weaponviewmodel( String filename )
+-	TIKIS take their setup data from pak0.pk3/global/gameplay.gpf
+-	Weapons take their damage info from pak20.pk3/models/weapons/weapondata.tik
+	and projectiledata.tik
+-	Holstred Weapons (Entities) stay at the location they where holstred at
+-	info_player_deathmatch Spawnpoints can not be moved like scriptobjects,
+	with ORIGIN you can relocate all script accessable Objects.
+	$targetname.origin('0 0 0');
+-	$lift01.targetName( "0" );//this will crash the engine...don't change targetnames on func_ objects :)
+-	Chrash the server when the entity does not exist - trigger( "$entity" );
+-	Chrashes on Linux Server
+	- $player.loadobjectives(string objectiveToLoad);
+	- $player.setobjectiveshow( String name, Boolean show );
+	- $player.setobjectivecomplete( String name, Boolean complete );
+	- $player.setobjectivefailed( String name, Boolean failed );
+-	Chrashes in Multiplayer
+	- $munro.playdialog( "localization/sound/dialog/m6l1/munro_ready2.mp3", 1, 20000, 0 );
+	- waitfordialog($chell);
+	- cinematic();
+	- noncinematic();
+	- cuecamera($cam1);
+	- cueplayer();
+	- $cam1.fov(float);
+	- $cam1.follow($path);
+	- $cam1.follow($path,$watchMe);
+	- $cam1.watch($movingobject);
+	- CLASS: trigger_callVolume
+-	Does not work at all, needs to be written unlike - if(returnBool() && returnBool2()){...}
+	- It works like this: if(returnBool() == 1 && returnBool2() == 1){...}
+-	actorToAnimate.doesVarExist( "actorToRandomlyUseTricorder" )
+-	Context dialog //Lines commented out because our game is too big, and we're blowing out MAX_SOUNDS in SV_FindIndex ();
+-	ontrigger( String label )
+    Sets what label to jump to and process script at when triggered. 
+
+	
+	
+	
+	
+"waitForDeath",
+EV_SCRIPTONLY,
+"s",
+"name",
+"Wait for death."
+void CThread::EventWaitForDeath( Event *ev )
+{
+doneProcessing = true;
+
+ClearWaitFor();
+waitingForDeath = ev->GetString(1);
+if ( !waitingForDeath.length() )
+{
+ev->Error( "Null name" );
+return;
+}
+
+DoMove();
+}
+-	
+
+
+void Actor::PlayDialog( Sentient *user, float volume, float min_dist, const char *dialog_name, const char *state_name, qboolean headDisplay , bool useTalk , bool important )
+{
+	str real_dialog;
+	char *morph_target_name;
+	const char *dialogAnim;
+	str dialog_anim;		
+	int frame_number;
+	int index;
+	int morph_channel;
+	float dialog_length;		
+	float morph_time;	
+	float amplitude;
+	Event *new_event;
+	bool changedAnim;
+	
+	//First, if we are playing dialog, check if our new dialog is important
+	if ( GetActorFlag( ACTOR_FLAG_DIALOG_PLAYING ) && !important )
+		return;
+	
+	//If we get here, then our dialog IS important, so let's check again if we're playing
+	// dialog... If so, then we need to stop our current dialog.
+	if ( GetActorFlag( ACTOR_FLAG_DIALOG_PLAYING ) )
+		StopDialog();
+
+	SetActorFlag( ACTOR_FLAG_USING_HUD,	false );
+
+	if ( dialog_name )
+		real_dialog = dialog_name;
+	else
+		real_dialog = FindDialog( user , DIALOG_TYPE_NORMAL );
+	
+	if ( !real_dialog.length())
+		return;	
+
+	// localize the selected dialog filename
+	char localizedDialogName[MAX_QPATH];
+	gi.LocalizeFilePath( real_dialog, localizedDialogName );
+	
+	//Find the Anim to go along with the dialog, if there is one
+	dialogAnim = gi.Alias_FindSpecificAnim( edict->s.modelindex , localizedDialogName );
+	
+	if(dialogAnim)
+		dialog_anim = dialogAnim;
+	
+	if ( dialog_anim.length() > 0 )
+	{
+		if (gi.Alias_CheckLoopAnim( edict->s.modelindex, localizedDialogName ))
+			SetAnim(dialog_anim);			
+		else
+			SetAnim(dialog_anim, EV_Actor_DialogAnimDone );
+	}
+	
+	
+	Sound( str( localizedDialogName ), CHAN_DIALOG, volume, min_dist );
+	SetActorFlag( ACTOR_FLAG_DIALOG_PLAYING, true );
+	
+	dialog_length = gi.SoundLength( localizedDialogName );
+	
+	dialog_done_time = level.time + dialog_length;
+	
+	// Add dialog to player
+	
+	Player *player = GetPlayer( 0 );
+	
+	if ( player )
+	{
+		if ( headDisplay )
+			{
+			player->SetupDialog( this, localizedDialogName );
+			SetActorFlag( ACTOR_FLAG_USING_HUD,	true );
+			}
+		else
+			player->SetupDialog( NULL, localizedDialogName );
+	}
+	
+	if ( dialog_length > 0.0f )
+	{
+		Event *headTwitchEvent;
+		
+		if ( state_name != NULL && currentState )
+		{
+			if ( ( mode == ACTOR_MODE_SCRIPT ) || ( mode == ACTOR_MODE_IDLE ) )
+			{
+				dialog_old_state_name = currentState->getName();
+				dialog_state_name = state_name;
+				
+				Event *idle_event = new Event( EV_Actor_Idle );
+				idle_event->AddString( state_name );
+				ProcessEvent( idle_event );
+			}
+		}
+		
+		index = -1;
+		changedAnim = false;
+		
+		// Start head twitch now
+		
+		CancelEventsOfType( EV_Actor_SetHeadTwitch );
+
+		headTwitchEvent = new Event( EV_Actor_SetHeadTwitch );
+		headTwitchEvent->AddInteger( true );
+		ProcessEvent( headTwitchEvent );
+		
+		// Stop head twitch when dialog is done
+		
+		headTwitchEvent = new Event( EV_Actor_SetHeadTwitch );
+		headTwitchEvent->AddInteger( false );
+		PostEvent( headTwitchEvent, dialog_length );
+		
+		while( 1 )
+		{
+			morph_target_name = (char *)gi.GetNextMorphTarget( localizedDialogName, &index, &frame_number, &amplitude );
+			
+			if ( index == -1 || !morph_target_name )
+				break;
+
+			// Determine the time we should start this morph
+				
+			morph_time = frame_number * ( 1.0f / LIP_SYNC_HZ );
+			
+			// Start 2 frames early
+			
+			morph_time -= 2.0f * FRAMETIME;
+			
+			if ( morph_time < 0.0f )
+				morph_time = 0.0f;
+			
+			if ( strnicmp( morph_target_name, "emt_", 4 ) == 0 )
+			{
+				// Set the emotion
+
+				new_event = new Event( EV_Actor_SetEmotion );
+				new_event->AddString( morph_target_name + 4 );
+				PostEvent( new_event, morph_time );
+			}
+			else if ( strnicmp( morph_target_name, "anm_", 4 ) == 0 )
+			{
+				// Make sure we don't screw things up if we're in TALK_MODE
+				if (mode != ACTOR_MODE_TALK  )
+				{
+					// Change the animation
+					new_event = new Event( EV_Actor_Anim );
+					new_event->AddString( morph_target_name + 4 );
+					PostEvent( new_event, morph_time );
+					SetActorFlag(ACTOR_FLAG_PLAYING_DIALOG_ANIM , true );
+
+					changedAnim = true;
+				}
+			}
+			else
+			{
+				morph_channel = GetMorphChannel( morph_target_name );
+				
+				new_event = new Event ( EV_Morph );
+				
+				new_event->AddString( morph_target_name );
+				
+				if ( morph_channel == MORPH_CHAN_MOUTH )
+					amplitude *= _dialogMorphMult;
+				
+				new_event->AddFloat( amplitude );
+				
+				if ( morph_channel == MORPH_CHAN_EYES || morph_channel == MORPH_CHAN_LEFT_LID || morph_channel == MORPH_CHAN_RIGHT_LID )
+					new_event->AddFloat( 0.10f );
+				else if ( morph_channel == MORPH_CHAN_MOUTH )
+					new_event->AddFloat( 0.15f );
+				else
+					new_event->AddFloat( 0.25f );
+				
+				PostEvent( new_event, morph_time, EVENT_DIALOG_ANIM );
+			}
+		}
+		
+		// Make sure the mouth shuts after dialog
+		
+		new_event = new Event ( EV_Morph );
+		
+		new_event->AddString( "morph_mouth_base" );
+		new_event->AddFloat( 0.0f );
+		new_event->AddFloat( 0.10f );
+		
+		PostEvent( new_event, dialog_length, EVENT_DIALOG_ANIM );
+		
+		// Send the dialog done event
+		
+		PostEvent( EV_Actor_DialogDone, dialog_length );			
+		
+		if ( emotion != "none" )
+		{
+			new_event = new Event( EV_Actor_SetEmotion );
+			new_event->AddString( emotion.c_str() );
+			PostEvent( new_event, dialog_length );
+		}
+		
+		// Reset the anim if it has changed
+		
+		if ( changedAnim )
+		{
+			new_event = new Event( EV_Actor_Anim );
+			new_event->AddString( "idle" );
+			PostEvent( new_event, dialog_length );
+
+			Event *clearFlag;
+			clearFlag = new Event ( EV_Actor_SetActorFlag );
+			clearFlag->AddString( "playingdialoganim" );
+			clearFlag->AddInteger( 0 );
+			PostEvent( clearFlag , dialog_length );			
+		}
+		
+	}
+	else
+	{
+		SetActorFlag( ACTOR_FLAG_DIALOG_PLAYING, false );
+		gi.WDPrintf( "Lip file not found for dialog %s\n", localizedDialogName );
+	}
+
+	if(useTalk)
+		StartTalkBehavior(user);
+}
+	
+// configstrings
+// 06A0D42E 8A 9C 3E 14 00 02 00 mov bl,byte ptr [esi+edi+20014h]//M10 MAIN -FOR-
+// 004B4CF7 D9 44 17 30 fld dword ptr [edi+edx+30h] //g_gametype 2 + [> 1CL]

@@ -1,0 +1,150 @@
+//-----------------------------------------------
+// Cinematic Name: c:\projects\ef2\ef2\base\cins\m9l1_omagb-temp.cin
+// Export Version: 1
+// Export Date:    Fri Feb 28 14:23:45 2003
+//-----------------------------------------------
+//removed camera freeze command
+
+Origins
+{
+    Origin
+    {
+          name          "m9l1_omagb"
+          origin         0.000000 0.000000 0.000000
+          yaw            0.000000
+    }
+}
+
+
+Actors
+{
+    Actor
+    {
+        name          "armKrindo"
+        tiki          "char/krindo-noweapon.tik"
+        anim          "cin-m9l1_omagb_krindo"
+        moveanim      "walk"
+        alwaysSpawn    false
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  FREEZE
+        origin         889.827515 796.045959 7.666627
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "armMunro"
+        tiki          "char/hazardteam_munro.tik"
+        anim          "cin-m9l1_omagb_munro"
+        moveanim      "walk"
+        alwaysSpawn    false
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  FREEZE
+        origin         863.969360 755.743774 6.494221
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "armOmag"
+        tiki          "char/ferengi_oolpax.tik"
+        anim          "cin-m9l1_omagb_omag"
+        moveanim      "walk"
+        alwaysSpawn    false
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  FREEZE
+        origin         834.259521 833.327454 8.202217
+        yaw            -90.000000
+    }
+}
+
+
+Cameras
+{
+    Camera
+    {
+        name         "cam2-m9l1b-omag"
+        camfile      "cam2-m9l1b-omag"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+		selfRemoving   false
+    }
+    Camera
+    {
+        name         "cam3-m9l1b-omag"
+        camfile      "cam3-m9l1b-omag"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+		selfRemoving   false
+    }
+    Cut
+    {
+        toCamera     "cam3-m9l1b-omag"
+        frame         0
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam2-m9l1b-omag"
+        frame         35
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m9l1b-omag"
+        frame         88
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam2-m9l1b-omag"
+        frame         151
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m9l1b-omag"
+        frame         235
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam2-m9l1b-omag"
+        frame         277
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m9l1b-omag"
+        frame         358
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+}

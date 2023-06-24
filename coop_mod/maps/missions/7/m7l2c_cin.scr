@@ -1,0 +1,175 @@
+void levelEnding();
+void levelEnding_ShuttleFlyBy();
+void levelEnding_skipThread();
+void levelEnding_ShuttleFlyBy_ScaleShuttleUp();
+void levelEnding_ShuttleFlyBy_ScaleShuttleDown();
+
+//---------------------
+// Function: levelEnding
+// Comments:
+// ends the level
+//---------------------
+void levelEnding()
+{
+//set objective
+	thread globalCoop_objectives_update("incomplete",4,0);
+	globalCoop_objectives_update("incomplete",5,1);
+//Transport out all players
+	globalCoop_player_displayEffectAll("TransportOut","Federation");
+	wait(2);
+	thread globalCoop_level_remove($sydney);//dialog
+	thread globalCoop_level_remove($Munro);//dialog
+
+	//--- start cinematic commands
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	//--- stop the random explosions and lightning functions
+	killthread( "randomExplosionSound" );
+	killthread( "randomLightningFlash" );
+
+	//--- turn off the fog and the rain
+	$world.entity_fade_dist( 50000 );
+	$world.farplane_cull( 0 );
+	$world.farplane_color ( '.5 .5 .5' );
+	$world.farplane ( 0 );
+	$world.weather( "rain", 0 );
+
+	spawn( "Camera", "targetname", "cam1");
+	cinematicArm_Shuttle = createCinematic( "m7-end" );
+    cinematicArm_Shuttle.setEndThread( "levelEnding_ShuttleFlyBy" );
+	cam.load( "m7l2c_FlyBy_Shuttle" );
+	cam.load( "m7l2c_FlyBy_Shot1" );
+
+	//--- setup the skybox
+	$lightning1.hide();
+	$lightning2.hide();
+	$lightning3.hide();
+	$lightning4.hide();
+	$lightning5.hide();
+	$lightning6.hide();
+	$lightning7.hide();
+	$lightning8.hide();
+	$lightning9.hide();
+	$explosionFlash1.hide();
+	$explosionFlash2.hide();
+	$explosionFlash3.hide();
+	$explosionFlash4.hide();
+	$explosionFlash5.hide();
+	$explosionFlash6.hide();
+	$skyGround.hide();
+	$starDome.show();
+	wait( .5 );
+
+	//--- set the skipthread
+	globalCoop_cin_skipThread( "levelEnding_skipThread");
+	allowmusicducking ( 0 );
+	music ( "aux4" );
+
+	//--- launch the armature
+	cinematicArm_Shuttle.beginCinematic( "m7-end" );
+}
+
+//---------------------
+// Function: levelEnding_ShuttleFlyBy
+// Comments: cinematic showing the shuttle flying away from the planet
+//---------------------
+void levelEnding_ShuttleFlyBy()
+{
+	globalCoop_main_camFadeOut(.5);
+	wait( .5 );
+
+	//--- set camera
+	globalCoop_cin_fov($cam1, 55 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_follow( $cam1 , $m7l2c_FlyBy_Shot1 );
+	$shuttleSpace_Origin.followPath( $m7l2c_FlyBy_Shuttle );
+	thread levelEnding_ShuttleFlyBy_ScaleShuttleUp();	
+	wait( .2 );
+	globalCoop_cin_cuecamera( $cam1 );
+	
+	allowmusicducking ( 0 );
+	music ( "aux6" );
+	
+	//--- fade in
+	globalCoop_main_camFadeIn(1);
+	wait( 5 );
+	
+	$shuttleSpace_Origin.playsound( "sound/vehicles/shuttlecraft/shuttle_flyby_fast.wav", 10 , 2 ,10000 );
+	wait ( 3 );
+
+	killthread( "levelEnding_ShuttleFlyBy_ScaleShuttleUp" );
+	thread levelEnding_ShuttleFlyBy_ScaleShuttleDown();
+	wait( 3.5 );
+
+	//--- end the level
+	thread levelEnding_skipThread();
+}
+
+
+//---------------------
+// Function: levelEnding_skipThread
+// Comments:
+// skipthread for the ending of the level cinematic
+//---------------------
+void levelEnding_skipThread()
+{
+	skipthread( "null" );
+	killthread( "levelEnding" );
+	killthread( "levelEnding_ShuttleFlyBy" );
+	killthread( "levelEnding_ShuttleFlyBy_ScaleShuttleUp" );
+	killthread( "levelEnding_ShuttleFlyBy_ScaleShuttleDown" );
+
+	globalCoop_cin_end();
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	//--- end the armature
+	cinematicArm_Shuttle.endCinematic( FALSE );
+	globalCoop_main_camFadeOut(.1);
+
+	if(!cvar_bool_multiplayer){//singleplayer
+		spawn ( "trigger_changelevel", "targetname", "trigger_endlevel", "map", "m8l1a-drull_ruins2" );
+		wait ( .5 );
+		globalCoop_level_triggerEntity($trigger_endlevel);
+	}
+	else{
+		wait(1);
+		coop_endLevel();
+	}
+}
+
+//---------------------
+// 	levelEnding_ShuttleFlyBy_ScaleShuttleUp
+// 	scale the shuttle up on the first part of it's path
+//---------------------
+void levelEnding_ShuttleFlyBy_ScaleShuttleUp()
+{
+	float i;
+
+	for( i = .01 ; i <= .15 ; i += .0005 )
+	{
+    	$shuttleSpace_Body.scale( i );
+    	$shuttleSpace_Door.scale( i );
+    	wait( .05 );
+    }
+}
+
+//---------------------
+// 	cinematicIntro_SpaceFlyIn_ScaleShuttleDown
+// 	scale the shuttle down on the last part of it's path
+//---------------------
+void levelEnding_ShuttleFlyBy_ScaleShuttleDown()
+{
+	float i;
+
+	for( i = .095 ; i >= .01 ; i -= .0007 )
+	{
+    	$shuttleSpace_Body.scale( i );
+    	$shuttleSpace_Door.scale( i );
+    	wait( .05 );
+    }
+}
+
+

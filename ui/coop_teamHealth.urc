@@ -1,0 +1,517 @@
+menu "coop_teamHealth" 256 144 NONE 0
+bgcolor 0 0 0 0
+align right top
+nomouse
+noresize 1
+noescape 0
+depth 0.35
+gamefocus
+fadein 0.5
+
+resource
+Label
+{
+rect 0 80 256 64
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 0.50 0.50 0.50 0.00
+borderstyle "NONE"
+shader coop_hud_teamhealth_bg
+}
+
+resource
+Label
+{
+rect 24 83 14 14
+fgcolor 1.00 1.00 1.00 0.7
+bgcolor 0.50 0.50 0.50 0.00
+borderstyle "NONE"
+title "1"
+font serpentinemedium-12
+horizontaljustify center
+verticaljustify center
+cvarvisibility coop_1 0 !=
+}
+resource
+Label
+{
+linkcvar coop_1
+rect 38 81 100 13
+fgcolor 0 0 0 1
+bgcolor .9 .1 .1 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_1 0 !=
+}
+resource
+Label
+{
+linkcvar coop_1
+rect 37 80 100 13
+fgcolor 1 1 1 1
+bgcolor 0 0 0 0
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_1 0 !=
+}
+resource
+Label
+{
+linkcvar coop_1
+rect 38 81 100 13
+fgcolor 0 0 0 1
+bgcolor .8 .8 0 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_1 50 >=
+}
+resource
+Label
+{
+linkcvar coop_1
+rect 38 81 100 13
+fgcolor 1 1 1 1
+bgcolor 0 .3 .3 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_1 100 >=
+}
+
+resource
+Label
+{
+rect 24 95 14 14
+fgcolor 1.00 1.00 1.00 0.7
+bgcolor 0.50 0.50 0.50 0.00
+borderstyle "NONE"
+title "2"
+font serpentinemedium-12
+horizontaljustify center
+verticaljustify center
+cvarvisibility coop_2 0 !=
+}
+resource
+Label
+{
+linkcvar coop_2
+rect 38 96 100 13
+fgcolor 0 0 0 1
+bgcolor .9 .1 .1 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_2 1 >=
+}
+resource
+Label
+{
+linkcvar coop_2
+rect 37 95 100 13
+fgcolor 1 1 1 1
+bgcolor 0 0 0 0
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_2 1 >=
+}
+resource
+Label
+{
+linkcvar coop_2
+rect 38 96 100 13
+fgcolor 0 0 0 1
+bgcolor .8 .8 0 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_2 50 >=
+}
+resource
+Label
+{
+linkcvar coop_2
+rect 38 96 100 13
+fgcolor 1 1 1 1
+bgcolor 0 .3 .3 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_2 100 >=
+}
+
+resource
+Label
+{
+rect 24 110 14 14
+fgcolor 1.00 1.00 1.00 0.7
+bgcolor 0.50 0.50 0.50 0.00
+borderstyle "NONE"
+title "3"
+font serpentinemedium-12
+horizontaljustify center
+verticaljustify center
+cvarvisibility coop_3 0 !=
+}
+resource
+Label
+{
+linkcvar coop_3
+rect 38 111 100 13
+fgcolor 0 0 0 1
+bgcolor .9 .1 .1 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_3 1 >=
+}
+resource
+Label
+{
+linkcvar coop_3
+rect 37 110 100 13
+fgcolor 1 1 1 1
+bgcolor 0 0 0 0
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_3 1 >=
+}
+resource
+Label
+{
+linkcvar coop_3
+rect 38 111 100 13
+fgcolor 0 0 0 1
+bgcolor .8 .8 0 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_3 50 >=
+}
+resource
+Label
+{
+linkcvar coop_3
+rect 38 111 100 13
+fgcolor 1 1 1 1
+bgcolor 0 .3 .3 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_3 100 >=
+}
+
+resource
+Label
+{
+rect 24 124 14 14
+fgcolor 1.00 1.00 1.00 0.7
+bgcolor 0.50 0.50 0.50 0.00
+borderstyle "NONE"
+title "4"
+font serpentinemedium-12
+horizontaljustify center
+verticaljustify center
+cvarvisibility coop_4 0 !=
+}
+resource
+Label
+{
+linkcvar coop_4
+rect 38 126 100 13
+fgcolor 0 0 0 1
+bgcolor .9 .1 .1 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_4 1 >=
+}
+resource
+Label
+{
+linkcvar coop_4
+rect 37 125 100 13
+fgcolor 1 1 1 1
+bgcolor 0 0 0 0
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_4 1 >=
+}
+resource
+Label
+{
+linkcvar coop_4
+rect 38 126 100 13
+fgcolor 0 0 0 1
+bgcolor .8 .8 0 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_4 50 >=
+}
+resource
+Label
+{
+linkcvar coop_4
+rect 38 126 100 13
+fgcolor 1 1 1 1
+bgcolor 0 .3 .3 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_4 100 >=
+}
+
+resource
+Label
+{
+rect 142 83 14 14
+fgcolor 1.00 1.00 1.00 0.7
+bgcolor 0.50 0.50 0.50 0.00
+borderstyle "NONE"
+title "5"
+font serpentinemedium-12
+horizontaljustify center
+verticaljustify center
+cvarvisibility coop_5 0 !=
+}
+resource
+Label
+{
+linkcvar coop_5
+rect 156 81 100 13
+fgcolor 0 0 0 1
+bgcolor .9 .1 .1 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_5 1 >=
+}
+resource
+Label
+{
+linkcvar coop_5
+rect 155 80 100 13
+fgcolor 1 1 1 1
+bgcolor 0 0 0 0
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_5 1 >=
+}
+resource
+Label
+{
+linkcvar coop_5
+rect 156 81 100 13
+fgcolor 0 0 0 1
+bgcolor .8 .8 0 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_5 50 >=
+}
+resource
+Label
+{
+linkcvar coop_5
+rect 156 81 100 13
+fgcolor 1 1 1 1
+bgcolor 0 .3 .3 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_5 100 >=
+}
+
+resource
+Label
+{
+rect 142 95 14 14
+fgcolor 1.00 1.00 1.00 0.7
+bgcolor 0.50 0.50 0.50 0.00
+borderstyle "NONE"
+title "6"
+font serpentinemedium-12
+horizontaljustify center
+verticaljustify center
+cvarvisibility coop_6 0 !=
+}
+resource
+Label
+{
+linkcvar coop_6
+rect 156 96 100 13
+fgcolor 0 0 0 1
+bgcolor .9 .1 .1 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_6 1 >=
+}
+resource
+Label
+{
+linkcvar coop_6
+rect 155 95 100 13
+fgcolor 1 1 1 1
+bgcolor 0 0 0 0
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_6 1 >=
+}
+resource
+Label
+{
+linkcvar coop_6
+rect 156 96 100 13
+fgcolor 0 0 0 1
+bgcolor .8 .8 0 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_6 50 >=
+}
+resource
+Label
+{
+linkcvar coop_6
+rect 156 96 100 13
+fgcolor 1 1 1 1
+bgcolor 0 .3 .3 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_6 100 >=
+}
+
+resource
+Label
+{
+rect 142 110 14 14
+fgcolor 1.00 1.00 1.00 0.7
+bgcolor 0.50 0.50 0.50 0.00
+borderstyle "NONE"
+title "7"
+font serpentinemedium-12
+horizontaljustify center
+verticaljustify center
+cvarvisibility coop_7 0 !=
+}
+resource
+Label
+{
+linkcvar coop_7
+rect 156 111 100 13
+fgcolor 0 0 0 1
+bgcolor .9 .1 .1 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_7 1 >=
+}
+resource
+Label
+{
+linkcvar coop_7
+rect 155 110 100 13
+fgcolor 1 1 1 1
+bgcolor 0 0 0 0
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_7 1 >=
+}
+resource
+Label
+{
+linkcvar coop_7
+rect 156 111 100 13
+fgcolor 0 0 0 1
+bgcolor .8 .8 0 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_7 50 >=
+}
+resource
+Label
+{
+linkcvar coop_7
+rect 156 111 100 13
+fgcolor 1 1 1 1
+bgcolor 0 .3 .3 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_7 100 >=
+}
+
+resource
+Label
+{
+rect 142 124 14 14
+fgcolor 1.00 1.00 1.00 0.7
+bgcolor 0.50 0.50 0.50 0.00
+borderstyle "NONE"
+title "8"
+font serpentinemedium-12
+horizontaljustify center
+verticaljustify center
+cvarvisibility coop_8 0 !=
+}
+resource
+Label
+{
+linkcvar coop_8
+rect 156 126 100 13
+fgcolor 0 0 0 1
+bgcolor .9 .1 .1 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_8 1 >=
+}
+resource
+Label
+{
+linkcvar coop_8
+rect 155 125 100 13
+fgcolor 1 1 1 1
+bgcolor 0 0 0 0
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_8 1 >=
+}
+resource
+Label
+{
+linkcvar coop_8
+rect 156 126 100 13
+fgcolor 0 0 0 1
+bgcolor .8 .8 0 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_8 50 >=
+}
+resource
+Label
+{
+linkcvar coop_8
+rect 156 126 100 13
+fgcolor 1 1 1 1
+bgcolor 0 .3 .3 1
+font serpentinemedium-12
+horizontaljustify center
+borderstyle "NONE"
+cvarvisibility coop_8 100 >=
+}
+
+end.

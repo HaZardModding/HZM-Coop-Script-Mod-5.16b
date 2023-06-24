@@ -1,0 +1,32 @@
+//moved from general MP, since deathmatch with 500+ points is very uncommon
+cache localization/sound/dialog/dm/comp_500pointsleft.mp3
+
+//cache sysimg/icons/mp/diffusion_bomber.img
+//cache sysimg/icons/mp/cp_alpha_red.img
+//cache sysimg/icons/mp/cp_alpha_blue.img
+//cache sysimg/icons/mp/team_red.img
+//cache sysimg/icons/mp/team_blue.img
+//cache sysimg/icons/mp/ctf_oneFlagInBase.img
+//cache sysimg/icons/mp/ctf_oneFlagMissing.img
+
+cache localization/sound/dialog/dm/comp_bombtakenred.mp3
+cache localization/sound/dialog/dm/comp_bombtakenblue.mp3
+cache localization/sound/dialog/dm/comp_bombbase.mp3
+cache localization/sound/dialog/dm/comp_bomba.mp3
+cache localization/sound/dialog/dm/comp_bombdisarmed.mp3
+cache localization/sound/dialog/dm/comp_bomberKilled.mp3
+cache localization/sound/dialog/dm/comp_bomberguarded.mp3
+cache localization/sound/dialog/dm/comp_baseguarded.mp3
+cache localization/sound/dialog/dm/comp_bombguarded.mp3
+cache localization/sound/dialog/dm/comp_bomber.mp3
+cache localization/sound/dialog/dm/comp_bombtime.mp3
+cache localization/sound/dialog/dm/comp_bombtime15.mp3
+cache localization/sound/dialog/dm/comp_bombtime30.mp3
+cache localization/sound/dialog/dm/comp_bombexplodered.mp3
+cache localization/sound/dialog/dm/comp_bombexplodeblue.mp3
+
+//cache models/weapons/worldmodel-tricorder.tik
+//cache models/weapons/worldmodel-compressionrifle.tik
+cache models/item/mp_diffusion_bomb.tik
+cache models/fx/fx-explosion-bomb.tik
+

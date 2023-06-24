@@ -1,0 +1,938 @@
+init
+{
+	server
+		{
+		classname Actor
+		}
+}
+
+animations models/char/base-male2
+	{
+
+//////////////////cin m1 beamin anims/////////////////////////////////////////////////////////////////////
+	cin-m1beamin-idle		cin-m1beamin-idle.ska
+	cin-m1beamin-look1		cin-m1beamin-look1.ska				
+	cin-m1beamin-look2		cin-m1beamin-look2.ska
+	cin-m1beamin-look3		cin-m1beamin-look3.ska
+	cin-m1beamin-look4		cin-m1beamin-look4.ska
+	cin-m1beamin-holster		cin-m1beamin-holster.ska
+	
+	cin-m1_chang-raise		cin-m1_chang-raise.ska
+	cin-m1_chang-idle		cin-m1_chang-idle.ska
+	cin-m1_chell-raise		cin-m1_chell-raise.ska
+	cin-m1_chell-idle		cin-m1_chell-idle.ska
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m12-end-2nd
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m12-end-2nd-chell				cin-m12-end-2nd-chell.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+		}
+	}
+cin-m12-end-2nd-chang				cin-m12-end-2nd-chang.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			0 giveactorweapon "actorweapons/fed-datapad.tik"
+			0 useactorweapon "EnterpriseDatapad"
+		}
+	}
+cin-m12-end-2nd-kourban			cin-m12-end-2nd-kourban.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m12-end
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m12-end-chell				cin-m12-end-chell.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+		}
+	}
+cin-m12-end-chang				cin-m12-end-chang.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			0 giveactorweapon "actorweapons/fed-datapad.tik"
+			0 useactorweapon "EnterpriseDatapad"
+		}
+	}
+cin-m12-end-kourban			cin-m12-end-kourban.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+		}
+	}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m7-end
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m7-end-korban cin-m7-end-korban.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+		}
+	}
+	
+	cin-m7-end-chang cin-m7-end-chang.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m10-l2b-rom
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m10-rom-gonz		cin-m10-rom-gonz.ska
+	{
+		server
+		{
+			entry morph MORPH_DOWN
+			0 useactorweapon "none"
+			0 rendereffects +shadowFromBip01
+			32 playDialog "loc/eng/sound/dialog/m10l2/gonz_wasting.mp3" 1, 10000, 0
+			32 simpleplayDialog "loc/deu/sound/dialog/m10l2/gonz_wasting.mp3" 1, 10000, 0
+			
+			219 playDialog "loc/eng/sound/dialog/m10l2/gonz_betrayed.mp3" 1, 10000, 0
+			219 simpleplayDialog "loc/deu/sound/dialog/m10l2/gonz_betrayed.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              igm4_protect
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-igm4_protect_chell cin-igm4_protect_chell.ska
+	{
+		server
+		{
+			303 playDialog "loc/eng/sound/dialog/ent_m4/chell_fromwhat.mp3" 1, 10000, 0
+			303 simpleplayDialog "loc/deu/sound/dialog/ent_m4/chell_fromwhat.mp3" 1, 10000, 0
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m8-shuttlecrash lighting
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	cin-m8-shuttlecrash-chang	cin-m8-shuttlecrash-chang.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			290 playDialog "loc/eng/sound/dialog/m8l1/chang_overcast.mp3" 1, 10000, 0
+			290 simpleplayDialog "loc/deu/sound/dialog/m8l1/chang_overcast.mp3" 1, 10000, 0
+		}
+	}
+
+
+	cin-m8-shuttlecrash-kourban	cin-m8-shuttlecrash-kourban.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			230 playDialog "loc/eng/sound/dialog/m8l1/korban_daydie.mp3" 1, 10000, 0
+			230 simpleplayDialog "loc/deu/sound/dialog/m8l1/korban_daydie.mp3" 1, 10000, 0
+			
+			323 playDialog "loc/eng/sound/dialog/m8l1/korban_rrr.mp3" 1, 10000, 0
+			323 simpleplayDialog "loc/deu/sound/dialog/m8l1/korban_rrr.mp3" 1, 10000, 0
+		}
+	}
+	
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m6l0-attack
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m6l0-chang cin-m6l0-chang.ska
+cin-m6l0-kourban cin-m6l0-kourban.ska
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m1l1b_find
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m1l1b_find_chell cin-m1l1b_find_chell.ska
+	{
+		server
+		{
+			78 playDialog "loc/eng/sound/dialog/borg01/tuvok_wecannot.mp3" 1, 10000, 0
+			78 simpleplayDialog "loc/deu/sound/dialog/borg01/tuvok_wecannot.mp3" 1, 10000, 0
+			
+			303 playDialog "loc/eng/sound/dialog/borg01/chell_changnearby.mp3" 1, 10000, 0
+			303 simpleplayDialog "loc/deu/sound/dialog/borg01/chell_changnearby.mp3" 1, 10000, 0
+			
+			398 playDialog "loc/eng/sound/dialog/borg01/telsia_stilllooking.mp3" 1, 10000, 0
+			398 simpleplayDialog "loc/deu/sound/dialog/borg01/telsia_stilllooking.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m1l1b_chang
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m1l1b_chang_chell cin-m1l1b_chang_chell.ska
+	{
+		server
+		{
+			0 rendereffects +shadowFromBip01
+			0 useactorweapon "I-mod"
+			271 playDialog "loc/eng/sound/dialog/borg01/chell_flyinamber.mp3" 1, 10000, 0
+			271 simpleplayDialog "loc/deu/sound/dialog/borg01/chell_flyinamber.mp3" 1, 10000, 0
+			
+			525 playDialog "loc/eng/sound/dialog/borg01/chell_useimods.mp3" 1, 10000, 0
+			525 simpleplayDialog "loc/deu/sound/dialog/borg01/chell_useimods.mp3" 1, 10000, 0
+			
+			706 playDialog "sound/weapons/imod/imodfire.wav" 1, 10000, 0
+			722 playDialog "sound/weapons/imod/imodfire.wav" 1, 10000, 0
+		}
+	}
+
+	cin-m1l1b_chang_chang cin-m1l1b_chang_chang.ska
+	{
+		server
+		{
+
+			0 rendereffects +shadowFromBip01
+			0 useactorweapon "I-mod"
+			202 playDialog "loc/eng/sound/dialog/borg01/chang_theresvoy.mp3" 1, 10000, 0
+			202 simpleplayDialog "loc/deu/sound/dialog/borg01/chang_theresvoy.mp3" 1, 10000, 0
+			
+			502 playDialog "loc/eng/sound/dialog/borg01/chang_borgactive.mp3" 1, 10000, 0
+			502 simpleplayDialog "loc/deu/sound/dialog/borg01/chang_borgactive.mp3" 1, 10000, 0
+			
+			753 playDialog "loc/eng/sound/dialog/borg01/chang_helpmunro.mp3" 1, 10000, 0
+			753 simpleplayDialog "loc/deu/sound/dialog/borg01/chang_helpmunro.mp3" 1, 10000, 0
+			
+			776 displayeffect "TransportOut" "BorgNoAnim"
+			
+			589 playDialog "sound/weapons/imod/imodfire.wav" 1, 10000, 0
+			589 weaponanimon "fire1" "dual"
+			590 weaponanimon "idle" "dual"
+			
+			603 playDialog "sound/weapons/imod/imodfire.wav" 1, 10000, 0
+			603 weaponanimon "fire1" "dual"
+			604 weaponanimon "idle" "dual"
+			
+			622 playDialog "sound/weapons/imod/imodfire.wav" 1, 10000, 0
+			622 weaponanimon "fire1" "dual"
+			623 weaponanimon "idle" "dual"
+			
+		}
+		client
+		{
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m9l1_intro
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m9l1_intro_gonzo cin-m9l1_intro_gonzo.ska
+{
+		server
+		{
+			0 useactorweapon "none"
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m7m8_crash
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m7m8_crash_Korban cin-m7m8_crash_Korban.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			85 playDialog "loc/eng/sound/dialog/m8l1/korban_morethan.mp3" 1, 10000, 0
+			85 simpleplayDialog "loc/deu/sound/dialog/m8l1/korban_morethan.mp3" 1, 10000, 0
+			
+			892 playDialog "loc/eng/sound/dialog/m8l1/korban_takepoint.mp3" 1, 10000, 0
+			892 simpleplayDialog "loc/deu/sound/dialog/m8l1/korban_takepoint.mp3" 1, 10000, 0
+		}
+	}
+
+cin-m7m8_crash_Chang cin-m7m8_crash_Chang.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			175 playDialog "loc/eng/sound/dialog/m8l1/chang_finetoo.mp3" 1, 10000, 0
+			175 simpleplayDialog "loc/deu/sound/dialog/m8l1/chang_finetoo.mp3" 1, 10000, 0
+			
+			512 playDialog "loc/eng/sound/dialog/m8l1/chang_inter.mp3" 1, 10000, 0
+			512 simpleplayDialog "loc/deu/sound/dialog/m8l1/chang_inter.mp3" 1, 10000, 0
+			
+			578 playDialog "loc/eng/sound/dialog/m8l1/chang_guess.mp3" 1, 10000, 0
+			578 simpleplayDialog "loc/deu/sound/dialog/m8l1/chang_guess.mp3" 1, 10000, 0
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m11l1a_chelldeath
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m11l1a_chell_Korban cin-m11l1a_chell_Korban.ska
+	{
+		server
+		{
+			0 giveactorweapon "actorweapons/fed-compressionrifle-enhanced.tik"
+			1 useactorweapon "CompressionRifleEnhanced"
+			entry morph morph_lid-lshut 100 0.5
+			entry morph morph_lid-rshut 100 0.5
+			entry surface material3 +nodraw
+			entry blink 0
+			0 displayEffect TransportIn FederationNoAnim
+			534 weaponanimon "fire" "dual"
+			618 weaponanimon "idle" "dual"
+			
+			755 playDialog "loc/eng/sound/dialog/m11l1/korban_theypay.mp3" 1, 10000, 0
+			755 simpleplayDialog "loc/deu/sound/dialog/m11l1/korban_theypay.mp3" 1, 10000, 0
+		}
+	}
+
+
+	cin-m11l1a_chell_Chell cin-m11l1a_chell_Chell.ska
+	{
+		server
+		{
+			0 giveactorweapon "tricorder"
+			0 useactorweapon "tricorder"
+			entry morph morph_lid-lshut 100 0.5
+			entry morph morph_lid-rshut 100 0.5
+			entry surface material3 +nodraw
+			entry blink 0
+			0 displayEffect TransportIn FederationNoAnim
+			507 playDialog "loc/eng/sound/dialog/m11l1/chell_ohdear.mp3" 1, 10000, 0
+			507 simpleplayDialog "loc/deu/sound/dialog/m11l1/chell_ohdear.mp3" 1, 10000, 0
+			700 displayEffect TransportOut FederationNoAnim
+		}
+		client
+		{
+			
+			502 tagspawn "Bip01"
+				(
+				count 14
+				model compressionspike2.spr
+				color 0.4 1.0 0.3
+				angles crandom 180 crandom 180 crandom 180
+				alpha 0.675
+				life 0.35
+				avelocity crandom 225 crandom 225 crandom 225
+				scale 1.5
+				scalerate -2.25
+				fade
+				)
+		
+			502 tagspawn "Bip01"
+				(
+				count 8
+				model rom-bfg-saturation.spr
+				color 0.85 1.0 0.75
+				alpha 0.8
+				angles crandom 180 crandom 180 crandom 180
+				life 1.15
+				avelocity 0 0 crandom 225
+				randvel crandom 40 crandom 40 crandom 40
+				offset crandom 4 crandom 4 crandom 4
+				accel 0 0 45
+				scale 0.3
+				scalerate 0.9
+				fade
+				)
+		
+		      	502 tagspawn "Bip01"
+				(
+				count 26
+				model  models/fx/fx-debris-energy-blue-01.tik models/fx/fx-debris-energy-blue-02.tik
+				angles crandom 180 crandom 180 crandom 180
+				color 0 1.0 0.065
+				avelocity crandom 300 crandom 300 crandom 300
+				life 0.75
+				scale 0.25
+				scalerate -2.0
+				offset crandom 4 crandom 4 crandom 4
+				randvel crandomrange 50 350 crandomrange 50 350 randomrange -100 400
+				accel 0 0 -600
+				dofade 0.25 0 0
+				)
+		
+			502 tagspawn "Bip01"
+				(
+				model compressionspike3.spr
+				colorrange 0.25 1 0.5 1.0 0.675 0.425 1.25
+				count 45
+				randvel crandom 400 crandom 400 random 465
+				collision
+				bouncefactor 0.4
+				life randomrange 2.75 3.5
+				scale 0.08
+				accel 0 0 -725
+				scalerate -0.5
+				dofade 2.25 0 0
+				)
+	
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m11l1a_korbandeath
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m11l1a_korbandeath_Korban cin-m11l1a_korbandeath_Korban.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			282 playDialog "loc/eng/sound/dialog/m11l1/korban_snipers.mp3" 1, 10000, 0
+			282 simpleplayDialog "loc/deu/sound/dialog/m11l1/korban_snipers.mp3" 1, 10000, 0
+			
+			381 playDialog "loc/eng/sound/dialog/m11l1/korban_perhapdie.mp3" 1, 10000, 0
+			381 simpleplayDialog "loc/deu/sound/dialog/m11l1/korban_perhapdie.mp3" 1, 10000, 0
+			
+			802 playDialog "loc/eng/sound/dialog/m11l1/korban_whatref.mp3" 1, 10000, 0
+			802 simpleplayDialog "loc/deu/sound/dialog/m11l1/korban_whatref.mp3" 1, 10000, 0
+			
+			842 displayEffect TransportOut FederationNoAnim
+		}
+		client
+		{
+
+	378 sound sound/impact/explosion/expl_plasmanode1.wav 2 2 10001
+
+	378 tagspawn "Bip01"
+		(
+		count 10
+		model compressionspike2.spr
+		color 1.0 0.4 0.25
+		angles crandom 180 crandom 180 crandom 180
+		avelocity 0 0 crandom 240
+		life 0.5
+		scale 2.75
+		scalerate -2.0
+		dofade 0 0 0
+		)
+
+	378 tagspawn "Bip01"
+		(
+		count 30
+		model redsparkle.spr
+		color 1.0 0.6 0.3
+		angles 0 0 crandom 125
+		avelocity 0 0 crandom 125
+		life 4.5
+		scale 0.185
+		scalerate -0.7
+		offset crandom 4 crandom 4 crandom 4
+		randvelaxis crandom 60 crandom 60 randomrange 60 285 
+		accel 0 0 -275
+		collision
+		bouncefactor 0.35
+		dofade 3.25 0 0
+		)
+
+	378 tagspawn "Bip01"
+		(
+		count 35
+		model compressionspike3.spr
+		color 1.0 0.875 0.45
+		angles 0 0 crandom 125
+		avelocity 0 0 crandom 125
+		life 1.0
+		scale 0.14
+		scalerate -0.7
+		offset crandom 4 crandom 4 crandom 4
+		randvelaxis crandom 60 crandom 60 randomrange 60 285 
+		accel 0 0 -325
+		collision
+		bouncefactor 0.35
+		dofade 0.675 0 0
+		)
+		
+		
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m9l1a_k7intro
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m9l1a_k7intro_Gonzo cin-m9l1a_k7intro_Gonzo.ska
+	{
+		server
+		{
+			entry giveactorweapon "actorweapons/fed-fieldassaultrifle.tik"
+			entry useactorweapon "FieldAssaultRifle"
+			207 playDialog "loc/eng/sound/dialog/m9l1/gonz_hopeomag.mp3" 1, 10000, 0
+			207 simpleplayDialog "loc/deu/sound/dialog/m9l1/gonz_hopeomag.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m5l2-bioscan
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m5l2-bio-chell cin-m5l2-bio-chell.ska
+	{
+		server
+		{
+			0 rendereffects +shadowFromBip01
+			304 playDialog "loc/eng/sound/dialog/m5l2/chell_kilo.mp3" 1, 10000, 0
+			304 simpleplayDialog "loc/deu/sound/dialog/m5l2/chell_kilo.mp3" 1, 10000, 0
+			
+			498 playDialog "loc/eng/sound/dialog/m5l2/chell_checkbio.mp3" 1, 10000, 0
+			498 simpleplayDialog "loc/deu/sound/dialog/m5l2/chell_checkbio.mp3" 1, 10000, 0
+		}
+	}
+	
+	cin-m5l2-bio-korban cin-m5l2-bio-korban.ska
+	{
+		server
+		{
+			0 rendereffects +shadowFromBip01
+			156 playDialog "loc/eng/sound/dialog/m5l2/korban_wrath.mp3" 1, 10000, 0
+			156 simpleplayDialog "loc/deu/sound/dialog/m5l2/korban_wrath.mp3" 1, 10000, 0
+  			230 fire dualhand primary
+  			231 stopfire dualhand
+  			245 fire dualhand primary
+  			246 stopfire dualhand
+  			256 fire dualhand primary
+  			257 stopfire dualhand
+			346 playDialog "loc/eng/sound/dialog/m5l2/korban_terror.mp3" 1, 10000, 0
+			346 simpleplayDialog "loc/deu/sound/dialog/m5l2/korban_terror.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m5l1a intro
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m5l1a_intro_Korban cin-m5l1a_intro_Korban.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			0 forcealpha
+			0 alpha 0
+			
+			entry morph morph_lid-lshut 100 0.5
+			entry morph morph_lid-rshut 100 0.5
+			entry surface material3 +nodraw
+			entry blink 0
+			20 displayEffect TransportIn FederationNoAnim
+			
+			224 playDialog "loc/eng/sound/dialog/m5l1/korban_alien.mp3" 1, 10000, 0
+			224 simpleplayDialog "loc/deu/sound/dialog/m5l1/korban_alien.mp3" 1, 10000, 0
+			
+			284 playDialog "loc/eng/sound/dialog/m5l1/korban_urr.mp3" 1, 10000, 0
+			284 simpleplayDialog "loc/deu/sound/dialog/m5l1/korban_urr.mp3" 1, 10000, 0
+		}
+	}
+
+cin-m5l1a_intro_Chell cin-m5l1a_intro_Chell.ska
+	{
+		server
+		{
+			0 useactorweapon "tricorder"
+			0 forcealpha
+			0 alpha 0
+			
+			entry morph morph_lid-lshut 100 0.5
+			entry morph morph_lid-rshut 100 0.5
+			entry surface material3 +nodraw
+			entry blink 0
+			20 displayEffect TransportIn FederationNoAnim
+			
+			80 playDialog "loc/eng/sound/dialog/m5l1/chell_registry.mp3" 1, 10000, 0
+			80 simpleplayDialog "loc/deu/sound/dialog/m5l1/chell_registry.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               m7l1a quadintro
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m7l1a_quadintro_Korban cin-m7l1a_quadintro_Korban.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			167 playDialog "loc/eng/sound/dialog/m7l1/korban_remainsafe.mp3" 1, 10000, 0
+			167 simpleplayDialog "loc/deu/sound/dialog/m7l1/korban_remainsafe.mp3" 1, 10000, 0
+		}
+	}
+
+cin-m7l1a_quadintro_Chang cin-m7l1a_quadintro_Chang.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			0 playDialog "loc/eng/sound/dialog/m7l1/" 1, 10000, 0
+			0 simpleplayDialog "loc/deu/sound/dialog/m7l1/" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               m7l1b Rescue
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m7l1b_rescue_Korban cin-m7l1b_rescue_Korban.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			213 playDialog "loc/eng/sound/dialog/m7l1/korban_survive.mp3" 1, 10000, 0
+			213 simpleplayDialog "loc/deu/sound/dialog/m7l1/korban_survive.mp3" 1, 10000, 0
+			
+			348 playDialog "loc/eng/sound/dialog/m7l1/korban_backsurface.mp3" 1, 10000, 0
+			348 simpleplayDialog "loc/deu/sound/dialog/m7l1/korban_backsurface.mp3" 1, 10000, 0
+			
+			563 playDialog "loc/eng/sound/dialog/m7l1/korban_why.mp3" 1, 10000, 0
+			563 simpleplayDialog "loc/deu/sound/dialog/m7l1/korban_why.mp3" 1, 10000, 0
+		}
+
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               m7l1a Sewer Entrance
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m7l1b_sewerenter_Korban cin-m7l1b_sewerenter_Korban.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                M4L2 - Gonz
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+		cin-m4l2-gonz cin-m4l2-gonz.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			20 playDialog "loc/eng/sound/dialog/m4l2/gonz_dallas.mp3" 1, 10000, 0
+			20 simpleplayDialog "loc/deu/sound/dialog/m4l2/gonz_dallas.mp3" 1, 10000, 0
+			
+			155 playDialog "loc/eng/sound/dialog/m4l2/gonz_looks.mp3" 1, 10000, 0
+			155 simpleplayDialog "loc/deu/sound/dialog/m4l2/gonz_looks.mp3" 1, 10000, 0
+			
+			242 playDialog "loc/eng/sound/dialog/m4l2/gonz_telsia.mp3" 1, 10000, 0
+			242 simpleplayDialog "loc/deu/sound/dialog/m4l2/gonz_telsia.mp3" 1, 10000, 0
+			
+			297 playDialog "loc/eng/sound/dialog/m4l2/gonz_resident.mp3" 1, 10000, 0
+			297 simpleplayDialog "loc/deu/sound/dialog/m4l2/gonz_resident.mp3" 1, 10000, 0
+			
+			395 playDialog "loc/eng/sound/dialog/m4l2/gonz_menace.mp3" 1, 10000, 0
+			395 simpleplayDialog "loc/deu/sound/dialog/m4l2/gonz_menace.mp3" 1, 10000, 0
+			
+			454 playDialog "loc/eng/sound/dialog/m4l2/gonz_tired.mp3" 1, 10000, 0
+			454 simpleplayDialog "loc/deu/sound/dialog/m4l2/gonz_tired.mp3" 1, 10000, 0
+			
+			681 playDialog "loc/eng/sound/dialog/m4l2/gonz_kidding.mp3" 1, 10000, 0
+			681 simpleplayDialog "loc/deu/sound/dialog/m4l2/gonz_kidding.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                igm7 ready
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-igm7_ready_Chell cin-igm7_ready_Chell.ska
+	{
+		server
+		{
+			19 playDialog "loc/eng/sound/dialog/ent_m7/chell_omagwipe.mp3" 1, 10000, 1
+			19 simpleplayDialog "loc/deu/sound/dialog/ent_m7/chell_omagwipe.mp3" 1, 10000, 1
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                igm3 Brief
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-igm3_brief_Chell cin-igm3_brief_Chell.ska
+	{
+		server
+		{
+			546 playDialog "loc/eng/sound/dialog/ent_m3/chell_inhabit.mp3" 1, 10000, 0
+			546 simpleplayDialog "loc/deu/sound/dialog/ent_m3/chell_inhabit.mp3" 1, 10000, 0
+		}
+	}
+
+cin-igm3_brief_Korban cin-igm3_brief_Korban.ska
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m2l3-Chell
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m2l3-c-chell cin-m2l3-c-chell.ska
+	{
+		server
+		{
+			0 noshadow
+			0 attachmodel enviro/klingon_glass1.tik tag_Rhand 0.75
+			69 playDialog "loc/eng/sound/dialog/m2l2/chell_toast.mp3" 1, 10000, 0
+			69 simpleplayDialog "loc/deu/sound/dialog/m2l2/chell_toast.mp3" 1, 10000, 0
+			
+			182 playDialog "loc/eng/sound/dialog/m2l2/chell_what.mp3" 1, 10000, 0
+			182 simpleplayDialog "loc/deu/sound/dialog/m2l2/chell_what.mp3" 1, 10000, 0
+			
+			279 playDialog "loc/eng/sound/dialog/m2l2/chell_desolate.mp3" 1, 10000, 0
+			279 simpleplayDialog "loc/deu/sound/dialog/m2l2/chell_desolate.mp3" 1, 10000, 0
+			
+			578 playDialog "loc/eng/sound/dialog/m2l2/chell_boring.mp3" 1, 10000, 0
+			578 simpleplayDialog "loc/deu/sound/dialog/m2l2/chell_boring.mp3" 1, 10000, 0
+			
+			743 playDialog "loc/eng/sound/dialog/m2l2/chell_cook.mp3" 1, 10000, 0
+			743 simpleplayDialog "loc/deu/sound/dialog/m2l2/chell_cook.mp3" 1, 10000, 0
+			
+			856 playDialog "loc/eng/sound/dialog/m2l2/chell_shuttle.mp3" 1, 10000, 0
+			856 simpleplayDialog "loc/deu/sound/dialog/m2l2/chell_shuttle.mp3" 1, 10000, 0
+			
+			1006 playDialog "loc/eng/sound/dialog/m2l2/chell_dead.mp3" 1, 10000, 0
+			1006 simpleplayDialog "loc/deu/sound/dialog/m2l2/chell_dead.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m3l2 - Chell
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m3l2-c-chell cin-m3l2-c-chell.ska
+	{
+		server
+		{
+			0 useactorweapon "tricorder"
+			25 playDialog "loc/eng/sound/dialog/dallas02/chell_closeone.mp3" 1, 10000, 0
+			25 simpleplayDialog "loc/deu/sound/dialog/dallas02/chell_closeone.mp3" 1, 10000, 0
+			
+			194 playDialog "loc/eng/sound/dialog/dallas02/chell_sddown.mp3" 1, 10000, 0
+			194 simpleplayDialog "loc/deu/sound/dialog/dallas02/chell_sddown.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m3l2 - Transporter Room
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m3l2-trans-chell cin-m3l2-trans-chell.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			801 playDialog "loc/eng/sound/dialog/dallas02/chell_chewing.mp3" 1, 10000, 1
+			801 simpleplayDialog "loc/deu/sound/dialog/dallas02/chell_chewing.mp3" 1, 10000, 1
+			
+			1074 playDialog "loc/eng/sound/dialog/dallas02/chell_helpmenow.mp3" 1, 10000, 1
+			1074 simpleplayDialog "loc/deu/sound/dialog/dallas02/chell_helpmenow.mp3" 1, 10000, 1
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m5l2c - Scientist
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m5l2csci_korban cin-m5l2csci_korban.ska
+	{
+		server
+		{
+			entry useactorweapon "none"
+			768 playDialog "loc/eng/sound/dialog/m5l2/korban_climbing.mp3" 1, 10000, 0
+			768 simpleplayDialog "loc/deu/sound/dialog/m5l2/korban_climbing.mp3" 1, 10000, 0
+		}
+	}
+
+cin-m5l2csci_chell cin-m5l2csci_chell.ska
+	{
+		server
+		{
+			entry useactorweapon "none"
+			845 playDialog "loc/eng/sound/dialog/m5l2/chell_exom.mp3" 1, 10000, 0
+			845 simpleplayDialog "loc/deu/sound/dialog/m5l2/chell_exom.mp3" 1, 10000, 0
+			
+			1041 playDialog "loc/eng/sound/dialog/m5l2/chell_billions.mp3" 1, 10000, 0
+			1041 simpleplayDialog "loc/deu/sound/dialog/m5l2/chell_billions.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                M10-L2 Gonzales
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m10l2-gonz cin-m10l2-gonz.ska
+	{
+		server
+		{
+			0 morph MORPH_DOWN
+			0 useactorweapon "none"
+			0 rendereffects +shadowFromBip01
+			17 playDialog "loc/eng/sound/dialog/m10l2/gonz_goodsee.mp3" 1, 10000, 0
+			17 simpleplayDialog "loc/deu/sound/dialog/m10l2/gonz_goodsee.mp3" 1, 10000, 0
+			
+			65 playDialog "loc/eng/sound/dialog/m10l2/gonz_hellhole.mp3" 1, 10000, 0
+			65 simpleplayDialog "loc/deu/sound/dialog/m10l2/gonz_hellhole.mp3" 1, 10000, 0
+			
+			1055 playDialog "loc/eng/sound/dialog/m10l2/gonz_brilliant.mp3" 1, 10000, 0
+			1055 simpleplayDialog "loc/deu/sound/dialog/m10l2/gonz_brilliant.mp3" 1, 10000, 0
+			
+			1232 playDialog "loc/eng/sound/dialog/m10l2/gonz_prove.mp3" 1, 10000, 0
+			1232 simpleplayDialog "loc/deu/sound/dialog/m10l2/gonz_prove.mp3" 1, 10000, 0
+			
+			1676 playDialog "loc/eng/sound/dialog/m10l2/gonz_ack.mp3" 1, 10000, 0
+			1676 simpleplayDialog "loc/deu/sound/dialog/m10l2/gonz_ack.mp3" 1, 10000, 0
+		}
+		client
+		{
+			
+			1677 tagspawn "Bip01"
+				(
+				count 14
+				model compressionspike2.spr
+				color 0.4 1.0 0.3
+				angles crandom 180 crandom 180 crandom 180
+				alpha 0.675
+				life 0.35
+				avelocity crandom 225 crandom 225 crandom 225
+				scale 1.5
+				scalerate -2.25
+				fade
+				)
+		
+			1678 tagspawn "Bip01"
+				(
+				count 8
+				model rom-bfg-saturation.spr
+				color 0.85 1.0 0.75
+				alpha 0.8
+				angles crandom 180 crandom 180 crandom 180
+				life 1.15
+				avelocity 0 0 crandom 225
+				randvel crandom 40 crandom 40 crandom 40
+				offset crandom 4 crandom 4 crandom 4
+				accel 0 0 45
+				scale 0.3
+				scalerate 0.9
+				fade
+				)
+		
+		      	1678 tagspawn "Bip01"
+				(
+				count 26
+				model  models/fx/fx-debris-energy-blue-01.tik models/fx/fx-debris-energy-blue-02.tik
+				angles crandom 180 crandom 180 crandom 180
+				color 0 1.0 0.065
+				avelocity crandom 300 crandom 300 crandom 300
+				life 0.75
+				scale 0.25
+				scalerate -2.0
+				offset crandom 4 crandom 4 crandom 4
+				randvel crandomrange 50 350 crandomrange 50 350 randomrange -100 400
+				accel 0 0 -600
+				dofade 0.25 0 0
+				)
+		
+			1678 tagspawn "Bip01"
+				(
+				model compressionspike3.spr
+				colorrange 0.25 1 0.5 1.0 0.675 0.425 1.25
+				count 45
+				randvel crandom 400 crandom 400 random 465
+				collision
+				bouncefactor 0.4
+				life randomrange 2.75 3.5
+				scale 0.08
+				accel 0 0 -725
+				scalerate -0.5
+				dofade 2.25 0 0
+				)
+	
+		}
+	}
+
+		
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                M2L1-SF-Acadamy
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	cin-m2_chell	cin-m2_chell.ska
+	{
+		server
+		{
+			540 playDialog "loc/eng/sound/dialog/m2l1/chell_noteven.mp3" 1, 10000, 0
+			540 simpleplayDialog "loc/deu/sound/dialog/m2l1/chell_noteven.mp3" 1, 10000, 0
+			
+			881 playDialog "loc/eng/sound/dialog/m2l1/chell_saving.mp3" 1, 10000, 0
+			881 simpleplayDialog "loc/deu/sound/dialog/m2l1/chell_saving.mp3" 1, 10000, 0
+		}
+	}
+	cin-m2_chang cin-m2_chang.ska                                                     
+	{                                                                                 
+		server                                                                    
+		{                                                                         
+			716 playDialog "loc/eng/sound/dialog/m2l1/chang_tuvok.mp3" 1, 10000, 0
+			716 simpleplayDialog "loc/deu/sound/dialog/m2l1/chang_tuvok.mp3" 1, 10000, 0
+		}                                                                         
+	}                                                                                 
+	cin-m2_2chell cin-m2_2chell.ska
+	{
+		server
+		{
+			177 playDialog "loc/eng/sound/dialog/m2l1/chell_toohot.mp3" 1, 10000, 0
+			177 simpleplayDialog "loc/deu/sound/dialog/m2l1/chell_toohot.mp3" 1, 10000, 0
+		}
+	}
+	cin-m2_2chang cin-m2_2chang.ska
+	{
+		server
+		{
+			300 playDialog "loc/eng/sound/dialog/m2l1/chang_outnum.mp3" 1, 10000, 0
+			300 simpleplayDialog "loc/deu/sound/dialog/m2l1/chang_outnum.mp3" 1, 10000, 0
+		}
+	}
+	
+	
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               IN GAME
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	cin-m3_pointing			cin-m3_pointing.ska
+	cin-m3_kneel-down		cin-m3_kneel-down.ska
+	cin-m3_idle-kneel		cin-m3_idle-kneel.ska
+	cin-m3_kneel-up			cin-m3_kneel-up.ska
+	cin-m3_collapse			cin-m3_collapse.ska
+	cin-m3_idle-collapse		cin-m3_idle-collapse.ska
+	cin-m3_bail			cin-m3_bail.ska
+	cin-m3_sitting			cin-m3_sitting.ska
+	cin-m3_frank			cin-m3_frank.ska
+	cin-m8_back   			cin-m8_back.ska
+	cin-m8_lean   			cin-m8_lean.ska
+	cin-m8_foward 			cin-m8_foward.ska
+	cin-m8_legup  			cin-m8_legup.ska
+	cin-m8_situp  			cin-m8_situp.ska	
+}

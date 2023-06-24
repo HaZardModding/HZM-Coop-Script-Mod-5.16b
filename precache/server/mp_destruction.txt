@@ -1,0 +1,5 @@
+//moved from general MP, since deathmatch with 500+ points is very uncommon
+cache localization/sound/dialog/dm/comp_500pointsleft.mp3
+
+cache models/fx/fx-explosion-singularity.tik
+cache models/weapons/worldmodel-tricorder.tik

@@ -1,0 +1,297 @@
+float fCinematicIntroSTARTED;
+float fintro_ente_orbit_ENDSTARTED;
+entity cinIntro;
+entity cinCampsite;
+
+void intro_ente_orbit();
+void intro_ente_orbit_END();
+void cinematicIntro();
+void cinematicIntroEnd();
+void campSequence1();
+void campSequence1_skipThread();
+
+void intro_ente_orbit()
+//Enterprise e in orbit of this crapy planet, we skip this in multiplayer
+{
+	globalCoop_cin_start();
+	//align the saucer more precisely than we can in radiant
+	$entSaucer.origin ( $entBody.getorigin ());
+	$entNacelles.origin ( $entBody.getorigin ());
+	$entSaucer.bind   ( $entOrigin );
+	$entBody.bind     ( $entOrigin );
+	$entNacelles.bind ( $entOrigin );
+
+	//spawn and move things around as appropriate
+	//we spawn stuff to avoid precaching large amounts of unneeded textures
+	$entSkyOrigin.rendereffects ( "+skyorigin" );
+
+	$entOrigin.origin ( '13088 -17476 936' );
+	spawn( "sky_planet_m4-mining_highres" , "model" , "sky/sky_colony-planet.tik" , "origin" , "13044.00 -16856.00 1320.00" , "targetname" , "miningPlanet" );
+	$miningPlanet.angle ( 90.0 );
+	$miningPlanet.scale ( .95 );
+	
+/* 	$entOrigin.angles ( '0 0 -15' );
+	$entOrigin.followpath ( $entOrbit_2 , "normalangles" );
+	wait ( .1 );
+	$entOrigin.endpath (); */
+	
+	//backdrop
+	spawn ( "sky_skybox_brecha-rift" , "scale" , "5" , "origin" , "15680.00 -17392.00 1024.00" , "model" , "sky/sky_brecha-rift.tik" , "targetname" , "cinIntroSky");
+	
+	$entOrigin.followpath ( $entOrbit_2 , "normalangles" );
+	//tighten the cinematic up a little by getting rid of the second camera shot
+	
+	spawn ( "Camera" , "targetname" , "entIntroCam" );
+	cam.load ( "igm4_EntIntro" );
+	wait ( 2 );
+
+	globalCoop_cin_follow($entIntroCam, $igm4_EntIntro);
+	globalCoop_cin_cut($entIntroCam);
+	
+	globalCoop_cin_skipThread( "intro_ente_orbit_END" );
+	
+	globalCoop_cin_fov($entIntroCam, 90 );//50
+	globalCoop_cin_cuecamera( $entIntroCam );
+	
+	//--- set music
+	allowMusicDucking( 0 );
+	music ("aux2");
+	
+	wait ( 2 );
+	globalCoop_main_camFadeIn(1);
+	stuffcmd("locationprint 0 70 $$M5Stardate$$ 10.0\n");
+	wait ( 7.5 );
+	thread intro_ente_orbit_END();
+}
+
+
+void intro_ente_orbit_END()
+//END/SKIP THREAD -> Enterprise e in orbit of this crapy planet
+{
+	skipthread ( "null" );
+	stuffcmd("locationprint 0 70 \"\" 14.0\n");
+	if(fintro_ente_orbit_ENDSTARTED){
+		return;
+	}
+	fintro_ente_orbit_ENDSTARTED=1;
+	
+	globalCoop_main_camFadeOut(1);
+	wait ( 1 );
+	
+	$cinIntroSky.remove();
+	$miningPlanet.remove();
+	$entSaucer.remove();
+	$entBody.remove();
+	$entNacelles.remove();
+	
+//--- set music
+	allowMusicDucking( 1 );
+	music ("normal");
+	killthread ( "intro_ente_orbit" );
+	
+	thread cinematicIntro();
+}
+
+void cinematicIntro()
+{
+	if(fCinematicIntroSTARTED){
+		return;
+	}
+	fCinematicIntroSTARTED=1;
+//create Intro
+	cinIntro = createcinematic( "m5l1a_intro" );	
+	allowMusicDucking( 0 );
+	music ("normal");
+//	music ("aux1");
+	wait( 1 );
+
+	cinIntro.setendthread( "cinematicIntroEnd" );
+	cinIntro.beginCinematic( "m5l1a_intro" ) ;
+
+	wait( .5 );
+	//set skipthread
+	globalCoop_cin_skipThread( "cinematicIntroEnd" );
+
+	cinIntro.playsound( "sound/environment/transporter/transport1.WAV", 0, 1.5, 10000 );
+}
+
+void cinematicIntroEnd()
+{
+	//kill the cinematic
+	skipthread( "null" );
+
+	//--- end the cinematic and kill the thread
+	killthread("intro_ente_orbit");
+	killthread("intro_ente_orbit_END");
+	killthread("cinematicIntro");
+	cinIntro.endCinematic( FALSE );
+	
+	//--- fade to black
+	cam_fadeout( .5, 0, 0, 0, 1, 0 );
+	wait( .6 );
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.origin( $scriptmunro.getorigin() );
+		$player.solid();
+		$player.show();
+	}
+	
+	// spread team out a little
+	$chell.origin( '9152 -10560 -165' );
+	$korban.origin( '8960 -10560 -120' );
+	$telsia.origin( '9152 -10752 -203' );
+	wait( .1 );
+
+	//--- set the music
+	music ("aux1");
+
+	//--- release the cinematic
+	globalCoop_cin_end();
+	cam_fadein( 2 , 0, 0, 0, 1, 0 );
+	wait( 1 );
+
+	//turn on ai for teammates
+	globalCommon_AiActor( $chell );
+	globalCommon_AiActor( $telsia );
+	globalCommon_AiActor( $korban );
+}
+
+
+void campSequence1()
+{
+	cinCampsite = createcinematic( "m5l1a_campsite" );
+	$idryll1.setFloatVar( "pauseRandomAnimate", 1 );
+	$idryll2.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+
+	$idryll1.ai_off();
+	$idryll2.ai_off();
+
+	$idryll1.turntowardsplayer();
+	$idryll2.turntowardsplayer();
+
+	$idryll1.anim( "walk" );
+	$idryll2.anim( "walk" );
+	wait( 1 );
+
+	//begin cinematic
+	globalCoop_main_camFadeOut(.5);
+	globalCoop_cin_start();
+	wait( .6 );
+	allowMusicDucking( 0 );
+
+	music ("normal");
+//	music ("aux1","normal");
+
+	$idryll1.anim( "idle" );
+	$idryll2.anim( "idle" );
+
+	$idryll1.hide();
+	$idryll1.notsolid();
+//	$idryll2.hide();
+	$idryll2.notsolid();
+
+	$chell.ai_off();
+	$telsia.ai_off();
+	$korban.ai_off();
+
+	$telsia.origin( '11100 -5864 -114' );
+	$korban.origin( '11120 -5900 -114' );
+	$chell.origin( '11128 -5940 -114' );
+	$idryll2.origin( '11230 -5840 -90' );
+
+	$telsia.angles( '0 -5 0' );
+	$korban.angles( '0 10 0' );
+	$chell.angles( '0 35 0' );
+	$idryll2.angles( '0 -90 0' );
+	wait( 1 );
+
+	//set the skipthread
+	globalCoop_cin_skipThread( "campSequence1_skipThread");
+
+	cinCampsite.setendthread( "campSequence1_skipThread" );
+	cinCampsite.beginCinematic( "m5l1a_campsite" ) ;
+}
+
+void campSequence1_skipThread()
+{
+	//kill the cinematic
+	skipthread( "null" );
+
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	killthread( "campSequence1" );
+
+	cinCampsite.endCinematic( FALSE );
+
+	wait( .1 );
+
+	$scriptmunro.hide();
+	$scriptmunro.notsolid();
+
+	//--- Set up Scene
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.origin( '11136 -6016 -107' );
+		$player.angles( '0 45 0' );
+	}
+	
+	$chell.origin( '11008 -6016 -122');
+	$telsia.origin( '11008 -6144 -113' );
+	$korban.origin( '11136 -6144 -115' );
+	
+	$chell.angles( '0 45 0' );
+	$telsia.angles( '0 45 0' );
+	$korban.angles( '0 45 0' );
+
+	$chell.ai_on();
+	$telsia.ai_on();
+	$korban.ai_on();
+
+	$chell.show();
+	$telsia.show();
+	$korban.show();
+
+	$idryll1.setFloatVar( "pauseRandomAnimate", 0 );
+	$idryll2.setFloatVar( "pauseRandomAnimate", 0 );
+
+	$idryll1.show();
+	$idryll1.solid();
+	$idryll1.origin( '11232 -5608 -120' );
+	$idryll1.angle( 315 );
+
+	$idryll2.show();
+	$idryll2.solid();
+	$idryll2.origin( '11296 -5680 -120' );
+	$idryll2.angle( 135 );
+
+	globalCoop_cin_end();
+
+	
+	//Enable Conversation triggering after idryll cinematic
+	$idryllConversation1Trigger.triggerable();
+	$idryllConversation2Trigger.triggerable();
+	$idryllConversation3Trigger.triggerable();
+
+	wait ( .5 );
+
+	//--- Action
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+
+	wait( .6 );
+
+	$arch_waypointCamp1.missionobjective( 0 );
+	$arch_waypointCamp1.remove();
+	$arch_waypointCave1.missionobjective( 1 );
+
+	// $player.setobjectivecomplete( "ProceedToLifeforms", 1 );
+	// $player.setobjectiveshow( "EnterRuins", 1 );
+	// $player.setobjectiveshow( "FindScientists", 1 );
+	// $player.setobjectiveshow( "FindScouting", 1 );
+	globalCoop_objectives_update("complete",1,0);
+	globalCoop_objectives_update("incomplete",2,0);
+	globalCoop_objectives_update("incomplete",3,0);
+	thread globalCoop_objectives_update("incomplete",4,1);
+}
+
+

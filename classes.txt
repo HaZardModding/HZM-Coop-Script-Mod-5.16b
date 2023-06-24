@@ -1,0 +1,43 @@
+---DATA OUTDATED--
+---DATA OUTDATED--
+---DATA OUTDATED--
+
+Each Class has uniqe abilities which are as follows:
+
+
+Technician
+==================================================
+Resistance against (less damage):
+- Electricity	+50%
+- Snipers		-50%
+
+Special ablity:
+- Can give Shield to other players, and recives 50% Shield by doing so.
+- Can build a Transporter
+
+
+Medic
+==================================================
+Resistance against (less damage):
+- Poison GAS	+75%
+- Alien Slime	+75%
+- Meele/Sword	+20%
+- Snipers		-75%
+
+Special ablity:
+- Can heal other players, and heals it self by doing so.
+
+
+HeavyWeapons
+==================================================
+Resistance against (less damage):
+- Snipers		+40%
+- Disruptors	+30%	
+- Vaporation	+30%
+- Explosions	+30%
+- Alien Slime	-40%
+
+Special ablity:
+- Can give Ammo to other players, and recives Ammo by doing so.
+- Inflicts the Dubbled ammount of damage.
+

@@ -1,0 +1,107 @@
+//---------------------
+// globalCoop_contextM3_setup
+// Sets up the context and +use ( combat ) dialog for teammates
+// context dialog for enemies should be set up in the TIKI
+// This function is LONG, because I want to keep everything centralized.
+//---------------------
+void globalCoop_contextM3_setup( entity currentActor , string theActorName )
+{
+// if(getCvarInt("g_gametype") != 1)
+//Lines commented out because our game is too big, and we're blowing out MAX_SOUNDS in SV_FindIndex ();
+	string path;
+	path = "localization/sound/dialog/combat/";
+
+	//-------------------------------------------------------------------------
+	// Context "enteredcombat"
+	//-------------------------------------------------------------------------
+	currentActor.alias( theActorName + "CtxtEnteredCombatA" , path + theActorName + "_anotone-3.mp3" ); 		//There's another one!
+	currentActor.alias( theActorName + "CtxtEnteredCombatB" , path + theActorName + "_lookout-3.mp3" ); 		//Look out!!
+	currentActor.alias( theActorName + "CtxtEnteredCombatC" , path + theActorName + "_overthere-3.mp3" ); 	//Over there!
+	currentActor.alias( theActorName + "CtxtEnteredCombatD" , path + theActorName + "_wevegot-3.mp3" );		//We've Got Contacts!
+	currentActor.alias( theActorName + "CtxtEnteredCombatE" , path + theActorName + "_incoming-3.mp3" );		//Incoming!
+	currentActor.alias( theActorName + "CtxtEnteredCombatF" , path + theActorName + "_espotted-3.mp3" );		//Enemy Spotted!
+	currentActor.alias( theActorName + "CtxtEnteredCombatG" , path + theActorName + "_herecome-3.mp3" );		//Here They Come
+	currentActor.alias( theActorName + "CtxtEnteredCombatH" , path + theActorName + "_headsup-3.mp3" );		//Heads up
+	currentActor.alias( theActorName + "CtxtEnteredCombatI" , path + theActorName + "_herewego-3.mp3" );		//Here we go
+	currentActor.alias( theActorName + "CtxtEnteredCombatJ" , path + theActorName + "_contacts-3.mp3" );		//Contacts
+	currentActor.dialog( theActorName + "CtxtEnteredCombat" , "contextinitiator" , "enteredcombat" );
+	//let the server digest all of this (it's a lot)
+	globalCoop_main_waitZeroDot2();
+
+	//-------------------------------------------------------------------------
+	// Context "playerattacked"
+	//-------------------------------------------------------------------------
+	path = "localization/sound/dialog/combat/";
+	currentActor.alias( theActorName + "CtxtPlayerAttackedA" , path + theActorName + "_munwhat-3.mp3" ); 	//Munro, what are you doing?
+	currentActor.alias( theActorName + "CtxtPlayerAttackedB" , path + theActorName + "_heywat-3.mp3" ); 		//Hey! Watch it!
+	currentActor.alias( theActorName + "CtxtPlayerAttackedC" , path + theActorName + "_holdfire-3.mp3" ); 	//Hold your fire
+	currentActor.alias( theActorName + "CtxtPlayerAttackedD" , path + theActorName + "_whoses-3.mp3" ); 		//Who's side are you on
+	currentActor.alias( theActorName + "CtxtPlayerAttackedE" , path + theActorName + "_watchfire-3.mp3" ); 	//Watch your fire
+	currentActor.alias( theActorName + "CtxtPlayerAttackedF" , path + theActorName + "_whatyoudo-3.mp3" ); 	//What are you doing
+	currentActor.alias( theActorName + "CtxtPlayerAttackedG" , path + theActorName + "_checktarg-3.mp3" ); 	//Munro! Check your targets
+	currentActor.dialog ( theActorName + "CtxtPlayerAttacked" , "contextinitiator" , "playerattacked" );
+	//let the server digest all of this (it's a lot)
+	globalCoop_main_waitZeroDot2();
+
+
+	//-------------------------------------------------------------------------
+	// Context "turnonplayer"
+	//-------------------------------------------------------------------------
+	currentActor.alias( theActorName + "CtxtTurnOnPlayerA" , path + theActorName + "_committr-3.mp3" ); 	//You're committing treason!
+	currentActor.alias( theActorName + "CtxtTurnOnPlayerB" , path + theActorName + "_ltcomm-3.mp3" );		//Lieutenant, you are committing treason!
+	currentActor.dialog ( theActorName + "CtxtTurnOnPlayer" , "contextinitiator" , "turnonplayer" );
+	//let the server digest all of this (it's a lot)
+	globalCoop_main_waitZeroDot2();
+
+	//-------------------------------------------------------------------------
+	// Context "incombat" -- General
+	//-------------------------------------------------------------------------
+	currentActor.alias( theActorName + "CtxtInCombatA" , path + theActorName + "_coverme-3.mp3" ); 		//Cover me!
+	currentActor.alias( theActorName + "CtxtInCombatC" , path + theActorName + "_lookout-3.mp3" );		//Look out!
+	currentActor.alias( theActorName + "CtxtInCombatD" , path + theActorName + "_toomany-3.mp3" );		//There are too many of them!
+	currentActor.alias( theActorName + "CtxtInCombatG" , path + theActorName + "_watchout-3.mp3" );		//Watch out!
+	currentActor.alias( theActorName + "CtxtInCombatH" , path + theActorName + "_wantsome-3.mp3" );		//Want some more?
+	currentActor.alias( theActorName + "CtxtInCombatI" , path + theActorName + "_brinon-3.mp3" );		//Bring it on!
+	currentActor.alias( theActorName + "CtxtInCombatJ" , path + theActorName + "_howanot-3.mp3" );		//How about another one
+	currentActor.alias( theActorName + "CtxtInCombatK" , path + theActorName + "_allyougot-3.mp3" );	//Is that all you've got?
+	currentActor.dialog ( theActorName + "CtxtInCombat" , "contextinitiator" , "incombat" );
+	//let the server digest all of this (it's a lot)
+	globalCoop_main_waitZeroDot2();
+
+	//-------------------------------------------------------------------------
+	// Context "killedenemy"
+	//-------------------------------------------------------------------------
+	currentActor.alias( theActorName + "CtxtKilledEnemyA" , path + theActorName + "_takethat-3.mp3" ); 	//Take that!
+	currentActor.alias( theActorName + "CtxtKilledEnemyB" , path + theActorName + "_gotone-3.mp3" ); 	//Got One!
+	currentActor.dialog ( theActorName + "CtxtKilledEnemy" , "contextinitiator" , "killedenemy" );
+
+	//-------------------------------------------------------------------------
+	// Context "blockedbyplayer"
+	//-------------------------------------------------------------------------
+	currentActor.alias( theActorName + "CtxtBlockedByPlayerA" , path + theActorName + "_exme-3.mp3" ); 		//Excuse me
+	currentActor.dialog ( theActorName + "CtxtBlockedByPlayer" , "contextinitiator" , "blockedbyplayer" );
+
+	//-------------------------------------------------------------------------
+	// Combat +use dialog
+	//-------------------------------------------------------------------------
+	currentActor.alias( theActorName + "PlusUseCombatA" , path + theActorName + "_muntalklater-3.mp3" ); 	//Munro, talk to me later
+	//currentActor.alias( theActorName + "PlusUseCombatB" , path + theActorName + "_injured-3.mp3" );			//Are you injured
+	currentActor.alias( theActorName + "PlusUseCombatD" , path + theActorName + "_cantwait-3.mp3" ); 		//Can't this wait, Alex?
+	currentActor.alias( theActorName + "PlusUseCombatE" , path + theActorName + "_sorrynotime-3.mp3" ); 		//Sorry, no time to talk
+	currentActor.dialog ( theActorName + "PlusUseCombat" , "combatdialog" , "randompick" );
+	//let the server digest all of this (it's a lot)
+	globalCoop_main_waitZeroDot2();
+
+	//-------------------------------------------------------------------------
+	// Normal +use dialog
+	//-------------------------------------------------------------------------
+	currentActor.alias( theActorName + "PlusUseNormalA" , path + theActorName + "_moveon-3.mp3" ); 			//We should move on
+	currentActor.alias( theActorName + "PlusUseNormalC" , path + theActorName + "_whatisal-3.mp3" ); 		//What is it Alex?
+	currentActor.alias( theActorName + "PlusUseNormalD" , path + theActorName + "_whatisit-3.mp3" ); 		//What is it?
+	currentActor.alias( theActorName + "PlusUseNormalE" , path + theActorName + "_sir9-3.mp3" ); 			//Sir?
+	//currentActor.alias( theActorName + "PlusUseNormalF" , path + theActorName + "_canihelpu-3.mp3" ); 		//Can I help you?
+	currentActor.alias( theActorName + "PlusUseNormalG" , path + theActorName + "_alex-3.mp3" ); 			//Alex?
+	currentActor.dialog ( theActorName + "PlusUseNormal" , "randompick" );
+}
+
+

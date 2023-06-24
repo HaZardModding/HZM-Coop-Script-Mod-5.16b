@@ -1,0 +1,129 @@
+//#include "coop_mod/maps/optional_modules/randomplayer.scr"
+//-----------------------------------------------------------------------------------
+// Script By:		Christian Sebastian Strahl (Chrissstrahl)
+// Created on:		2011.25.04
+// E-Mail:			chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+// RETURN RANDOM PLAYER - INCLUDE ONLY TO THE CURRENT LEVEL SCRIPT!!
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2012 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+//USE randmomplayer.scr if you want to get any player randomly returned as entity
+
+
+////////////////////////////////////////////////////////////////////////////////
+//DECLARATIONS
+////////////////////////////////////////////////////////////////////////////////
+entity globalCoop_randomplayer(float fReturnActiveOnly);
+
+
+entity globalCoop_randomplayer(float fReturnActiveOnly)
+//------------------------------------------------------------------------------
+//Return a Random player sentity, used often, must be fast, so we use FOR and IF-ELSE
+//------------------------------------------------------------------------------
+{
+	entity ePlayer;
+	if(!cvar_bool_multiplayer){
+		ePlayer = $player;
+	}
+	else{
+		entity 	ePlayer1,ePlayer2,ePlayer3,ePlayer4,
+				ePlayer5,ePlayer6,ePlayer7,ePlayer8;
+		float fPlayerIdInUse;
+		float fPlayerAvailableIndex;
+		float fSpec = 0;
+		
+		for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++){
+			ePlayer = getentity("player"+ fPlayerIdInUse);
+			
+			if(	doesEntityExist(ePlayer)){
+				if(fReturnActiveOnly){
+					if(globalCoop_check_playerSpectator(ePlayer) != 1){
+						fSpec = 1;
+					}
+				}
+				else if(globalCoop_check_playerSpectator(ePlayer) == 1){
+					fSpec = 1;
+				}
+				if(fSpec){
+				//used to have if else, if issue use if else again!
+					if(fPlayerAvailableIndex == 0){
+						ePlayer1 = ePlayer;
+					}
+					if(fPlayerAvailableIndex == 1){
+						ePlayer2 = ePlayer;
+					}
+					if(fPlayerAvailableIndex == 2){
+						ePlayer3 = ePlayer;
+					}
+					if(fPlayerAvailableIndex == 3){
+						ePlayer4 = ePlayer;
+					}
+					if(fPlayerAvailableIndex == 4){
+						ePlayer5 = ePlayer;
+					}
+					if(fPlayerAvailableIndex == 5){
+						ePlayer6 = ePlayer;
+					}
+					if(fPlayerAvailableIndex == 6){
+						ePlayer7 = ePlayer;
+					}
+					if(fPlayerAvailableIndex == 7){
+						ePlayer8 = ePlayer;
+					}
+					fPlayerAvailableIndex++;
+				}
+			}
+		}
+		fPlayerIdInUse = randomInt(fPlayerAvailableIndex);
+	//used to have if else, if issue use if else again!
+		if(fPlayerIdInUse == 0){
+			ePlayer = ePlayer1;
+		}
+		if(fPlayerIdInUse == 1){
+			ePlayer = ePlayer2;
+		}
+		if(fPlayerIdInUse == 2){
+			ePlayer = ePlayer3;
+		}
+		if(fPlayerIdInUse == 3){
+			ePlayer = ePlayer4;
+		}
+		if(fPlayerIdInUse == 4){
+			ePlayer = ePlayer5;
+		}
+		if(fPlayerIdInUse == 5){
+			ePlayer = ePlayer6;
+		}
+		if(fPlayerIdInUse == 6){
+			ePlayer = ePlayer7;
+		}
+		if(fPlayerIdInUse == 7){
+			ePlayer = ePlayer8;
+		}
+	}
+		
+	if(!doesEntityExist(ePlayer)){
+		if(fReturnActiveOnly){
+			ePlayer = globalCoop_randomplayer(0);
+			if(doesEntityExist(ePlayer)){
+				return ePlayer;
+			}
+		}
+		return $world;		
+	}
+	return ePlayer;
+}
+
+

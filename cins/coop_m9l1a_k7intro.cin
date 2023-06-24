@@ -1,0 +1,120 @@
+//-----------------------------------------------
+// Cinematic Name: c:\projects\ef2\ef2\base\cins\m9l1a_k7intro-temp.cin
+// Export Version: 1
+// Export Date:    Fri Feb 28 10:19:56 2003
+//-----------------------------------------------
+//removed sydney
+//removed freezing cammera command
+
+Origins
+{
+    Origin
+    {
+          name          "m9l1a_k7intro"
+          origin         -1770.297852 37.688339 0.000000
+          yaw            0.000000
+    }
+}
+
+
+Actors
+{
+    Actor
+    {
+        name          "armKrindo"
+        tiki          "char/krindo-noweapon.tik"
+        anim          "cin-m9l1a_k7intro_Krindo"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         -154.135498 74.827011 -17.393000
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "armMunro"
+        tiki          "char/hazardteam_munro.tik"
+        anim          "cin-m9l1a_k7intro_Munro"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         -109.961548 76.154457 -17.393000
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "armGonzalez"
+        tiki          "char/hazardteam_gonzales.tik"
+        anim          "cin-m9l1a_k7intro_Gonzo"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE        
+	  origin         -152.662109 117.068222 -17.393000
+        yaw            -90.000000
+    }
+}
+
+
+Cameras
+{
+    Camera
+    {
+        name         "cam2-m9l1a-k7intro"
+        camfile      "cam2-m9l1a-k7intro"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+		selfRemoving false
+    }
+    Camera
+    {
+        name         "cam3-m9l1a-k7intro"
+        camfile      "cam3-m9l1a-k7intro"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+		selfRemoving false
+    }
+    Cut
+    {
+        toCamera     "cam2-m9l1a-k7intro"
+        frame         0
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m9l1a-k7intro"
+        frame         55
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+	Cut
+    {
+        toCamera     "cam2-m9l1a-k7intro"
+        frame         312
+        fadeout       20
+        fadein        0
+        lerp          false
+    }
+
+}

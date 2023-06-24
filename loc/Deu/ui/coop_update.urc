@@ -1,0 +1,99 @@
+menu "coop_update" 286 600 NONE 0
+bgcolor 0 0 0 0
+align center center
+nomouse
+noresize 1
+noescape 0
+depth 0.35
+gamefocus
+fadein 0.9
+direction from_left 1
+
+fadedelay 7
+
+resource
+Label
+{
+rect 15 200 286 286
+shadercolor 1.00 1.00 1.00 0.7
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 0 0 0 0
+borderstyle "NONE"
+shader textures/coop_mod/misc/boxart
+cvarvisibility coop_svB 5016 >
+}
+
+resource
+Label
+{
+rect 67 310 200 40
+fgcolor 0.00 1.00 1.00 1
+bgcolor 0 0 0 0
+borderstyle "NONE"
+title "Bitte\naktualisieren"
+font serpentinemedium-16
+horizontaljustify center
+cvarvisibility coop_svB 5016 >
+}
+resource
+Label
+{
+title "Ihre:"
+rect 81 391 130 20
+fgcolor 1 0 0 1
+bgcolor 1 1 1 0
+borderstyle "NONE"
+font serpentinemedium-14
+horizontaljustify left
+cvarvisibility coop_svB 5016 >
+}
+resource
+Label
+{
+title "5.016"
+rect 190 390 60 20
+fgcolor 1 0 0 1
+bgcolor 1 1 1 0
+borderstyle "NONE"
+font serpentinemedium-14
+horizontaljustify right
+cvarvisibility coop_svB 5016 >
+}
+resource
+Label
+{
+title "Server:"
+rect 81 361 130 20
+fgcolor 0 1 0 1
+bgcolor 1 1 1 0
+borderstyle "NONE"
+font serpentinemedium-14
+horizontaljustify left
+cvarvisibility coop_svB 5016 >
+}
+resource
+Label
+{
+rect 191 361 60 20
+fgcolor 0 0 0 1
+bgcolor 1 1 1 0
+borderstyle "NONE"
+font serpentinemedium-14
+horizontaljustify right
+cvarvisibility coop_svB 5016 >
+linkcvar coop_build
+}
+resource
+Label
+{
+rect 190 360 60 20
+fgcolor 0 1 0 1
+bgcolor 1 1 1 0
+borderstyle "NONE"
+font serpentinemedium-14
+horizontaljustify right
+cvarvisibility coop_svB 5016 >
+linkcvar coop_build
+}
+
+end.

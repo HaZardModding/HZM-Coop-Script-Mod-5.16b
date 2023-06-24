@@ -1,0 +1,185 @@
+//all objectives are listed here, makes the map script better to read
+void objectiveWarehouseEntering()
+//player has entred the room with the bat'leth
+{
+	legacy_savegame();
+//make the players respawn, ONLY respawn at the Klingon Warehouse transporter
+	$ipd1.angles('0 90 0');
+	$ipd2.angles('0 90 0');
+	$ipd3.angles('0 90 0');
+	$ipd4.angles('0 90 0');
+	$ipd5.angles('0 90 0');
+	$ipd6.angles('0 90 0');
+	$ipd7.angles('0 90 0');
+	$ipd8.angles('0 90 0');
+	$ipd1.origin('13025 -3358 -732');
+	$ipd2.origin('13087 -3358 -732');
+	$ipd3.origin('13146 -3358 -732');
+	$ipd4.origin('13025 -3358 -732');
+	$ipd5.origin('13087 -3358 -732');
+	$ipd6.origin('13146 -3358 -732');
+	$ipd7.origin('13025 -3358 -732');
+	$ipd8.origin('13087 -3358 -732');
+	coopMod430CompatibilitySpawnLocationHack();
+//update Objectives
+	thread globalCoop_objectives_update("inComplete",2,1);//State,Item,ShowIt
+}
+
+void objectiveWarehouseTakenBathlet()
+//player has taken the bat'leth
+{
+//delete the fake bath'leth
+	$warehouseBatleth.remove();
+//move the indicator some where else, and re use it
+	$batlethSymbol.origin('3208 -290 830');
+//update Objectives - Found weapon
+	thread globalCoop_objectives_update("complete",2,1);//State,Item,ShowIt
+//give bat'leth to all players
+	coop_string_mp_waponToTakeAwayFromPlayer2 = "";//do not take away bat'leth anymore (MP)
+	globalCoop_player_giveAll("models/weapons/worldmodel-batleth.tik",.5);//give bath'leth (SP)
+//WEAPONS
+	coop_string_weapon1			= "models/weapons/worldmodel-batleth.tik";
+	coop_string_weapon2			= "models/weapons/worldmodel-tricorder-stx.tik";
+}
+
+void objectiveWarehouseExitDoor()
+{
+//update Objectives - bypass locked door
+	thread globalCoop_objectives_update("inComplete",3,1);//State,Item,ShowIt
+}
+
+
+void objectiveWarehouseLeft()
+{
+//update Objectives - Bypassed locked door
+	thread globalCoop_objectives_update("complete",3,1);//State,Item,ShowIt
+}
+
+void objectiveFedoutpostEntering()
+//player has entred the federation outpost
+{
+	legacy_savegame();
+//update Objectives - go to fedoutpost
+	globalCoop_objectives_update("complete",1,0);//State,Item,ShowIt
+//update Objectives - replicate
+	globalCoop_objectives_update("inComplete",4,0);//State,Item,ShowIt
+//update Objectives - Activate landing Platform Lights
+	thread globalCoop_objectives_update("inComplete",5,1);//State,Item,ShowIt
+}
+
+void objectiveFedoutpostReplicated()
+{
+	if(!float_approachedReplicatorSolvedPuzzle){
+		float_approachedReplicatorSolvedPuzzle = 1;
+	//Remove security clearance update puzzle
+		globalCoop_level_remove($Security_Clearance);
+	//update Objectives - replicate
+		thread globalCoop_objectives_update("complete",4,1);//State,Item,ShowIt
+	//put weapons into inventory
+		globalCoop_player_giveAll("models/weapons/worldmodel-phaser-STX.tik",-1);//(-1)->do not use(take in hands)
+		globalCoop_player_giveAll("models/weapons/worldmodel-compressionrifle.tik",-1);//(-1)->do not use(take in hands)
+	//update weapons manually to sort by best weapon
+		coop_string_weapon1			= "models/weapons/worldmodel-compressionrifle.tik";
+		coop_string_weapon2			= "models/weapons/worldmodel-batleth.tik";
+		coop_string_weapon3			= "models/weapons/worldmodel-phaser-STX.tik";
+		coop_string_weapon4			= "models/weapons/worldmodel-tricorder-stx.tik";
+	}
+}
+
+void objectiveFedoutpostLandingPadRoutePannelOpen()
+{
+//move the indicator some where else, and re use it
+	$batlethSymbol.hide();
+	$batlethSymbol.origin('5928 -629 110');
+//the pannel is open now!
+	float_landingPlatformPowerPannel=1;
+//update objectives
+	thread objectiveFedoutpostLandingPadRoutePannel();
+//wait a moment for the power pannels to open
+	wait(5);
+//SPAWN PUZZLE NOW
+	if(cvar_bool_multiplayer){
+		globalCoop_puzzle_add("landingplatformpower","objectiveFedoutpostLandingPadActivate",20,'6237 -1196 -92');
+	}else{
+		singleplayerSpawnRealTricorderPuzzle('6237 -1196 -92',5,"landingplatformpower","","objectiveFedoutpostLandingPadActivate");
+	}
+}
+
+
+void objectiveFedoutpostLandingPadRoutePannel()
+{
+//player has found the route pannel, now set objective to open it from tower
+	if(!float_landingPlatformPowerPannel){//open pannel
+		thread globalCoop_objectives_update("inComplete",6,1);//State,Item,ShowIt
+	}else{//player has opened the pannel from inside the tower allready
+		globalCoop_objectives_update("inComplete",6,0);//State,Item,ShowIt
+		thread globalCoop_objectives_update("complete",6,1);//State,Item,ShowIt
+	}
+//remove trigger now - Player shall not trigger the objectives twiche
+	globalCoop_level_remove($triggerObjectiveFedoutpostLandingPadRoutePannel);
+}
+
+
+void objectiveFedoutpostLandingPadActivate()
+{
+//update objectives - Route Power for the Landingpad Lights
+	thread globalCoop_objectives_update("complete",7,1);//State,Item,ShowIt
+	$padMSymbol.remove();
+//close pannel again
+	globalCoop_level_triggerEntity($landingplatformPowerDoor);
+//wait a moment 
+	wait(3);
+//Trigger the lights pannel, make it move up and accesable for the player
+	globalCoop_level_triggerEntity($landingplatformLightsPannel);
+//wait a moment for the pannel to move up
+	wait(5);
+//enable the trigger to turn on lights
+	$batlethSymbol.show();
+	$triggerLandingpadFedOutpostPower.triggerable();
+}
+
+
+void objectiveFedoutpostLandingPadLights()
+{
+	$batlethSymbol.origin('0 0 -1000');
+	legacy_savegame();
+//update objectives - Route Power for the Landingpad Lights
+	thread globalCoop_objectives_update("complete",5,1);//State,Item,ShowIt
+//Trigger the lights pannel, make it move DOWN again
+	globalCoop_level_triggerEntity($landingplatformLightsPannel);
+//when sequence is near end, then inizial objective
+	thread objectiveFedoutpostEvacuateToShuttle();
+	thread globalCoop_level_callReliably("globalCoop_mission_accomplished");
+//make shuttle come down and start landing sequence
+	float fMaxTime,fDepatureTime=120;
+	fMaxTime=getCvarInt("mp_timelimit");
+	if(fMaxTime == 0){
+		fMaxTime=40;
+	}
+	fMaxTime = (fMaxTime * 60);
+	if(fMaxTime - getLevelTime() < 200){
+		fDepatureTime=90;
+		if(fMaxTime - getLevelTime() < 120){
+			fDepatureTime=30;
+			if(fMaxTime - getLevelTime() < 60){
+				fDepatureTime=5;
+			}
+		}
+	}
+	wait(fDepatureTime);
+	thread shuttleLandingSequence();
+}
+
+void objectiveFedoutpostEvacuateToShuttle()
+{
+	$batlethSymbol.origin('7594 -323 130');
+	thread globalCoop_objectives_update("inComplete",8,1);//State,Item,ShowIt
+}
+
+void objectiveFedoutpostEvacuateToShuttleComplete()
+{
+	thread globalCoop_objectives_update("complete",8,1);//State,Item,ShowIt
+}
+
+
+

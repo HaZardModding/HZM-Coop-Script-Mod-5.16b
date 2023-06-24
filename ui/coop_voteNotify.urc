@@ -1,0 +1,43 @@
+menu "coop_voteNotify" 2560 480 NONE 0
+bgcolor 0 0 0 0
+align center left
+direction from_left 0.3
+depth 0.3
+noresize
+gamefocus
+
+resource 
+Widget
+{
+    name "Default"
+    rect 0 220 2560 80
+    fgcolor 			0 0 0 0
+    bgcolor 			0 0 0 0.7
+    borderstyle "NONE"
+}
+
+resource 
+Label
+{
+	title "$$NewVote$$"
+    name "Default"
+    rect 2 252 402 30
+    fgcolor 			0 0 0 1
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+	font startrekfilmbt-18
+	horizontaljustify left
+}
+resource 
+Label
+{
+	title "$$NewVote$$"
+    name "Default"
+    rect 0 250 400 30
+    fgcolor 			1.00 1.00 1.00 1.00
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+	font startrekfilmbt-18
+	horizontaljustify left
+}
+end.

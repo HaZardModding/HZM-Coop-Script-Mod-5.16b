@@ -1,0 +1,172 @@
+//coop_bugs, cinematic related stuff
+
+void cinematic_bugplants()
+//player aproaches the bugplants
+{
+	forcemusic("aux4");
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.4);
+	wait(.5);
+	globalCoop_cin_follow($cam1,$bugplantsShot1);
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera($cam1);
+	globalCoop_main_camFadeIn(.25);
+	thread globalCoop_cin_skipThread("cinematic_bugplantsSkip");
+	wait(2.5);
+	if(!cinematic_bugPlantsSpawned)
+	{
+		cinematic_bugPlantsSpawned=1;
+		globalCoop_level_triggerEntity($spawnerCinematicBugplantsBug1);
+	}
+	wait(1);
+	$CinematicBugplantsBug1.ai_off();
+	$CinematicBugplantsBug1.walkto("$CinematicBugplantsBug1Walkto","walk");
+	globalCoop_level_triggerEntity($spawnerCinematicBugplantsBug2);
+	globalCoop_level_triggerEntity($spawnerCinematicBugplantsBug3);
+	wait(1);
+	$CinematicBugplantsBug2.ai_off();
+	$CinematicBugplantsBug2.walkto("$CinematicBugplantsBug2Walkto");
+	$CinematicBugplantsBug3.ai_off();
+	$CinematicBugplantsBug3.walkto("$CinematicBugplantsBug3Walkto");
+	wait(7);
+	globalCoop_main_camFadeOut(.25);
+	wait(1);
+	globalCoop_cin_end();
+	globalCoop_level_removePath($bugplantsShot1);//remove camera path (trafic)
+//fade camera back in
+	globalCoop_main_camFadeIn(.25);
+}
+
+void cinematic_bugplantsSkip()
+{
+//bugs not yet spawned
+	if(!cinematic_bugPlantsSpawned)
+	{
+		cinematic_bugPlantsSpawned=1;
+		globalCoop_level_triggerEntity($spawnerCinematicBugplantsBug1);
+	}
+//end cinematic thread
+	killthread("cinematic_bugplants");
+//set new objective
+	if(coop_integer_cinematicIsActive > 0)
+	{
+		thread globalCoop_level_removePath($bugplantsShot1);//remove camera path (trafic)
+		globalCoop_main_camFadeOut(.25);
+		wait(.3);
+		globalCoop_cin_end();
+		globalCoop_level_removePath($bugplantsShot1);//remove camera path (trafic)
+	//fade camera back in
+		globalCoop_main_camFadeIn(.25);
+	}
+	forcemusic("normal");
+}
+
+void cinematic_lift()
+{
+	forcemusic("aux4");
+	entity eTrigger;
+	entity ePlayer;
+	eTrigger = getCurrentEntity();
+	if(doesEntityExist(eTrigger))
+	{
+		ePlayer = eTrigger.getLastActivatingEntity();
+	}
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.4);
+	wait(.5);
+	$liftPannel2On.hide();
+	$liftPannel2Off.show();
+	$liftOrigin.movetopos($liftLocation2.getOrigin());
+	$liftOrigin.time(4.5);
+	
+	spawn("actor","model","coop_bugs/munro.tik","targetname","munro","origin","11982.00 -4806.00 -867.00","angle","90");
+	globalCoop_main_waitAFrame();
+	globalCoop_cin_follow($cam1,$cinematic_liftOperational);
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera($cam1);
+	globalCoop_main_camFadeIn(.25);
+//wait for camera
+	$munro.ai_off();
+	$munro.headwatch($lift_dude,20);
+	$lift_dude.headwatch($munro,20);
+//wait for lift
+	waitFor($liftOrigin);
+//open lift door
+	$liftDoorOrigin.rotateZdown(90);
+	$liftDoorOrigin.time(2.5);
+	wait(2);
+//start dialog
+	globalCoop_dialog_play($munro,"m7l1/munro_federation.mp3",1,1024,0);
+//animate dude
+	$lift_dude.anim("conv-yes");
+//be greathful
+	globalCoop_dialog_play($lift_dude,"m4l1/attrex_help.mp3",1,1024,0);
+	$munro.hide();
+	$munro.notsolid();
+	wait(0.5);
+	globalCoop_main_camFadeOut(.25);
+	wait(1);
+	globalCoop_cin_end();
+	globalCoop_level_removePath($cinematic_liftOperational);//remove camera path (trafic)
+//relocate player
+	if(globalCoop_check_existingLivingEntity(ePlayer))
+	{
+		ePlayer.origin('12262 -5051 -967');
+		ePlayer.playerviewangles('0 0 0');
+	}
+	forcemusic("normal");
+//fade camera back in
+	globalCoop_main_camFadeIn(.25);
+//end cinematic
+}
+
+void pyramid_cinematicEnd()
+{
+	if(cvar_bool_multiplayer)
+	{
+		$pyramid_callVolumeVisual.remove();
+	}	
+	forcemusic("aux4");
+	$pyramid_beam0.show();
+	$pyramid_beam1.show();
+	$pyramid_beam2.show();
+	$pyramid_beam3.show();
+	$pyramid_cinematicEnd2.angles('35 180 0');
+	wait(2);
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.4);
+	wait(.5);
+	if(!doesEntityExist($munro))
+	{
+		spawn("actor","model","coop_bugs/munro.tik","targetname","munro","origin","19281 -4565 -70","angle","90");
+		wait(0.1);
+	}
+	else{
+		$munro.origin('19281 -4565 -70');
+	}
+	$munro.ai_off();
+	$munro.angle(90);
+	$munro.show();
+	globalCoop_cin_follow($cam1,$pyramid_cinematicEnd);
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera($cam1);
+	globalCoop_main_camFadeIn(.25);
+	$munro.walkto("$pyramid_cinematicEnd_walk");
+	wait(3);
+	//waitfor($munro);
+	globalCoop_actor_useWeapon($munro,"fed-tricorder-STX");
+	$munro.anim("tricorder_scan180");
+	wait(3);
+//fade out bright white
+	cam_fadeout(1,1,1,1,1);
+	wait(2);
+	globalCoop_dialog_play($munro,"combat/picard_report.mp3",1,2024,0);
+	wait(2);
+	cam_fadein(10,0,0,0,1);
+	cam_fadeout(0.01,0,0,0,1);
+	globalCoop_cin_end();
+//mission completed
+	wait(3);
+	globalCoop_mission_completed("");
+}
+

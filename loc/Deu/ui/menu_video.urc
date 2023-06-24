@@ -1,0 +1,4876 @@
+menu "video" 640 480 NONE 0
+bgcolor 0 0 0 0.4
+borderstyle NONE
+//fullscreen 1
+depth 0.2
+
+include "loc/Deu/ui/background.inc"
+
+
+
+resource 
+Label
+{
+    title "$$VideoSettings$$"
+	name "VideoBackground"
+	rect 157 87 326 16
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	font serpentinemedium-10
+	borderstyle "3D_BORDER"
+
+}
+
+
+resource
+Widget
+{
+	name "VideoBackground"
+	rect 157 103 326 105
+	fgcolor 1 1 1 1
+	bgcolor 0.000 0.000 0.000 0.75
+	borderstyle "OUTLINE_BORDER"
+	borderwidth 1
+	bordercolor 0.278 0.365 0.510 1.000
+}
+
+resource 
+Label
+{
+    title "$$GammaCorrections$$"
+	name "VideoBackground"
+	rect 157 212 326 16
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	font serpentinemedium-10
+	borderstyle "3D_BORDER"
+
+}
+
+resource
+Widget
+{
+	name "VideoBackground2"
+	rect 157 228 326 80
+	fgcolor 1 1 1 1
+	bgcolor 0.000 0.000 0.000 0.75
+	borderstyle "OUTLINE_BORDER"
+	borderwidth 1
+	bordercolor 0.278 0.365 0.510 1.000
+}
+
+resource
+Label
+{
+    name "tooltip_video"
+    rect 49 403 320 26
+    fgcolor 1 1 1 1
+    bgcolor 0 0 0 0
+    font tahoma-8
+    
+    verticaljustify top
+    horizontaljustify left
+}
+
+resource
+Button
+{
+title "$$Controls$$"
+name "Default"
+rect 44 55 138 32
+fgcolor 0.12 0.15 0.25 1.00
+bgcolor 1.00 1.00 1.00 0.00
+
+borderstyle "none"
+
+font serpentinemedium-12
+horizontaljustify center
+verticaljustify center
+
+hovershader menu/generic/button-hover
+pressedshader menu/generic/button-press
+hovercommand "globalwidgetcommand tooltip_video title \"$$ChangeKeyboardSettings$$\""
+hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+
+stuffcommand "transitionmenu controls 0"
+
+hoversound sound/misc/menu/hover.wav
+clicksound sound/misc/menu/click.wav
+}
+
+resource
+Button
+{
+title "$$Video$$"
+name "Default"
+rect 182 55 138 32
+//fgcolor 0.12 0.15 0.25 1.00
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+
+font serpentinemedium-12
+horizontaljustify center
+verticaljustify center
+
+//hovershader menu/generic/button-hover
+//pressedshader menu/generic/button-press
+//hovercommand "globalwidgetcommand tooltip_video title \"$$ChangeVideoSettings$$\""
+//hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+
+//stuffcommand "transitionmenu  video 0"
+
+//hoversound sound/misc/menu/hover.wav
+//clicksound sound/misc/menu/click.wav
+}
+
+resource
+Button
+{
+title "$$Audio$$"
+name "Default"
+rect 320 55 138 32
+fgcolor 0.12 0.15 0.25 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+
+
+font serpentinemedium-12
+horizontaljustify center
+verticaljustify center
+
+hovershader menu/generic/button-hover
+pressedshader menu/generic/button-press
+hovercommand "globalwidgetcommand tooltip_video title \"$$ChangeAudioSettings$$\""
+hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+
+stuffcommand "transitionmenu  audio 0"
+
+hoversound sound/misc/menu/hover.wav
+clicksound sound/misc/menu/click.wav
+
+}
+
+resource
+Button
+{
+title "$$GameOptions$$"
+name "Default"
+rect 458 55 138 32
+fgcolor 0.12 0.15 0.25 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+
+font serpentinemedium-12
+horizontaljustify center
+verticaljustify center
+
+hovershader menu/generic/button-hover
+pressedshader menu/generic/button-press
+hovercommand "globalwidgetcommand tooltip_video title \"$$ChangeGameSettings$$\""
+hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+
+stuffcommand "transitionmenu  gameoptions 0"
+
+hoversound sound/misc/menu/hover.wav
+clicksound sound/misc/menu/click.wav
+
+}
+
+resource
+widget
+{
+	rect 	 371 399 256 32
+	fgcolor 1.00 1.00 0.00 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle "none"
+	
+	shader menu/main/credits
+}
+
+resource
+Button
+{
+	title "$$Apply$$"
+	name 	"Default"
+	rect 	 424 401 123 26
+	font serpentinemedium-12
+	fgcolor 		1.000 1.000 1.000 1.000
+	bgcolor 		0.000 0.000 0.000 0.000
+
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+
+	//borderstyle "BORDER_OUTLINE"
+	//borderwidth 1
+	//bordercolor 0.12 0.15 0.25 1.00
+
+    stuffcommand "ui_checkrestart"
+    
+    hovercommand "globalwidgetcommand tooltip_video title \"$$ApplyCurrentChangesToVideo$$\""
+    hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+    
+    clicksound sound/misc/menu/click.wav
+}
+
+resource
+Button
+{
+    title "$$MainMenu$$"
+    name "Default"
+    rect 435 428 96 32
+    fgcolor 0.12 0.15 0.25 1.00
+    bgcolor 1.00 1.00 1.00 0.00
+    borderstyle "None"
+    stuffcommand "popmenu 0"
+    font serpentinemedium-12
+    hovershader menu/generic/button-hover
+    pressedshader menu/generic/button-press
+    hovercommand "globalwidgetcommand tooltip_video title \"$$ReturnToMainMenu$$\""
+    hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+    
+    clicksound sound/misc/menu/back1.wav
+
+}
+
+
+//resource
+//Label
+//{
+//name "Default"
+//rect 32 43 256 256
+//fgcolor 1.00 1.00 1.00 1.00
+//bgcolor 1.00 1.00 1.00 0.00
+//borderstyle "NONE"
+//shader "textures/menu/video_1"
+//}
+
+
+resource
+Label
+{
+title "$$Hidden$$"
+name "Default"
+rect 289 446 59 24
+fgcolor 0.00 0.00 0.00 0.00
+bgcolor 0.50 0.50 0.50 0.00
+borderstyle "RAISED"
+linkcvar "r_mode"
+font serpentinemedium-10
+horizontaljustify left
+}
+
+
+//Video Mode Label
+resource
+Label
+{
+    title "$$VideoMode$$"
+    name "Default"
+    rect 162 108 156 16
+    fgcolor 1.00 1.00 1.00 1.00
+    bgcolor 0.122 0.157 0.251 1.000
+    borderstyle "3D_BORDER"
+    font serpentinemedium-10
+    horizontaljustify right
+	
+    hovercommand "globalwidgetcommand tooltip_video title \"$$SetVideoResolution$$\""
+    hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+}
+
+//Video Mode Display
+resource
+SwitchBox
+{
+    name "Default"
+    rect 322 108 140 16
+    fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.750
+    borderstyle "OUTLINE_BORDER"
+    bordercolor 0.122 0.157 0.251 1.000
+    
+    linkcvar "r_mode"
+
+    option "640 x 480"      "set r_mode 3" 3
+    option "800 x 600"      "set r_mode 4" 4
+    option "1024 x 768"     "set r_mode 6" 6
+    option "1152 x 864"     "set r_mode 7" 7
+    option "1280 x 1024"    "set r_mode 8" 8
+    option "1600 x 1200"    "set r_mode 9" 9
+    option "Selbstdefiniert"    "set r_mode -1" -1
+    
+    font serpentinemedium-10
+    hovercommand "globalwidgetcommand tooltip_video title \"$$SetVideoResolution$$\""
+    hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+    
+    clicksound sound/misc/menu/click.wav
+}
+
+//Video Mode Pull Down Menu
+resource
+PulldownMenuContainer
+{
+    name "reslist"
+    rect 462 108 16 16
+    fgcolor                 0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+    
+    font serpentinemedium-10
+    
+    borderstyle "NONE"
+    menushader "MENU" "textures/menu/pulldownarrow"
+    selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+    addpopup "MENU" "640 x 480"     command "set r_mode 3"
+    addpopup "MENU" "800 x 600"     command "set r_mode 4"
+    addpopup "MENU" "1024 x 768"    command "set r_mode 6"
+    addpopup "MENU" "1152 x 864"    command "set r_mode 7"
+    addpopup "MENU" "1280 x 1024"   command "set r_mode 8"
+    addpopup "MENU" "1600 x 1200"   command "set r_mode 9"
+    addpopup "MENU" "Selbstdefiniert"   command "set r_mode -1"
+    popup_width "MENU" 160
+    
+    font serpentinemedium-10
+    hovercommand "globalwidgetcommand tooltip_video title \"$$SetVideoResolution$$\""
+    hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+    
+    clicksound sound/misc/menu/click.wav
+}
+
+// Color Depth Label
+resource 
+Label
+{
+    title "$$ColorDepth$$"
+    name "Default"
+    rect 162 128 156 16
+    fgcolor 1.00 1.00 1.00 1.00
+    bgcolor 0.122 0.157 0.251 1.000
+    borderstyle "3D_BORDER"
+    font serpentinemedium-10
+    horizontaljustify right
+    hovercommand "globalwidgetcommand tooltip_video title \"$$SetColorDepth$$\""
+    hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+}
+
+//Color Depth Drop Down
+resource
+SwitchBox
+{
+    name "Default"
+    rect 322 128 140 16
+    fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.750
+    borderstyle "OUTLINE_BORDER"
+    bordercolor 0.122 0.157 0.251 1.000
+    
+    linkcvar "r_texturebits"
+    
+    option "$$Default$$"    "set r_texturebits 0"   0
+    option "$$16Bit$$"      "set r_texturebits 16" 16
+    option "$$32Bit$$"      "set r_texturebits 32" 32
+    
+    font serpentinemedium-10
+    hovercommand "globalwidgetcommand tooltip_video title \"$$SetColorDepth$$\""
+    hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+    
+    clicksound sound/misc/menu/click.wav
+}
+
+//Color Depth Container.
+resource
+PulldownMenuContainer
+{
+    name "colorlist"
+    rect 462 128 16 16
+    fgcolor                 0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+    borderstyle "NONE"
+    
+    menushader "MENU" "textures/menu/pulldownarrow"
+    selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+    
+    addpopup "MENU" "$$Default$$"   command "set r_texturebits 0"
+    addpopup "MENU" "$$16Bit$$"     command "set r_texturebits 16"
+    addpopup "MENU" "$$32Bit$$"     command "set r_texturebits 32"
+    popup_width "MENU" 144
+    
+    font serpentinemedium-10
+    hovercommand "globalwidgetcommand tooltip_video title \"$$SetColorDepth$$\""
+    hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+}
+
+
+//Texture Detail Label
+resource 
+Label
+{
+    title "$$TextureQuality$$"
+    name	"Default"
+    rect 162 148 156 16 
+    fgcolor 1.00 1.00 1.00 1.00
+    bgcolor 0.122 0.157 0.251 1.000
+    borderstyle "3D_BORDER"
+    font serpentinemedium-10
+    horizontaljustify right
+    hovercommand "globalwidgetcommand tooltip_video title \"$$SetTextureDetail$$\""
+    hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+}
+
+//Texture Detail Display
+resource
+SwitchBox
+{
+    name "Default"
+    rect 322 148 140 16
+    fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.750
+    borderstyle "OUTLINE_BORDER"
+    bordercolor 0.122 0.157 0.251 1.000
+    
+    linkcvar "r_picmip"
+    
+    option "$$Low$$"        "set r_picmip 2" 2
+    option "$$Medium$$"     "set r_picmip 1" 1
+    option "$$High$$"       "set r_picmip 0" 0
+
+    font serpentinemedium-10
+    
+    hovercommand "globalwidgetcommand tooltip_video title \"$$SetTextureDetail$$\""
+    hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+    
+    clicksound sound/misc/menu/click.wav
+}
+
+
+//Texture Detail Container
+resource
+PulldownMenuContainer
+{
+    name "Default"
+    rect 462 148 16 16
+    fgcolor                 0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+    borderstyle "NONE"
+    
+    menushader "MENU" "textures/menu/pulldownarrow"
+    selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+    
+    addpopup "MENU" "$$Low$$" command "set r_picmip 2"
+    addpopup "MENU" "$$Medium$$" command "set r_picmip 1"
+    addpopup "MENU" "$$High$$" command "set r_picmip 0"
+    popup_width "MENU" 144
+    
+    font serpentinemedium-10
+    hovercommand "globalwidgetcommand tooltip_video title \"$$SetTextureDetail$$\""
+    hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+    
+    clicksound sound/misc/menu/click.wav
+}
+
+
+
+//Texture Filtering
+resource 
+Label
+{
+    title "$$TextureFilter$$"
+    name	"Default"
+    rect 162 168 156 16
+    fgcolor 1.00 1.00 1.00 1.00
+    bgcolor 0.122 0.157 0.251 1.000
+    borderstyle "3D_BORDER"
+    font serpentinemedium-10
+    
+    horizontaljustify right
+    hovercommand "globalwidgetcommand tooltip_video title \"$$SetTextureFilter$$\""
+    hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+}
+
+resource
+SwitchBox
+{
+    name "Default"
+    rect 322 168 140 16
+    fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.750
+    borderstyle "OUTLINE_BORDER"
+    bordercolor 0.122 0.157 0.251 1.000
+    
+    linkcvar "r_texturemode"
+    
+    option "$$Bilinear$$"   "set r_texturemode gl_linear_mipmap_nearest" gl_linear_mipmap_nearest
+    option "$$Trilinear$$"  "set r_texturemode gl_linear_mipmap_linear" gl_linear_mipmap_linear
+
+    font serpentinemedium-10
+    hovercommand "globalwidgetcommand tooltip_video title \"$$SetTextureFilter$$\""
+    hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+    
+    clicksound sound/misc/menu/click.wav
+
+}
+
+resource
+PulldownMenuContainer
+{
+    name "Default"
+    rect 462 168 16 16
+    fgcolor                 0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+    
+    borderstyle "NONE"
+    
+    menushader "MENU" "textures/menu/pulldownarrow"
+    selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+    
+    addpopup "MENU" "$$Bilinear$$"  command "set r_texturemode gl_linear_mipmap_nearest"
+    addpopup "MENU" "$$Trilinear$$" command "set r_texturemode gl_linear_mipmap_linear"
+    
+    popup_width "MENU" 144
+    
+    font serpentinemedium-10
+    hovercommand "globalwidgetcommand tooltip_video title \"$$SetTextureFilter$$\""
+    hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+    
+    clicksound sound/misc/menu/click.wav
+
+}
+
+//Brightness
+resource 
+Label
+{
+title "$$Brightness$$"
+name	"Default"
+rect 162 233 156 16
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 0.122 0.157 0.251 1.000
+borderstyle "3D_BORDER"
+font serpentinemedium-10
+horizontaljustify right
+hovercommand "globalwidgetcommand tooltip_video title \"$$SetBrightness$$\""
+hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+}
+
+//Brightness
+resource 
+widget
+{
+name	"Default"
+rect 162 253 316 48
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 0.00 0.00 0.00 0.00
+
+shader "sysimg/menu/calibration.tga"
+}
+
+//Brightness
+resource 
+Label
+{
+name	"Default"
+title "$$AllShadesShouldBeDistinct$$"
+rect 162 253 316 24
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 0.00 0.00 0.00 0.00
+font serpentinelight-10
+horizontaljustify left
+verticaljustify center
+}
+
+resource
+Slider
+{
+name "Default"
+rect 322 233 156 16
+fgcolor 0.953 0.667 0.271 1.000
+bgcolor 0.000 0.000 0.000 0.750
+borderstyle "OUTLINE_BORDER"
+bordercolor 0.122 0.157 0.251 1.000
+linkcvar "r_gamma"
+slidertype float
+setrange 0.5 3
+stepsize 0.1
+hovercommand "globalwidgetcommand tooltip_video title \"$$SetBrightness$$\""
+hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+clicksound sound/misc/menu/click.wav
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//COOP MOD EXTENSION////////////////////////////////////////////////////////////
+resource 
+Label
+{
+    title "Blickwinkel"
+	name "fieldOfViewTitle"
+	rect 34 87 120 16
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	font serpentinemedium-10
+	borderstyle "3D_BORDER"
+}
+resource
+Widget
+{
+	name "fieldOfViewWidget"
+	rect 34 103 120 38
+	fgcolor 1 1 1 1
+	bgcolor 0.000 0.000 0.000 0.75
+	borderstyle "OUTLINE_BORDER"
+	borderwidth 1
+	bordercolor 0.278 0.365 0.510 1.000
+}
+
+resource 
+Label
+{
+name	"fieldOfViewCurrent"
+rect 34 124 26 16
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 0.00 0.00 0.00 0.00
+font serpentinelight-10
+horizontaljustify center
+verticaljustify center
+linkcvar "userfov"
+}
+
+resource
+Button
+{
+title "Reset"
+name "fieldOfViewReset"
+rect 64 124 86 14
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 0.00 0.00 0.70
+borderstyle "NONE"
+stuffcommand "seta userfov 80;seta coop_fov \"userfov 80\""
+ordernumber 1
+font serpentinelight-8
+hovershader menu/generic/button-hover
+pressedshader menu/generic/button-press
+clicksound sound/misc/menu/click.wav
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+resource 
+Label
+{
+    title "Dritte Person"
+	name "3rdPersonCameraTitle"
+	//rect 486 87 120 16
+	rect 34 180 120 16
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	font serpentinemedium-10
+	borderstyle "3D_BORDER"
+
+}
+resource
+Widget
+{
+	name "3rdPersonCameraWidget"
+	rect 34 196 120 164
+	fgcolor 1 1 1 1
+	bgcolor 0.000 0.000 0.000 0.75
+	borderstyle "OUTLINE_BORDER"
+	borderwidth 1
+	bordercolor 0.278 0.365 0.510 1.000 
+}
+resource 
+Label
+{
+    title "Distanz Vers."
+	name "3rdPersonCameraTitle"
+	horizontaljustify right
+	rect 33 196 120 16
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.278 0.365 0.510 0.000
+	font serpentinemedium-10
+	borderstyle "NONE"
+}
+resource
+Button
+{
+title "R"
+name "fieldOfViewReset"
+rect 35 198 16 10
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 0.00 0.00 0.70
+borderstyle "3D_BORDER"
+stuffcommand "seta cg_cameradist 120"
+ordernumber 1
+font serpentinelight-8
+hovershader menu/generic/button-hover
+clicksound sound/misc/menu/click.wav
+}
+resource
+Slider
+{
+name "3rdPersonCameraSlider"
+rect 36 213 116 16
+fgcolor 0.953 0.667 0.271 1.000
+bgcolor 0.000 0.000 0.000 0.750
+borderstyle "OUTLINE_BORDER"
+bordercolor 0.122 0.157 0.251 1.000
+linkcvar "cg_cameradist"
+slidertype integer
+setrange -50 200
+stepsize 2
+clicksound sound/misc/menu/click.wav
+}
+resource 
+Label
+{
+    title "Höhen Vers."
+	name "3rdPersonCameraTitle"
+	horizontaljustify right
+	rect 33 232 120 16
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.278 0.365 0.510 0.000
+	font serpentinemedium-10
+	borderstyle "NONE"
+}
+resource
+Button
+{
+title "R"
+name "fieldOfViewReset"
+rect 35 234 16 10
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 0.00 0.00 0.70
+borderstyle "3D_BORDER"
+stuffcommand "seta cg_cameraheight 18"
+ordernumber 1
+font serpentinelight-8
+hovershader menu/generic/button-hover
+clicksound sound/misc/menu/click.wav
+}
+resource
+Slider
+{
+name "3rdPersonCameraSlider"
+rect 36 250 116 16
+fgcolor 0.953 0.667 0.271 1.000
+bgcolor 0.000 0.000 0.000 0.750
+borderstyle "OUTLINE_BORDER"
+bordercolor 0.122 0.157 0.251 1.000
+linkcvar "cg_cameraheight"
+slidertype integer
+setrange -50 120
+stepsize 2
+clicksound sound/misc/menu/click.wav
+}
+resource 
+Label
+{
+    title "Vert. Versatz"
+	name "3rdPersonCameraTitle"
+	rect 33 268 120 16
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.278 0.365 0.510 0.000
+	font serpentinemedium-10
+	borderstyle "NONE"
+	horizontaljustify right
+}
+resource
+Button
+{
+title "R"
+name "fieldOfViewReset"
+rect 35 270 16 10
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 0.00 0.00 0.70
+borderstyle "3D_BORDER"
+stuffcommand "seta cg_cameraverticaldisplacement -2"
+ordernumber 1
+font serpentinelight-8
+hovershader menu/generic/button-hover
+clicksound sound/misc/menu/click.wav
+}
+resource
+Slider
+{
+name "3rdPersonCameraSlider"
+rect 36 287 116 16
+fgcolor 0.953 0.667 0.271 1.000
+bgcolor 0.000 0.000 0.000 0.750
+borderstyle "OUTLINE_BORDER"
+bordercolor 0.122 0.157 0.251 1.000
+linkcvar "cg_cameraverticaldisplacement"
+slidertype integer
+setrange -100 120
+stepsize 2
+clicksound sound/misc/menu/click.wav
+}
+resource 
+Label
+{
+    title "Horz. Versatz"
+	name "3rdPersonCameraTitle"
+	horizontaljustify right
+	rect 33 305 120 16
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.278 0.365 0.510 0.000
+	font serpentinemedium-10
+	borderstyle "NONE"
+}
+resource
+Button
+{
+title "R"
+name "fieldOfViewReset"
+rect 35 307 16 10
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 0.00 0.00 0.70
+borderstyle "3D_BORDER"
+stuffcommand "seta cg_camerahorizontaloffset 0"
+ordernumber 1
+font serpentinelight-8
+hovershader menu/generic/button-hover
+clicksound sound/misc/menu/click.wav
+}
+resource
+Slider
+{
+name "3rdPersonCameraSlider"
+rect 36 324 116 16
+fgcolor 0.953 0.667 0.271 1.000
+bgcolor 0.000 0.000 0.000 0.750
+borderstyle "OUTLINE_BORDER"
+bordercolor 0.122 0.157 0.251 1.000
+linkcvar "cg_camerahorizontaloffset"
+slidertype integer
+setrange -100 100
+stepsize 2
+clicksound sound/misc/menu/click.wav
+}
+
+resource
+CheckBox
+{
+title "3. Person"
+name "toggle3rdPerson"
+rect 55 344 100 12
+
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 0.00 0.00 0.00 0.00
+
+shadercolor             0.953 0.667 0.271 1.000
+hovershadercolor        0.953 0.667 0.271 1.000
+armedshadercolor        0.953 0.667 0.271 1.000
+selectedshadercolor     0.953 0.667 0.271 1.000
+	
+borderstyle "3D_BORDER"
+linkcvar "cg_3rd_person"
+checked_command "seta coop_3rd \"exec coop_mod/cfg/3rdOn.cfg\"\n"
+unchecked_command "seta coop_3rd \"exec coop_mod/cfg/3rdOff.cfg\"\n"
+
+checked_shader "textures/menu/checkbox_checked"
+unchecked_shader "textures/menu/checkbox_unchecked"
+
+hovershader menu/generic/button-hover
+armedshader menu/generic/button-press
+
+ordernumber 1
+font serpentinelight-8
+hovershader menu/generic/button-hover
+clicksound sound/misc/menu/click.wav
+
+hovercommand "globalwidgetcommand tooltip_video title \"3. Person Ansicht wechseln\""
+hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+resource 
+Label
+{
+    title "Selbstdefiniert"
+	name "customResTitle"
+	rect 486 87 120 16
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	font serpentinemedium-10
+	borderstyle "3D_BORDER"
+	cvarvisibility "r_mode" "-1" "=="
+}
+resource
+Widget
+{
+	name "customResWidget"
+	rect 486 103 120 120
+	fgcolor 1 1 1 1
+	bgcolor 0.000 0.000 0.000 0.75
+	borderstyle "OUTLINE_BORDER"
+	borderwidth 1
+	bordercolor 0.278 0.365 0.510 1.000
+	cvarvisibility "r_mode" "-1" "=="
+}
+
+resource 
+Label
+{
+    title "Breite"
+	name "customResWidthTitle"
+	rect 488 105 116 14
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	font serpentinemedium-10
+	borderstyle "3D_BORDER"
+	cvarvisibility "r_mode" "-1" "=="
+}
+
+resource
+Field
+{
+	name			"Default"
+	rect 520 121 50 12
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.000 0.000 0.000 0.850
+	borderstyle	"OUTLINE_BORDER"
+	bordercolor	0.125 0.157 0.251 1.000
+	font serpentinemedium-8
+    clicksound sound/misc/menu/click.wav
+	cvarvisibility "r_mode" "-1" "=="
+	
+	maxcharacters   5
+	linkcvar		"r_customwidth"
+	stuffcommand    "ui_setrangecvar r_customwidth $e$ 0 99999"
+}
+
+resource 
+Label
+{
+    title "Höhe"
+	name "customResHeightTitle"
+	rect 488 144 116 14
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	font serpentinemedium-10
+	borderstyle "3D_BORDER"
+	cvarvisibility "r_mode" "-1" "=="
+}
+
+resource
+Field
+{
+	name			"Default"
+	rect 520 160 50 12
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.000 0.000 0.000 0.850
+	borderstyle	"OUTLINE_BORDER"
+	bordercolor	0.125 0.157 0.251 1.000
+	font serpentinemedium-8
+    clicksound sound/misc/menu/click.wav
+	cvarvisibility "r_mode" "-1" "=="
+	
+	maxcharacters   5
+	linkcvar		"r_customheight"
+	stuffcommand    "ui_setrangecvar r_customheight $e$ 0 99999"
+}
+
+
+resource 
+Label
+{
+    title "Auflösung"
+	name "customResTitle"
+	rect 488 190 116 14
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	font serpentinemedium-10
+	borderstyle "3D_BORDER"
+	cvarvisibility "r_mode" "-1" "=="
+}
+resource 
+Label
+{
+	title ""
+	name "customResTitle"
+	rect 488 206 116 16
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0 0 0 0
+	bordercolor	0.125 0.157 0.251 1.000
+	font serpentinemedium-10
+	borderstyle	"OUTLINE_BORDER"
+	cvarvisibility "r_mode" "-1" "=="
+}
+resource 
+Label
+{
+	linkcvar "r_customwidth"
+	name "customResTitle"
+	rect 488 206 50 14
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0 0 0 0.3
+	font serpentinemedium-10
+	borderstyle	"OUTLINE_BORDER"
+	cvarvisibility "r_mode" "-1" "=="
+}
+resource 
+Label
+{
+    title "x"
+	name "customResTitle"
+	rect 536 206 16 14
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0 0 0 0.3
+	font serpentinemedium-10
+	borderstyle	"OUTLINE_BORDER"
+	cvarvisibility "r_mode" "-1" "=="
+}
+resource 
+Label
+{
+    linkcvar "r_customheight"
+	name "customResTitle"
+	rect 552 206 50 14
+	fgcolor 1.000 1.000 1.000 1.000
+	bgcolor 0 0 0 0.3
+	font serpentinemedium-10
+	borderstyle	"OUTLINE_BORDER"
+	cvarvisibility "r_mode" "-1" "=="
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+resource
+CheckBox
+{
+title "$$FullScreen$$"
+name "Default"
+rect 162 188 120 16
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 0.50 0.50 0.50 0.00
+
+shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 1.000
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 1.000
+
+borderstyle "NONE"
+linkcvar "r_fullscreen"
+horizontaljustify left
+checked_shader "textures/menu/checkbox_checked"
+unchecked_shader "textures/menu/checkbox_unchecked"
+hovershader menu/generic/button-hover
+armedshader menu/generic/button-press
+font serpentinemedium-10
+hovercommand "globalwidgetcommand tooltip_video title \"$$SetFullScreen$$\""
+hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+
+clicksound sound/misc/menu/click.wav
+
+}
+
+
+
+
+//Advanced Video
+resource
+Button
+{
+title "$$Advanced$$"
+name "Default"
+rect 420 375 128 32
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 0.00 0.00 0.00 0.00
+borderstyle "NONE"
+stuffcommand "showmenu promptadvancedvideo\n"
+//shader "textures/menu/B_apply"
+//hovershader "textures/menu/B_apply_selected"
+//clicksound sound/misc/menu/select.wav
+ordernumber 1
+font serpentinemedium-10
+hovershader menu/generic/button-hover
+pressedshader menu/generic/button-press
+hovercommand "globalwidgetcommand tooltip_video title \"$$AdvancedVideoSettings$$\""
+hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+clicksound sound/misc/menu/click.wav
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//COOP MOD EXTENSION////////////////////////////////////////////////////////////
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 50\nseta coop_fov \"userfov 50\"" 
+cvarvisibility "userfov" "51" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 51\nseta coop_fov \"userfov 51\"" 
+cvarvisibility "userfov" "52" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 52\nseta coop_fov \"userfov 52\"" 
+cvarvisibility "userfov" "53" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 53\nseta coop_fov \"userfov 53\"" 
+cvarvisibility "userfov" "54" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 54\nseta coop_fov \"userfov 54\"" 
+cvarvisibility "userfov" "55" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 55\nseta coop_fov \"userfov 55\"" 
+cvarvisibility "userfov" "56" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 56\nseta coop_fov \"userfov 56\"" 
+cvarvisibility "userfov" "57" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 57\nseta coop_fov \"userfov 57\"" 
+cvarvisibility "userfov" "58" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 58\nseta coop_fov \"userfov 58\"" 
+cvarvisibility "userfov" "59" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 59\nseta coop_fov \"userfov 59\"" 
+cvarvisibility "userfov" "60" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 60\nseta coop_fov \"userfov 60\"" 
+cvarvisibility "userfov" "61" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 61\nseta coop_fov \"userfov 61\"" 
+cvarvisibility "userfov" "62" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 62\nseta coop_fov \"userfov 62\"" 
+cvarvisibility "userfov" "63" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 63\nseta coop_fov \"userfov 63\"" 
+cvarvisibility "userfov" "64" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 64\nseta coop_fov \"userfov 64\"" 
+cvarvisibility "userfov" "65" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 65\nseta coop_fov \"userfov 65\"" 
+cvarvisibility "userfov" "66" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 66\nseta coop_fov \"userfov 66\"" 
+cvarvisibility "userfov" "67" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 67\nseta coop_fov \"userfov 67\"" 
+cvarvisibility "userfov" "68" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 68\nseta coop_fov \"userfov 68\"" 
+cvarvisibility "userfov" "69" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 69\nseta coop_fov \"userfov 69\"" 
+cvarvisibility "userfov" "70" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 70\nseta coop_fov \"userfov 70\"" 
+cvarvisibility "userfov" "71" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 71\nseta coop_fov \"userfov 71\"" 
+cvarvisibility "userfov" "72" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 72\nseta coop_fov \"userfov 72\"" 
+cvarvisibility "userfov" "73" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 73\nseta coop_fov \"userfov 73\"" 
+cvarvisibility "userfov" "74" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 74\nseta coop_fov \"userfov 74\"" 
+cvarvisibility "userfov" "75" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 75\nseta coop_fov \"userfov 75\"" 
+cvarvisibility "userfov" "76" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 76\nseta coop_fov \"userfov 76\"" 
+cvarvisibility "userfov" "77" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 77\nseta coop_fov \"userfov 77\"" 
+cvarvisibility "userfov" "78" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 78\nseta coop_fov \"userfov 78\"" 
+cvarvisibility "userfov" "79" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 79\nseta coop_fov \"userfov 79\"" 
+cvarvisibility "userfov" "80" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 80\nseta coop_fov \"userfov 80\"" 
+cvarvisibility "userfov" "81" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 81\nseta coop_fov \"userfov 81\"" 
+cvarvisibility "userfov" "82" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 82\nseta coop_fov \"userfov 82\"" 
+cvarvisibility "userfov" "83" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 83\nseta coop_fov \"userfov 83\"" 
+cvarvisibility "userfov" "84" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 84\nseta coop_fov \"userfov 84\"" 
+cvarvisibility "userfov" "85" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 85\nseta coop_fov \"userfov 85\"" 
+cvarvisibility "userfov" "86" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 86\nseta coop_fov \"userfov 86\"" 
+cvarvisibility "userfov" "87" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 87\nseta coop_fov \"userfov 87\"" 
+cvarvisibility "userfov" "88" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 88\nseta coop_fov \"userfov 88\"" 
+cvarvisibility "userfov" "89" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 89\nseta coop_fov \"userfov 89\"" 
+cvarvisibility "userfov" "90" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 90\nseta coop_fov \"userfov 90\"" 
+cvarvisibility "userfov" "91" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 91\nseta coop_fov \"userfov 91\"" 
+cvarvisibility "userfov" "92" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 92\nseta coop_fov \"userfov 92\"" 
+cvarvisibility "userfov" "93" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 93\nseta coop_fov \"userfov 93\"" 
+cvarvisibility "userfov" "94" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 94\nseta coop_fov \"userfov 94\"" 
+cvarvisibility "userfov" "95" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 95\nseta coop_fov \"userfov 95\"" 
+cvarvisibility "userfov" "96" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 96\nseta coop_fov \"userfov 96\"" 
+cvarvisibility "userfov" "97" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 97\nseta coop_fov \"userfov 97\"" 
+cvarvisibility "userfov" "98" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 98\nseta coop_fov \"userfov 98\"" 
+cvarvisibility "userfov" "99" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 99\nseta coop_fov \"userfov 99\"" 
+cvarvisibility "userfov" "100" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 100\nseta coop_fov \"userfov 100\"" 
+cvarvisibility "userfov" "101" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 101\nseta coop_fov \"userfov 101\"" 
+cvarvisibility "userfov" "102" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 102\nseta coop_fov \"userfov 102\"" 
+cvarvisibility "userfov" "103" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 103\nseta coop_fov \"userfov 103\"" 
+cvarvisibility "userfov" "104" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 104\nseta coop_fov \"userfov 104\"" 
+cvarvisibility "userfov" "105" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 105\nseta coop_fov \"userfov 105\"" 
+cvarvisibility "userfov" "106" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 106\nseta coop_fov \"userfov 106\"" 
+cvarvisibility "userfov" "107" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 107\nseta coop_fov \"userfov 107\"" 
+cvarvisibility "userfov" "108" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 108\nseta coop_fov \"userfov 108\"" 
+cvarvisibility "userfov" "109" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 109\nseta coop_fov \"userfov 109\"" 
+cvarvisibility "userfov" "110" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 110\nseta coop_fov \"userfov 110\"" 
+cvarvisibility "userfov" "111" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 111\nseta coop_fov \"userfov 111\"" 
+cvarvisibility "userfov" "112" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 112\nseta coop_fov \"userfov 112\"" 
+cvarvisibility "userfov" "113" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 113\nseta coop_fov \"userfov 113\"" 
+cvarvisibility "userfov" "114" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 114\nseta coop_fov \"userfov 114\"" 
+cvarvisibility "userfov" "115" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 115\nseta coop_fov \"userfov 115\"" 
+cvarvisibility "userfov" "116" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 116\nseta coop_fov \"userfov 116\"" 
+cvarvisibility "userfov" "117" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 117\nseta coop_fov \"userfov 117\"" 
+cvarvisibility "userfov" "118" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 118\nseta coop_fov \"userfov 118\"" 
+cvarvisibility "userfov" "119" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 119\nseta coop_fov \"userfov 119\"" 
+cvarvisibility "userfov" "120" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 120\nseta coop_fov \"userfov 120\"" 
+cvarvisibility "userfov" "121" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 121\nseta coop_fov \"userfov 121\"" 
+cvarvisibility "userfov" "122" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 122\nseta coop_fov \"userfov 122\"" 
+cvarvisibility "userfov" "123" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 123\nseta coop_fov \"userfov 123\"" 
+cvarvisibility "userfov" "124" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 124\nseta coop_fov \"userfov 124\"" 
+cvarvisibility "userfov" "125" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 125\nseta coop_fov \"userfov 125\"" 
+cvarvisibility "userfov" "126" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 126\nseta coop_fov \"userfov 126\"" 
+cvarvisibility "userfov" "127" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 127\nseta coop_fov \"userfov 127\"" 
+cvarvisibility "userfov" "128" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 128\nseta coop_fov \"userfov 128\"" 
+cvarvisibility "userfov" "129" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 129\nseta coop_fov \"userfov 129\"" 
+cvarvisibility "userfov" "130" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 130\nseta coop_fov \"userfov 130\"" 
+cvarvisibility "userfov" "131" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 131\nseta coop_fov \"userfov 131\"" 
+cvarvisibility "userfov" "132" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 132\nseta coop_fov \"userfov 132\"" 
+cvarvisibility "userfov" "133" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 133\nseta coop_fov \"userfov 133\"" 
+cvarvisibility "userfov" "134" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 134\nseta coop_fov \"userfov 134\"" 
+cvarvisibility "userfov" "135" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 135\nseta coop_fov \"userfov 135\"" 
+cvarvisibility "userfov" "136" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 136\nseta coop_fov \"userfov 136\"" 
+cvarvisibility "userfov" "137" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 137\nseta coop_fov \"userfov 137\"" 
+cvarvisibility "userfov" "138" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 138\nseta coop_fov \"userfov 138\"" 
+cvarvisibility "userfov" "139" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 139\nseta coop_fov \"userfov 139\"" 
+cvarvisibility "userfov" "140" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 140\nseta coop_fov \"userfov 140\"" 
+cvarvisibility "userfov" "141" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 141\nseta coop_fov \"userfov 141\"" 
+cvarvisibility "userfov" "142" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 142\nseta coop_fov \"userfov 142\"" 
+cvarvisibility "userfov" "143" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 143\nseta coop_fov \"userfov 143\"" 
+cvarvisibility "userfov" "144" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 144\nseta coop_fov \"userfov 144\"" 
+cvarvisibility "userfov" "145" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 145\nseta coop_fov \"userfov 145\"" 
+cvarvisibility "userfov" "146" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 146\nseta coop_fov \"userfov 146\"" 
+cvarvisibility "userfov" "147" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 147\nseta coop_fov \"userfov 147\"" 
+cvarvisibility "userfov" "148" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 148\nseta coop_fov \"userfov 148\"" 
+cvarvisibility "userfov" "149" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 149\nseta coop_fov \"userfov 149\"" 
+cvarvisibility "userfov" "150" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 150\nseta coop_fov \"userfov 150\"" 
+cvarvisibility "userfov" "151" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 151\nseta coop_fov \"userfov 151\"" 
+cvarvisibility "userfov" "152" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 152\nseta coop_fov \"userfov 152\"" 
+cvarvisibility "userfov" "153" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 153\nseta coop_fov \"userfov 153\"" 
+cvarvisibility "userfov" "154" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 154\nseta coop_fov \"userfov 154\"" 
+cvarvisibility "userfov" "155" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 155\nseta coop_fov \"userfov 155\"" 
+cvarvisibility "userfov" "156" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 156\nseta coop_fov \"userfov 156\"" 
+cvarvisibility "userfov" "157" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 157\nseta coop_fov \"userfov 157\"" 
+cvarvisibility "userfov" "158" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 158\nseta coop_fov \"userfov 158\"" 
+cvarvisibility "userfov" "159" "==" 
+} 
+
+resource 
+button 
+{ 
+title "< Runter" 
+name "fieldOfViewDown" 
+rect 40 104 48 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 159\nseta coop_fov \"userfov 159\"" 
+cvarvisibility "userfov" "160" "==" 
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 51\nseta coop_fov \"userfov 51\"" 
+cvarvisibility "userfov" "50" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 52\nseta coop_fov \"userfov 52\"" 
+cvarvisibility "userfov" "51" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 53\nseta coop_fov \"userfov 53\"" 
+cvarvisibility "userfov" "52" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 54\nseta coop_fov \"userfov 54\"" 
+cvarvisibility "userfov" "53" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 55\nseta coop_fov \"userfov 55\"" 
+cvarvisibility "userfov" "54" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 56\nseta coop_fov \"userfov 56\"" 
+cvarvisibility "userfov" "55" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 57\nseta coop_fov \"userfov 57\"" 
+cvarvisibility "userfov" "56" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 58\nseta coop_fov \"userfov 58\"" 
+cvarvisibility "userfov" "57" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 59\nseta coop_fov \"userfov 59\"" 
+cvarvisibility "userfov" "58" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 60\nseta coop_fov \"userfov 60\"" 
+cvarvisibility "userfov" "59" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 61\nseta coop_fov \"userfov 61\"" 
+cvarvisibility "userfov" "60" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 62\nseta coop_fov \"userfov 62\"" 
+cvarvisibility "userfov" "61" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 63\nseta coop_fov \"userfov 63\"" 
+cvarvisibility "userfov" "62" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 64\nseta coop_fov \"userfov 64\"" 
+cvarvisibility "userfov" "63" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 65\nseta coop_fov \"userfov 65\"" 
+cvarvisibility "userfov" "64" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 66\nseta coop_fov \"userfov 66\"" 
+cvarvisibility "userfov" "65" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 67\nseta coop_fov \"userfov 67\"" 
+cvarvisibility "userfov" "66" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 68\nseta coop_fov \"userfov 68\"" 
+cvarvisibility "userfov" "67" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 69\nseta coop_fov \"userfov 69\"" 
+cvarvisibility "userfov" "68" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 70\nseta coop_fov \"userfov 70\"" 
+cvarvisibility "userfov" "69" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 71\nseta coop_fov \"userfov 71\"" 
+cvarvisibility "userfov" "70" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 72\nseta coop_fov \"userfov 72\"" 
+cvarvisibility "userfov" "71" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 73\nseta coop_fov \"userfov 73\"" 
+cvarvisibility "userfov" "72" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 74\nseta coop_fov \"userfov 74\"" 
+cvarvisibility "userfov" "73" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 75\nseta coop_fov \"userfov 75\"" 
+cvarvisibility "userfov" "74" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 76\nseta coop_fov \"userfov 76\"" 
+cvarvisibility "userfov" "75" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 77\nseta coop_fov \"userfov 77\"" 
+cvarvisibility "userfov" "76" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 78\nseta coop_fov \"userfov 78\"" 
+cvarvisibility "userfov" "77" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 79\nseta coop_fov \"userfov 79\"" 
+cvarvisibility "userfov" "78" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 80\nseta coop_fov \"userfov 80\"" 
+cvarvisibility "userfov" "79" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 81\nseta coop_fov \"userfov 81\"" 
+cvarvisibility "userfov" "80" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 82\nseta coop_fov \"userfov 82\"" 
+cvarvisibility "userfov" "81" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 83\nseta coop_fov \"userfov 83\"" 
+cvarvisibility "userfov" "82" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 84\nseta coop_fov \"userfov 84\"" 
+cvarvisibility "userfov" "83" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 85\nseta coop_fov \"userfov 85\"" 
+cvarvisibility "userfov" "84" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 86\nseta coop_fov \"userfov 86\"" 
+cvarvisibility "userfov" "85" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 87\nseta coop_fov \"userfov 87\"" 
+cvarvisibility "userfov" "86" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 88\nseta coop_fov \"userfov 88\"" 
+cvarvisibility "userfov" "87" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 89\nseta coop_fov \"userfov 89\"" 
+cvarvisibility "userfov" "88" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 90\nseta coop_fov \"userfov 90\"" 
+cvarvisibility "userfov" "89" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 91\nseta coop_fov \"userfov 91\"" 
+cvarvisibility "userfov" "90" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 92\nseta coop_fov \"userfov 92\"" 
+cvarvisibility "userfov" "91" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 93\nseta coop_fov \"userfov 93\"" 
+cvarvisibility "userfov" "92" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 94\nseta coop_fov \"userfov 94\"" 
+cvarvisibility "userfov" "93" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 95\nseta coop_fov \"userfov 95\"" 
+cvarvisibility "userfov" "94" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 96\nseta coop_fov \"userfov 96\"" 
+cvarvisibility "userfov" "95" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 97\nseta coop_fov \"userfov 97\"" 
+cvarvisibility "userfov" "96" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 98\nseta coop_fov \"userfov 98\"" 
+cvarvisibility "userfov" "97" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 99\nseta coop_fov \"userfov 99\"" 
+cvarvisibility "userfov" "98" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 100\nseta coop_fov \"userfov 100\"" 
+cvarvisibility "userfov" "99" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 101\nseta coop_fov \"userfov 101\"" 
+cvarvisibility "userfov" "100" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 102\nseta coop_fov \"userfov 102\"" 
+cvarvisibility "userfov" "101" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 103\nseta coop_fov \"userfov 103\"" 
+cvarvisibility "userfov" "102" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 104\nseta coop_fov \"userfov 104\"" 
+cvarvisibility "userfov" "103" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 105\nseta coop_fov \"userfov 105\"" 
+cvarvisibility "userfov" "104" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 106\nseta coop_fov \"userfov 106\"" 
+cvarvisibility "userfov" "105" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 107\nseta coop_fov \"userfov 107\"" 
+cvarvisibility "userfov" "106" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 108\nseta coop_fov \"userfov 108\"" 
+cvarvisibility "userfov" "107" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 109\nseta coop_fov \"userfov 109\"" 
+cvarvisibility "userfov" "108" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 110\nseta coop_fov \"userfov 110\"" 
+cvarvisibility "userfov" "109" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 111\nseta coop_fov \"userfov 111\"" 
+cvarvisibility "userfov" "110" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 112\nseta coop_fov \"userfov 112\"" 
+cvarvisibility "userfov" "111" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 113\nseta coop_fov \"userfov 113\"" 
+cvarvisibility "userfov" "112" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 114\nseta coop_fov \"userfov 114\"" 
+cvarvisibility "userfov" "113" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 115\nseta coop_fov \"userfov 115\"" 
+cvarvisibility "userfov" "114" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 116\nseta coop_fov \"userfov 116\"" 
+cvarvisibility "userfov" "115" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 117\nseta coop_fov \"userfov 117\"" 
+cvarvisibility "userfov" "116" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 118\nseta coop_fov \"userfov 118\"" 
+cvarvisibility "userfov" "117" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 119\nseta coop_fov \"userfov 119\"" 
+cvarvisibility "userfov" "118" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 120\nseta coop_fov \"userfov 120\"" 
+cvarvisibility "userfov" "119" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 121\nseta coop_fov \"userfov 121\"" 
+cvarvisibility "userfov" "120" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 122\nseta coop_fov \"userfov 122\"" 
+cvarvisibility "userfov" "121" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 123\nseta coop_fov \"userfov 123\"" 
+cvarvisibility "userfov" "122" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 124\nseta coop_fov \"userfov 124\"" 
+cvarvisibility "userfov" "123" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 125\nseta coop_fov \"userfov 125\"" 
+cvarvisibility "userfov" "124" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 126\nseta coop_fov \"userfov 126\"" 
+cvarvisibility "userfov" "125" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 127\nseta coop_fov \"userfov 127\"" 
+cvarvisibility "userfov" "126" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 128\nseta coop_fov \"userfov 128\"" 
+cvarvisibility "userfov" "127" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 129\nseta coop_fov \"userfov 129\"" 
+cvarvisibility "userfov" "128" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 130\nseta coop_fov \"userfov 130\"" 
+cvarvisibility "userfov" "129" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 131\nseta coop_fov \"userfov 131\"" 
+cvarvisibility "userfov" "130" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 132\nseta coop_fov \"userfov 132\"" 
+cvarvisibility "userfov" "131" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 133\nseta coop_fov \"userfov 133\"" 
+cvarvisibility "userfov" "132" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 134\nseta coop_fov \"userfov 134\"" 
+cvarvisibility "userfov" "133" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 135\nseta coop_fov \"userfov 135\"" 
+cvarvisibility "userfov" "134" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 136\nseta coop_fov \"userfov 136\"" 
+cvarvisibility "userfov" "135" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 137\nseta coop_fov \"userfov 137\"" 
+cvarvisibility "userfov" "136" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 138\nseta coop_fov \"userfov 138\"" 
+cvarvisibility "userfov" "137" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 139\nseta coop_fov \"userfov 139\"" 
+cvarvisibility "userfov" "138" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 140\nseta coop_fov \"userfov 140\"" 
+cvarvisibility "userfov" "139" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 141\nseta coop_fov \"userfov 141\"" 
+cvarvisibility "userfov" "140" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 142\nseta coop_fov \"userfov 142\"" 
+cvarvisibility "userfov" "141" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 143\nseta coop_fov \"userfov 143\"" 
+cvarvisibility "userfov" "142" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 144\nseta coop_fov \"userfov 144\"" 
+cvarvisibility "userfov" "143" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 145\nseta coop_fov \"userfov 145\"" 
+cvarvisibility "userfov" "144" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 146\nseta coop_fov \"userfov 146\"" 
+cvarvisibility "userfov" "145" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 147\nseta coop_fov \"userfov 147\"" 
+cvarvisibility "userfov" "146" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 148\nseta coop_fov \"userfov 148\"" 
+cvarvisibility "userfov" "147" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 149\nseta coop_fov \"userfov 149\"" 
+cvarvisibility "userfov" "148" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 150\nseta coop_fov \"userfov 150\"" 
+cvarvisibility "userfov" "149" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 151\nseta coop_fov \"userfov 151\"" 
+cvarvisibility "userfov" "150" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 152\nseta coop_fov \"userfov 152\"" 
+cvarvisibility "userfov" "151" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 153\nseta coop_fov \"userfov 153\"" 
+cvarvisibility "userfov" "152" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 154\nseta coop_fov \"userfov 154\"" 
+cvarvisibility "userfov" "153" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 155\nseta coop_fov \"userfov 155\"" 
+cvarvisibility "userfov" "154" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 156\nseta coop_fov \"userfov 156\"" 
+cvarvisibility "userfov" "155" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 157\nseta coop_fov \"userfov 157\"" 
+cvarvisibility "userfov" "156" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 158\nseta coop_fov \"userfov 158\"" 
+cvarvisibility "userfov" "157" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 159\nseta coop_fov \"userfov 159\"" 
+cvarvisibility "userfov" "158" "==" 
+} 
+
+resource 
+button 
+{ 
+title "Hoch >" 
+name "fieldOfViewUp" 
+rect 104 104 40 16
+fgcolor 1.00 1.00 1.00 1.00 
+bgcolor 0.00 0.00 0.00 0.00 
+borderstyle "NONE" 
+font serpentinelight-8 
+hovershader menu/generic/button-hover 
+pressedshader menu/generic/button-press 
+clicksound sound/misc/menu/click.wav 
+stuffcommand "seta userfov 160\nseta coop_fov \"userfov 160\"" 
+cvarvisibility "userfov" "159" "==" 
+} 
+
+end.

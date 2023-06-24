@@ -1,0 +1,409 @@
+init
+{
+	server
+		{
+		classname Actor
+		}
+}
+
+animations models/char/base-female2
+	{
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m11l1a_korbandeath
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		cin-m11l1a_korbandeath_Rom cin-m11l1a_korbandeath_Rom.ska
+	{
+		server
+		{
+			entry immortal 1					//jhefty - prevent players calling down a torpedo strike from killing the actor
+			0 useactorweapon "romulansniperrifle"
+			360 weaponanimon "fire" "dual"
+			361 weaponanimon "idle" "dual"
+		}
+	}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                end_kleeya
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-end_kleeya_kleeya cin-end_kleeya_kleeya.ska
+	{
+		server
+		{
+			113 playDialog  "loc/eng/sound/dialog/m11l3/kleeya_happy.mp3" 1, 10000, 0
+			113 simpleplayDialog   "loc/deu/sound/dialog/m11l3/kleeya_happy.mp3" 1, 10000, 0
+			
+			255 playDialog  "loc/eng/sound/dialog/m11l3/kleeya_havealot.mp3" 1, 10000, 0
+			255 simpleplayDialog   "loc/deu/sound/dialog/m11l3/kleeya_havealot.mp3" 1, 10000, 0
+			
+			330 playDialog  "loc/eng/sound/dialog/m11l3/kleeya_victory.mp3" 1, 10000, 0
+			330 simpleplayDialog   "loc/deu/sound/dialog/m11l3/kleeya_victory.mp3" 1, 10000, 0
+			
+			574 playDialog  "loc/eng/sound/dialog/m11l3/kleeya_diplo.mp3" 1, 10000, 0
+			574 simpleplayDialog   "loc/deu/sound/dialog/m11l3/kleeya_diplo.mp3" 1, 10000, 0
+			
+			624 playDialog  "loc/eng/sound/dialog/m11l3/kleeya_tworaces.mp3" 1, 10000, 0
+			624 simpleplayDialog   "loc/deu/sound/dialog/m11l3/kleeya_tworaces.mp3" 1, 10000, 0
+			
+			708 playDialog  "loc/eng/sound/dialog/m11l3/kleeya_ihope.mp3" 1, 10000, 0
+			708 simpleplayDialog   "loc/deu/sound/dialog/m11l3/kleeya_ihope.mp3" 1, 10000, 0
+			
+			822 playDialog  "loc/eng/sound/dialog/m11l3/kleeya_andfor.mp3" 1, 10000, 0
+			822 simpleplayDialog   "loc/deu/sound/dialog/m11l3/kleeya_andfor.mp3" 1, 10000, 0
+			
+			874 playDialog  "loc/eng/sound/dialog/m11l3/kleeya_icando.mp3" 1, 10000, 0
+			874 simpleplayDialog   "loc/deu/sound/dialog/m11l3/kleeya_icando.mp3" 1, 10000, 0
+			
+			1133 playDialog  "loc/eng/sound/dialog/m11l3/kleeya_buti.mp3" 1, 10000, 0
+			1133 simpleplayDialog   "loc/deu/sound/dialog/m11l3/kleeya_buti.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m1l1b_chang
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m1l1b_chang_borg cin-m1l1b_chang_borg.ska
+	{
+		server
+		{
+			0 forcealpha
+			0 alpha 0
+
+			entry morph morph_lid-lshut 100 0.5
+			entry morph morph_lid-rshut 100 0.5
+			entry surface material3 +nodraw
+			entry blink 0
+			701 displayeffect TransportIn BorgNoAnim
+			776 displayeffect TransportOut BorgNoAnim
+		}
+	}
+	cin-m1l1b-chang-borgpink cin-m1l1b-chang-borgpink.ska
+	{
+		server
+		{
+			0 rendereffects +shadowFromBip01
+			662 playDialog "sound/weapons/imod/imodfire.wav" 1, 10000, 0
+		}
+		client
+		{
+
+		200 emitteron borgredbeam
+		200 emitteron borgredflare
+
+		662 tagspawn "Bip01 Spine1"
+		(
+		count 7
+		model compressionspike2.spr
+		color 0.5 1.0 0.0
+		angles random 180 random 180 random 180
+		alpha 0.65
+		life 0.35
+		avelocity crandom 225 crandom 225 crandom 225
+		scale 2.25
+		scalerate -2
+		hitentities 1
+		fade
+		)
+
+		662 tagspawn "Bip01 SPine1"
+		(
+		model models/fx/fx-firespark.tik
+		count 24
+		align
+		bouncefactor 0.52
+		life randomrange 1.35 1.75
+		scale 0.5
+		accel 0 0 -1550
+		scalerate -2.0
+		randvel crandom 275 crandom 275 random 500
+		hitentities 1
+		dofade 1.25 0 0
+		detail
+		)
+
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                M10-L2 Gonzales
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m10l2-female cin-m10l2-female.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			0 forcealpha
+			0 alpha 0
+			0 noshadow
+
+			entry morph morph_lid-lshut 100 0.5
+			entry morph morph_lid-rshut 100 0.5
+			entry surface material3 +nodraw
+			entry blink 0
+			50 displayEffect TransportIn Romulan
+
+			735 playDialog  "loc/eng/sound/dialog/m10l2/romguard_sir.mp3" 1, 10000, 0
+			735 simpleplayDialog   "loc/deu/sound/dialog/m10l2/romguard_sir.mp3" 1, 10000, 0
+			
+			891 playDialog  "loc/eng/sound/dialog/m10l2/romguard_ack.mp3" 1, 10000, 0
+			891 simpleplayDialog   "loc/deu/sound/dialog/m10l2/romguard_ack.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               m7l1b quadintro
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m7l1a_quadintro_AttrexF cin-m7l1a_quadintro_AttrexF.ska
+	{
+		server
+		{
+			40 playDialog  "loc/eng/sound/dialog/m7l1/attrexf1_sewersub.mp3" 1, 10000,
+			40 simpleplayDialog   "loc/deu/sound/dialog/m7l1/attrexf1_sewersub.mp3" 1, 10000,
+			
+			367 playDialog  "loc/eng/sound/dialog/m7l1/attrexf1_hardtofind.mp3" 1, 10000,
+			367 simpleplayDialog   "loc/deu/sound/dialog/m7l1/attrexf1_hardtofind.mp3" 1, 10000,
+		}
+
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               m7l1b rescue
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m7l1b_rescue_AttrexF cin-m7l1b_rescue_AttrexF.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			150 playDialog  "loc/eng/sound/dialog/m7l1/attrexm1_infinite.mp3" 1, 10000,
+			150 simpleplayDialog   "loc/deu/sound/dialog/m7l1/attrexm1_infinite.mp3" 1, 10000,
+			
+			260 playDialog  "loc/eng/sound/dialog/m7l1/attrexm1_idontknow.mp3" 1, 10000,
+			260 simpleplayDialog   "loc/deu/sound/dialog/m7l1/attrexm1_idontknow.mp3" 1, 10000,
+			
+			446 playDialog  "loc/eng/sound/dialog/m7l1/attrexf2_tunnelcollapse.mp3" 1, 10000,
+			446 simpleplayDialog   "loc/deu/sound/dialog/m7l1/attrexf2_tunnelcollapse.mp3" 1, 10000,
+			
+			587 playDialog  "loc/eng/sound/dialog/m7l1/attrexf2_dontknow.mp3" 1, 10000,
+			587 simpleplayDialog   "loc/deu/sound/dialog/m7l1/attrexf2_dontknow.mp3" 1, 10000,
+			
+			693 playDialog  "loc/eng/sound/dialog/m7l1/attrexf2_yesidryll.mp3" 1, 10000,
+			693 simpleplayDialog   "loc/deu/sound/dialog/m7l1/attrexf2_yesidryll.mp3" 1, 10000,
+		}
+
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               m7l1a_injuredattrex
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m7l1a-attrex_F cin-m7l1a-attrex_F.ska
+	{
+		server
+		{
+			134 playDialog  "loc/eng/sound/dialog/m7l1/attrexf1_hittwohours.mp3" 1, 10000,
+			134 simpleplayDialog   "loc/deu/sound/dialog/m7l1/attrexf1_hittwohours.mp3" 1, 10000,
+			
+			299 playDialog  "loc/eng/sound/dialog/m7l1/attrexf1_security.mp3" 1, 10000,
+			299 simpleplayDialog   "loc/deu/sound/dialog/m7l1/attrexf1_security.mp3" 1, 10000,
+			
+			426 playDialog  "loc/eng/sound/dialog/m7l1/attrexf1_thirdwave.mp3" 1, 10000,
+			426 simpleplayDialog   "loc/deu/sound/dialog/m7l1/attrexf1_thirdwave.mp3" 1, 10000,
+			
+			650 playDialog  "loc/eng/sound/dialog/m7l1/attrexf1_ilead.mp3" 1, 10000,
+			650 simpleplayDialog   "loc/deu/sound/dialog/m7l1/attrexf1_ilead.mp3" 1, 10000,
+
+		}
+	}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               igm8 Kleeya
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-igm8_kleeya_Kleeya cin-igm8_kleeya_Kleeya.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			115 playDialog  "loc/eng/sound/dialog/ent_m8/kleeya_sorry.mp3" 1, 10000, 0
+			115 simpleplayDialog   "loc/deu/sound/dialog/ent_m8/kleeya_sorry.mp3" 1, 10000, 0
+			
+			198 playDialog  "loc/eng/sound/dialog/ent_m8/kleeya_motives.mp3" 1, 10000, 0
+			198 simpleplayDialog   "loc/deu/sound/dialog/ent_m8/kleeya_motives.mp3" 1, 10000, 0
+			
+			374 playDialog  "loc/eng/sound/dialog/ent_m8/kleeya_head.mp3" 1, 10000, 0
+			374 simpleplayDialog   "loc/deu/sound/dialog/ent_m8/kleeya_head.mp3" 1, 10000, 0
+			
+			496 playDialog  "loc/eng/sound/dialog/ent_m8/kleeya_alli.mp3" 1, 10000, 0
+			496 simpleplayDialog   "loc/deu/sound/dialog/ent_m8/kleeya_alli.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               igm4 Leave
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-igm4_leave_Kleeya cin-igm4_leave_Kleeya.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			143 playDialog  "loc/eng/sound/dialog/ent_m4/kleeya_surp.mp3" 1, 10000, 0
+			143 simpleplayDialog   "loc/deu/sound/dialog/ent_m4/kleeya_surp.mp3" 1, 10000, 0
+			
+			260 playDialog  "loc/eng/sound/dialog/ent_m4/kleeya_baseless.mp3" 1, 10000, 0
+			260 simpleplayDialog   "loc/deu/sound/dialog/ent_m4/kleeya_baseless.mp3" 1, 10000, 0
+			
+			304 playDialog  "loc/eng/sound/dialog/ent_m4/kleeya_your.mp3" 1, 10000, 0
+			304 simpleplayDialog   "loc/deu/sound/dialog/ent_m4/kleeya_your.mp3" 1, 10000, 0
+			
+			527 playDialog  "loc/eng/sound/dialog/ent_m4/kleeya_tuvok.mp3" 1, 10000, 0
+			527 simpleplayDialog   "loc/deu/sound/dialog/ent_m4/kleeya_tuvok.mp3" 1, 10000, 0
+			
+			598 playDialog  "loc/eng/sound/dialog/ent_m4/kleeya_expert.mp3" 1, 10000, 0
+			598 simpleplayDialog   "loc/deu/sound/dialog/ent_m4/kleeya_expert.mp3" 1, 10000, 0
+			
+			683 playDialog  "loc/eng/sound/dialog/ent_m4/kleeya_control.mp3" 1, 10000, 0
+			683 simpleplayDialog   "loc/deu/sound/dialog/ent_m4/kleeya_control.mp3" 1, 10000, 0
+			
+			895 playDialog  "loc/eng/sound/dialog/ent_m4/kleeya_thank2.mp3" 1, 10000, 0
+			895 simpleplayDialog   "loc/deu/sound/dialog/ent_m4/kleeya_thank2.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                igm4 - Attrexian Confrontation
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-igm4_attrex_Attrexian cin-igm4_attrex_Attrexian.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			58 playDialog  "loc/eng/sound/dialog/ent_m4/attcomm_release.mp3" 1, 10000, 0
+			58 simpleplayDialog   "loc/deu/sound/dialog/ent_m4/attcomm_release.mp3" 1, 10000, 0
+			
+			109 playDialog  "loc/eng/sound/dialog/ent_m4/attcomm_stumbled.mp3" 1, 10000, 0
+			109 simpleplayDialog   "loc/deu/sound/dialog/ent_m4/attcomm_stumbled.mp3" 1, 10000, 0
+			
+			267 playDialog  "loc/eng/sound/dialog/ent_m4/attcomm_obvious.mp3" 1, 10000, 0
+			267 simpleplayDialog   "loc/deu/sound/dialog/ent_m4/attcomm_obvious.mp3" 1, 10000, 0
+			
+			408 playDialog  "loc/eng/sound/dialog/ent_m4/attcomm_harm.mp3" 1, 10000, 0
+			408 simpleplayDialog   "loc/deu/sound/dialog/ent_m4/attcomm_harm.mp3" 1, 10000, 0
+			
+			517 playDialog  "loc/eng/sound/dialog/ent_m4/attcomm_ourbus.mp3" 1, 10000, 0
+			517 simpleplayDialog   "loc/deu/sound/dialog/ent_m4/attcomm_ourbus.mp3" 1, 10000, 0
+			
+			731 playDialog  "loc/eng/sound/dialog/ent_m4/attcomm_noted.mp3" 1, 10000, 0
+			731 simpleplayDialog   "loc/deu/sound/dialog/ent_m4/attcomm_noted.mp3" 1, 10000, 0
+			
+			851 playDialog  "loc/eng/sound/dialog/ent_m4/attcomm_mock.mp3" 1, 10000, 0
+			851 simpleplayDialog   "loc/deu/sound/dialog/ent_m4/attcomm_mock.mp3" 1, 10000, 0
+			
+			941 playDialog  "loc/eng/sound/dialog/ent_m4/attcomm_exile.mp3" 1, 10000, 0
+			941 simpleplayDialog   "loc/deu/sound/dialog/ent_m4/attcomm_exile.mp3" 1, 10000, 0
+			
+			1096 playDialog  "loc/eng/sound/dialog/ent_m4/attcomm_dead.mp3" 1, 10000, 0
+			1096 simpleplayDialog   "loc/deu/sound/dialog/ent_m4/attcomm_dead.mp3" 1, 10000, 0
+			
+			1173 playDialog  "loc/eng/sound/dialog/ent_m4/attcomm_thankyou.mp3" 1, 10000, 0
+			1173 simpleplayDialog   "loc/deu/sound/dialog/ent_m4/attcomm_thankyou.mp3" 1, 10000, 0
+		}
+	}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                igm4_brief
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-igm4_brief_Kleeya cin-igm4_brief_Kleeya.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			106 playDialog  "loc/eng/sound/dialog/ent_m4/kleeya_laughed.mp3" 1, 10000, 0
+			106 simpleplayDialog   "loc/deu/sound/dialog/ent_m4/kleeya_laughed.mp3" 1, 10000, 0
+			
+			299 playDialog  "loc/eng/sound/dialog/ent_m4/kleeya_undo.mp3" 1, 10000, 0
+			299 simpleplayDialog  "loc/deu/sound/dialog/ent_m4/kleeya_undo.mp3" 1, 10000, 0
+			
+			498 playDialog  "loc/eng/sound/dialog/ent_m4/kleeya_evidence.mp3" 1, 10000, 0
+			498 simpleplayDialog  "loc/deu/sound/dialog/ent_m4/kleeya_evidence.mp3" 1, 10000, 0
+			
+			591 playDialog  "loc/eng/sound/dialog/ent_m4/kleeya_lightly.mp3" 1, 10000, 0
+			591 simpleplayDialog  "loc/deu/sound/dialog/ent_m4/kleeya_lightly.mp3" 1, 10000, 0
+			
+			728 playDialog  "loc/eng/sound/dialog/ent_m4/kleeya_never.mp3" 1, 10000, 0
+			728 simpleplayDialog  "loc/deu/sound/dialog/ent_m4/kleeya_never.mp3" 1, 10000, 0
+			
+			904 playDialog  "loc/eng/sound/dialog/ent_m4/kleeya_wish.mp3" 1, 10000, 0
+			904 simpleplayDialog  "loc/deu/sound/dialog/ent_m4/kleeya_wish.mp3" 1, 10000, 0
+		}
+	}
+
+	cin-igm4_wbrief_Kleeya cin-igm4_brief_Kleeyaw.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m5l2c - Scientist
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m5l2csci_kleeya cin-m5l2csci_kleeya.ska
+	{
+		server
+		{
+			entry useactorweapon "none"
+			299 playDialog  "loc/eng/sound/dialog/m5l2/kleeya_hurt.mp3" 1, 10000, 0
+			299 simpleplayDialog  "loc/deu/sound/dialog/m5l2/kleeya_hurt.mp3" 1, 10000, 0
+			
+			376 playDialog  "loc/eng/sound/dialog/m5l2/kleeya_exo.mp3" 1, 10000, 0
+			376 simpleplayDialog  "loc/deu/sound/dialog/m5l2/kleeya_exo.mp3" 1, 10000, 0
+			
+			490 playDialog  "loc/eng/sound/dialog/m5l2/kleeya_passive.mp3" 1, 10000, 0
+			490 simpleplayDialog  "loc/deu/sound/dialog/m5l2/kleeya_passive.mp3" 1, 10000, 0
+			
+			623 playDialog  "loc/eng/sound/dialog/m5l2/kleeya_trapped.mp3" 1, 10000, 0
+			623 simpleplayDialog  "loc/deu/sound/dialog/m5l2/kleeya_trapped.mp3" 1, 10000, 0
+		}
+	}
+
+/////////////////////////////////////IN GAME//////////////////////////////////////////
+
+		cin-m3_lean	cin-m3_lean.ska
+		cin-m3_hunch	cin-m3_hunch.ska
+		cin-m3_tohunch     cin-m3_tohunch.ska
+		cin-m3_fromhunch   cin-m3_fromhunch.ska
+		cin-m3_drop	cin-m3_drop.ska
+		{
+			server
+			{
+			entry immortal 1 // To Turn On
+			}
+		}
+		cin-m3_scan	cin-m3_scan.ska
+		cin-m3_toscan	cin-m3_toscan.ska
+		cin-m3_fromscan	cin-m3_fromscan.ska
+		cin-m3_late	cin-m3_late.ska
+		cin-m3_greet	cin-m3_greet.ska
+		cin-m3_staying	cin-m3_staying.ska
+	}

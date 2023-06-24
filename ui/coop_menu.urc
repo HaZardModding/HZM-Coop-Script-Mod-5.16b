@@ -1,0 +1,734 @@
+menu "coop_menu" 768 340 NONE 1
+align  center
+bgcolor 0 0 0 0
+borderstyle NONE
+hideDuringLoad
+depth 0.1
+noescape 1
+noresize 1
+fullscreen 0
+direction from_top 0
+
+showcommand "exec coop_mod/cfg/coop_menu.cfg\n"
+pushcommand "exec coop_mod/cfg/coop_menu.cfg\n"
+popcommand "ui_removehud coop_menu"
+hidecommand "ui_removehud coop_menu"
+
+resource
+Widget
+{
+	ordernumber 10
+	name "coop_menu_bg"
+	rect 0 0 1024 512
+	fgcolor 1.00 1.00 1.00 1.00
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "none"
+	shader coop_hud_story_bg
+}
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////TITLE
+////////////////////////////////////////////////////////////////////////////////
+resource
+Label
+{
+	title "Coop Mod Special Menu"
+	name "coop_menuTitleS"
+	rect 11 2 280 22
+	fgcolor 0 0 0 1
+	bgcolor 0.50 0.50 0.50 0.00
+	borderstyle "NONE"
+	font serpentinemedium-14
+	verticaljustify top
+	horizontaljustify left
+}
+resource
+Label
+{
+	title "Coop Mod Special Menu"
+	name "coop_menuTitle"
+	rect 10 1 280 22
+	fgcolor 0.6 1.0 0.0 1
+	bgcolor 0.50 0.50 0.50 0.00
+	borderstyle "NONE"
+	font serpentinemedium-14
+	verticaljustify top
+	horizontaljustify left
+}
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////CLASS
+////////////////////////////////////////////////////////////////////////////////
+resource
+Label
+{
+	title	"Class"
+	name 	"coop_menuClassTitle"
+	rect 	 20 38 240 20
+	font serpentinemedium-12
+	fgcolor 0.000 0.000 0.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	borderstyle "3D_BORDER"
+}
+resource
+Label
+{
+	disable
+	title	"Personal"
+	name 	"coop_menuAiFollowTitle"
+	rect 	 20 38 240 20
+	font serpentinemedium-12
+	fgcolor 0.000 0.000 0.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	borderstyle "3D_BORDER"
+}
+
+resource
+Button
+{
+	title	"Toggle"
+	name 	"coop_menuAdvancedToggle3"
+	rect 	 180 38 60 20
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "NONE"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "exec coop_mod/cfg/coop_menu_advanced3.cfg\n"
+    clicksound sound/misc/menu/click.wav
+	horizontaljustify center
+}
+resource
+Button
+{
+	disable
+	title	"Toggle"
+	name 	"coop_menuAdvancedToggle4"
+	rect 	 180 38 60 20
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "NONE"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "exec coop_mod/cfg/coop_menu_advanced4.cfg\n"
+    clicksound sound/misc/menu/click.wav
+	horizontaljustify center
+}
+resource
+Widget
+{
+	name 	"coop_menuClassWidget"
+	rect 	 20 60 240 74
+	fgcolor 0.937 0.643 0.129 1.000
+	bgcolor 0 0 0 1
+	borderstyle "3D_BORDER"
+	bordercolor 0.278 0.365 0.510 1.000
+}
+resource
+Button
+{
+	disable
+	title	"Make Teammtes Follow Me"
+	name 	"coop_menuFollowMe"
+	rect 	 23 63 235 22
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use five;ui_hidemouse"
+    clicksound sound/misc/menu/click.wav
+}
+resource
+Button
+{
+	title	"$$Medic$$"
+	name 	"coop_menuClassMedic"
+	rect 	 23 63 235 22
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use five;ui_hidemouse"
+    clicksound sound/misc/menu/click.wav
+}
+resource
+Button
+{
+	disable
+	title	"Respawn right here"
+	name 	"coop_menuRespawnHere"
+	rect 	 23 86 235 22
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use six;ui_hidemouse"
+    clicksound sound/misc/menu/click.wav
+}
+resource
+Button
+{
+	title	"$$Technician$$"
+	name 	"coop_menuClassTechnician"
+	rect 	 23 86 235 22
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use six;ui_hidemouse"
+    clicksound sound/misc/menu/click.wav
+}
+resource
+Button
+{
+	disable
+	title	"Respawn at default"
+	name 	"coop_menuRespawnDefault"
+	rect 	 23 109 235 22
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use seven;ui_hidemouse"
+    clicksound sound/misc/menu/click.wav
+}
+resource
+Button
+{
+	title	"$$HeavyWeapons$$"
+	name 	"coop_menuClassHeavyWeapons"
+	rect 	 23 109 235 22
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use seven;ui_hidemouse"
+    clicksound sound/misc/menu/click.wav
+}
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////SKILL
+////////////////////////////////////////////////////////////////////////////////
+resource
+Label
+{
+	title	"$$SkillLevel$$"
+	name 	"coop_menuSkillTitle"
+	rect 	 20 148 240 20
+	font serpentinemedium-12
+	fgcolor 0.000 0.000 0.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	borderstyle "3D_BORDER"
+}
+// resource
+// Label
+// {
+	// title	"$$SkillLevel$$"
+	// name 	"coop_menuSkillTitleS"
+	// rect 	 18 146 240 20
+	// font serpentinemedium-12
+	// fgcolor 1 1 1 1
+	// bgcolor 0 0 0 0
+// }
+resource
+Widget
+{
+	name 	"coop_menuSkillWidget"
+	rect 	 20 170 240 97
+	fgcolor 0.937 0.643 0.129 1.000
+	bgcolor 0 0 0 1
+	borderstyle "3D_BORDER"
+	bordercolor 0.278 0.365 0.510 1.000
+}
+resource
+Button
+{
+	title	"$$Easy$$"
+	name 	"coop_menuSkillEasy"
+	rect 	 23 174 235 22
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use one;ui_hidemouse"
+    clicksound sound/misc/menu/click.wav
+}
+resource
+Button
+{
+	title	"$$Normal$$"
+	name 	"coop_menuSkillEasy"
+	rect 	 23 197 235 22
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use two;ui_hidemouse"
+    clicksound sound/misc/menu/click.wav
+}
+resource
+Button
+{
+	title	"$$Hard$$"
+	name 	"coop_menuSkillEasy"
+	rect 	 23 220 235 22
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use three;ui_hidemouse"
+    clicksound sound/misc/menu/click.wav
+}
+resource
+Button
+{
+	title	"$$VeryHard$$"
+	name 	"coop_menuSkillEasy"
+	rect 	 23 243 235 22
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use four;ui_hidemouse"
+    clicksound sound/misc/menu/click.wav
+}
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////OPTIONS
+////////////////////////////////////////////////////////////////////////////////
+resource
+Label
+{
+	title	"$$MiscOptions$$"
+	name 	"coop_menuMiscTitle"
+	rect 	 300 20 440 20
+	font serpentinemedium-12
+	fgcolor 0.000 0.000 0.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	borderstyle "3D_BORDER"
+}
+// resource
+// Label
+// {
+	// title	"$$MiscOptions$$"
+	// name 	"coop_menuMiscTitleS"
+	// rect 	 298 18 440 20
+	// font serpentinemedium-12
+	// fgcolor 1 1 1 1
+	// bgcolor 0 0 0 0
+// }
+resource
+Widget
+{
+	name 	"coop_menuMiscWidget"
+	rect 	 300 41 440 96
+	fgcolor 0.937 0.643 0.129 1.000
+	bgcolor 0 0 0 1
+	borderstyle "3D_BORDER"
+	bordercolor 0.278 0.365 0.510 1.000
+}
+resource
+Button
+{
+	title	"Health and Energy Dispensers - ON/OFF"
+	name 	"coop_menuMisc1"
+	rect 	 303 43 435 22
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use Eight;ui_hidemouse"
+    clicksound sound/misc/menu/click.wav
+	horizontaljustify right
+}
+resource
+Button
+{
+	title	"Technician Modulation only - ON/OFF"
+	name 	"coop_menuMisc2"
+	rect 	 303 66 435 22
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use Zero;ui_hidemouse"
+    clicksound sound/misc/menu/click.wav
+	horizontaljustify right
+}
+resource
+Button
+{
+	title	"Player Classes - ON/OFF"
+	name 	"coop_menuMisc3"
+	rect 	 303 89 435 22
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use Nine;ui_hidemouse"
+    clicksound sound/misc/menu/click.wav
+	horizontaljustify right
+}
+resource
+Button
+{
+	title	"$$RestoreBackToDefaults$$"
+	name 	"coop_menuMisc4"
+	rect 	 303 112 435 22
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 0.750
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use Ten;ui_hidemouse"
+    clicksound sound/misc/menu/click.wav
+}
+
+resource
+Label
+{
+	title	"$$AdvancedServerSettings$$"
+	name 	"coop_menuAdvancedTitle"
+	rect 	 300 150 440 20
+	font serpentinemedium-12
+	fgcolor 0.000 0.000 0.000 1.000
+	bgcolor 0.278 0.365 0.510 1.000
+	borderstyle "3D_BORDER"
+}
+resource
+Widget
+{
+	name 	"coop_menuAdvancedWidget"
+	//rect 	 300 171 440 96
+	rect 	 300 171 440 72
+	fgcolor 0.937 0.643 0.129 1.000
+	bgcolor 0 0 0 1
+	borderstyle "3D_BORDER"
+	bordercolor 0.278 0.365 0.510 1.000
+}
+resource
+Button
+{
+	title	"Toggle"
+	name 	"coop_menuAdvancedToggle1"
+	rect 	 643 150 80 20
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "NONE"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "exec coop_mod/cfg/coop_menu_advanced1.cfg\n"
+    clicksound sound/misc/menu/click.wav
+	horizontaljustify center
+}
+resource
+Button
+{
+	disable
+	title	"Toggle"
+	name 	"coop_menuAdvancedToggle2"
+	rect 	 643 150 80 20
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "NONE"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "exec coop_mod/cfg/coop_menu_advanced2.cfg\n"
+    clicksound sound/misc/menu/click.wav
+	horizontaljustify center
+}
+
+resource
+Button
+{
+	disable
+	title	"Weapon-Fire-Movent speed - 0.35"
+	name 	"coop_menuAdvanced5"
+	rect 	 303 173 435 22
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use Twelve;ui_hidemouse"
+    clicksound sound/misc/menu/click.wav
+	horizontaljustify right
+}
+resource
+Button
+{
+	disable
+	title	"Weapon-Fire-Movent speed - 0.65"
+	name 	"coop_menuAdvanced6"
+	rect 	 303 196 435 22
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use Thirteen;ui_hidemouse"
+    clicksound sound/misc/menu/click.wav
+	horizontaljustify right
+}
+resource
+Button
+{
+	disable
+	title	"Weapon-Fire-Movent speed - 1.0"
+	name 	"coop_menuAdvanced7"
+	rect 	 303 219 435 22
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use Fourteen;ui_hidemouse"
+    clicksound sound/misc/menu/click.wav
+	horizontaljustify right
+}
+// resource
+// Button
+// {
+	// disable
+	// title	""
+	// name 	"coop_menuAdvanced8"
+	// rect 	 303 242 435 22
+	// font serpentinemedium-12
+	// fgcolor			0.937 0.643 0.129 1.000
+	// bgcolor			0.125 0.157 0.251 0.750
+	// hoverbgcolor	0.278 0.365 0.510 1.000
+	// hoverfgcolor	1.000 1.000 1.000 1.000
+	// borderstyle "3D_BORDER"
+	// hovershader menu/generic/button-hover
+	// pressedshader menu/generic/button-press
+	// stuffcommand "use Fifteen;ui_hidemouse"
+    // clicksound sound/misc/menu/click.wav
+// }
+resource
+Button
+{
+	title	"Player Max Speed - 200"
+	name 	"coop_menuAdvanced1"
+	rect 	 303 173 435 22
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use Twelve;ui_hidemouse"
+    clicksound sound/misc/menu/click.wav
+	horizontaljustify right
+}
+resource
+Button
+{
+	title	"Player Max Speed - 240"
+	name 	"coop_menuAdvanced2"
+	rect 	 303 196 435 22
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use Thirteen;ui_hidemouse"
+    clicksound sound/misc/menu/click.wav
+	horizontaljustify right
+}
+resource
+Button
+{
+	title	"Player Max Speed - 300"
+	name 	"coop_menuAdvanced3"
+	rect 	 303 219 435 22
+	font serpentinemedium-12
+	fgcolor			0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 1.000
+	hoverbgcolor	0.278 0.365 0.510 1.000
+	hoverfgcolor	1.000 1.000 1.000 1.000
+	borderstyle "3D_BORDER"
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use Fourteen;ui_hidemouse"
+    clicksound sound/misc/menu/click.wav
+	horizontaljustify right
+}
+// resource
+// Button
+// {
+	// title	"Player Max Speed - 350"
+	// name 	"coop_menuAdvanced4"
+	// rect 	 303 242 435 22
+	// font serpentinemedium-12
+	// fgcolor			0.937 0.643 0.129 1.000
+	// bgcolor			0.125 0.157 0.251 1.000
+	// hoverbgcolor	0.278 0.365 0.510 1.000
+	// hoverfgcolor	1.000 1.000 1.000 1.000
+	// borderstyle "3D_BORDER"
+	// hovershader menu/generic/button-hover
+	// pressedshader menu/generic/button-press
+	// stuffcommand "use Fifteen;ui_hidemouse"
+    // clicksound sound/misc/menu/click.wav
+	// horizontaljustify right
+// }
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////OTHER MENUS
+////////////////////////////////////////////////////////////////////////////////
+resource
+widget
+{
+	odernumber 10
+	borderstyle "none"
+	rect 	 18 300 250 24
+	shader menu/main/blank-button
+	fgcolor 			0.000 0.500 0.250 1.000
+	bgcolor 			0.000 0.000 0.000 0.000
+	hoverfgcolor		0.000 0.500 0.250 1.000
+	hoverbgcolor		0.000 0.000 0.000 0.000
+	selectedfgcolor 	0.000 0.500 0.250 1.000
+	selectedbgcolor 	0.000 0.000 0.000 0.000
+	shadercolor			0.000 0.500 0.250 1.000
+	hovershadercolor	0.000 0.500 0.250 1.000
+}
+resource
+Button
+{
+	title	"$$CallVote$$"
+	name 	"coop_menuCallvote"
+	rect 	 25 298 210 24
+	font serpentinemedium-12
+	fgcolor 		1.000 1.000 1.000 1.000
+	bgcolor 		0 0 0 0
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use Knife;showmenu callvote\n"
+    clicksound sound/misc/menu/click.wav
+	horizontaljustify center
+}
+resource
+widget
+{
+	odernumber 10
+	borderstyle "none"
+	rect 	 258 300 250 24
+	shader menu/main/blank-button
+	fgcolor 			0.000 0.500 0.250 1.000
+	bgcolor 			0.000 0.000 0.000 0.000
+	hoverfgcolor		0.000 0.500 0.250 1.000
+	hoverbgcolor		0.000 0.000 0.000 0.000
+	selectedfgcolor 	0.000 0.500 0.250 1.000
+	selectedbgcolor 	0.000 0.000 0.000 0.000
+	shadercolor			0.000 0.500 0.250 1.000
+	hovershadercolor	0.000 0.500 0.250 1.000
+}
+resource
+Button
+{
+	title	"Coop Settings"
+	name 	"coop_menuCoopSettings"
+	rect 	 265 298 210 24
+	font serpentinemedium-12
+	fgcolor 		1.000 1.000 1.000 1.000
+	bgcolor 		0 0 0 0
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	stuffcommand "use Knife;showmenu coop_settings"
+    clicksound sound/misc/menu/click.wav
+	horizontaljustify center
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////CLOSE BUTTON
+////////////////////////////////////////////////////////////////////////////////
+resource
+Button
+{
+title "$$BackToGame$$"
+name "coop_menuOk"
+rect 	574 321 170 18
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 0 1 0 0.4
+borderstyle "None"
+stuffcommand "use Knife;ui_hidemouse"
+font serpentinemedium-12
+clicksound sound/misc/menu/click.wav
+}
+
+end.
+

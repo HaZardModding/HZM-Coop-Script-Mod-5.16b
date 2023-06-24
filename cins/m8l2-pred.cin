@@ -1,0 +1,158 @@
+//-----------------------------------------------
+// Cinematic Name: c:\projects\ef2\ef2\base\cins\m8l2-pred.cin
+// Export Version: 1
+// Export Date:    Mon Nov 25 11:39:35 2002
+//-----------------------------------------------
+
+Origins
+{
+    Origin
+    {
+          name          "m8l2-pred"
+          origin         -5577.664551 1512.175781 2158.887939
+          yaw            0.000000
+    }
+}
+
+
+Actors
+{
+    Actor
+    {
+        name          "armMunro"
+        tiki          "char/hazardteam_munro.tik"
+        anim          "cin-m8l2b-munro"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         763.921875 280.816406 -110.887939
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "armKrindo"
+        tiki          "char/krindo-noweapon.tik"
+        anim          "cin-m8l2b-krindo"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         797.939941 325.361572 -110.887939
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "armPred"
+        tiki          "char/alien-type4-predator.tik"
+        anim          "cin-m8l2b-pred"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         -856.358398 -177.511841 147.667480
+        yaw            -90.000000
+    }
+}
+
+
+Cameras
+{
+    Camera
+    {
+        name         "cam2-m8l2-predator"
+        camfile      "cam2-m8l2-predator"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+		selfRemoving   false
+    }
+    Camera
+    {
+        name         "cam3-m8l2-predator"
+        camfile      "cam3-m8l2-predator"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+		selfRemoving   false
+    }
+    Cut
+    {
+        toCamera     "cam2-m8l2-predator"
+        frame         0
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m8l2-predator"
+        frame         206
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam2-m8l2-predator"
+        frame         260
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m8l2-predator"
+        frame         283
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam2-m8l2-predator"
+        frame         307
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m8l2-predator"
+        frame         329
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam2-m8l2-predator"
+        frame         380
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam2-m8l2-predator"
+        frame         462
+        fadeout       20
+        fadein        0
+        lerp          false
+    }
+
+}

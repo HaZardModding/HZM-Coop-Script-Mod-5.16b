@@ -1,0 +1,361 @@
+//-----------------------------------------------------------------
+//
+//  EF2/LOTR Level Script File
+//
+//  Level:			ent-deck11 - Enterprise Deck 11
+//  Script By:   	Kenny T
+//  Geometry By:  	Benson R, Kenny T
+//  Created on:   	6/14/2002
+//
+//  Last Edited:  	9-22-2002 Benson R
+//
+//-----------------------------------------------------------------
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  DEFINE SCRIPT
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+
+void main();
+void init();
+
+void checkMissionNumber();
+void justLoadedDeckThread();
+
+void astrometricsOpenHallPortal();
+void astrometricsCloseHallPortal();
+
+void hideMunroPlanets();
+void hideKleeyaPlanets();
+void fadeInMunroPlanets();
+void fadeOutMunroPlanets();
+void fadeInKleeyaPlanets();
+void fadeOutKleeyaPlanets();
+
+void killAllTalking();
+
+string sNextLevelToLoadForCoop;
+void coop_endLevel();
+
+//-----------------------------------------------------------
+//-----------------------------------------------------------
+//--- variables
+
+float currentDeck = 11;
+float missionEnterprise = 0;
+float developerMode = 0; //--- Ship with 0
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  INCLUDES
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+
+#include "coop_mod/maps/igm_main.scr"
+#include "coop_mod/maps/global/global_common.scr"
+#include "coop_mod/maps/global/igm_dialog.scr"
+
+#include "maps/global_scripts/global_debugUtils.scr"
+#include "maps/global_scripts/global_math.scr"
+#include "maps/global_scripts/global_acceleratedmovement.scr"
+#include "maps/global_scripts/global_archetype.scr"
+#include "coop_mod/maps/missions/igm3/ent-deck11-mission3_mom.scr"
+#include "coop_mod/maps/missions/igm_common/igm_turbolift.scr"
+#include "coop_mod/maps/missions/igm3/ent-deck11-mission3.scr"
+#include "coop_mod/maps/missions/igm4/ent-deck11-mission4.scr"
+#include "coop_mod/maps/missions/igm8/ent-deck11-mission8.scr"
+
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  MAIN THREAD
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+
+void main()
+{
+	$turboLift.sound_locked("");//stop deny sound to be played
+	//Turn Exit Triggers Off
+	$triggerExit.nottriggerable();
+
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////6
+	coop_string_playerModelResetTiki = "models/char/munro_sf.tik";
+	//coop_string_nextMapToCheck			= "ent-deck16";//set the map we gona load next while we are in testmode
+	coop_string_nextMapToCheck			= "ent-deck7a";//set the map we gona load next while we are in testmode
+//DEFINIE SPAWNS
+	coop_float_spawnAngle0 				= 230;
+	coop_float_spawnAngle1 				= 135;
+	coop_vector_spawnOrigin1 			= '-9928 1 0';
+	coop_vector_spawnOrigin2 			= '-9927 330 0';
+	coop_vector_spawnOrigin3 			= '-9965 282 0';
+	coop_vector_spawnOrigin4 			= '-10049 216 0';
+	coop_vector_spawnOrigin5 			= '-10128 132 0';
+	coop_vector_spawnOrigin6 			= '-10206 49 0';
+	coop_vector_spawnOrigin7 			= '-10206 49 0';
+	coop_vector_spawnOrigin8 			= '-10206 49 0';
+//definie weapons
+	coop_string_weapon1 = "models/weapons/worldmodel-Tricorder-stx.tik";
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+//SETUP FOR THE MISSION
+	missionEnterprise = getCvarInt("coop_igm");
+	if(!cvar_bool_multiplayer){
+		missionEnterprise=getfloatvar("game.globalMissionEnterprise");
+	}
+	if(missionEnterprise < 3){//3
+		missionEnterprise=3;//3
+		setfloatvar("game.globalMissionEnterprise",missionEnterprise);
+	}
+	globalCoop_level_callReliably("setupMission"+missionEnterprise+"Deck11");
+	
+	//--- set the sky portal
+	$sky.rendereffects( "+skyorigin" );
+	$world.entity_fade_dist( 800000 );
+	
+	init();
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		dontSaveOrientation();
+		waitforplayer();
+		$player.health( 100 );
+	}
+	
+	
+	$world.clearAvailableViewModes();
+	$world.addAvailableViewMode( "none" );
+}
+
+void init()
+{	
+	//Lock Secret Door. Unlocked In IGM 3
+	$secretDoor.lock();
+
+	entTurboLiftSetup();
+	//ent_turboliftInit();
+
+	checkMissionNumber();
+	
+	//setupMission3Deck11(); setfloatvar ( "game.globalMissionEnterprise", 3 );
+	
+	$astrometricsHallPortal.openportal();
+	$astrometricsHallPortal.hide();
+	$astrometricsHallPortal.notsolid();
+	$astrometricsHallPortalTriggerOpen.thread( "astrometricsOpenHallPortal" );
+	$astrometricsHallPortalTriggerClose.thread( "astrometricsCloseHallPortal" );
+	
+	//Archetypes
+	globalArchetype_Setup ( $elevatorButtonArchetype, "TurboLiftControls" );
+	
+	//Init the Sky
+	globalCommon_SpawnScriptModel( "sky/sky_brecha-rift.tik", "dome", '-4752 -3824 1024', 0 );
+	globalCommon_SpawnScriptModel( "sky/sky_stardome-black.tik", "domeBlack", '-4752 -3824 1024', 0 );
+	globalCoop_main_waitAFrame();
+	
+	globalCommon_SpawnScriptModel( "fx/fx-sun.tik", "sun", '-4736.00 -3648.00 992.00', 0 );
+	globalCommon_SpawnScriptModel( "sky/sky_planet_vazbaj-high.tik", "vazbaj", '-4735.60 -3839.60 1024.40', 180 );
+	globalCoop_main_waitAFrame();
+	
+	globalCommon_SpawnScriptModel( "sky/sky_earth-high.tik", "earth", '-4735.60 -3839.60 1024.40', 180 );
+	globalCommon_SpawnScriptModel( "sky/sky_moon-med.tik", "moon", '-4671.60 -3839.60 1024.40', 180 );
+	globalCoop_main_waitAFrame();
+	
+	$sun.time( .05 );
+	$sun.moveUp( 16 );
+	
+	$dome.scale( 8 );
+	$domeBlack.scale( 4 );
+	
+	$earth.scale( .3 );
+	$moon.scale( .05 );
+	$vazbaj.scale( .3 );
+	
+	wait( .05 );
+	
+	$moon.bind( $moonOrigin );
+	$moonOrigin.bind( $earth );
+	$earth.bind( $sunOrigin );
+	
+	$vazbaj.bind( $sunOrigin );
+	
+	$sunOrigin.bind( $sun );
+	
+	wait( .05 );
+
+	$sunOrigin.time( .05 );
+	$sunOrigin.rotateYup( -25 );
+	
+	$sun.time( .05 );
+	$sun.moveWest( 64 );
+	$sun.moveUp( 32 );
+	
+	globalCoop_main_waitAFrame();
+	hideMunroPlanets();
+	hideKleeyaPlanets();
+}
+
+void checkMissionNumber()
+{	
+	string stringSoundTrack;	
+	stringSoundTrack = "music/igm" + missionEnterprise + ".mus";
+	//--- set the soundtrack
+ 	soundtrack( stringSoundTrack );
+}
+
+//---------------------
+// justLoadedDeckThread	
+// creats a trigger to call the approiate deckJustLoadedThreadIGMx thread
+//---------------------
+void justLoadedDeckThread()
+{
+	string deckJustLoadedThread;
+	
+	deckJustLoadedThread = ( "justLoadedDeckThreadIGM" + missionEnterprise );
+	
+	thread entTurboLiftCheck();
+	
+//not needed in multiplayer, since co-op mod uses the local strings ($$keyword$$)
+//these are loadad sepereately, no matter what objectives are loadad
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		waitforplayer();
+		if( missionEnterprise == 4 )
+		{
+		
+			if( getfloatvar( "game.IGM4GoToTelsia" ) >= 1 )
+			{
+				$player.loadobjectives("IGM4alt");		
+			}
+			else
+			{
+				$player.loadobjectives("IGM4");
+			}
+		}
+		else if( missionEnterprise == 6 )
+		{
+			if( getfloatvar( "game.IGM6MeetTelsia" ) >= 1 )
+			{
+				$player.loadobjectives("IGM6alt");
+			}
+			else
+			{
+				$player.loadobjectives("IGM6");
+			}
+		}
+		else $player.loadobjectives( "IGM" + missionEnterprise );
+	}
+	
+	//if( missionEnterprise == 1 ) thread justLoadedDeckThreadIGM1();
+	//if( missionEnterprise == 2 ) thread justLoadedDeckThreadIGM2();
+	//if( missionEnterprise == 3 ) thread justLoadedDeckThreadIGM3();
+	if( missionEnterprise == 4 ) thread justLoadedDeckThreadIGM4();
+	//if( missionEnterprise == 5 ) thread justLoadedDeckThreadIGM5();
+	//if( missionEnterprise == 6 ) thread justLoadedDeckThreadIGM6();
+	//if( missionEnterprise == 7 ) thread justLoadedDeckThreadIGM7();
+	if( missionEnterprise == 8 ) thread justLoadedDeckThreadIGM8();
+}
+
+//---------------------
+// These 2 threads Open and Close A portal in the hall way outside the 
+// Astrometrics
+// Necessary To Avoid player seeing through sky box insode astrometrics
+//------------------------
+void astrometricsOpenHallPortal()
+{
+	$astrometricsHallPortal.openportal();
+	wait( .05 );
+}
+
+//---------------------
+// These 2 threads Open and Close A portal in the hall way outside the 
+// Astrometrics
+// Necessary To Avoid player seeing through sky box insode astrometrics
+//------------------------
+void astrometricsCloseHallPortal()
+{
+	$astrometricsHallPortal.closeportal();
+	wait( .05 );
+}
+
+void hideMunroPlanets()
+{
+	$dome.hide();
+	$sun.hide();
+	$moon.hide();
+	$earth.hide();
+	
+	$domeBlack.show();
+}
+
+void hideKleeyaPlanets()
+{
+	$dome.hide();
+	$sun.hide();
+	$vazbaj.hide();
+	
+	$domeBlack.show();
+}
+
+void fadeInMunroPlanets()
+{
+	$dome.angles( '45 45 180' );
+	$dome.show();
+	
+	$sun.show();
+	$moon.show();
+	$earth.show();
+	
+	$domeBlack.hide();
+}
+
+void fadeOutMunroPlanets()
+{
+	$sun.hide();
+	$moon.hide();
+	$earth.hide();
+	
+	$domeBlack.show();
+}
+
+void fadeInKleeyaPlanets()
+{
+	$dome.angles( '30 -25 0' );
+	$dome.show();
+	
+	$sun.show();
+	$vazbaj.show();
+	
+	$domeBlack.hide();
+}
+
+void fadeOutKleeyaPlanets()
+{
+	$sun.hide();
+	$vazbaj.hide();
+	
+	$domeBlack.show();
+}
+
+//---------------------
+// killAllTalking
+// This stops all talking on the level
+//------------------------
+void killAllTalking()
+{
+	globalCoop_dialog_stopAll();
+}
+
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed(sNextLevelToLoadForCoop);
+}
+
+

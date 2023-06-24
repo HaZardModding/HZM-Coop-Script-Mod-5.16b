@@ -1,0 +1,1315 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	  m10l2a-romulan_installation - Romulan Installation - Ice World
+//  Script By:    Jared Hefty
+//  Geometry By:  R 'Charon' Heath, Luke Whiteside, The Castle ;P, Jared Hefty
+//  Created on:   07/23/2002
+//	Last Edited:  3/16/2003 - Jared Hefty
+//-----------------------------------------------------------------
+void main();
+void setupStationaryGuard ( entity e );
+void initGuard ( entity e );
+vector VectorSubtract ( vector v1, vector v2 );
+void init();
+void triggerAlarm ();
+void ladderUp ();
+void openEntranceDoor ();
+void m10l2a_FromStateMachine_EarlyOut();
+void EarlyOut ( entity e );
+void ExitEvents();
+void runCrateBeaminMachine ( entity crate , vector firstMove, vector secondMove);
+void triggerAlarmFromTrace ();
+void coop_setRespawnLocations2();
+void coop_waitForTeam();
+void coop_endLevel();
+void securityAccessGained();
+void animActor ( entity e , string animation , string finishedAnim );
+void storageDoorUnlock ();
+
+float alarmTriggeredFromTrace = 0;
+float TOTAL_SPAWNERS = 21;
+float MAX_DISTANCE = 512;
+float totalGuysSpawned = 0;
+float totalGuysAlive = 0;
+float endOfLevel = 0;
+float alarmsActive = 0;
+
+float float_grid_disable1;
+float float_grid_disable2;
+float float_grid_disable3;
+
+//=============================================================================
+// Includes
+//=============================================================================
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/global/global_common.scr"
+#include "coop_mod/maps/optional_modules/codepanel.scr"
+#include "coop_mod/maps/optional_modules/puzzles_advanced.scr"
+#include "coop_mod/maps/optional_modules/forcefields.scr"
+#include "coop_mod/maps/missions/10/m10l2a_cin.scr"
+#include "coop_mod/maps/missions/10/m10_doors.scr"
+#include "coop_mod/maps/missions/10/m10l2_tripwires.scr"
+#include "maps/global_scripts/global_debugutils.scr"
+#include "maps/global_scripts/global_math.scr"
+#include "maps/global_scripts/global_tripwire.scr"
+#include "maps/global_scripts/global_archetype.scr"
+#include "maps/global_scripts/global_tricorderBase.scr"
+#include "maps/global_scripts/global_tricorderKeypad.scr"
+#include "maps/global_scripts/global_acceleratedMovement.scr"
+#include "maps/m10/m10_common.scr"
+#include "maps/m10/m10l2a_dialog.scr"
+
+//===================================================================================================================
+// Main Stuff
+//===================================================================================================================
+
+float commanderKilled = 0;
+
+//---------------------
+// main
+// do start up stuff
+//---------------------
+void main()
+{
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+//allowed special model
+	//coop_string_playerModelResetTiki	= "models/char/dm_romulan_rebel-guard-snow.tik";
+	coop_string_playerModelResetTiki	= "models/char/munro-romulan.tik";
+//set the map we gona load next while we are in testmode
+	coop_string_nextMapToCheck			= "m10l2b-romulan_installation";
+//Set spawnangles for this level
+	coop_float_spawnAngle0 				= 353;
+	coop_float_spawnAngle1 				= 83;
+	coop_float_spawnAngle2 				= 101;
+	coop_float_spawnAngle3 				= 118;
+	coop_float_spawnAngle4 				= 63;
+	coop_vector_spawnOrigin8 			= '-562 1294 -607';
+	coop_vector_spawnOrigin7 			= '-567 1224 -607';
+	coop_vector_spawnOrigin6 			= '-573 1157 -607';
+	coop_vector_spawnOrigin5 			= '-580 1068 -607';
+	coop_vector_spawnOrigin4 			= '-480 800 -543';
+	coop_vector_spawnOrigin3 			= '-176 798 -543';
+	coop_vector_spawnOrigin2 			= '-277 632 -543';
+	coop_vector_spawnOrigin1 			= '-362 625 -543';
+//Definie Objective
+	coop_string_objectiveItem1			= "DownloadData";
+	coop_string_objectiveItem2			= "GainStorageAccess";
+	coop_string_objectiveItem3			= "RescueGonzalez";	
+	coop_string_objectiveItem4			= "FollowInformant";
+	coop_string_objectiveItem5			= "FindExit";
+//definie weapons
+	coop_string_weapon1 = "models/weapons/worldmodel-rom-disruptor-romhands.tik";
+	coop_string_weapon2 = "models/weapons/worldmodel-rom-datapad.tik";
+//Start the Co-Op Script
+	globalCoop_main();
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	thread init();
+	$world.addAvailableViewMode ( "tripwire" );
+	$world.addAvailableViewMode ( "structuralintegrity" );
+//DO SPAWNS/CHACHE WHAT EVER WE NEED IN SP
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/m10l2a/main.cfg\n");
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.model("models/char/hazardteam_munro-rom-uniform.tik");
+		$player.playerviewangles ( '0 77 0' );	//hack because the levels are oriented differently
+		$player.LoadObjectives ( "m10l2a-romulan_installation" );
+		wait ( .1 );
+	}
+//lights
+	$world.light_lightstyle ( "alarmLights" , "ffffffffffffffffgffffffffffffffff" , 1 );
+	$world.light_lightstyle ( "warningLights" , "aaaaaabcdefghijklmnopqrstuvwxyzzzzzz" , 0 );
+	$romulan_informant.headwatch(globalCoop_return_playerClosestPreferActive($romulan_informant));
+	thread openEntranceDoor ();
+}
+
+void setupPannels()
+{
+	float i;
+	entity e;
+	for ( i = 1 ; i <= 11 ; i++ )
+	{
+		e = getentity ( "doorPanel" + i );
+		globalArchetype_Setup ( e , "RomulanDoorPanel" );
+	}
+}
+
+void setupStationaryGuard ( entity e )
+{
+	string t;
+	if ( doesEntityExist ( e ))
+	{
+		t = e.gettargetname();
+
+		e.archetype ( "RomulanRebelMale" );
+		e.settendency ( "pullalarm" , 1.0 );
+		e.settendency ( "wander" , 0.0 );
+		e.settendency ( "patrol" , 0.0 );
+	}
+}
+
+void initGuard ( entity e )
+{
+	string t;
+	if ( doesEntityExist ( e ))
+	{
+		t = e.gettargetname();
+		e.settendency ( "pullalarm" , 1.0 );
+		e.settendency ( "patrol" , 1.0 );
+
+		e.ai_off ();	//make them wake up
+		wait (.1 );
+		e.ai_on ();
+	}
+	else
+		print ( "initGuard(): entity not found!\n ");
+}
+
+vector VectorSubtract ( vector v1, vector v2 )
+{
+	vector ret;
+
+	ret_x = v1_x - v2_x;
+	ret_y = v1_y - v2_y;
+	ret_z = v1_z - v2_z;
+
+	return ret;
+}
+
+//---------------------
+// init
+// stuff that doesn't go in main
+//---------------------
+void init()
+{
+//Dancer
+	$ddr.forcealpha ( 1 );
+	$ddr.alpha ( .5 );
+	$ddr.hide ();
+//Informant
+	$romulan_informant.pushable ( 0 );
+	$romulan_informant.mass ( 999999 );
+//spawn Class Selection
+	//thread globalCoop_class_setup("HeavyWeapons",'-563 1319 -500');
+	//thread globalCoop_class_setup("Technician",'-158 950 -500');
+	//thread globalCoop_class_setup("Medic",'-491 958 -500');
+	
+	$cas_portal01.notsolid();
+	$cas_portal01.hide();
+	$cas_portal02.notsolid();
+	$cas_portal02.hide();
+
+
+	//initialize our existing guards
+
+	//two guys talking in the room after your vent crawl
+	setupStationaryGuard($guard1);
+	setupStationaryGuard($guard2);
+
+	$guard1.addcustomthread ( "damaged" , "killConversation1" );
+	$guard2.addcustomthread ( "damaged" , "killConversation1" );
+
+	//guy patrolling pillar room
+	setupStationaryGuard($guard3);
+
+	//two guys talking inside of security center
+	setupStationaryGuard($guard5);
+	setupStationaryGuard($guard6);
+
+	$guard5.addcustomthread ( "damaged" , "killConversation2" );
+	$guard6.addcustomthread ( "damaged" , "killConversation2" );
+
+
+	setupStationaryGuard($secretGuard1);
+//disable ai in mp or it will trigger alert all the time
+	if(cvar_bool_multiplayer)
+	{
+		$secretGuard1.ai_off();
+	}
+	
+	initGuard ( $guard4 );		//start him patrolling
+
+	float x;
+	entity e;
+	for ( x = 1 ; x <=  TOTAL_SPAWNERS ; x++ )
+	{
+		e = getentity ( "spawner" + x );
+		e.spawnEffectName ( "TransportIn" , "Romulan" );
+		e.setspawnkeyvalue ( "setgroupid" , "999" );
+		e.setfloatvar ( "notChoosable" , 0 );
+		e.checkforspace ();
+	}
+
+	$liftForcefield.loopsound ( "sound/ships/enterprise/ent_forcefield.wav", .5 , 50 );
+	thread globalCoop_forcefield_makeInteractive($liftForcefieldClip);
+
+	//Setup d-lights/door indicators for locked doors
+	lockDoor ( "radgunDoor" );
+	lockDoor ( "liftDoor" );
+	lockDoor ( "compDoor" );
+	lockDoor ( "storageDoor" );
+
+	$romulan_informant.ai_off();
+	$romulan_informant.killthread ( "fail" );
+
+	//$ExitEventsTrigger.nottriggerable();
+	$informantFound.nottriggerable();
+
+	$ventRoom_Fan1.speed (10);
+	$ventRoom_Fan1.rotateY (360);
+
+	$liftForcefieldClip.solid ();
+
+	entity e;
+	float i;
+
+	for ( i = 0; i <= 6 ; i++ )
+	{
+		e = getentity ( "ladder1Rung" + i );
+		wait ( .1 );
+		e.rotateXDown ( 90 );
+	}
+
+	thread globalCommon_OnUse ( $cranePanel , "moveCrane" );
+
+	//setup groups of archetypes
+	float i;
+	entity e;
+
+	//alarm panels
+	for ( i = 1 ; i <6 ; i++ )
+	{
+		e = getentity ( "alarmPanel" + i + "Archetype" );
+		globalArchetype_Setup ( e , "RomulanAlarmPanel" );
+	}
+
+	//tripwire mod panels
+	globalArchetype_Setup ( $modPanel1Archetype , "RomulanSecurityGrid" );
+	globalArchetype_Setup ( $modPanel2Archetype , "RomulanSecurityGrid" );
+
+	globalArchetype_Setup ( $commRoomButtonArchetype , "RomulanConsole" );
+	globalArchetype_Setup ( $securityRoomPanel1Archetype , "RomulanConsole" );
+	globalArchetype_Setup ( $ladderConsoleArchetype , "RomulanGenericConsole" );
+
+	globalArchetype_Setup ( $storageKeycodeArchetype , "RomulanKeypad" );
+
+	globalArchetype_Setup ( $securitySign1Archetype , "RomulanSecuritySign" );
+	globalArchetype_Setup ( $exitSign1Archetype , "RomulanEntranceSign" );
+	globalArchetype_Setup ( $commandSign1Archetype , "RomulanCommandSign" );
+
+	globalArchetype_Setup ( $exitLiftArchetype , "RomulanLiftControl" );
+
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		spawn ( "Actor" , "model" , "models/char/hazardteam_munro-rom-uniform.tik" , "targetname" , "fakeMunro" );
+		wait ( .1 );
+		$fakeMunro.hide ();
+		$fakeMunro.notsolid ();
+		
+		$storagePuzzle.puzzleobject_itemToUse      ( "Tricorder"          );
+		$storagePuzzle.puzzleobject_itemUsedthread ( "startStoragePuzzle" );
+		$storagePuzzle.puzzleobject_solvedThread   ( "storageDoorUnlock"  );
+
+		$ladderPuzzle.puzzleobject_itemtouse ( "Tricorder" );
+		$ladderPuzzle.puzzleobject_timetouse ( 3 );
+		$ladderPuzzle.puzzleobject_solvedThread ( "solvedLadderPuzzle" );
+		spawn("weapon","model","weapons/worldmodel-rom-radgun.tik","origin","988.16 182.18 -124.11","targetname","secretWeapon");
+	}
+	else
+	{
+		globalCoop_puzzle_add("disableGridPuzzle1","coop_disableGrid1",5,'608 1040 -328');		
+		globalCoop_puzzle_add("disableGridPuzzle2","coop_disableGrid2",5,'3368 1880 76');
+		
+		thread globalCoop_puzzle_replace($researchPuzzle,"researchStationUsed",5);
+		thread globalCoop_puzzle_replace($ladderPuzzle,"solvedLadderPuzzle",3);
+		
+		globalCoop_puzzle_replace($securityAccessPuzzleObject,"securityAccessGained",5);
+		$securityAccessPuzzleObject.setStringVar("coop_puzzle_addHud","codehud_m10_equipment");
+		$securityAccessPuzzleObject.setFloatVar("coop_puzzle_resetState",1);
+		$securityAccessPuzzleObject.setFloatVar("coop_puzzle_doNotDisable",1);
+		$securityAccessPuzzleObject.setFloatvar("globalCoop_puzzleAllowAllClasses",1);
+		
+		
+	//Code Puzzle
+		//spawn("trigger_relay","targetname","storageKeypadMom","origin",""+$storagePuzzle.getorigin());
+		spawn("trigger_use","targetname","storageKeypad","origin",""+$storagePuzzle.getorigin());
+		//spawn("trigger_multiple","targetname","storageKeypadMultiple","origin",""+$storagePuzzle.getorigin());
+		wait(1);
+		//$storageKeypadMultiple.setsize('-30 -30 -30','30 30 30');
+		//$storageKeypadMultiple.thread("coop_transitionTricorderKeypad");		
+		$storagePuzzle.remove();
+		//$storageKeypadMom.setstringvar("uservar1","coop_tricorderKeypadRom");
+		//$storageKeypadMom.setstringvar("uservar2","codepanel");
+		//$storageKeypad.thread("coop_storageKeypadUseTricorder");	
+		$storageKeypad.thread("mom_basic");	
+		$storageKeypad.setsize('-20 -20 -50','20 20 50');
+		//x=time until failure,Y=code,z=how many numbers does the code have
+		$storageKeypad.setvectorvar("coop_codepannelCCD",'0 57391 5');//countdown,code,length
+		$storageKeypad.setstringvar("coop_codepannelSucess","storageDoorUnlock");//sucess thread
+		$storageKeypad.setstringvar("coop_codepannelFailed","");//failed thread
+		$storageKeypad.setstringvar("uservar2","codepanel");
+		$storageKeypad.setstringvar("uservar1","coop_tricorderKeypadRom");
+		$storageKeypad.setStringVar("uservar3","storageDoorUnlockNoHud");
+		
+		$storagePuzzle.setStringVar("coop_puzzle_key","securityAccessPuzzleObject");
+		$storagePuzzle.setFloatVar("coop_puzzle_resetState",1);
+		$storagePuzzle.setFloatVar("coop_puzzle_doNotDisable",1);	
+		$storagePuzzle.setFloatvar("globalCoop_puzzleAllowAllClasses",1);
+		wait(0.2);
+	//use this trigger to switch from tricorder to keypad
+		//thread globalCoop_puzzle_replace($storagePuzzle,"storageDoorUnlock",7);
+		//$storagePuzzle.setStringVar("coop_puzzle_key","securityAccessPuzzleObject");
+		//$storagePuzzle.setFloatVar("coop_puzzle_resetState",1);
+		//$storagePuzzle.setFloatVar("coop_puzzle_doNotDisable",1);	
+//ALLOW EVERY ONE TO DO PUZZLES
+		$ladderPuzzle.setFloatvar("globalCoop_puzzleAllowAllClasses",1);
+		$researchPuzzle.setFloatvar("globalCoop_puzzleAllowAllClasses",1);
+		$disableGridPuzzle1.setFloatvar("globalCoop_puzzleAllowAllClasses",1);
+		$disableGridPuzzle2.setFloatvar("globalCoop_puzzleAllowAllClasses",1);
+//REMOVE ALL PUZZLE OBJECTS
+		removeClass("PuzzleObject");
+	}
+	thread initM10L2Tripwires ();
+
+	thread runCrateBeaminMachine ( $crateScannerCrate1 , '0 80 0' , '-512 0 0');
+	wait  ( 3 );
+	if(doesEntityExist($secretWeapon)){
+		$secretWeapon.notsolid();
+		$secretWeapon.angles('353.000000 258.000000 330.000000');
+		$secretWeapon.scale(.6);
+	}
+	thread runCrateBeaminMachine ( $crateScannerCrate2 , '0 -80 0' , '-512 0 0');
+	
+	thread setupPannels();
+//--- set the soundtrack
+	soundtrack( "music/m10l2a-romulan_installation.mus" );
+//update Objectives
+	//$player.setobjectiveshow ( "DownloadData" , 1 );
+	//$player.setobjectiveshow ( "GainStorageAccess" , 1 );
+	thread globalCoop_objectives_update("incomplete",1,0);
+	thread globalCoop_objectives_update("incomplete",2,1);
+}
+
+
+void startLadderPuzzle ()
+{
+	//routing puzzle here
+}
+
+void solvedLadderPuzzle ()
+{
+	$ladder.triggerable ();
+	globalCoop_level_remove($ladderBlocker);
+	globalCoop_level_remove($ladderConsoleArchetype);
+
+	$ladderPuzzle.playsound ( "sound/ships/romulan/rom_beep_yes.wav" , 4, .3, 10000 );
+	ladderUp();
+	wait(10);
+	thread coop_setRespawnLocations2();
+}
+//===================================================================================================================
+// Buttons, Switches and Triggers
+//===================================================================================================================
+//---------------------
+// ComputerRoomButton_Use
+// Computer room button is used, unlocks door and makes informant wait for you at the end.
+//---------------------
+
+void researchStationUsed()
+{
+	$researchPuzzle.playsound ( "sound/ships/romulan/rom_beep_yes.wav" , 4, .3, 10000 );
+	$researchPuzzle.nouse();
+	
+//Update Objectives
+	thread globalCoop_objectives_update("complete",1,0);
+	thread globalCoop_objectives_update("incomplete",5,1);
+
+	//$romulan_informant.alpha ( 0 );
+	globalCoop_level_hideAndNotSolid($romulan_informant);
+	$romulan_informant.warpto ( "$informantWarpTo" );
+	$romulan_informant.missionobjective ( 1 );
+	$informantFound.triggerable ();
+
+	$researchPuzzle.missionobjective ( 0 );
+
+	globalCoop_level_remove($commRoomButtonArchetype);
+
+	unlockDoor ( "compDoor" );
+	$triggerExitIndicator.triggerable ();
+}
+
+//===================================================================================================================
+// AI Stuff
+//===================================================================================================================
+//---------------------
+// SecurityOfficer_Killed
+// Security officer is killed, gain clearance card for new areas
+//---------------------
+float storageCodeAccessed = 0;
+void securityAccessGained()
+{
+	if(storageCodeAccessed==0)
+	{
+		coop_vector_svnextmaporrebootDoloadnextmimapWaitingForTeam_y=1;//allow loading next mission on time ran out
+		commanderKilled = 1;
+		$securityAccessPuzzleObject.missionobjective ( 0 );
+		$storagePuzzle.missionobjective ( 1 );
+		storageCodeAccessed = 1;
+		thread globalCoop_objectives_update("complete",2,1);
+		//$player.setobjectivecomplete ( "GainStorageAccess" , 1 );
+		if(!cvar_bool_multiplayer)
+		{//Singleplayer
+			$securityAccessPuzzleObject.playsound ( "sound/ships/romulan/rom_beep_yes.wav" , 4, .3, 10000 );
+			$player.addhud ("codehud_m10_equipment");
+			globalCoop_level_remove($securityRoomPanel1Archetype);
+		}
+	}
+}
+
+
+//---------------------
+// ExitEvents
+// player exits level
+//---------------------
+void ExitEvents()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.immobilize ( 1 );
+	}
+	else{
+		coop_waitForTeam();
+	}
+		
+	$exitLift.loopsound ( "sound/environment/machine/lift3_looponly.wav" );
+	globalAccelMove_Relative( $exitLift, '0 0 -128', 2, "rampup" ,"" );
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+	//spawning a level tranistion and triggering it
+		spawn ( "trigger_changelevel", "targetname", "trigger_endlevel", "map", "m10l2b-romulan_installation" );
+		wait ( .05 );
+		trigger ( "$trigger_endlevel" );
+	}
+}
+
+void fail()
+{
+	wait ( 2 );
+	thread globalCoop_mission_fail();
+}
+
+//---------------------------------------
+//---------------------------------------
+void startStoragePuzzle ()
+{
+	globalTricorderKeypad_SetType( "romulan" );
+	globalTricorderKeypad_SetScannedCodeFlag ( commanderKilled );
+	globalTricorderKeypad_SetSecretCode ( 5 , 7 , 3 , 9 , 1 , 0 , 0 , 0 , 0 );
+	globalTricorderKeypad_Run ( $storagePuzzle , 0 /*no timelimit*/ , 3 /*3 tries */);
+}
+
+void storageDoorUnlockNoHud()
+//player does not have the hud/menu/coop mod
+{
+	entity ePlayer,eTrigger;
+	eTrigger = getCurrentEntity();
+	ePlayer = mom_returnPlayerForTrigger(eTrigger);
+	if(doesEntityExist(ePlayer))
+	{
+		if(ePlayer.getFloatVar("coop_puzzle_hasSolved_securityAccessPuzzleObject") != 1)
+		{
+			ePlayer.hudprint("^5Info: ^2You need to download the CODE for this panel\n");
+			return;
+		}
+		storageDoorUnlock();
+		eTrigger.nottriggerable();
+	}
+}
+
+void storageDoorUnlock ()
+{
+	
+	thread globalCoop_huds_RemoveAll("codehud_m10_equipment");
+	
+	unlockDoor ( "storageDoor" );
+	$storageKeypad.playsound ( "sound/environment/switches/switch_01.wav" , 3, .7, 10000 );
+	//$radgunPuzzle.playsound ( "sound/ships/romulan/rom_beep_yes.wav" , 4, .5, 10000 );
+	$storagePuzzle.missionobjective ( 0 );
+	$storageKeypad.missionobjective ( 0 );
+	$researchPuzzle.missionobjective ( 1 );
+	globalCoop_level_remove($storageKeycodeArchetype);
+	$storageKeypad.nottriggerable();
+	wait(1);
+	$storageKeypad.remove();
+	$storagePuzzle.remove();
+}
+
+void ladderUp ()
+{
+	$ladder1Door.playsound ( "sound/ships/romulan/rom_beep_yes.wav" , 8, .7, 10000 );
+	$ladder1Door.playsound ( "sound/environment/machine/pneu_small1.wav", 7, .7, 432 );
+	entity e;
+	float i;
+
+	for ( i = 0; i <= 6 ; i++ )
+	{
+		e = getentity ( "ladder1Rung" + i );
+		e.playsound ( "sound/doors/klingon_jtube.wav", 6, .6, 232 );
+		e.time ( .75 );
+		e.rotateXup ( 90 );
+		wait ( .5 );
+	}
+
+	$ladderDoor.time ( 1 );
+	$ladderDoor.playsound ( "sound/environment/machine/mech_move1.wav", 6, 1, 232 );
+	trigger ( "$ladderDoor" );
+}
+
+
+void spawnEnemyWave ();
+void triggerAlarm ()
+{
+	entity caller,e;
+	float group;
+
+	caller = getcurrententity ();
+	if ( doesEntityExist ( caller ))
+	{
+		caller.nottriggerable();
+		e = caller.getlastactivatingentity ();
+	}
+
+	if ((alarmsActive) && (!doesEntityExist ( e )))	//we don't get an entity or caller if the AI triggers it, so check this to make sure they don't turn off the alarms
+		return;
+
+	if ( !alarmsActive )	//initial activation
+	{
+		alarmsActive = 1;
+		if(!cvar_bool_multiplayer)
+		{
+			$player.loopsound ( "sound/ships/romulan/rom_redalert.wav" , 1 ,100);
+		}
+		else
+		{
+			entity ePlayer;
+			float fPlayerIdInUse;
+			for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++){
+				ePlayer = getentity("player"+fPlayerIdInUse);
+				if(doesEntityExist(ePlayer)){
+					ePlayer.loopsound ( "sound/ships/romulan/rom_redalert.wav" , 1 , 85);
+				}
+			}
+		}
+		$world.light_lightstyle ( "alarmLights" , "zzzzzzzzzzzzzzaaaaaaaaaaaaa" , 0 );
+		thread spawnEnemyWave();
+
+		float i;
+		entity e2;
+
+		for ( i = 1 ; i <=6 ; i++ )
+		{
+			e2 = getentity ( "guard" + i );
+			if(doesEntityExist(e2))
+			{
+				e2.settendency ( "pullalarm" , 0.0 );
+			}
+		}
+
+	}
+	else
+	{
+		float i;
+		entity e2;
+
+		for ( i = 1 ; i <=6 ; i++ )
+		{
+			e2 = getentity ( "guard" + i );
+			if(doesEntityExist(e2))
+			{
+				e2.settendency ( "pullalarm" , 1.0 );
+			}
+		}
+		alarmsActive = 0;
+		if(!cvar_bool_multiplayer)
+		{
+			$player.stoploopsound ();
+		}
+		else
+		{
+			entity ePlayer;
+			float fPlayerIdInUse;
+			for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++){
+				ePlayer = getentity("player"+fPlayerIdInUse);
+				if(doesEntityExist(ePlayer)){
+					ePlayer.stoploopsound ();
+				}
+			}
+		}
+		$world.light_lightstyle ( "alarmLights" , "aaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaa" , 1 );
+	}
+
+	wait ( .5 );
+
+	if ( doesEntityExist ( caller ))
+	{
+		caller.triggerable ();
+	}
+}
+
+void chooseSpawnerClosestToPlayer ();
+void spawnEnemyWave ()
+{
+	if ( totalGuysAlive <= 0 )
+	{
+		wait ( randomfloat ( 2 ) + 2 );
+		thread chooseSpawnerClosestToPlayer ();
+		thread chooseSpawnerClosestToPlayer ();
+		thread chooseSpawnerClosestToPlayer ();
+		if(cvar_bool_multiplayer)
+		{
+			if(cvar_integer_coop_skill > 1 || globalCoop_return_integerPlayersQuantity(2) > 2)
+			{
+				thread chooseSpawnerClosestToPlayer ();
+			}
+			if(cvar_integer_coop_skill > 2 || globalCoop_return_integerPlayersQuantity(2) > 3)
+			{
+				thread chooseSpawnerClosestToPlayer ();
+			}
+		}
+	}
+}
+
+void spawnedDeathThread ()
+{
+	entity e;
+	e = getcurrententity();
+	totalGuysAlive --;
+	if ( totalGuysAlive < 0 )
+		totalGuysAlive = 0;
+
+	if ( (totalGuysAlive <= 0) && (alarmsActive == 1) )
+	{
+		spawnEnemyWave ();				//spawn another wave
+	}
+}
+
+string return_RandomModel;	//get around any weirdness when it comes to returning strings
+void randomModel ()
+{
+	float choice;
+	choice = randomint ( 12 ) + 1; //choose from [1,12]
+
+	if ( choice == 1 )
+		return_RandomModel = "models/char/romulan-m10-soldier-pistol-f.tik";
+	else if ( choice == 2 )
+		return_RandomModel = "models/char/romulan-m10-soldier-pistol-f2.tik";
+	else if ( choice == 3 )
+		return_RandomModel = "models/char/romulan-m10-soldier-pistol-f3.tik";
+	else if ( choice == 4 )
+		return_RandomModel = "models/char/romulan-m10-soldier-pistol-m.tik";
+	else if ( choice == 5 )
+		return_RandomModel = "models/char/romulan-m10-soldier-pistol-m2.tik";
+	else if ( choice == 6 )
+		return_RandomModel = "models/char/romulan-m10-soldier-pistol-m3.tik";
+	else if ( choice == 7 )
+		return_RandomModel = "models/char/romulan-m10-soldier-rifle-f.tik";
+	else if ( choice == 8 )
+		return_RandomModel = "models/char/romulan-m10-soldier-rifle-f2.tik";
+	else if ( choice == 9 )
+		return_RandomModel = "models/char/romulan-m10-soldier-rifle-f3.tik";
+	else if ( choice == 10 )
+		return_RandomModel = "models/char/romulan-m10-soldier-rifle-m.tik";
+	else if ( choice == 11 )
+		return_RandomModel = "models/char/romulan-m10-soldier-rifle-m2.tik";
+	else if ( choice == 12 )
+		return_RandomModel = "models/char/romulan-m10-soldier-rifle-m3.tik";
+	else	//failsafe
+		return_RandomModel = "models/char/romulan-m10-soldier-rifle-f.tik";
+}
+
+void chooseSpawnerClosestToPlayer ()
+{
+	vector playerOrigin;
+	entity toReturn , spawner,guy,ePlayer;
+	float i,spawnerDistance, lowestDistance;
+	string tname;
+	float iterations;
+	float MAX_ITERATIONS = 15;
+
+	if(!cvar_bool_multiplayer)
+	{
+		if ( totalGuysAlive >= 3 )
+			return;
+	}
+
+	while ( !doesEntityExist ( guy ) && (iterations < MAX_ITERATIONS) && alarmsActive )		//while we haven't spawned a feller and we haven't tried too many times, and the alarms are still going
+	{
+		
+		
+		lowestDistance = MAX_DISTANCE;
+		//go through all available spawners and find the one horizontally closest to the player
+		for ( i = 1 ; i <= TOTAL_SPAWNERS ; i++ )
+		{
+			spawner = getentity ( "spawner" + i );				//grab our spawner
+			ePlayer = globalCoop_return_playerClosestPreferActive(spawner);
+			playerOrigin = ePlayer.getorigin ();
+			globalCommon_AssertEntity ( spawner , "^6chooseSpawnerClosestToPlayer(): $spawner" + i + " is null" );
+			if ( spawner.getfloatvar ( "notChoosable" ) == 0 )		//don't bother checking if it's already in use
+			{
+				spawnerDistance = globalMath_GetDistance ( spawner.getorigin (), playerOrigin );
+				if ( spawnerDistance < lowestDistance )
+				{
+					lowestDistance = spawnerDistance;	//we've found a new lowest distance
+					toReturn = spawner;
+				}
+			}
+		}
+
+		if ( doesEntityExist ( toReturn ))
+		{
+			randomModel();
+			toReturn.modelname ( return_RandomModel );
+
+			toReturn.setfloatvar ( "notChoosable" , 1 );	//flag it as in-use
+			totalGuysSpawned++;
+			tname = "spawned" + totalGuysSpawned;
+			wait ( .05 );
+			toReturn.spawntargetname ( tname );
+//			print ( "spawning from " +toReturn.gettargetname () + "\n" );
+			triggerentity ( toReturn );
+			wait ( .15 );
+
+			guy = getentity ( tname );
+
+			if ( doesEntityExist ( guy ))
+			{
+				totalGuysAlive++;
+//				print ( "Spawned: " +totalGuysAlive + "\n" );
+				guy.targetname ( "SpawnedGuy" );
+				guy.killthread ( "spawnedDeathThread" );
+				guy.setvar ( "manual_state" , "combat" );
+				guy.settendency ( "pullalarm" , 0 );
+				if(cvar_bool_multiplayer)//Multiplayer	
+				{
+					globalCoop_actor_healthMultiplicatePerPlayer(guy);
+					//guy.settendency ( "pullalarm" , 1.0 );
+				}
+				guy.attack ( globalCoop_return_playerClosestPreferActive(guy) );
+
+				wait ( 4 );
+				toReturn.setfloatvar ( "notChoosable" , 0 );
+			}
+			else
+			{
+				toReturn.setfloatvar ( "notChoosable" , 0 );
+				wait ( .25 );
+			}
+		}
+		wait ( .25 );
+		iterations++;
+	}
+
+	//debugging -- let's see how often this happens during a normal play through
+	if ( iterations >= MAX_ITERATIONS )
+	{
+		print ( "chooseSpawnerClosestToPlayer(): Tried more than " + MAX_ITERATIONS + " attempts to spawn an enemy\n" );
+		if(cvar_bool_multiplayer){//Multiplayer
+			wait(5);
+			thread chooseSpawnerClosestToPlayer();
+		}
+		return;
+	}
+
+	//time the guys out
+	float i = 0;
+	while ( ( i < 90 ) && !endOfLevel )
+	{
+		wait ( 1 );
+		i++;
+	}
+
+	if ( doesEntityExist ( guy ))
+	{
+		EarlyOut ( guy );
+	}
+}
+
+void triggerAlarmFromTrace ()
+{
+	if ( !alarmsActive )
+	{
+		triggerAlarm ();
+	}
+}
+
+
+void doorLockedSound ()
+{
+	entity e;
+	e=getCurrentEntity();
+	if(doesEntityExist(e))
+	{
+		e.playsound ( "sound/ships/romulan/rom_beep_no.wav" , 7, .5, 10000 );
+	}
+}
+
+void doorUnlockedSound ()
+{
+	entity e;
+	e=getCurrentEntity();
+	if(doesEntityExist(e))
+	{
+		e.playsound ( "sound/ships/romulan/rom_beep_yes.wav" , 7, .5, 10000 );
+	}
+}
+
+
+void weaponFound ()
+{
+	if(!cvar_bool_multiplayer)
+	{
+		$player.give ( "models/weapons/worldmodel-rom-radgun-romhands.tik" );
+		$player.use ( "RomulanRadGun" );
+		setfloatvar( "game.secretWeapon_RomulanExperimental", TRUE );
+	}
+	else
+	{
+		globalCoop_player_giveAll("models/weapons/worldmodel-rom-radgun-romhands.tik",1);
+		stuffcmd("seta coop_eWtik models/weapons/worldmodel-rom-radgun-romhands.tik\n");
+		globalCoop_level_remove($secretWeapon);
+	}
+	globalCoop_level_remove($secretWeapon);
+}
+
+
+void runCrateBeaminMachine ( entity crate , vector firstMove, vector secondMove)
+{
+	globalCommon_AssertEntity ( crate , "Crate does not exist!" );
+
+	vector startOrigin;
+	vector firstMove,secondMove;
+	startOrigin = crate.getorigin();
+
+	crate.forcealpha ( 1 );
+	while ( 1 )
+	{
+		crate.alpha ( 0 );
+		crate.show ();
+		crate.fadein ( 1.5 );
+		crate.displayeffect ( "TransportIn" ,"Romulan" );
+		wait ( 2.0 );
+
+		globalAccelMove_Relative( crate, firstMove, 2, "rampupdown", "" );
+		globalAccelMove_Relative( crate, secondMove, 6, "rampup", "" );
+
+		crate.hide ();
+		wait ( .1 );
+		crate.origin ( startOrigin );
+	}
+}
+
+void activateSecretGuard ()
+{
+	initGuard ( $secretGuard1 );	//start the guard walking
+}
+
+//from m11/m11_groupspawn.scr
+void CommandToGroup ( float groupID , string event , string arg1 , string arg2)
+{
+	entity e;
+	e = spawn ( "Actor" , "setgroupid" , groupID );
+	wait ( .05 );
+
+	e.sendeventtogroup ( event , arg1 , arg2 );
+	globalCoop_level_remove(e);
+}
+
+
+//----------------------------------------------------------------
+// conversational stuff
+//----------------------------------------------------------------
+
+void activateConversation1 ()
+{
+	initGuard($guard3);
+
+	//wake them up a bit (get them out of sleep)
+	$guard1.ai_off();
+	$guard2.ai_off();
+	wait ( .1 );
+	$guard1.ai_on();
+	$guard2.ai_on();
+
+	globalCoop_dialog_play($guard1,"m10l2/guard1_hoursbet.mp3", 1, 400 , 0);
+	globalCoop_dialog_play($guard2,"m10l2/guard2_twelve.mp3", 1, 400 , 0);
+	globalCoop_dialog_play($guard1,"m10l2/guard1_thatall.mp3", 1, 400 , 0);
+	globalCoop_dialog_play($guard2,"m10l2/guard2_newtech.mp3", 1, 400 , 0);
+	globalCoop_dialog_play($guard1,"m10l2/guard1_stubborn.mp3", 1, 400 , 0);
+	globalCoop_dialog_play($guard2,"m10l2/guard2_cardass.mp3", 1, 400 , 0);
+	globalCoop_dialog_play($guard2,"m10l2/guard2_toolate.mp3", 1, 400 , 0);
+	globalCoop_dialog_play($guard1,"m10l2/guard1_open.mp3", 1, 400 , 0);
+	globalCoop_dialog_play($guard2,"m10l2/guard2_howdo.mp3", 1, 400 , 0);
+	globalCoop_dialog_play($guard1,"m10l2/guard1_heard.mp3", 1, 400 , 0);
+	globalCoop_dialog_play($guard2,"m10l2/guard2_cover.mp3", 1, 400 , 0);
+	globalCoop_dialog_play($guard1,"m10l2/guard1_quick.mp3", 1, 400 , 0);
+	globalCoop_dialog_play($guard2,"m10l2/guard2_lying.mp3", 1, 400 , 0);
+	globalCoop_dialog_play($guard1,"m10l2/guard1_believe.mp3", 1, 400 , 0);
+	globalCoop_dialog_play($guard2,"m10l2/guard2_unless.mp3", 1, 400 , 0);
+	
+	//start them moving
+	wait ( .5 );
+	initGuard ( $guard1 );
+}
+
+void killConversation1 ()
+{
+	killthread ( "activateConversation1" );
+	if ( doesEntityExist ( $guard1 ))
+	{
+		$guard1.stopdialog ();
+		$guard1.ai_on();
+	}
+	if ( doesEntityExist ( $guard2 ))
+	{
+		$guard2.stopdialog ();
+		$guard2.ai_on();
+	}
+}
+
+
+void activateConversation2 ()
+{
+	globalCoop_dialog_play($guard5,"m10l1/indrom3_latrine.mp3", 1, 400 , 0); //I have latrine duty again! Out on the forward observation glacier!
+	globalCoop_dialog_play($guard6,"m10l1/indrom4_so.mp3", 1, 400 , 0); //So?
+	globalCoop_dialog_play($guard5,"m10l1/indrom3_fav.mp3", 1, 400 , 0); //So Old Suldok plays favorites. Why else would I keep getting the same posting?
+	globalCoop_dialog_play($guard6,"m10l1/indrom4_deserve.mp3", 1, 400 , 0); //Maybe you did something to deserve it.
+	globalCoop_dialog_play($guard5,"m10l1/indrom3_secret.mp3", 1, 400 , 0); //If you’re not in his secret society, you don’t get any good postings.
+	globalCoop_dialog_play($guard6,"m10l1/indrom4_really.mp3", 1, 400 , 0); //Really?
+	globalCoop_dialog_play($guard5,"m10l1/indrom3_spies.mp3", 1, 400 , 0); //And his spies are everywhere! It’s not like you can’t tell who’s in his idiotic club.
+	globalCoop_dialog_play($guard6,"m10l1/indrom4_tell.mp3", 1, 400 , 0); //You can tell?
+	globalCoop_dialog_play($guard5,"m10l1/indrom3_rat.mp3", 1, 400 , 0); //And they’ll rat on you for the smallest thing.
+	globalCoop_dialog_play($guard6,"m10l1/indrom3_like.mp3", 1, 400 , 0); //Like insulting the Commander?
+	globalCoop_dialog_play($guard5,"m10l1/indrom3_report.mp3", 1, 400 , 0); //Exactly! Just like... like… Oh no! Please don’t report me!
+	wait ( 1 );
+	initGuard ( $guard5 );
+
+	wait ( .75 );
+	initGuard ( $guard6 );
+}
+
+void killConversation2 ()
+{
+	killthread ( "activateConversation2" );
+	
+
+	if ( doesEntityExist ( $guard5 ))
+	{
+		$guard5.stopdialog ();
+		$guard5.ai_on ();
+		//$guard5.attack ( $player );
+	}
+
+	if ( doesEntityExist ( $guard6 ))
+	{
+		$guard6.stopdialog ();
+		$guard6.ai_on ();
+		//$guard6.attack ( $player );
+	}
+}
+
+void  m10l2a_FromStateMachine_KillDialog ()
+{
+	killConversation1 ();
+	killConversation2 ();
+}
+
+void blockVent ()
+{
+	if(!cvar_bool_multiplayer){//only do this in singleplayer, it does lock out the players in mp!!!
+		$ventGrate5.moveup ( 66 );
+		$ventGrate5.lock ();
+	}
+}
+
+float ddrScale = .2;
+
+void toggleDDR ()
+{
+	entity e;
+	e=getcurrententity ();
+	globalCoop_level_remove(e);
+	e.playsound ( "sound/ships/romulan/rom_beep_yes.wav" , 4, .3, 10000 );
+
+	$ddr.alpha ( 0 );
+	$ddr.show ();
+	$ddr.fadein ( 1 , .65 );
+	$ddr.anim ( "dance1" );
+}
+
+void scaleUpDDR ()
+{
+	float oldScale;
+	oldScale = ddrScale;
+	ddrScale+=.1;
+
+	entity e;
+	e=getcurrententity ();
+//DO NOT ACCES NULL ENTITY !!!
+	if(!doesEntityExist(e)){
+		return;
+	}
+	e.nouse ();
+
+	e.playsound ( "sound/ships/romulan/rom_beep_yes.wav" , 4, .3, 10000 );
+
+	if ( ddrScale > .9 )
+	{
+		ddrScale = .9;
+		return;
+	}
+	float i;
+
+	for ( i = oldScale ; i<ddrScale ; i+=.05 )
+	{
+		$ddr.scale ( i );
+		wait ( .05 );
+	}
+}
+
+void scaleDownDDR ()
+{
+	float oldScale;
+	oldScale = ddrScale;
+	ddrScale-=.1;
+
+	entity e;
+	e=getcurrententity ();
+	e.nouse ();
+
+	e.playsound ( "sound/ships/romulan/rom_beep_yes.wav" , 4, .3, 10000 );
+
+	if ( ddrScale < .2 )
+	{
+		ddrScale = .2;
+		return;
+	}
+	float i;
+
+	for ( i = oldScale ; i>ddrScale ; i-=.05 )
+	{
+		$ddr.scale ( i );
+		wait ( .05 );
+	}
+}
+
+void openEntranceDoor ()
+{
+	$doorPanel11.playsound ( "sound/environment/switches/switch_01.wav" , 3, .3, 10000 );
+	$doorPanel11.playsound ( "sound/ships/romulan/rom_beep_yes.wav" , 7, .3, 10000 );
+	wait( .1 );
+
+	$doorPanel11.nottriggerable ();
+
+    $StationOfficerOuterDoorPart1.playsound ( "sound/doors/drull_bigdoor_01.wav", 5, 1, 300);
+	$StationOfficerOuterDoorPart1.time( 5 );
+	$StationOfficerOuterDoorPart1.moveUp( 6 );
+	$StationOfficerOuterDoorPart2.time( 5 );
+	$StationOfficerOuterDoorPart2.moveUp( 36 );
+	$StationOfficerOuterDoorPart3.time( 5 );
+	$StationOfficerOuterDoorPart3.moveUp( 66 );
+	$StationOfficerOuterDoorPart4.time( 5 );
+	$StationOfficerOuterDoorPart4.moveUp( 96 );
+	$StationOfficerOuterDoorPart5.time( 5 );
+	$StationOfficerOuterDoorPart5.moveUp( 126 );
+    $StationOfficerOuterDoorPart1.playsound ( "sound/doors/drull_bigdoor_stop_01.wav", 5, 1, 300);
+    waitfor ( $StationOfficerOuterDoorPart5 );
+}
+//---------------------
+void closeEntranceDoor()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$entranceDoorBlocker.solid ();
+		$exitDoorTrigger1.playsound ( "sound/environment/switches/switch_01.wav" , 3, .3, 10000 );
+		$exitDoorTrigger1.playsound ( "sound/ships/romulan/rom_beep_yes.wav" , 7, .3, 10000 );
+
+	    $StationOfficerOuterDoorPart1.playsound ( "sound/doors/drull_bigdoor_01.wav", 5, 1, 300);
+		$StationOfficerOuterDoorPart1.time( 3 );
+		$StationOfficerOuterDoorPart.moveDown( 6 );
+		$StationOfficerOuterDoorPart2.time( 3 );
+		$StationOfficerOuterDoorPart2.moveDown( 36 );
+		$StationOfficerOuterDoorPart3.time( 3 );
+		$StationOfficerOuterDoorPart3.moveDown( 66 );
+		$StationOfficerOuterDoorPart4.time( 3 );
+		$StationOfficerOuterDoorPart4.moveDown( 96 );
+		$StationOfficerOuterDoorPart5.time( 3 );
+		$StationOfficerOuterDoorPart5.moveDown( 126 );
+		waitfor( $StationOfficerOuterDoorPart1 );
+
+	    $StationOfficerOuterDoorPart1.playsound ( "sound/doors/drull_bigdoor_stop_01.wav", 5, 1, 300);
+
+		lockDoor ( "exitDoor" );
+	}
+}
+
+void unlockRadgunDoor ()
+{
+	unlockDoor ( "radgunDoor" );
+}
+
+//===================================================================================================================
+// Portal culling
+//===================================================================================================================
+void portalculling_off()
+//===================================================================================================================
+{
+	$cas_portal01.openportal();
+	$cas_portal02.openportal();
+}
+
+//===================================================================================================================
+void portalculling_on()
+//===================================================================================================================
+{
+	$cas_portal01.closeportal();
+	$cas_portal02.closeportal();
+}
+
+//===================================================================================================================
+void m10l2a_FromStateMachine_EarlyOut ()
+//===================================================================================================================
+{
+	entity e;
+	e = getcurrententity();
+
+	EarlyOut ( e );
+}
+
+//===================================================================================================================
+void EarlyOut ( entity e )
+//===================================================================================================================
+{
+	string s;
+	s = e.gettargetname ();
+	if ( s != "SpawnedGuy" )
+	{
+		e.ai_off ();
+		e.clearcurrentenemy();
+		e.ai_on ();
+		return; 	//avoid beaming out people we specifically placed in the level
+	}
+
+	e.ai_off ();
+	e.immortal (1);
+	e.displayeffect ( "TransportIn" ,"Romulan" );
+	e.fadeout ( 2 );
+	e.anim ( "idle" );
+	totalGuysAlive--;
+
+	if ( totalGuysAlive < 0 )
+		totalGuysAlive = 0;
+}
+
+
+
+void coop_setRespawnLocations2()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	if(cvar_bool_multiplayer){//Multiplayer	
+		if($world.getFloatVar("coop_setRespawnLocations2_launched") != 1){
+		//Lock this thread down...
+			$world.setFloatVar("coop_setRespawnLocations2_launched",1);
+		//Set spawnangles for this level
+			coop_float_spawnAngle1 				= 90;
+			coop_float_spawnAngle2 				= 90;
+			coop_float_spawnAngle3 				= 90;
+			coop_float_spawnAngle4 				= 90;
+			coop_float_spawnAngle5 				= 90;
+			coop_float_spawnAngle6 				= 90;
+			coop_float_spawnAngle7 				= 90;
+			coop_float_spawnAngle8 				= 90;
+			coop_vector_spawnOrigin8 			= '2210 555 120';
+			coop_vector_spawnOrigin7 			= '2290 555 120';
+			coop_vector_spawnOrigin6 			= '2210 660 120';
+			coop_vector_spawnOrigin5 			= '2290 660 120';
+			coop_vector_spawnOrigin4 			= '2210 730 120';
+			coop_vector_spawnOrigin3 			= '2290 730 120';
+			coop_vector_spawnOrigin2 			= '2210 800 120';
+			coop_vector_spawnOrigin1 			= '2290 800 120';
+			globalCoop_applaySpawnOriginOnReSpwanOrigin();
+		//relocate Class Selection
+//move class selection
+			thread globalCoop_level_moveToPos($coop_class_MedicModel,'2190 1550 0');
+			thread globalCoop_level_moveToPos($coop_class_TechnicianModel,'2250 1549 0');
+			thread globalCoop_level_moveToPos($coop_class_HeavyWeaponsModel,'2320 1548 0');
+		}
+	}
+}
+
+
+void coop_waitForTeam()
+//------------------------------------------------------------------------------
+//waitForPlayers beeing close, end then the Level
+//------------------------------------------------------------------------------
+{
+	globalCoop_main_waitForTeam('3511 101 -106','-128 -128 -200','128 128 64');
+	coop_endLevel();
+}
+
+void coop_storageKeypadUseTricorder()
+//------------------------------------------------------------------------------
+//switch to tricorder when used and player does not have tricorder in hand
+//------------------------------------------------------------------------------
+{
+	entity eTrigger;
+	eTrigger = getCurrentEntity();
+	if(doesEntityExist(eTrigger))
+	{
+		eTrigger = eTrigger.getLastActivatingEntity();
+		if(globalCoop_check_activeWeaponType(eTrigger,"Tricorder")!=1)
+		{
+			eTrigger.use("Tricorder-rom");
+			globalCoop_armory_waitForWeapon(eTrigger,"Tricorder-rom",18);
+		}
+	}	
+}
+
+void coop_transitionTricorderKeypad()
+//------------------------------------------------------------------------------
+//switch from tricorder to keypad
+//------------------------------------------------------------------------------
+{
+	entity eTrigger;
+	eTrigger = getCurrentEntity();
+	if(doesEntityExist(eTrigger))
+	{
+		eTrigger = eTrigger.getLastActivatingEntity();
+		if(globalCoop_check_activeWeaponType(eTrigger,"Tricorder")==1 && doesEntityExist($storageKeypad) == 1)
+		{
+			$storageKeypad.doActivate(eTrigger);
+		}
+	}
+}
+
+void coop_changedModelplayer1(){globalCoop_player_transmitter($player1,"set mp_playermodel "+coop_string_playerModelResetTiki);}
+void coop_changedModelplayer2(){globalCoop_player_transmitter($player2,"set mp_playermodel "+coop_string_playerModelResetTiki);}
+void coop_changedModelplayer3(){globalCoop_player_transmitter($player3,"set mp_playermodel "+coop_string_playerModelResetTiki);}
+void coop_changedModelplayer4(){globalCoop_player_transmitter($player4,"set mp_playermodel "+coop_string_playerModelResetTiki);}
+void coop_changedModelplayer5(){globalCoop_player_transmitter($player5,"set mp_playermodel "+coop_string_playerModelResetTiki);}
+void coop_changedModelplayer6(){globalCoop_player_transmitter($player6,"set mp_playermodel "+coop_string_playerModelResetTiki);}
+void coop_changedModelplayer7(){globalCoop_player_transmitter($player7,"set mp_playermodel "+coop_string_playerModelResetTiki);}
+void coop_changedModelplayer8(){globalCoop_player_transmitter($player8,"set mp_playermodel "+coop_string_playerModelResetTiki);}
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed("m10l2b-romulan_installation");
+}
+
+

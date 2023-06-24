@@ -1,0 +1,197 @@
+//-----------------------------------------------
+// Cinematic Name: c:\projects\ef2\ef2\base\cins\end_kleeya-old.cin
+// Export Version: 1
+// Export Date:    Wed May 21 14:41:57 2003
+//-----------------------------------------------
+
+Origins
+{
+    Origin
+    {
+          name          "end_kleeya"
+          origin         0.000000 0.000000 0.000000
+          yaw            0.000000
+    }
+}
+
+
+Actors
+{
+    Actor
+    {
+        name          "armMunro"
+        tiki          "char/hazardteam_sf-munro.tik"
+        anim          "cin-end_kleeya_munro"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         -9390.098633 -141.187775 0.000000
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "armKleeya"
+        tiki          "char/kleeya-noweapon.tik"
+        anim          "cin-end_kleeya_kleeya"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         -9290.452148 -69.262222 0.000000
+        yaw            -90.000000
+    }
+}
+
+
+Cameras
+{
+    Camera
+    {
+        name         "cam0-end_kleeya"
+        camfile      "cam0-end_kleeya"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+		selfRemoving false
+    }
+    Camera
+    {
+        name         "cam1-end_kleeya"
+        camfile      "cam1-end_kleeya"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+		selfRemoving false
+    }
+    Cut
+    {
+        toCamera     "cam0-end_kleeya"
+        frame         0
+        fadeout       0
+        fadein        30
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam1-end_kleeya"
+        frame         83
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam0-end_kleeya"
+        frame         110
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam1-end_kleeya"
+        frame         150
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam0-end_kleeya"
+        frame         250
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam1-end_kleeya"
+        frame         300
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam0-end_kleeya"
+        frame         328
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam1-end_kleeya"
+        frame         507
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam0-end_kleeya"
+        frame         573
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam1-end_kleeya"
+        frame         681
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam0-end_kleeya"
+        frame         708
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam1-end_kleeya"
+        frame         760
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam0-end_kleeya"
+        frame         874
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam1-end_kleeya"
+        frame         968
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam0-end_kleeya"
+        frame         1100
+        fadeout       30
+        fadein        0
+        lerp          false
+    }
+}

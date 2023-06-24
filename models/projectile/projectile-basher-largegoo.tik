@@ -1,0 +1,141 @@
+TIKI
+setup
+   {
+   scale 1.0
+   path models/fx/tags/
+   }
+
+init
+	{
+	server
+	   {
+		classname               Projectile
+		setsize                 "-8 -8 -8" "8 8 8"
+		speed                   700
+		hitdamage               6
+		health                  10
+		meansofdeath            explosion
+		explosionmodel          fx/fx-explosion-projectile-basher-goo.tik
+		cache 			models/fx/fx-explosion-projectile-basher-goo.tik
+		knockback               0
+		life                    2.0
+		surface all 		+nodraw
+		proj_notshootable
+      	   }
+
+	client
+	   {
+
+
+		cache goospray-basher.spr
+		cache orangesparkle.spr
+		cache goomist3.spr
+		cache sound/chars/chewer/chew_projloop.wav
+
+	      	tagemitter tag_02 goolength
+	        	(
+		        spawnrate 57//60
+		        model goospray-basher.spr
+		        alpha 0.8
+		        life 0.225
+			scale 0.4
+		  	scalerate -0.875
+			angles 0 0 crandom 180
+			avelocity 0 0 crandom 35
+			offsetalongaxis random -10 0 0
+		        randvel crandom 8 crandom 8 crandom 8
+		        dofade 0 0 0
+		        )
+	
+	      	tagemitter tag_02 goocenter
+	        	(
+		        spawnrate 18//20
+		        model goospray-basher.spr
+		        hardlink
+		        alpha 0.75
+		        life 0.3
+			scale 0.3
+		  	scalerate 1.85
+			angles 0 0 random 360
+			avelocity 0 0 crandom 35
+		        randvel crandom 10 crandom 10 crandom 10
+		        dofade 0.1 0 0
+		        )
+	
+	      	tagemitter tag_02 gooblobs
+	        	(
+		        spawnrate 43//45
+			model orangesparkle.spr
+			color 0.9 0.5 0.1
+			angles 0 0 crandom 180
+			avelocity 0 0 crandom 200
+		        life 0.5
+			scale 0.35
+		  	scalerate -2.5
+		  	inwardsphere 16
+		  	velocity 28
+		        dofade 0.25 0 0
+		        )
+	
+	      	tagemitter tag_02 goocenter2
+	        	(
+		        spawnrate 10//11
+			model goomist3.spr
+			color 0.75 0.5 0.0
+			hardlink
+		        life 0.3
+			scale 0.2
+		  	scalerate 1.75
+		  	offset crandom 2 crandom 2 crandom 2
+			angles 0 0 random 360
+			avelocity 0 0 crandom 35
+		        randvel crandom 17 crandom 17 crandom 18
+		        dofade 0.2 0 0
+		        )
+
+	   }
+	}
+
+animations
+   {
+   idle tag-expand-02.tan
+	{
+	client
+		{
+		0 loopsound sound/chars/chewer/chew_projloop.wav 1.5 60
+	
+	      	entry tagspawn tag_02
+	        	(
+		        count 8
+		        model goospray-basher.spr
+		        alpha 0.75
+			hardlink
+		        life 0.4
+			scale 0.3
+		  	scalerate 1.75
+			angles 0 0 random 360
+			avelocity 0 0 crandom 35
+		        randvel crandom 10 crandom 10 crandom 10
+		        dofade 0.1 0 0
+		        )
+	
+	
+	      	entry tagspawn tag_02
+	        	(
+		        count 4
+			model goomist3.spr
+			color 0.75 0.5 0.0
+			hardlink
+		        life 0.3
+			scale 0.2
+		  	scalerate 1.75
+		  	offset crandom 2 crandom 2 crandom 2
+			angles 0 0 random 360
+			avelocity 0 0 crandom 35
+		        randvel crandom 17 crandom 17 crandom 18
+		        dofade 0.2 0 0
+		        )
+
+		}
+	}
+   }

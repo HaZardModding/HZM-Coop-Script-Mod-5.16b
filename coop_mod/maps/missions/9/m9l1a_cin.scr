@@ -1,0 +1,674 @@
+// Cinematics
+void cinematicArm_Intro_Start();
+void cinematicArm_Intro_ArmEnd();
+
+void cinematicArm_MeetOmag_Start();
+void cinematicArm_MeetOmag_DialogSeq1_Start();
+void cinematicArm_MeetOmag_DialogChoice1();
+void cinematicArm_MeetOmag_DialogChoice1Reply1();
+void cinematicArm_MeetOmag_DialogChoice1Reply2();
+void cinematicArm_MeetOmag_DialogSeq2_Start();
+void cinematicArm_MeetOmag_DialogChoice2();
+void cinematicArm_MeetOmag_DialogChoice2Reply1();
+void cinematicArm_MeetOmag_DialogChoice2Reply2();
+void cinematicArm_MeetOmag_DialogSeq3_Start();
+void cinematicArm_MeetOmag_ArmEnd();
+
+entity cinematicArm_Intro;
+entity cinematicArm_MeetOmag;
+entity cinematicArm_MeetOmag_DialogSeq1;
+entity cinematicArm_MeetOmag_DialogSeq2;
+entity cinematicArm_MeetOmag_DialogSeq3;
+
+void cinematic_CageMatch();
+void cinematic_CageMatch_End();
+void cinematic_CageMatch_Skipthread();
+
+
+
+//---------------------
+// cinematicArm_Intro_Start
+// starting armature cinematic
+//---------------------
+void cinematicArm_Intro_Start()
+{
+	globalCoop_cin_start();
+	//--- the intro armature
+	if(cvar_bool_multiplayer){//Multi
+		cinematicArm_Intro = createCinematic( "coop_m9l1a_k7intro" );
+	}else{
+		cinematicArm_Intro = createCinematic( "m9l1a_k7intro" );
+	}
+	cinematicArm_Intro.setendthread( "cinematicArm_Intro_ArmEnd" );
+	cinematicArm_Intro.beginCinematic( "m9l1a_k7intro" );
+	wait( .2 );
+	//--- fade in
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+
+	//--- set the skipthread
+	globalCoop_cin_skipThread( "cinematicArm_Intro_ArmEnd" );
+}
+
+//---------------------
+// cinematicArm_Intro_ArmEnd
+// end thread for cinematic
+//---------------------
+void cinematicArm_Intro_ArmEnd()
+{
+	//kill the cinematic
+	skipthread( "null" );
+	//fade to black
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	//--- end the armature cinematics, FALSE means don't launch the end thread
+	cinematicArm_Intro.endCinematic( FALSE );
+
+	killthread( "cinematicArm_Intro_Start" );
+
+	//--- show gonzales and krindo
+	globalCommon_AiDummy( $krindo, "" );
+	globalCoop_actor_aiOff($krindo);
+	globalCoop_cin_end();
+	wait( .75 );
+	thread globalCoop_player_warpToSpawnOriginAll();
+
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+	wait( 1 );
+
+	//--- start krindo and gonzales AI
+	globalCommon_AiActor( $krindo );
+	globalCommon_AiActor( $gonzales );
+	
+	globalCoop_objectives_update("incomplete",1,0);
+	thread globalCoop_objectives_update("incomplete",2,1);
+
+	wait( 3 );
+	shuttlebayConversation1();
+}
+
+
+
+
+//---------------------
+// cinematicArm_MeetOmag_Start
+// opening armature of krindo walking up to omag
+//---------------------
+void cinematicArm_MeetOmag_Start()
+{
+	killthread("shuttlebayConversation1");//noclipping while testing, this must be killed	
+	//--- setup the omag cinematic
+	if(!cvar_bool_multiplayer)
+	{
+		cinematicArm_MeetOmag				= createCinematic( "m9l1_intro" );
+		cinematicArm_MeetOmag_DialogSeq1	= createCinematic( "m9l1_omaga" );
+	}
+	else
+	{
+		cinematicArm_MeetOmag				= createCinematic( "coop_m9l1_intro" );
+		cinematicArm_MeetOmag_DialogSeq1	= createCinematic( "coop_m9l1_omaga" );
+	}
+	cinematicArm_MeetOmag.setEndThread				( "cinematicArm_MeetOmag_DialogSeq1_Start" );
+	cinematicArm_MeetOmag_DialogSeq1.setEndThread	( "cinematicArm_MeetOmag_DialogChoice1" );
+	
+	//--- mark the objective as complete
+	//$player.setobjectivecomplete( "FindOmag" , 1 );
+	thread globalCoop_objectives_update("complete",2,1);
+	if(cvar_bool_multiplayer){
+	//Set Objective as complete
+		coop_vector_spawnOrigin1 			= '560 560 160';
+		coop_vector_spawnOrigin2 			= '560 620 160';
+		coop_vector_spawnOrigin3 			= '560 680 160';
+		coop_vector_spawnOrigin4 			= '500 560 160';
+		coop_vector_spawnOrigin5 			= '500 620 160';
+		coop_vector_spawnOrigin6 			= '500 680 160';
+		coop_vector_spawnOrigin7 			= '440 560 160';
+		coop_vector_spawnOrigin8 			= '440 620 160';
+		thread globalCoop_applaySpawnOriginOnReSpwanOrigin();
+	}
+
+	
+	if( barStarWarsConversationComplete == 0 )
+	{
+		killthread( "barStarWarsConversation" );
+		$HanSolo.stopdialog();
+		$LukeSkywalker.stopdialog();
+		$ObiWanKenobi.stopdialog();
+	}
+
+	
+	//--- starting cinematic commands
+	globalCoop_cin_start();
+	//--- fade out
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	cam.load( "m9l1a_MeetOmag_Shot1" );
+	cam.load( "m9l1a_MeetOmag_Shot2" );
+	cam.load( "m9l1a_MeetOmag_Shot3" );
+	cam.load( "m9l1a_MeetOmag_Shot4" );
+	wait( .1 );
+
+	// stop conversation dialog if its still running
+	if( barMusicianConversationComplete == 0)
+	{
+		killthread( "barMusicianConversation" );
+		$klingonFemale1.stopdialog();
+		$humanMale3.stopdialog();
+	}
+
+	//--- hide 
+	globalCommon_AiDummyHide( $omag );
+	if(cvar_bool_multiplayer)
+	{
+		globalCoop_level_remove($krindo);
+		globalCoop_level_remove($gonzales);
+	}
+	else
+	{
+		globalCommon_AiDummyHide( $krindo );
+		globalCommon_AiDummyHide( $gonzales );	
+	}
+
+	//--- start the first piece of the cinematic
+	cinematicArm_MeetOmag.beginCinematic( "m9l1_omaga" );
+
+	//--- set the music
+	forcemusic( "normal" );
+
+	//centerprint( "PLAYING ARM INTRO" );
+	
+	if(cvar_bool_multiplayer){//multi only!! Do not skip in single (branch-dialog)
+		globalCoop_cin_skipThread("cinematicArm_MeetOmag_ArmEnd");
+	}
+
+	//--- fade in
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+}
+
+//---------------------
+// cinematicArm_MeetOmag_Start
+// opening armature of krindo walking up to omag
+//---------------------
+void cinematicArm_MeetOmag_DialogSeq1_Start()
+{
+	//--- start the first dialog piece
+	cinematicArm_MeetOmag_DialogSeq1.beginCinematic( "m9l1_omaga" );
+
+	//centerprint( "PLAYING ARM OMAG A" );
+}
+
+//---------------------
+// cinematicArm_MeetOmag_DialogChoice1Reply1
+// first choice, reply 1 - failure
+//---------------------
+void cinematicArm_MeetOmag_DialogChoice1Reply1()
+{
+	//--------------------------------------------------------
+	//shot - munro
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 40 );
+	globalCoop_cin_follow($cam2, $m9l1a_MeetOmag_Shot2 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam2 );
+
+	$armMunro.anim( "omagA_talkA" );
+	globalCoop_dialog_play($armMunro,"m9l1/munro_riskier.mp3", 1, 20000, 0); //Rule 7. ‘Keep your ears open.’ Where is the Master Control Facility?
+	wait( .2 );
+
+	$armMunro.anim( "omagA_idle" );
+
+	//--------------------------------------------------------
+	//shot - omag
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 40 );
+	globalCoop_cin_follow($cam1, $m9l1a_MeetOmag_Shot1 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam1 );
+
+	$armOmag.anim( "omagA_fer_talkA" );
+	thread globalCoop_dialog_play($armOmag,"m9l1/omag_neverheard.mp3", 1, 20000, 0); //I heard you! But I don’t know about this Controlling Facility Master.
+	wait( 3 );
+
+	//--------------------------------------------------------
+	//shot - all
+
+	//--- set the camera
+	globalCoop_cin_fov($cam3, 50 );
+	globalCoop_cin_follow($cam3, $m9l1a_MeetOmag_Shot3 );
+	globalCoop_cin_cut($cam3);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam3 );
+
+	//--- wait for Omag to finish yappin'.....NO MORE YAK YAK!!!!!!
+	globalCoop_dialog_waitForDialog( $armOmag );
+	wait( .2 );
+
+	$armOmag.anim( "omagA_fer_idle" );
+
+	thread cinematicArm_MeetOmag_DialogChoice1();
+}
+
+//---------------------
+// cinematicArm_MeetOmag_DialogChoice1
+// first dialog choice
+//---------------------
+void cinematicArm_MeetOmag_DialogChoice1()
+{
+	//cueplayer();
+	//releaseplayer();
+	//noncinematic();
+	//--- set the idles on the characters
+	$armMunro.anim( "omagA_idle" );
+
+	$armKrindo.anim( "omagA_drull_idle" );
+
+	if(!cvar_bool_multiplayer){
+		$munro.branchdialog( "branchMeetOmag_DialogChoice1" );
+		pause();
+	}else{
+		thread cinematicArm_MeetOmag_DialogChoice1Reply2();
+	}
+}
+
+//---------------------
+// cinematicArm_MeetOmag_DialogChoice1Reply2
+// first choice, reply 2 - success
+//---------------------
+void cinematicArm_MeetOmag_DialogChoice1Reply2()
+{
+	//--------------------------------------------------------
+	//shot - munro
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 40 );
+	globalCoop_cin_follow($cam2, $m9l1a_MeetOmag_Shot2 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam2 );
+
+	$armMunro.anim( "omagA_talkB" );
+	globalCoop_dialog_play($armMunro,"m9l1/munro_60.mp3", 1, 20000, 0); //Rule 60. ‘Keep your lies consistent.’ Where is the Master Control Facility?
+	wait( .2 );
+
+	$armMunro.anim( "omagA_idle" );
+
+	//--------------------------------------------------------
+	//shot - omag
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 40 );
+	globalCoop_cin_follow($cam1, $m9l1a_MeetOmag_Shot1 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam1 );
+
+	thread globalCoop_dialog_play($armOmag,"m9l1/omag_cuaght.mp3", 1, 20000, 0); //All right! You caught me in an inconsistency. So here’s the truth.  I don’t know where the Master Control Facility is.
+
+	$armOmag.anim( "omagA_fer_talkB" );
+	waitForAnimation( $armOmag, "omagA_fer_talkB" );
+
+	$armOmag.anim( "omagA_fer_talkA" );
+	waitForAnimation( $armOmag, "omagA_fer_talkA" );
+	$armOmag.anim( "omagA_fer_idle" );
+
+	globalCoop_dialog_waitForDialog( $armOmag );
+	
+	if(!cvar_bool_multiplayer)
+	{
+		cinematicArm_MeetOmag_DialogSeq2 = createCinematic( "m9l1_omagb" );
+	}
+	else
+	{
+		cinematicArm_MeetOmag_DialogSeq2 = createCinematic( "coop_m9l1_omagb" );
+	}
+	cinematicArm_MeetOmag_DialogSeq2.setEndThread( "cinematicArm_MeetOmag_DialogChoice2" );
+	wait( .2 );
+
+	thread cinematicArm_MeetOmag_DialogSeq2_Start();
+}
+
+//---------------------
+// cinematicArm_MeetOmag_DialogSeq2_Start
+// 2nd dialog portion of the cinematic
+//---------------------
+void cinematicArm_MeetOmag_DialogSeq2_Start()
+{
+	//--- start the first dialog piece
+	cinematicArm_MeetOmag_DialogSeq2.beginCinematic( "m9l1_omagb" );		
+}
+
+//---------------------
+// cinematicArm_MeetOmag_DialogChoice2
+// 2nd dialog choice
+//---------------------
+void cinematicArm_MeetOmag_DialogChoice2()
+{
+	$armMunro.anim( "omagB_idle" );
+	$armOmag.anim( "omagB_fer_idle" );
+	$armKrindo.anim( "omagB_drull_idle" );
+
+	if(!cvar_bool_multiplayer){
+		$munro.branchdialog( "branchMeetOmag_DialogChoice2" );
+		pause();
+	}else{
+		thread cinematicArm_MeetOmag_DialogChoice2Reply1();
+	}
+}
+
+//---------------------
+// cinematicArm_MeetOmag_DialogChoice2Reply1
+// 2nd dialog choice reply 1 - success
+//---------------------
+void cinematicArm_MeetOmag_DialogChoice2Reply1()
+{
+	//--------------------------------------------------------
+	//shot - munro
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 40 );
+	globalCoop_cin_follow($cam2, $m9l1a_MeetOmag_Shot4 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam2 );
+
+	thread globalCoop_dialog_play($armMunro,"m9l1/munro_181.mp3", 1, 20000, 0); //How do we know you’re telling the truth? Rule 181 says ‘not even dishonesty can tarnish the shine of profit.’
+
+	$armMunro.anim( "omagB_talkA" );
+	waitForAnimation( $armMunro, "omagB_talkA" );
+
+	$armMunro.anim( "omagB_idle" );
+
+	globalCoop_dialog_waitForDialog( $armMunro );
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//shot - omag
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 40 );
+	globalCoop_cin_follow($cam1, $m9l1a_MeetOmag_Shot1 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam1 );
+
+	thread globalCoop_dialog_play($armOmag,"m9l1/omag_want.mp3", 1, 20000, 0); //Because I don’t WANT to know where it is. If I knew the location of the Master Control Facility, my customer would be afraid I’d sell it again. Why give him incentive to kill me? No, I just I sold Krindo’s data from Prazjag Gamma 6, and let my customer fiddle about with star-charts to find it.
+
+	$armOmag.anim( "omagB_fer_talkA" );
+	waitForAnimation( $armOmag, "omagB_fer_talkA" );
+
+	$armOmag.anim( "omagB_fer_idle" );
+	wait( 6 );
+
+	//--------------------------------------------------------
+	//shot - all
+
+	//--- set the camera
+	globalCoop_cin_fov($cam3, 50 );
+	globalCoop_cin_follow($cam3, $m9l1a_MeetOmag_Shot3 );
+	globalCoop_cin_cut($cam3);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam3 );
+	wait( .25 );
+
+	$armOmag.anim( "omagB_fer_talkA" );
+	waitForAnimation( $armOmag, "omagB_fer_talkA" );
+
+	$armOmag.anim( "omagB_fer_idle" );
+	wait( .5 );
+
+	//--------------------------------------------------------
+	//shot - omag
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 40 );
+	globalCoop_cin_follow($cam1, $m9l1a_MeetOmag_Shot1 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam1 );
+
+	//--- wait for omag to stop that insessent yappin'!!!!!  Such a great voice actor eh??  I think he really nailed the part right, he's one of my favorite characters in the game actually.....so whinny....
+	//$armOmag.anim( "omagB_fer_talkA" );
+	//waitForAnimation( $armOmag, "omagB_fer_talkA" );
+
+	//$armOmag.anim( "omagB_fer_idle" );
+
+	globalCoop_dialog_waitForDialog( $armOmag );
+	if(!cvar_bool_multiplayer)
+	{
+		cinematicArm_MeetOmag_DialogSeq3 = createCinematic( "m9l1_omagc" );
+	}
+	else
+	{
+		cinematicArm_MeetOmag_DialogSeq3 = createCinematic( "coop_m9l1_omagc" );
+	}
+	cinematicArm_MeetOmag_DialogSeq3.setEndThread( "cinematicArm_MeetOmag_ArmEnd" );
+	wait( .2 );
+
+	thread cinematicArm_MeetOmag_DialogSeq3_Start();
+}
+
+//---------------------
+// cinematicArm_MeetOmag_DialogChoice2Reply2
+// 2nd choice, reply 2 - failure
+//---------------------
+void cinematicArm_MeetOmag_DialogChoice2Reply2()
+{
+	//--------------------------------------------------------
+	//shot - munro
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 40 );
+	globalCoop_cin_follow($cam2, $m9l1a_MeetOmag_Shot4 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam2 );
+
+	thread globalCoop_dialog_play($armMunro,"m9l1/munro_27.mp3", 1, 20000, 0); //You’re telling the truth? ‘There's nothing more dangerous than an honest businessman.’ Rule 27.
+
+	$armMunro.anim( "omagB_talkB" );
+	waitForAnimation( $armMunro, "omagB_talkB" );
+
+	$armMunro.anim( "omagB_idle" );
+
+	globalCoop_dialog_waitForDialog( $armMunro );
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//shot - omag
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 40 );
+	globalCoop_cin_follow($cam1, $m9l1a_MeetOmag_Shot1 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam1 );
+
+	thread globalCoop_dialog_play($armOmag,"m9l1/omag_danger.mp3", 1, 20000, 0); //Then I’m the most dangerous Ferengi you know! Ha, ha!
+
+	$armOmag.anim( "omagB_fer_talkB" );
+	waitForAnimation( $armOmag, "omagB_fer_talkB" );
+
+	$armOmag.anim( "omagB_fer_idle" );
+
+	globalCoop_dialog_waitForDialog( $armOmag );
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//shot - all
+
+	//--- set the camera
+	globalCoop_cin_fov($cam3, 50 );
+	globalCoop_cin_follow($cam3, $m9l1a_MeetOmag_Shot3 );
+	globalCoop_cin_cut($cam3);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam3 );
+
+	thread cinematicArm_MeetOmag_DialogChoice2();
+}
+
+//---------------------
+// cinematicArm_MeetOmag_DialogSeq3_Start
+// 3rd dialog portion of the cinematic
+//---------------------
+void cinematicArm_MeetOmag_DialogSeq3_Start()
+{
+	//--- start the first dialog piece
+	cinematicArm_MeetOmag_DialogSeq3.beginCinematic( "m9l1_omagc" );
+
+	//centerprint( "PLAYING ARM OMAG C" );
+}
+
+//---------------------
+// cinematicArm_MeetOmag_ArmEnd
+// end the cinematic
+//---------------------
+void cinematicArm_MeetOmag_ArmEnd()
+{
+	//kill the cinematic
+	skipthread( "null" );
+
+	//fade to black
+	cam_fadeout( .5, 0, 0, 0, 1, 0 );
+	wait( .6 );
+	
+	if(cvar_bool_multiplayer)
+	{
+		thread coop_waitForTeam();//spawn a level end gathering area
+		$armMunro.remove();
+		$armOmag.remove();
+		$armKrindo.remove();
+		$armGonzales.remove();
+		killthread("cinematicArm_MeetOmag_Start");
+		killthread("cinematicArm_MeetOmag_DialogSeq1_Start");
+		killthread("cinematicArm_MeetOmag_DialogChoice1Reply1");
+		killthread("cinematicArm_MeetOmag_DialogChoice1Reply2");
+		killthread("cinematicArm_MeetOmag_DialogSeq2_Start");
+		killthread("cinematicArm_MeetOmag_DialogChoice2");
+		killthread("cinematicArm_MeetOmag_DialogChoice2Reply1");
+		killthread("cinematicArm_MeetOmag_DialogSeq3_Start");
+		cinematicArm_MeetOmag.endCinematic( FALSE );
+		cinematicArm_MeetOmag_DialogSeq1.endCinematic( FALSE );
+		cinematicArm_MeetOmag_DialogSeq2.endCinematic( FALSE );
+		cinematicArm_MeetOmag_DialogSeq3.endCinematic( FALSE );
+	}
+	
+	thread globalCoop_level_removePath($m9l1a_MeetOmag_Shot1);
+	thread globalCoop_level_removePath($m9l1a_MeetOmag_Shot2);
+	thread globalCoop_level_removePath($m9l1a_MeetOmag_Shot3);
+	thread globalCoop_level_removePath($m9l1a_MeetOmag_Shot4);
+	
+
+	//--- end the armature cinematics, FALSE means don't launch the end thread
+	//cinematicArm_MeetChell.endCinematic( FALSE );
+
+	//killthread( "cinematicArm_MeetChell_Start" );
+	
+//--- positiong omag	
+	globalCommon_AiDummy( $omag, "" );
+	$omag.warp( $nodeOmag_PostCinematic.getOrigin() );
+	
+	if(!cvar_bool_multiplayer)
+	{
+		globalCommon_AiDummy( $krindo, "" );
+		globalCommon_AiDummy( $gonzales, "" );	
+		$krindo.warp( $nodeKrindo_PostCinematic.getOrigin() );
+		$gonzales.warp( $nodeGonzales_PostCinematic.getOrigin() );
+	}
+
+	//---unlock door allows player to follow omag out of bar
+	$barDoorExit.unlock();
+
+	//---lock the door leading back to the bar
+	$t531.lock();
+	$t531.noise( "sound/doors/door_locked.wav" );
+	$vip_doorLightGreen.remove();
+	$vip_doorLightRed.show();
+	$world.light_lightstyle( "vipLight_red1" , "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzy" , 0 );
+	$world.light_lightstyle( "vipLight_green1" , "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab" , 0 );
+
+	//--- remove armature gonzo
+	$armGonzo.remove();
+
+	$omag.turnTowardsEntity( $barDoorExit );
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.warp( $nodePlayer_PostCinematic.getOrigin() );
+		wait( .1 );
+		$player.turntowardsentity( $omag );
+		$krindo.turnTowardsEntity( $player );
+		$gonzales.turnTowardsEntity( $player );
+		$player.disableuseweapon( 0 );
+	}
+	else
+	{
+		coop_string_mp_waponToTakeAwayFromPlayer2 = "";
+		coop_string_mp_waponToTakeAwayFromPlayer2 = "";
+		spawn("script_model","model","fx/fx-dummy.tik","targetname","coopClip1","origin","1391 3273 341");
+		wait(.1);
+		$coopClip1.setSize('-200 -1 -100','200 1 1000');//level end caulked area avoid clip
+	
+		globalCoop_level_warpEntityToVectorSafty($humanFemale3,'620 324 10');
+		$andorianSitting3.origin('1270 470 8');
+		$klingonSleeping2.origin('1270 537 8');
+		
+		thread coop_vipAttackPlayer($humanMale2);
+		thread coop_vipAttackPlayer($andorianSitting3);
+		thread coop_vipAttackPlayer($klingonSleeping2);
+		thread coop_vipAttackPlayer($humanFemale3);
+	}
+	
+	coop_string_weapon6 = "models/weapons/worldmodel-tricorder-STX.tik";
+	coop_string_weapon5 = "models/weapons/worldmodel-Batleth.tik";
+	coop_string_weapon4 = "models/weapons/worldmodel-Phaser-stx.tik";
+	coop_string_weapon3	= "models/weapons/worldmodel-BurstRifle.tik";
+	coop_string_weapon2 = "models/weapons/worldmodel-photon.tik";
+	coop_string_weapon1 = "models/weapons/worldmodel-FieldAssaultRifle.tik";
+	thread globalCoop_player_giveAll(coop_string_weapon1,-1);
+	thread globalCoop_player_giveAll(coop_string_weapon2,-1);
+	thread globalCoop_player_giveAll(coop_string_weapon4,-1);
+	thread globalCoop_player_giveAll(coop_string_weapon5,-1);
+	thread globalCoop_player_giveAll(coop_string_weapon6,-1);
+	thread globalCoop_player_giveAll(coop_string_weapon3,0);
+
+	//--- release the cinematic
+	globalCoop_cin_end();
+	globalCoop_player_warpToSpawnOriginAll();
+	wait( .75 );
+
+	//--- music cue
+	music( "suspense");
+
+	//--- fade
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+
+	//---set players next objective
+	//$player.setobjectiveshow( "FollowOmag", 1 );
+	thread globalCoop_objectives_update("incomplete",3,1);
+
+	globalCommon_Autosave();
+
+	//---path for omag to run out of bar
+	thread omagFollowPath01();
+	wait( .75 );
+
+	thread globalCoop_dialog_play($munro,"m9l1/munro_stayhere3.mp3",1,10000,0); //gonzales! Stay here with Krindo!
+}
+
+
+

@@ -1,0 +1,221 @@
+//-----------------------------------------------------------------
+//
+//  EF2/LOTR Level Script File
+//
+//  Level:	  		ent-deck16_engineering - Enterprise Deck 16 - Main Engineering
+//  Script By:   	Kenny T
+//  Geometry By:  	Benson R, Kenny T
+//  Created on:   	6/14/2002
+//
+//  Last Edited:  	9-22-2002 Benson R
+//
+//-----------------------------------------------------------------
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  DEFINE SCRIPT
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+
+void main();
+void init();
+
+void checkMissionNumber();
+void justLoadedDeckThread();
+
+void killAllTalking();
+string sNextLevelToLoadForCoop;
+void coop_endLevel();
+
+//-----------------------------------------------------------
+//-----------------------------------------------------------
+//--- variables
+
+float currentDeck = 16;
+float missionEnterprise = 0;
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  INCLUDES
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+#include "coop_mod/maps/igm_main.scr"
+#include "coop_mod/maps/global/global_common.scr"
+#include "coop_mod/maps/global/igm_dialog.scr"
+
+#include "maps/global_scripts/global_debugUtils.scr"
+#include "maps/global_scripts/global_math.scr"
+#include "maps/global_scripts/global_archetype.scr"
+
+#include "coop_mod/maps/missions/igm_common/igm_turbolift.scr"
+
+#include "maps/igm1/ent-deck16_engineering-mission1.scr"
+#include "maps/igm2/ent-deck16_engineering-mission2.scr"
+#include "maps/igm3/ent-deck16_engineering-mission3.scr"
+#include "maps/igm4/ent-deck16_engineering-mission4.scr"
+#include "maps/igm5/ent-deck16_engineering-mission5.scr"
+#include "maps/igm6/ent-deck16_engineering-mission6.scr"
+#include "maps/igm7/ent-deck16_engineering-mission7.scr"
+#include "maps/igm8/ent-deck16_engineering-mission8.scr"
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  MAIN THREAD
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+
+void main()
+{
+	//--- set the sky portal
+	$sky.rendereffects( "+skyorigin" );
+	dontSaveOrientation();
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_string_playerModelResetTiki = "models/char/munro_sf.tik";
+	coop_string_nextMapToCheck			= "ent-deck7a";//set the map we gona load next while we are in testmode
+//Set spawnangles for this level
+	coop_float_spawnAngle0 				= 270;//SpawnOrigin0 Angle
+//Give each player a Item/weapon
+	coop_string_weapon1 				= "models/weapons/worldmodel-Tricorder-stx.tik";
+//spawnorigins, Spawn Players on those locations, at map start
+	coop_float_spawnAngle0 				= 132;
+	coop_float_spawnAngle1 				= 235;
+	coop_float_spawnAngle2 				= 217;
+	coop_float_spawnAngle3 				= 217;
+	coop_float_spawnAngle4 				= 234;
+	coop_vector_spawnOrigin1 			= '-1281 -446 0';
+	coop_vector_spawnOrigin2 			= '-1241 -482 0';
+	coop_vector_spawnOrigin3 			= '-1201 -448 0';
+	coop_vector_spawnOrigin4 			= '-1240 -397 0';
+	coop_vector_spawnOrigin5 			= '-1286 -721 0';
+	coop_vector_spawnOrigin6 			= '-1243 -683 0';
+	coop_vector_spawnOrigin7 			= '-1197 -734 0';
+	coop_vector_spawnOrigin8 			= '-1251 -783 0';
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	
+	
+	
+	init();
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		waitforplayer();
+		$player.health( 100 );
+	}
+	$world.clearAvailableViewModes();
+	$world.addAvailableViewMode( "none" );
+	
+	//Archetypes
+	globalArchetype_Setup ( $elevatorButtonArchetype, "TurboLiftControls" );
+}
+
+void init()
+{
+	//Turn Exit Triggers Off
+	$triggerExit.nottriggerable();
+
+	entTurboLiftSetup();
+	//ent_turboliftInit();
+	
+	checkMissionNumber();
+}
+
+void checkMissionNumber()
+{
+	missionEnterprise = getfloatvar ( "game.globalMissionEnterprise" );
+	if(cvar_bool_multiplayer)
+	{
+		missionEnterprise = getCvarInt("coop_igm");
+	}
+	if( missionEnterprise == 0 )
+	{
+		setfloatvar ( "game.globalMissionEnterprise", 1 );
+	}
+	
+	if(!cvar_bool_multiplayer)
+	{
+		thread globalCoop_level_callReliably("setupMission"+missionEnterprise+"Deck16");
+	}
+	
+	string stringSoundTrack;
+	
+	stringSoundTrack = "music/igm" + missionEnterprise + ".mus";
+	//--- set the soundtrack
+ 	soundtrack( stringSoundTrack );
+}
+
+//---------------------
+// justLoadedDeckThread	
+// creats a trigger to call the approiate deckJustLoadedThreadIGMx thread
+//---------------------
+void justLoadedDeckThread()
+{
+	string deckJustLoadedThread;
+	
+	deckJustLoadedThread = ( "justLoadedDeckThreadIGM" + missionEnterprise );
+	
+	thread entTurboLiftCheck();
+	
+	if(!cvar_bool_multiplayer)
+	{
+		waitforplayer();
+		
+		if( missionEnterprise == 4 )
+		{
+		
+			if( getfloatvar( "game.IGM4GoToTelsia" ) >= 1 )
+			{
+				$player.loadobjectives("IGM4alt");		
+			}
+			else
+			{
+				$player.loadobjectives("IGM4");
+			}
+		}
+		else if( missionEnterprise == 6 )
+		{
+			if( getfloatvar( "game.IGM6MeetTelsia" ) >= 1 )
+			{
+				$player.loadobjectives("IGM6alt");
+			}
+			else
+			{
+				$player.loadobjectives("IGM6");
+			}
+		}
+		else $player.loadobjectives( "IGM" + missionEnterprise );
+	}
+	//if( missionEnterprise == 1 ) thread justLoadedDeckThreadIGM1();
+	//if( missionEnterprise == 2 ) thread justLoadedDeckThreadIGM2();
+	//if( missionEnterprise == 3 ) thread justLoadedDeckThreadIGM3();
+	//if( missionEnterprise == 4 ) thread justLoadedDeckThreadIGM4();
+	//if( missionEnterprise == 5 ) thread justLoadedDeckThreadIGM5();
+	//if( missionEnterprise == 6 ) thread justLoadedDeckThreadIGM6();
+	//if( missionEnterprise == 7 ) thread justLoadedDeckThreadIGM7();
+	//if( missionEnterprise == 8 ) thread justLoadedDeckThreadIGM8();
+}
+
+//---------------------
+// killAllTalking
+// This stops all talking on the level
+//------------------------
+void killAllTalking()
+{
+	if(cvar_bool_multiplayer)
+	{
+		$player.killalldialog();
+	}
+}
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed(sNextLevelToLoadForCoop);
+}
+
+

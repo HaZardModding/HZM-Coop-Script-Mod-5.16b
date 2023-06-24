@@ -1,0 +1,62 @@
+//warehouse features - The purpose of this file is to keep the map-script easy to read
+
+void warehouseUnlockExitDoor()
+{
+//play klingon confirm sound
+	$warehouseExitDoor.playsound("sound/ships/klingon/kling_beep1.wav",0,1,128);
+//Unlock the door
+	$warehouseExitDoor.unlock();
+//open door
+	$warehouseExitDoor.open($world);
+//shut down ff
+	thread hallwayFFOff();
+//remove clip, so Monsters can attack player from both sides
+	$hallwayEncounter1MoveClip.remove();//removes also hanging down ceiling part
+//remove push trigger
+	$hallwayEncounter1MonsterPush.remove();
+//remove use symbol
+	$openDoorSymbol.remove();
+//upxdate objective -bypass locked door
+	thread objectiveWarehouseLeft();
+//turn off trigegr light
+	$world.light_intensity("warehouseExitDoor",1);//turn off lights
+}
+
+
+
+void warehouseBigBoxPush()
+{
+	$warehouseBigBox.nouse();
+	$warehouseBigBox.playsound("sound/environment/rock/rock_slab.wav",0,2,128);//snd,channel,vol,distance
+	$warehouseBigBoxOrigin.moveNorth(26);//312
+	$warehouseBigBoxOrigin.time(1);
+	waitFor($warehouseBigBoxOrigin);
+	$warehouseBigBox.stopsound(0);//channel
+	if(!$warehouseBigBoxOrigin.isWithinDistanceOf($warehouseBigBoxTarget,20)){
+		thread setOnUseThread($warehouseBigBox,"warehouseBigBoxPush");
+	}
+	else{
+		$boxSymbol.remove();
+	}
+}
+
+
+void warehousePlayerInShaft()
+{
+//Update objective - find way to bypass door
+	thread objectiveWarehouseExitDoor();
+//spawn attacker in the warehouse
+	thread warehouseEncounter2Spawner();
+}
+
+
+void warehouseEncounter2Spawner()
+{
+//SPAN A ENEMY, will be pushed down and triggers the explosion
+	$spawn1.modelName("char/alien-type1b-chewer.tik");
+	$spawn1.setspawngroupID(02);
+	$spawn1.setspawngroupdeaththread("warehouseEncounter2Spawner");
+	$spawn1.spawnnow();
+}
+
+

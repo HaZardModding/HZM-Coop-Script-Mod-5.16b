@@ -1,0 +1,20 @@
+LevelProperties
+{
+	mapname				"zoo1"
+	longmapname			"^5Co-Op ^3^1Secret 4 ^8zoo1"
+	screenshot			"sysimg/mapshots/zoo1.tga"
+	
+	gametype			"Holomatch"
+	gametype			"TeamHolomatch"
+	gametype			"CaptureTheFlag"
+	
+	modifier            "instantkill"
+	modifier            "actionhero"
+	modifier            "handicap"
+	modifier            "weaponscore"
+	modifier            "controlpoints"
+	modifier            "oneflag"
+	modifier            "elimination"
+	
+	recommendedplayers	"2-4"
+}

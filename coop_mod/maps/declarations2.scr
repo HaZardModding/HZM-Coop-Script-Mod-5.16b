@@ -1,0 +1,14 @@
+
+
+//WARNING! Do NOT remove the empty lines at the beginning and end of this file!
+
+//WARNING! Edit these settings on your own risk.
+//	Altering the player limit can create the following side effects:
+// - crashing
+// - sudden disconnecting
+// - error messages
+// - network lag
+
+float coop_integer_maxPlayers = 4;//coop_maxPlayers
+
+

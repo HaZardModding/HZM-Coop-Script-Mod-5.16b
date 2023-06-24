@@ -1,0 +1,146 @@
+
+
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+//	Function Implematations
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+
+float STAGE1_TIME = 160;	//seconds
+float STAGE1_PROMPT1 = 120;
+float STAGE1_PROMPT2 = 60;
+float STAGE1_PROMPT3 = 30;
+
+void stage1Timer ()
+{
+	threadname ( "stage1Timer" );
+
+	//we have to hijack a different stat since modulation uses playerstat.generic
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.setstat ( "generic" , 100 );
+		$player.addHud("m6SabotageTimer");
+	}
+	else{
+		wait(2);
+		float fPlayerQuantity;
+		fPlayerQuantity = globalCoop_return_integerPlayersQuantity(1);
+		if(fPlayerQuantity > 3){
+			fPlayerQuantity = 3;
+		}
+		STAGE1_TIME = (STAGE1_TIME / fPlayerQuantity);
+		
+		globalCoop_huds_AddAll("coop_m6SabotageTimer");
+		
+		entity ePlayer;
+		float fPlayerIdInUse;
+		fPlayerIdInUse=1;
+		for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++)
+		{
+			ePlayer = getentity("player"+fPlayerIdInUse);
+			if(doesEntityExist(ePlayer)){
+				if(ePlayer.getFloatVar("globalCoop_modulatingPuzzle") != 1){
+					
+					ePlayer.setstat ( "generic" , 100 );
+				}
+			}
+		}
+	}
+	float timer;
+	for ( timer = 1 ; timer <= STAGE1_TIME ; timer++ )
+	{
+		if ( timer == STAGE1_PROMPT1 )
+			thread globalCoop_dialog_play($tuvok,"m6l2/tuvok_hullwarn1.mp3", 1, 80000, 1);
+		else if ( timer == STAGE1_PROMPT2 )
+			thread globalCoop_dialog_play($tuvok,"m6l2/tuvok_hullwarn2.mp3", 1, 80000, 1);
+		else if ( timer == STAGE1_PROMPT3 )
+			thread globalCoop_dialog_play($tuvok,"m6l2/tuvok_hullwarn3.mp3", 1, 80000, 1);
+
+		if(!cvar_bool_multiplayer)
+		{
+			//we have to hijack a different stat since modulation uses playerstat.generic
+			$player.setstat ( "mp_generic1" , 100.0 * (STAGE1_TIME - timer) / STAGE1_TIME );		
+		}
+		else
+		{
+			for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++)
+			{
+				ePlayer = getentity("player"+fPlayerIdInUse);
+				if(doesEntityExist(ePlayer)){
+					if(ePlayer.getFloatVar("globalCoop_modulatingPuzzle") != 1){
+						ePlayer.setstat ( "generic" , 100.0 * (STAGE1_TIME - timer) / STAGE1_TIME );
+					}
+				}
+			}
+		}
+		wait ( 1 );
+	}
+	if(!cvar_bool_multiplayer)
+	{
+		$player.removeHud("m6SabotageTimer");
+	}
+	else
+	{
+		globalCoop_huds_RemoveAll("coop_m6SabotageTimer");
+	}
+	cinematicDeathBrig();
+}
+
+float playShieldDialog = 1;
+
+//called as soon as you kill one of the idryll
+void disableTuvokShieldDialog ()
+{
+	playShieldDialog = 0;
+}
+
+void endStage1Timer ()
+{
+	killthread ( "stage1Timer" );
+	if(!cvar_bool_multiplayer)
+	{
+		$player.removeHud("m6SabotageTimer");
+	}
+	else
+	{
+		globalCoop_huds_RemoveAll("coop_m6SabotageTimer");
+	}
+}
+
+void beginStage1()
+{
+//mp is handled via script, not trigger
+	entity eTrigger;
+	eTrigger=getCurrentEntity();
+	if(cvar_bool_multiplayer)
+	{
+		if(doesEntityExist(eTrigger))
+		{
+			return;
+		}
+	}
+	//$player.setobjectiveshow ( "ClearHullOfSaboteurs" , 1 );
+	thread globalCoop_objectives_update("incomplete",1,1);
+	thread stage1Timer ();
+	globalCoop_dialog_waitForDialog( $tuvok );
+	wait ( 7 );
+
+	if ( playShieldDialog )
+		thread globalCoop_dialog_play($tuvok,"m6l2/tuvok_hulltip.mp3", 1, 80000, 1);
+}
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+
+void sweepBeam ( entity b ) {
+	float i;
+	b.time ( 5 );
+
+	while ( 1 ) {
+		i = randomfloat ( 10 );
+		b.rotateZup ( 15 + i );
+		waitfor ( b );
+
+		b.rotateZdown ( 15 + i );
+		waitfor( b );
+	}
+}
+

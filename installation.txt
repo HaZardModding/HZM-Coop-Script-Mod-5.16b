@@ -1,0 +1,123 @@
+FÜR DAS SPIEL:               STAR TREK ELITE FORCE II
+SPIEL VERSION:               Alle offiziellen versionen, ausser die DEMO!
+KLASSIFIKATION:              Modifikation
+AUSFÜHRUNGS TYP:             Serverseitig (LevelScript - Morpheus Scripting System)
+MODUS:                       Mehrspieler
+HERSTELLER:                  HaZardModding
+
+
+HINWEIS=======================================================================
+==============================================================================
+Sollten Sie diese Modifikation Installiert haben, möchten aber trotzdem den
+Einzelspieler spielen, deinstallieren, bzw löschen Sie diese Co-op Mod Version
+und Installieren Sie die CLIENT version anstelle der FULL Version.
+
+
+KOMPATIBILITÄT================================================================
+==============================================================================
++ -> Linux Server kompatiebel!
++ -> Windows Server kompatiebel!
++ -> Funktioniert mit: Death Match, Team Death Match bei fast allen Modifieren
+! -> NICHT kompatiebel mit älteren versionen
+! -> NICHT kompatiebel mit Bomben Entschärfung und Singularität Modus
+! -> NICHT kompatiebel mit dem Einzelspieler (FULL Version)
+! -> NICHT kompatiebel mit der Modifikation: Compression Rifle for all missions
+
+
+INSTALLATIONS ANLEITUNG=======================================================
+==============================================================================
+1. Beenden Sie alle laufenden Anwendungen von Star Trek(R) Elite Force II.
+
+2. Wenn Sie nicht den Installer verwendet haben,
+löschen Sie folgende dateien falls diese Vorhanden sind:
+    z_hzm_co-op_v1.0.pk3
+    zzz_co-op_inventory.pk3
+    hzm_co-op_matrix-2.0.pk3
+    zzz_co-op_clientside.pk3
+    hzm_co-op_matrix-2.1.pk3
+    zzz_co-op_maps_secrets-2.0.pk3
+    zzz_co-op_maps_secrets-2.1.pk3
+    zz_advanced_health_hud_mod.pk3
+    zzz_co-op_maps_trainings-2.1.pk3
+	zzzzzz_co-op_hzm_script_mod_mini.pk3
+    zzzzzzz_co-op_hzm_script_mod_pak50.pk3
+    zzzzzzzzzzzzzzzzzzzzzzzzzzz_co-op_hzm_script_mod_zPak50.pk3
+	zzzzzz_co-op_hzm_script_mod_vlp.pk3
+	zzzzzz_co-op_hzm_script_mod.pk3
+	zzzzzz_co-op_hzm_script_mod_clientonly.pk3
+	
+3. Kopieren Sie folgende dateien in Ihren 'base' ordner:
+    zzzzzz_co-op_hzm_script_mod_deutsch.pk3
+    zzzzzz_co-op_hzm_script_mod.pk3 --ODER-- zzzzzz_co-op_hzm_script_mod_clientonly.pk3
+
+
+WAS IST DER 'BASE' ORDNER=====================================================
+==============================================================================
+Der Elite Force II 'base' befindet sich innerhalb deS Spiel Verzeichnis navigieren
+Sie zum Verzeichniss in welches Sie Star Trek Elite Force II installiert haben.
+BEISPIEL: c:\Spiele\Activision\EF2\base\
+
+In diesem Ordner befinden sich meherer Dateien mit der Endung .pk3m, so wie
+die Datei 'pak0.pk3'. Können Sie das SPiel nicht finden, nutzen Sie die
+Suchfunktion Ihres Betriebssystems und suchen Sie nach: pak0.pk3
+
+
+WIE DIE MODIFIKATION GESTARTET WIRD===========================================
+==============================================================================
+Laden Sie eine beliebige Karte im Mehrspieler und starten Sie eine Abstimmung
+für die Karte Zoo1. Oder Starten Sie im Spiel einfach einen LOKALEN Server.
+
+DEDIZIERTE SERVER::::::::
+Zum starten eines Internet oder eines Dedizieren Servers müssen Sie die
+mitgeleiferte Datei sv_coop.bat mit Administrator rechten ausführen.
+Dies ist notwendig da DEDIZIERTE server aus technischen Gründen sich nach
+ein paar Karten beenden müssen. Die Datei sv_coop.bat sorgt dafür dass
+der Server neu gestartet wird.
+
+LOKALER SERVER:::::::::::
+Starten Sie im Spiel einfach einen LOKALEN Server, und teilen Sie Ihre
+IP Ihren Freunden mit. Diese können den Server zwar nicht Online sehen
+,können aber im Spiel über SERVER ANGEBEN oder mit hilfe der KONSOLE
+auf Ihren Server verbinden und mit spielen.
+Konsolebefehl Beispiel: connect 88.88.11.11:29253
+
+IHRE IP::::::::::::::::::
+Ihre IP können Sie unter http://www.wieistmeineip.de erfahren.
+Bitte beachten Sie dass Sich Ihre IP möglicherweise bei jeder einwahl
+mit Ihrem Modem oder Router in das Internet verändert, eventuell auch
+wenn Sie Ihren Rechner neu starten und warscheinlich mindestens einmal
+innerhalb von 24 Stunden.
+
+SONSTIGE PROBLEME::::::::
+Sollten Ihre Freunde schwierigkeiten haben sich Ihrem Spiel anzuschliessen
+kann dies folgende Gründe haben:
+- Ihr Router hat die Ports geschlossen
+- Ihr Router leitet die Ports nicht weiter an den Rechner aud dem der Server läuft
+- Ihre Firewall blockiert das Spiel für öffentliche Zugriffe
+- Ihre Firewall versteckt oder tarnt Ihre Ports (Stealth Port oder Port Stealthing)
+- Sie haben den Server nicht zuerst gestartet und der Port hat sich geändert
+- Sie benützen eine eigne Server Konfigurations-Datei, und der Server Port hat sich geändert
+
+Ihre Freunde können bei der Verwendung der gleichen IP verscheidene Ports
+zum Verbinden ausprobieren, wie etwa:
+29253, 29254, 29255, 29256, 29257, 29258, 29259, 29001, 29002, 29003
+
+Konsolebefehl Beispiel: connect 88.88.11.11:29254
+
+PROBLEM LÖSUNGEN:::::::::
+- Starten Sie zuerst den Server dann erst Ihr das Spiel zum mitspielen. (wenn Sie einen dedizierten server hosten)
+- Konfigurieren Sie Ihre Firewall entsprechend für das Spiel
+- Informieren Sie sich über Ihren Router, lesen Sie das Handbuch, suchen
+Sie im Internet oder fragen Sie bei Ihren Internet Anbieter nach.
+- Kontaktieren Sie HaZardModding
+
+DE-INSTALLATION===============================================================
+==============================================================================
+1.	Beenden Sie das Spiel (und den Server) Star Trek(R) Elite Force II.
+2.	Sollten Sie die Modifikation nicht über Programme oder Software entfehrnen
+können (Systemsteuerung), löschen Sie folgende Dateien aus Ihrem base Ordner:
+	zzzzzz_co-op_hzm_script_mod.pk3
+	zzzzzz_co-op_hzm_script_mod_clientonly.pk3
+	zzzzzz_co-op_hzm_script_mod_deutsch.pk3
+
+

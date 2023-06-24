@@ -1,0 +1,492 @@
+menu "coop_TricorderModulation" 640 480 NONE .5
+align  center
+bgcolor 0 0 0 0.9
+borderstyle NONE
+direction from_top .1
+showcommand "seta coop_pEntered \"\"\n"
+showcommand "ui_showmouse;use Knife\n"
+hidecommand "ui_hidemouse\n"
+fadein 0.75
+noEscape 1
+depth 0.1
+fullscreen 1
+
+//--- Base Images
+resource
+Widget
+{
+rect 0 0 256 256
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+shader textures/tricorder/tri_basebg_01
+}
+resource
+Widget
+{
+rect 256 0 256 256
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+shader textures/tricorder/tri_basebg_02
+}
+resource
+Widget
+{
+rect 512 0 128 256
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+shader textures/tricorder/tri_basebg_03
+}
+resource
+Widget
+{
+rect 0 256 256 256
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+shader textures/tricorder/tri_basebg_04
+}
+resource
+Widget
+{
+rect 256 256 256 256
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+shader textures/tricorder/tri_basebg_05
+}
+resource
+Widget
+{
+rect 512 256 128 256
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+shader textures/tricorder/tri_basebg_06
+}
+
+// help button
+resource Button
+{
+	name "tri_mod_help"
+	rect 48 400 64 32
+	fgcolor 0.8 0.8 0.925 0.95
+	bgcolor 0.175 0.175 0.175 1
+	borderstyle "3D_BORDER"
+	title "$$TriPuz_HelpButton$$"
+	font serpentinemedium-12
+	stuffcommand "use Teen"
+	//stuffcommand "ui_addhud TricorderModulationHelp;globalwidgetcommand tri_mod_help hide"
+}
+
+//--- cancel button
+resource Button
+{
+	name "tri_mod_base_button_cancel"
+	rect 282 427 76 23
+	fgcolor 0.75 0.75 0.9 0.90
+	bgcolor 0.35 0.67 1.00 0.0
+	borderstyle "NONE"
+	title "$$TriPuz_CancelButton$$"
+	font serpentinemedium-12
+	ServerThreadToRun tricorderBaseCancel
+	clicksound sound/weapons/tricorder/tri_puzz_failure.wav
+	hovercommand "seta coop_pEntered $$TriPuz_Cancel$$\n"
+	hoverexitcommand "seta coop_pEntered \"\"\n"
+	stuffcommand "use Knife;ui_removehud coop_TricorderModulation\n"
+}
+
+resource Label
+{
+	name "tri_mod_base_timer_min"
+	rect 339 72 14 18
+	title "0"
+	fgcolor 0.75 0.75 0.9 0.90
+	bgcolor 0.35 0.67 1.00 0.0
+	horizontaljustify "left"
+	borderstyle "NONE"
+	font serpentinemedium-12
+	hovercommand "seta coop_pEntered $$TriPuz_Timer$$\n"
+	hoverexitcommand "seta coop_pEntered \"\"\n"
+}
+
+resource Label
+{
+	name "tri_mod_base_timer_sec"
+	title "00"
+	rect 360 72 28 18
+	fgcolor 0.75 0.75 0.9 0.90
+	bgcolor 0.35 0.67 1.00 0.0
+	horizontaljustify "left"
+	borderstyle "NONE"
+	font serpentinemedium-12
+	hovercommand "seta coop_pEntered $$TriPuz_Timer$$\n"
+	hoverexitcommand "seta coop_pEntered \"\"\n"
+}
+
+resource Label
+{
+	name "tri_mod_base_timer_milsec"
+	title "00"
+	rect 395 72 28 18
+	fgcolor 0.75 0.75 0.9 0.90
+	bgcolor 0.35 0.67 1.00 0.0
+	horizontaljustify "left"
+	borderstyle "NONE"
+	font serpentinemedium-12
+	hovercommand "seta coop_pEntered $$TriPuz_Timer$$\n"
+	hoverexitcommand "seta coop_pEntered \"\"\n"
+}
+
+//--- tooltip
+resource Label
+{
+	name "tri_mo_tooltip"
+	rect 233 103 174 13
+	fgcolor 0.75 0.75 0.9 0.90
+	bgcolor 0 0 0 0
+	font serpentinemedium-8
+	title "tooltip ?"
+}
+
+resource Label
+{
+	name "tri_mo_tooltip2"
+	rect 233 403 174 13
+	fgcolor 0.75 0.75 0.9 0.90
+	bgcolor 0 0 0 0
+	font serpentinemedium-8
+	linkcvar coop_pEntered
+}
+
+//-------------------------------- Base TriMod Image
+resource
+Widget
+{
+rect 192 127 256 256
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+shader textures/tricorder/tri_mod_base
+}
+
+resource 
+Label
+{
+	name "tri_mod_title"
+	rect 213 39 220 20
+	fgcolor 1.0 1.0 1.0 1.00
+	bgcolor 0.15 0.47 0.60 0.00
+	borderstyle "NONE"
+	title "$$TriPuz_ModTitle$$"
+	font serpentinemedium-12
+}
+
+
+//--------------------------------- tricorder wave composite
+resource Widget
+{
+	name "tri_mod_triwave1"
+	rect 192 159 82 156
+	//fgcolor 1.0 0.0 0.0 1.0
+	shadercolor 0.1 0.1 0.1 0.1
+	//hovershadercolor 1.0 0.0 0.0 1.0
+	bgcolor 0.0 0.0 0.0 0.0
+	borderstyle "NONE"
+	shader textures/tricorder/tri_mod_wave
+	hovercommand "seta coop_pEntered $$TriPuz_WA_Tricorder$$\n"
+	hoverexitcommand "seta coop_pEntered \"\"\n"
+}
+resource Widget
+{
+	name "tri_mod_triwave2"
+	rect 192 159 82 156
+	//fgcolor 0.0 1.0 0.0 1.0
+	shadercolor 0.1 0.1 0.1 0.1
+	//hovershadercolor 0.0 1.0 0.0 1.0
+	bgcolor 0.0 0.0 0.0 0.0
+	borderstyle "NONE"
+	shader textures/tricorder/tri_mod_wave
+}
+resource Widget
+{
+	name "tri_mod_triwave3"
+	rect 192 159 82 156
+	//fgcolor 0.0 0.0 1.0 1.0
+	shadercolor 0.1 0.1 0.1 0.1
+	//hovershadercolor 0.0 0.0 1.0 1.0
+	bgcolor 0.0 0.0 0.0 0.0
+	borderstyle "NONE"
+	shader textures/tricorder/tri_mod_wave
+}
+
+//--------------------------------- comparison wave composite
+resource Widget
+{
+	name "tri_mod_compwave1"
+	rect 279 159 82 156
+	fgcolor 1.0 1.0 1.0 1.0
+	bgcolor 0.0 0.0 0.0 0.0
+	shadercolor 0.1 0.1 0.1 0.1
+	borderstyle "NONE"
+	shader textures/tricorder/tri_mod_wave
+	hovercommand "seta coop_pEntered $$TriPuz_WA_Compare$$\n"
+	hoverexitcommand "seta coop_pEntered \"\"\n"
+}
+
+resource Widget
+{
+	name "tri_mod_compwave2"
+	rect 279 159 82 156
+	fgcolor 1.0 1.0 1.0 1.0
+	shadercolor 0.1 0.1 0.1 0.1
+	bgcolor 0.0 0.0 0.0 0.0
+	borderstyle "NONE"
+	shader textures/tricorder/tri_mod_wave_hashed
+}
+
+//--------------------------------- lock wave composite
+resource Widget
+{
+	name "tri_mod_lockwave1"
+	rect 366 159 82 156
+	//fgcolor 1.0 0.0 0.0 1.0
+	shadercolor 0.1 0.1 0.1 0.1
+	//hovershadercolor 1.0 0.0 0.0 1.0
+	bgcolor 0.0 0.0 0.0 0.0
+	borderstyle "NONE"
+	shader textures/tricorder/tri_mod_wave
+	hovercommand "seta coop_pEntered $$TriPuz_WA_Lock$$\n"
+	hoverexitcommand "seta coop_pEntered \"\"\n"
+}
+resource Widget
+{
+	name "tri_mod_lockwave2"
+	rect 366 159 82 156
+	//fgcolor 0.0 1.0 0.0 1.0
+	shadercolor 0.1 0.1 0.1 0.1
+	//hovershadercolor 0.0 1.0 0.0 1.0
+	bgcolor 0.0 0.0 0.0 0.0
+	borderstyle "NONE"
+	shader textures/tricorder/tri_mod_wave
+}
+resource Widget
+{
+	name "tri_mod_lockwave3"
+	rect 366 159 82 156
+	//fgcolor 0.0 0.0 1.0 1.0
+	shadercolor 0.1 0.1 0.1 0.1
+	//hovershadercolor 0.0 0.0 1.0 1.0
+	bgcolor 0.0 0.0 0.0 0.0
+	borderstyle "NONE"
+	shader textures/tricorder/tri_mod_wave
+}
+
+//--------------------------------- adjustment controls
+
+//--------------------------------- wave selector buttons
+resource Label
+{
+	name "tri_mod_button_sel1"
+	rect 320 127 32 16
+	fgcolor 0 0 0 0
+	bgcolor 0 0 0 0 
+	borderstyle "NONE"
+	shader textures/tricorder/tri_mod_button_1_inactive
+}
+resource Label
+{
+	name "tri_mod_button_sel2"
+	rect 362 127 32 16
+	fgcolor 0 0 0 0
+	bgcolor 0 0 0 0 
+	borderstyle "NONE"
+	shader textures/tricorder/tri_mod_button_2_inactive
+}
+resource Label
+{
+	name "tri_mod_button_sel3"
+	rect 404 127 32 16
+	fgcolor 0 0 0 0
+	bgcolor 0 0 0 0 
+	borderstyle "NONE"
+	shader textures/tricorder/tri_mod_button_3_inactive
+}
+
+//--------------------------------- paramter selector buttons
+
+resource Label
+{
+	name "Default"
+	rect 196 323 128 14
+	fgcolor 1 1 1 1.0
+	bgcolor 0 0 0 0
+	borderstyle "NONE"
+	title "$$TricorderAmplitude$$"
+	font serpentinemedium-12
+}
+
+resource Button
+{
+	name "tri_mod_button_ampl"
+	rect 196 323 128 16
+	fgcolor 0 0 0 0
+	bgcolor 0 0 0 0
+	hoverbgcolor 1 1 1 0.5
+	ServerThreadToRun tricorderMod_ampl
+	borderstyle "NONE"
+	clicksound sound/weapons/tricorder/tri_puzz_alt.wav
+	hovercommand "seta coop_pEntered $$TriPuz_WA_Ampl$$\n"
+	hoverexitcommand "seta coop_pEntered \"\"\n"
+}
+
+resource Label
+{
+	name "Default"
+	rect 196 343 128 14
+	fgcolor 1 1 1 1.0
+	bgcolor 0 0 0 0
+	borderstyle "NONE"
+	title "$$TricorderFrequency$$"
+	font serpentinemedium-12
+}
+
+resource Button
+{
+	name "tri_mod_button_freq"
+	rect 196 343 128 16
+	fgcolor 0 0 0 0
+	bgcolor 0 0 0 0
+	hoverbgcolor 1 1 1 0.5
+	ServerThreadToRun tricorderMod_freq
+	borderstyle "NONE"
+	clicksound sound/weapons/tricorder/tri_puzz_alt.wav
+	hovercommand "seta coop_pEntered $$TriPuz_WA_Freq$$\n"
+	hoverexitcommand "seta coop_pEntered \"\"\n"
+}
+
+resource Label
+{
+	name "Default"
+	rect 196 363 128 14
+	fgcolor 1 1 1 1.0
+	bgcolor 0 0 0 0
+	borderstyle "NONE"
+	title "$$TricorderOffset$$"
+	font serpentinemedium-12
+}
+
+resource Button
+{
+	name "tri_mod_button_offs"
+	rect 196 363 128 16
+	fgcolor 0 0 0 0
+	bgcolor 0 0 0 0
+	hoverbgcolor 1 1 1 0.5
+	ServerThreadToRun tricorderMod_offs
+	borderstyle "NONE"
+	clicksound sound/weapons/tricorder/tri_puzz_alt.wav
+	hovercommand "seta coop_pEntered $$TriPuz_WA_Offs$$\n"
+	hoverexitcommand "seta coop_pEntered \"\"\n"
+}
+
+//--------------------------------- wave adjust buttons
+resource Button
+{
+	name "tri_mod_button_inc"
+	rect 403 324 40 24
+	fgcolor 0 0 0 0
+	bgcolor 0 0 0 0
+	hoverbgcolor 1 1 1 0.5
+	ServerThreadToRun tricorderMod_inc
+	borderstyle "NONE"
+	clicksound sound/weapons/tricorder/tri_puzz_beep.wav
+	hovercommand "seta coop_pEntered $$TriPuz_WA_Increase$$\n"
+	hoverexitcommand "seta coop_pEntered \"\"\n"
+}
+resource Label
+{
+	name "tri_mod_label_value"
+	rect 364 338 32 26
+	fgcolor 1.0 1.0 1.0 1.00
+	bgcolor 0.35 0.67 1.00 0.0
+	borderstyle "NONE"
+	font serpentinemedium-16
+	hovercommand "seta coop_pEntered $$TriPuz_WA_Value$$\n"
+	hoverexitcommand "seta coop_pEntered \"\"\n"
+}
+resource Button
+{
+	name "tri_mod_button_dec"
+	rect 403 354 40 24
+	fgcolor 0 0 0 0
+	bgcolor 0 0 0 0
+	hoverbgcolor 1 1 1 0.5
+	ServerThreadToRun tricorderMod_dec
+	borderstyle "NONE"
+	clicksound sound/weapons/tricorder/tri_puzz_beep_low.wav
+	hovercommand "seta coop_pEntered $$TriPuz_WA_Decrease$$\n"
+	hoverexitcommand "seta coop_pEntered \"\"\n"
+}
+
+//-------------------------------- Control Route widgets
+resource
+Widget
+{
+	name "tri_mod_controlroute"
+	rect 325 319 32 64
+	fgcolor 1.00 1.00 1.00 0.0
+	bgcolor 1.00 1.00 1.00 0.0
+	borderstyle "none"
+	shader textures/tricorder/tri_mod_route-amp
+}
+
+// --------------------------  Extra localized text widgets
+
+resource Label
+{
+	name "Default"
+	rect 193 145 80 14
+	fgcolor 1 1 1 1.0
+	bgcolor 0 0 0 0
+	borderstyle "NONE"
+	title "$$TricorderTitle$$"
+	font serpentinemedium-8
+}
+
+resource Label
+{
+	name "Default"
+	rect 280 145 80 14
+	fgcolor 0.25 1 0.1 1.0
+	bgcolor 0 0 0 0
+	borderstyle "NONE"
+	title "$$TricorderComposite$$"
+	font serpentinemedium-8
+}
+
+resource Label
+{
+	name "Default"
+	rect 368 145 80 14
+	fgcolor 1 1 1 1.0
+	bgcolor 0 0 0 0
+	borderstyle "NONE"
+	title "$$TricorderTarget$$"
+	font serpentinemedium-8
+}
+
+resource Label
+{
+	name "Default"
+	rect 198 126 105 14
+	fgcolor 0.35 0.55 1 1.0
+	bgcolor 0 0 0 0
+	borderstyle "NONE"
+	title "$$TricorderActive$$"
+	font serpentinelight-8
+}
+
+end.

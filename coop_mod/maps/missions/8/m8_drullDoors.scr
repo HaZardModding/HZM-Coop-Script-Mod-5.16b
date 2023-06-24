@@ -1,0 +1,589 @@
+
+void drull_smalldoor()
+{
+	entity l_part1,l_part2,l_part3,
+		   r_part1,r_part2,r_part3,
+		   block,trig,activator,areaportal;
+		   
+	trig = getcurrententity ();
+	activator = trig.getLastActivatingEntity ();
+	
+	string basename,direction;
+	basename  = trig.getstringvar ( "uservar1" );
+	direction = trig.getstringvar ( "uservar2" );
+	
+	if(trig.getRawTargetName() == "coop_triggerMultiple"+basename)
+	{
+		if(trig.getFloatvar("coop_doorState") != 1){
+			return;
+		}
+	}
+
+	l_part1 = getentity ( basename + "left1" );
+	l_part2 = getentity ( basename + "left2" );
+	l_part3 = getentity ( basename + "left3" );
+
+	r_part1 = getentity ( basename + "right1" );
+	r_part2 = getentity ( basename + "right2" );
+	r_part3 = getentity ( basename + "right3" );
+
+	block = getentity ( basename + "block" );
+	areaportal = getentity ( basename + "portal" );
+	
+	if(doesEntityExist(areaportal)){areaportal.openportal ();}
+
+	if (trig)
+	{
+		trig.nottriggerable ();
+		
+	}
+	else {
+		print ( "drull_smalldoor::getcurrententity () == null\n" );
+		return;
+	}
+//CO-OP
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+	if(cvar_bool_multiplayer){//Multiplayer
+		trig = getentity("coop_triggerMultiple"+basename);
+		if(!doesEntityExist(trig)){//basename
+			vector vSpawn;
+			vSpawn = r_part1.getOrigin();
+			trig = spawn("trigger_multiple","thread","drull_smalldoor","targetname","coop_triggerMultiple"+basename,"origin",vectorToString(vSpawn));
+			wait(.2);
+			trig.wait(1);
+			trig.setSize('-256 -256 -128','256 256 128');
+			trig.uservar1(basename);
+			trig.uservar2(direction);
+		}
+	}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+	
+//-----------------
+//Part 1
+//-----------------
+	l_part1.time ( 2 );
+	r_part1.time ( 2 );
+
+	if ( direction == "ns" ) {
+		l_part1.moveSouth ( 64 );
+		r_part1.moveNorth ( 64 );
+		r_part1.playsound ( "sound/doors/kling_shipdoor.wav", 9, .7, 500 );
+	}
+	else {
+		r_part1.moveWest ( 64 );
+		l_part1.moveEast ( 64 );
+		r_part1.playsound ( "sound/doors/kling_shipdoor.wav", 9, .7, 500 );
+	}
+
+	wait ( 0.5 );
+
+//-----------------
+//Part 2
+//-----------------
+	l_part2.time ( 2 );
+	r_part2.time ( 2 );
+
+	if ( direction == "ns" ) {
+		l_part2.moveSouth ( 60 );
+		r_part2.moveNorth ( 60 );
+		r_part2.playsound ( "sound/doors/drull_smldoor_01.wav", 8, .7, 500 );
+	}
+	else {
+		r_part2.moveWest ( 60 );
+		l_part2.moveEast ( 60 );
+		r_part2.playsound ( "sound/doors/drull_smldoor_01.wav", 8, .7, 500 );
+	}
+	l_part2.moveUp ( 60 );
+	r_part2.moveUp ( 60 );
+
+
+	wait ( 0.75 );
+		r_part2.playsound ( "sound/doors/drull_smldoor_stop_01.wav", 8, .7, 500 );
+
+//-----------------
+//Part 3
+//-----------------
+	l_part3.time ( 2 );
+	r_part3.time ( 2 );
+
+	if ( direction == "ns" ) {
+		l_part3.moveSouth ( 48 );
+		r_part3.moveNorth ( 48 );
+		r_part3.playsound ( "sound/doors/drull_smldoor_01.wav", 8, .7, 500 );
+	}
+	else {
+		r_part3.moveWest ( 48 );
+		l_part3.moveEast ( 48 );
+		r_part3.playsound ( "sound/doors/drull_smldoor_01.wav", 8, .7, 500 );
+	}
+	l_part3.moveUp ( 48 );
+	r_part3.moveUp ( 48 );
+
+	//block.notsolid ();
+	waitfor ( r_part3 );
+    r_part2.playsound ( "sound/doors/drull_smldoor_stop_01.wav", 8, .7, 500 );
+//	wait ( 3 );
+	//wait ( 9 );
+//Blah, just leave the things open
+
+//CO-OP
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//Chrissstrahl@2008.10.6->Na i'm afraid i can't do this, gone change this for multiplayer, gona make use of every portal!
+	
+	trig.setFloatvar("coop_doorState",2);//Open
+	
+ 	if(cvar_bool_multiplayer){//Multiplayer
+		float fMultiuse_1 = 0;
+		float fMultiuse_2 = 0;
+		vector vActivator;vector vDistance;vector vDoor;
+		
+		vDoor = r_part1.getOrigin();
+		
+		while(fMultiuse_1 < 7){
+			activator = globalCoop_return_playerClosestPreferActive(r_part1);//activator<-RECYCLED VARIABLE!!!
+			vActivator		= activator.getOrigin();//activator<-RECYCLED VARIABLE!!!
+			vDistance		= vDoor - vActivator;
+			fMultiuse_2 	= vectorlength(vDistance);
+			if(fMultiuse_2 <= 256){
+				fMultiuse_1 = 0;	
+			}
+			wait(1);
+			fMultiuse_1++;
+		}		
+	//-----------------
+	//Part 3
+	//-----------------
+		l_part3.time ( 4 );
+		r_part3.time ( 4 );
+
+		if ( direction == "ns" ) {
+			r_part3.moveSouth ( 48 );
+			l_part3.moveNorth ( 48 );
+			r_part3.playsound ( "sound/doors/drull_bigdoor_01.wav", 8, .7, 500 );
+		}
+		else {
+			l_part3.moveWest ( 48 );
+			r_part3.moveEast ( 48 );
+			r_part3.playsound ( "sound/doors/drull_bigdoor_01.wav", 8, .7, 500 );
+		}
+		l_part3.moveDown ( 48 );
+		r_part3.moveDown ( 48 );
+
+		wait ( 1.5 );
+
+	//-----------------
+	//Part 2
+	//-----------------
+		l_part2.time ( 4 );
+		r_part2.time ( 4 );
+
+		if ( direction == "ns" ) {
+			r_part2.moveSouth ( 60 );
+			l_part2.moveNorth ( 60 );
+			r_part2.playsound ( "sound/doors/drull_bigdoor_01.wav", 8, .7, 500 );
+		}
+		else {
+			l_part2.moveWest ( 60 );
+			r_part2.moveEast ( 60 );
+			r_part2.playsound ( "sound/doors/drull_bigdoor_01.wav", 8, .7, 500 );
+		}
+		l_part2.moveDown ( 60 );
+		r_part2.moveDown ( 60 );
+
+		if(doesEntityExist(block)){
+			block.solid();
+		}
+		wait ( 1.0 );
+			r_part2.playsound ( "sound/doors/drull_bigdoor_stop_01.wav", 8, .7, 500 );
+
+	//-----------------
+	//Part 1
+	//-----------------
+		l_part1.time ( 4 );
+		r_part1.time ( 4 );
+
+		if ( direction == "ns" ) {
+			r_part1.moveSouth ( 64 );
+			l_part1.moveNorth ( 64 );
+		}
+		else {
+			l_part1.moveWest ( 64 );
+			r_part1.moveEast ( 64 );
+		}
+
+		wait ( 4 );
+
+		trig.triggerable ();
+		if(doesEntityExist(areaportal)){areaportal.closeportal();}
+		trig.setFloatvar("coop_doorState",1);//Closed
+		trig.triggerable ();
+	}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+}
+
+void drull_smalldoor_close() 
+{
+	if(cvar_bool_multiplayer){//Multiplayer
+		return;
+	}
+	
+	entity l_part1,l_part2,l_part3,
+		   r_part1,r_part2,r_part3,
+		   block,trig,activator,areaportal;
+		   
+	trig = getcurrententity ();	
+	activator = trig.getLastActivatingEntity ();
+
+	string basename,direction;
+	basename  = trig.getstringvar ( "uservar1" );
+	direction = trig.getstringvar ( "uservar2" );
+
+	l_part1 = getentity ( basename + "left1" );
+	l_part2 = getentity ( basename + "left2" );
+	l_part3 = getentity ( basename + "left3" );
+
+	r_part1 = getentity ( basename + "right1" );
+	r_part2 = getentity ( basename + "right2" );
+	r_part3 = getentity ( basename + "right3" );
+
+	block = getentity ( basename + "block" );
+	areaportal = getentity ( basename + "portal" );
+
+	areaportal.openportal ();
+	
+//-----------------
+//Part 3
+//-----------------
+	l_part3.time ( 4 );
+	r_part3.time ( 4 );
+
+	if ( direction == "ns" ) {
+		r_part3.moveSouth ( 48 );
+		l_part3.moveNorth ( 48 );
+		r_part3.playsound ( "sound/doors/drull_bigdoor_01.wav", 8, .7, 500 );
+	}
+	else {
+		l_part3.moveWest ( 48 );
+		r_part3.moveEast ( 48 );
+		r_part3.playsound ( "sound/doors/drull_bigdoor_01.wav", 8, .7, 500 );
+	}
+	l_part3.moveDown ( 48 );
+	r_part3.moveDown ( 48 );
+
+	wait ( 1.5 );
+
+//-----------------
+//Part 2
+//-----------------
+	l_part2.time ( 4 );
+	r_part2.time ( 4 );
+
+	if ( direction == "ns" ) {
+		r_part2.moveSouth ( 60 );
+		l_part2.moveNorth ( 60 );
+		r_part2.playsound ( "sound/doors/drull_bigdoor_01.wav", 8, .7, 500 );
+	}
+	else {
+		l_part2.moveWest ( 60 );
+		r_part2.moveEast ( 60 );
+		r_part2.playsound ( "sound/doors/drull_bigdoor_01.wav", 8, .7, 500 );
+	}
+	l_part2.moveDown ( 60 );
+	r_part2.moveDown ( 60 );
+
+	block.solid ();
+	wait ( 1.0 );
+        r_part2.playsound ( "sound/doors/drull_bigdoor_stop_01.wav", 8, .7, 500 );
+
+//-----------------
+//Part 1
+//-----------------
+	l_part1.time ( 4 );
+	r_part1.time ( 4 );
+
+	if ( direction == "ns" ) {
+		r_part1.moveSouth ( 64 );
+		l_part1.moveNorth ( 64 );
+	}
+	else {
+		l_part1.moveWest ( 64 );
+		r_part1.moveEast ( 64 );
+	}
+
+	wait ( 4 );
+
+	trig.triggerable ();
+	areaportal.closeportal();
+	trig.setFloatvar("coop_doorState",2);
+}
+
+
+void drull_bigdoor ( ) {
+	entity l_part1,l_part2,l_part3,l_part4,
+		   r_part1,r_part2,r_part3,r_part4,
+		   trig,activator;
+
+	trig = getcurrententity ();
+	activator = trig.getLastActivatingEntity ();
+
+	string basename,direction;
+	basename  = trig.getstringvar ( "uservar1" );
+	direction = trig.getstringvar ( "uservar2" );
+
+	l_part1 = getentity ( basename + "left1" );
+	l_part2 = getentity ( basename + "left2" );
+	l_part3 = getentity ( basename + "left3" );
+	l_part4 = getentity ( basename + "left4" );
+
+	r_part1 = getentity ( basename + "right1" );
+	r_part2 = getentity ( basename + "right2" );
+	r_part3 = getentity ( basename + "right3" );
+	r_part4 = getentity ( basename + "right4" );
+
+
+	trig.openportal ();
+	
+	if (trig)
+	{
+		entity activator;
+		trig.nottriggerable ();
+		
+	}
+	else {
+		print ( "drull_bigdoor::getcurrententity () == null\n" );
+		return;
+	}
+
+
+//-----------------
+//Part 1
+//-----------------
+	l_part1.time ( 2 );
+	r_part1.time ( 2 );
+
+	if ( direction == "ns" ) {
+		l_part1.moveSouth ( 64 );
+		r_part1.moveNorth ( 64 );
+		r_part1.playsound ( "sound/doors/drull_smldoor_01.wav", 8, .7, 500 );
+	}
+	else {
+		r_part1.moveWest ( 64 );
+		l_part1.moveEast ( 64 );
+		r_part1.playsound ( "sound/doors/drull_smldoor_01.wav", 8, .7, 500 );
+	}
+
+	wait ( 0.5 );
+		r_part1.playsound ( "sound/doors/drull_smldoor_stop_01.wav", 8, .7, 500 );
+
+//-----------------
+//Part 2
+//-----------------
+	l_part2.time ( 2 );
+	r_part2.time ( 2 );
+
+	if ( direction == "ns" ) {
+		l_part2.moveSouth ( 60 );
+		r_part2.moveNorth ( 60 );
+		r_part2.playsound ( "sound/doors/drull_smldoor_01.wav", 8, .7, 500 );
+	}
+	else {
+		r_part2.moveWest ( 60 );
+		l_part2.moveEast ( 60 );
+		r_part2.playsound ( "sound/doors/drull_smldoor_01.wav", 8, .7, 500 );
+	}
+	l_part2.moveUp ( 60 );
+	r_part2.moveUp ( 60 );
+
+	wait ( 0.75 );
+
+		r_part2.playsound ( "sound/doors/drull_smldoor_stop_01.wav", 8, .7, 500 );
+
+//-----------------
+//Part 3
+//-----------------
+	l_part3.time ( 2 );
+	r_part3.time ( 2 );
+
+	if ( direction == "ns" ) {
+		l_part3.moveSouth ( 48 );
+		r_part3.moveNorth ( 48 );
+		r_part3.playsound ( "sound/doors/drull_smldoor_01.wav", 8, .7, 500 );
+	}
+	else {
+		r_part3.moveWest ( 48 );
+		l_part3.moveEast ( 48 );
+		r_part3.playsound ( "sound/doors/drull_smldoor_01.wav", 8, .7, 500 );
+	}
+	l_part3.moveUp ( 48 );
+	r_part3.moveUp ( 48 );
+
+	wait ( 1.0 );
+
+
+//-----------------
+//Part 4
+//-----------------
+	l_part4.time ( 2 );
+	r_part4.time ( 2 );
+
+	if ( direction == "ns" ) {
+		l_part4.moveSouth ( 24 );
+		r_part4.moveNorth ( 24 );
+		r_part4.playsound ( "sound/doors/drull_smldoor_01.wav", 8, .7, 500 );
+	}
+	else {
+		r_part4.moveWest ( 24 );
+		l_part4.moveEast ( 24 );
+		r_part4.playsound ( "sound/doors/drull_smldoor_01.wav", 8, .7, 500 );
+	}
+	l_part4.moveUp ( 24 );
+	r_part4.moveUp ( 24 );
+
+
+//-----------------
+//Close
+//-----------------
+
+//Blah, just leave the things open
+
+//return;
+	wait( 2 );
+
+//-----------------
+//Part 4
+//-----------------
+	l_part4.time ( 4 );
+	r_part4.time ( 4 );
+
+	if ( direction == "ns" ) {
+		r_part4.moveSouth ( 24 );
+		l_part4.moveNorth ( 24 );
+		r_part4.playsound ( "sound/doors/drull_bigdoor_01.wav", 8, .7, 500 );
+	}
+	else {
+		l_part4.moveWest ( 24 );
+		r_part4.moveEast ( 24 );
+		r_part4.playsound ( "sound/doors/drull_bigdoor_01.wav", 8, .7, 500 );
+	}
+	l_part4.moveDown ( 24 );
+	r_part4.moveDown ( 24 );
+
+	print ( "waiting to close " + basename + "\n" );
+	wait ( 2.0 );
+
+        	r_part4.playsound ( "sound/doors/drull_bigdoor_stop_01.wav", 8, .7, 500 );
+
+//-----------------
+//Part 3
+//-----------------
+	l_part3.time ( 4 );
+	r_part3.time ( 4 );
+
+	if ( direction == "ns" ) {
+		r_part3.moveSouth ( 48 );
+		l_part3.moveNorth ( 48 );
+		r_part3.playsound ( "sound/doors/drull_bigdoor_01.wav", 7, .7, 500 );
+	}
+	else {
+		l_part3.moveWest ( 48 );
+		r_part3.moveEast ( 48 );
+		r_part3.playsound ( "sound/doors/drull_bigdoor_01.wav", 7, .7, 500 );
+	}
+	l_part3.moveDown ( 48 );
+	r_part3.moveDown ( 48 );
+
+	wait ( 1.5 );
+        	r_part3.playsound ( "sound/doors/drull_bigdoor_stop_01.wav", 7, .7, 500 );
+
+//-----------------
+//Part 2
+//-----------------
+	l_part2.time ( 4 );
+	r_part2.time ( 4 );
+
+	if ( direction == "ns" ) {
+		r_part2.moveSouth ( 60 );
+		l_part2.moveNorth ( 60 );
+		r_part2.playsound ( "sound/doors/drull_bigdoor_01.wav", 8, .7, 500 );
+	}
+	else {
+		l_part2.moveWest ( 60 );
+		r_part2.moveEast ( 60 );
+		r_part2.playsound ( "sound/doors/drull_bigdoor_01.wav", 8, .7, 500 );
+	}
+	l_part2.moveDown ( 60 );
+	r_part2.moveDown ( 60 );
+
+	wait ( 1.0 );
+        	r_part2.playsound ( "sound/doors/drull_bigdoor_stop_01.wav", 8, .7, 500 );
+
+//-----------------
+//Part 1
+//-----------------
+	l_part1.time ( 4 );
+	r_part1.time ( 4 );
+
+	if ( direction == "ns" ) {
+		r_part1.moveSouth ( 64 );
+		l_part1.moveNorth ( 64 );
+		l_part2.moveNorth ( 60 );
+		r_part1.playsound ( "sound/doors/drull_bigdoor_01.wav", 8, .7, 500 );
+	}
+	else {
+		l_part1.moveWest ( 64 );
+		r_part1.moveEast ( 64 );
+		l_part2.moveNorth ( 60 );
+		r_part1.playsound ( "sound/doors/drull_bigdoor_01.wav", 8, .7, 500 );
+	}
+
+	wait ( 4 );
+
+	trig.triggerable ();
+	trig.closeportal ();
+}
+
+void drull_lift ( ) {
+	string status;
+	status = $krindo.getstringvar ( "status" );
+
+	entity caller, lift;
+	float dist,oldState;
+	string dir;
+	vector vecMove = '0 0 0';
+
+	caller = getcurrententity ();
+	caller.nottriggerable ();
+
+	lift = getEntity( caller.getstringvar ( "uservar1" ) );
+
+	dist = caller.getfloatvar ( "uservar2" );
+	
+	vecMove = vectorSetZ( vecMove, dist );
+
+	if ( dist < 0 ) {
+		dir = "down";
+		dist *= -1;
+	}
+	else
+		dir = "up";
+
+	if ( status == "ready" )
+	{
+		//---TEMP solution for keeping player on lift
+		if ( hack == 1 )
+		{
+			$liftClip.solid();
+			$endLiftClip.solid();			
+		}
+		print ( caller.getstringvar ( "uservar1" ) + "\n" );
+		print ( caller.getstringvar ( "uservar3" ) + "\n" );
+		print ( dist + "\n" );
+		//globalAccelMove_AxisAligned ( caller.getstringvar ( "uservar1" ) , caller.getfloatvar ( "uservar3" ) , dist , dir );
+		globalAccelMove( lift, vecMove, caller.getfloatvar ( "uservar3" ), "rampupdown", "" );
+	}
+	caller.triggerable ();
+}

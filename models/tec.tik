@@ -1,0 +1,37 @@
+TIKI
+
+setup
+	{
+	scale 1
+	fade_dist_mod 1
+	lod 350 1 6000 0.75 25000
+	radius 15
+	
+	path models/item/backpacks
+	surface material1 shader technician.tga
+	}
+init
+	{
+	server
+		{
+		setsize "-6 -8 0" "7 9 48"
+		targetname coop_Technician
+		}
+      client
+		{
+		}
+
+	}
+animations 
+	{
+
+	idle	technician.tan
+		{
+		}
+	}
+   
+/*QUAKED    coop_class_technician    (0.5 0.25 0.25)    (0 0 0)    (0 0 0)
+Co-op Mod Class Selection for Technician
+Used to allow Players selecting Technician Class by walking over this.
+Do NOT make static!
+*/

@@ -1,0 +1,339 @@
+void hzm_waterTouched()
+////////////////////////////////////////////////////////////////////////////////
+//let us know that someone is taking a bath (some dude touched a trigger)
+////////////////////////////////////////////////////////////////////////////////
+{
+//IF THIS THREAD IS RUNNING DO NOT CALL IT, WAIT FOR THE TRIGGER TO FIRE AGAIN.
+//THIS AVOIDS THAT THIS FUNCTION IS CALLED MULTIPLE TIMES ON THE SAME PLAYER
+	if(!hzm_water_float_checkAssiningToucher){
+//LOCK DOWN THIS FUCNTION
+		hzm_water_float_checkAssiningToucher=1;
+//CREATE VARIABLES FROM TYPE ENTITY/OBJECT
+		entity eTrigger;
+//GRAB THE CURRENT OBJECT, WICH IS THE TRIGGER CALLING THIS THREAD
+		eTrigger = getCurrentEntity();
+//CHECK IF THE TRIGGER EXISTS
+		if(doesEntityExist(eTrigger)){
+//CREATE VARIABLES FROM TYPE ENTITY/OBJECT
+			entity ePlayer;
+//GRAB ENTITY WHICH HAS ACTIVATED THE TRIGGER (WHICH IS A PLAYER!)
+			ePlayer = eTrigger.getlastActivatingEntity();
+//CHECK IF THE PLAYER EVEN EXISTS
+			if(doesEntityExist(ePlayer)){
+//START THE FUNCTION WHICH TAKES CARE OF THE PLAYER AND CHECK IF THE PLAYER IS IN/UNDER THE WATER
+//START IT AS "THREAD" SO THIS THREAD CAN END AND DOES NOT WAIT FOR THE PLAYER TO LEAVE TEH WATER AGAIN.
+				thread hzm_waterTakeCareOfPlayer(ePlayer,eTrigger);
+			}
+		}
+//HAVE A DELAY HERE, TO AVOID THAT THIS THREAD CALLS TWICE ON THE SAME PLAYER
+		wait(.1);
+//UNLOCK THIS FUNCTION
+		hzm_water_float_checkAssiningToucher=0;
+	}
+}
+
+
+void hzm_waterTakeCareOfPlayer(entity ePlayer,entity eTrigger)
+////////////////////////////////////////////////////////////////////////////////
+//Take Care of the player under water :D, check if player is still in/under water
+////////////////////////////////////////////////////////////////////////////////
+{
+//blub blub->z==44 crouched
+//blub blub->z==86 stand
+	if(doesEntityExist(ePlayer) && doesEntityExist(eTrigger)){
+		if(ePlayer.getFloatvar("hzm_waterTakeCareOfPlayer") != 1){
+			ePlayer.setFloatVar("hzm_waterTakeCareOfPlayer",1);
+			float fHealth,fIsUnderWaterTime,fDamage,fBuble,fRandom;
+			vector vTrig,vBBoxMin,vBBoxMax,vPlayer,vPlayerMax,vTimeArray;
+//GET ONLY ONCE, THIS TRIGGER IS NOT SUPPOSE TO MOVE
+			vTrig = eTrigger.getOrigin();
+			vBBoxMin = eTrigger.getMins();
+			vBBoxMax = eTrigger.getMaxs();	
+//CHECK BEFORE USE
+ 			if(hzm_water_integer_minimumBubbles > 9){
+				hzm_water_integer_minimumBubbles = 9;
+			}
+			if(hzm_water_integer_maximumBubbles > 10){
+				hzm_water_integer_maximumBubbles = 10;
+			} 
+			if(hzm_water_integer_damageInvervall < 3){
+				hzm_water_integer_damageInvervall = 3;
+			}
+			if(hzm_water_integer_airTime < 5){
+				hzm_water_integer_airTime = 5;
+			}
+			vTimeArray = ePlayer.getVectorVar("lastUnderWaterTime");
+			if((vTimeArray_x + .3) > getLevelTime()){
+				fIsUnderWaterTime = vTimeArray_y;
+			}
+			
+//GET/CHEK THIS ALL THE TIME
+			while(doesEntityExist(ePlayer)){
+				fHealth = ePlayer.getHealth();				
+				if(fHealth > 0){
+					vPlayer = ePlayer.getOrigin();
+					vPlayerMax = ePlayer.getMaxs();
+					
+ 					if(vPlayerMax_z == 49){
+						vPlayerMax = '22 22 44';
+					}
+					else{
+						vPlayerMax = '22 22 86';
+					}
+					
+					if((vPlayer_z + vPlayerMax_z) <= (vTrig_z + vBBoxMax_z) && (vTrig_z + vBBoxMin_z) <= (vPlayer_z + vPlayerMax_z)){//(vPlayer_z + vMaxs_z) <= fCalcTriggerZTop
+						vTimeArray_x = getLevelTime();
+						vTimeArray_y = fIsUnderWaterTime;
+						
+						if(hzm_waterCheckBB(vTrig,vBBoxMin,vBBoxMax,vPlayer,'-22 -22 0',vPlayerMax,0)){
+							
+							fIsUnderWaterTime++;
+							fDamage = ((fIsUnderWaterTime / 10) / hzm_water_float_damageDivider);
+							if((fIsUnderWaterTime / 10) >= hzm_water_integer_airTime){
+								if(hzm_waterCheckValueOfGiven((fIsUnderWaterTime / 10),hzm_water_integer_damageInvervall)){
+									fHealth = (fHealth - fDamage);
+									if(fHealth < 1){
+ 										for(fBuble=hzm_water_integer_maximumBubbles;fBuble>0;fBuble--){
+											thread hzm_waterPlayerLeakAir(ePlayer,eTrigger);
+										}
+										ePlayer.killed(ePlayer,fDamage,ePlayer,1);
+										ePlayer.setVectorVar("lastUnderWaterTime",vTimeArray);
+										ePlayer.setFloatVar("hzm_waterTakeCareOfPlayer",0);
+										return;
+									}
+									else{
+										ePlayer.hurt(1);
+										ePlayer.health(fHealth); 
+										ePlayer.playSound("sound/player/player_gulp.wav",3,7,12);
+ 										fRandom = (randomInt((hzm_water_integer_maximumBubbles - hzm_water_integer_minimumBubbles)) + hzm_water_integer_minimumBubbles);
+										for(fBuble=fRandom;fBuble>0;fBuble--){
+											thread hzm_waterPlayerLeakAir(ePlayer,eTrigger);
+										}
+									}
+								}
+							}
+						}
+						else{
+							ePlayer.setVectorVar("lastUnderWaterTime",vTimeArray);
+							ePlayer.setFloatVar("hzm_waterTakeCareOfPlayer",0);
+							return;
+						}
+					}
+ 					else{
+						ePlayer.setVectorVar("lastUnderWaterTime",vTimeArray);
+						ePlayer.setFloatVar("hzm_waterTakeCareOfPlayer",0);
+						return;
+					}
+				}
+				else{
+					ePlayer.setVectorVar("lastUnderWaterTime",vTimeArray);
+					ePlayer.setFloatVar("hzm_waterTakeCareOfPlayer",0);
+					return;
+				} 
+				wait(.1);
+			}
+		}
+	}
+}
+
+
+void hzm_waterPlayerLeakAir(entity ePlayer,entity eTrigger)
+////////////////////////////////////////////////////////////////////////////////
+//Spawn some buble sprites at the player his head location, plus some lil offset
+////////////////////////////////////////////////////////////////////////////////
+{
+	if(doesEntityExist(ePlayer) && doesEntityExist(eTrigger)){
+		ePlayer.morph("MORPH_O",120,0.3,1);
+		vector vOrigin,vOriginTrigger,vTriggerMaxOrigin;
+		entity eBubble,eSplash;
+		vOrigin = ePlayer.getOrigin();
+//DUCKED, NOT DUCKED
+		if(vectorGetZ(ePlayer.getMaxs()) == 49){
+			vOrigin_z += 67;
+		}
+		else{
+			vOrigin_z += 96;
+		}
+	
+		vTriggerMaxOrigin	= eTrigger.getOrigin();
+		vTriggerMaxOrigin_z	+= vectorGetZ(eTrigger.getMaxs());
+		if((vOrigin_z + 8) < vTriggerMaxOrigin_z){
+			eBubble = spawn("script_model","model","waterdrop1.spr","origin",vectortoString(vOrigin),"scale","0.001","notsolid","1");
+			wait(.05);
+			hzm_waterShakeAndMoveUp(eBubble,eTrigger);
+			vOrigin = eBubble.getOrigin();
+		}
+		vOrigin_z = vTriggerMaxOrigin_z;
+		eSplash = spawn("script_model","model","rainsplash.spr","origin",vectortoString(vOrigin),"scale","0.001","notsolid","1");
+		wait(.05);
+		if(doesEntityExist(eBubble)){
+			eBubble.remove();
+		}
+		eSplash.time(.1);
+		eSplash.rotateXdownto(90);		
+		eSplash.playSound("sound/environment/water/drip.wav",3,2,15);
+//SCALE SPLASH UP
+		float fScale = .02,fMaxScale;
+		fMaxScale = ((randomInt(10) / 100) + .1);
+		while(fScale < fMaxScale){
+			wait(.02);//.01
+			fScale = (fScale + .02);//.01
+			if(doesEntityExist(eSplash)){
+				eSplash.scale(fScale);
+			}
+		}
+//REMOVE SPLASH
+		if(doesEntityExist(eSplash)){
+			eSplash.remove();
+		}
+	}
+}
+
+
+void hzm_waterShakeAndMoveUp(entity eBubble,entity eTrigger)
+////////////////////////////////////////////////////////////////////////////////
+//move the given airbubble towards the surface and shake it, the deeper in water the faster they move up
+////////////////////////////////////////////////////////////////////////////////
+{
+	if(doesEntityExist(eBubble) && doesEntityExist(eTrigger)){
+		float fDirection,fRounds,fMoveAt,fCount,fRanomMaxZSpeed;
+		vector vVelocity,vOriginTrigger,vBBoxMax,vBBoxMin,vBubleOrigin;
+		vOriginTrigger = eTrigger.getOrigin();
+		vBBoxMax = eTrigger.getMaxs();
+		vBBoxMin = eTrigger.getMins();
+		eBubble.scale(.15);
+		
+		while(hzm_waterCheckBB(vOriginTrigger,vBBoxMin,vBBoxMax,(vBubleOrigin = eBubble.getOrigin()),'0 0 0','0 0 8',(vVelocity_z / 10))){
+			fRounds++;
+			fCount++;
+			fMoveAt = (randomInt(10) + 15);
+			vVelocity_z = (randomint(((vOriginTrigger_z + vBBoxMax_z) - vBubleOrigin_z)) + 20 );
+			if(fRounds >= fMoveAt || fCount == 1){
+				fRounds = 0;
+				fDirection = randomInt(4);
+				if(fDirection==0){
+					vVelocity_x = randomint(15);
+					vVelocity_y = randomint(15);
+				}
+				else if(fDirection==1){
+					vVelocity_x = randomint(-15);
+					vVelocity_y = randomint(-15);
+				}
+				else if(fDirection==2){
+					vVelocity_x = randomint(-15);
+					vVelocity_y = randomint(-15);
+				}
+				else{
+					vVelocity_x = randomint(15);
+					vVelocity_y = randomint(15);
+				}	
+			}
+//check da bubble
+			if(doesEntityExist(eBubble)){
+				if((vectorGetZ(eBubble.getOrigin()) + (vVelocity_z / 10)) >= (vOriginTrigger_z + vBBoxMax_z) ){
+					return;
+				}
+			}
+//da bubble quit, exit the loop
+			else{
+				return;
+			}
+			eBubble.setVelocity(vVelocity);
+			wait(.01);
+		}
+	}
+}
+
+
+float hzm_waterCheckBB(vector vOri1,vector vMins1,vector vMaxs1,vector vOri2,vector vMins2,vector vMaxs2,float fPad)
+//------------------------------------------------------------------------------
+//HAZARD MODDING CO-OP MOD FUNCTION, DO GIVE CREDIT WHEN USE
+//------------------------------------------------------------------------------
+{
+	float fTemp,fCalc;
+ 	vector vTemp1,vTemp2;
+	if(vOri1 != vOri2){
+		vTemp2 = (vTemp1 = '0 0 0');
+		vTemp1_x = vOri1_x;
+		vTemp2_x = vOri2_x;
+		fTemp = ( floor(vectorLength(vTemp1 - vTemp2)) - fPad );
+		
+		if(vTemp1_x >= vTemp2_x){
+			fCalc = vMaxs2_x / 2;
+			if(	fTemp > (hzm_waterReturnFloatNotNegative(vMins1_x) + fCalc)){
+				return 0;
+			}
+		}
+		else{
+			fCalc = hzm_waterReturnFloatNotNegative(vMins2_x);
+			fCalc = (fCalc / 2);
+			if(fTemp > (vMaxs1_x + fCalc)){
+				return 0;
+			}
+		}
+		vTemp2 = (vTemp1 = '0 0 0');
+		vTemp1_y = vOri1_y;
+		vTemp2_y = vOri2_y;
+		fTemp = ( floor(vectorLength(vTemp1 - vTemp2)) - fPad );
+		
+		if(vTemp1_y >= vTemp2_y){
+			fCalc = (vMaxs2_y / 2);
+			if(	fTemp > (hzm_waterReturnFloatNotNegative(vMins1_y) + fCalc)){
+				return 0;
+			}
+		}
+		else{
+			fCalc = hzm_waterReturnFloatNotNegative(vMins2_y);
+			fCalc = (fCalc / 2);
+			if(fTemp > (vMaxs1_y + fCalc)){
+				return 0;
+			}
+		}
+		vTemp2 = (vTemp1 = '0 0 0');
+		vTemp1_z = vOri1_z;
+		vTemp2_z = vOri2_z;
+		fTemp = ( floor(vectorLength(vTemp1 - vTemp2)) - fPad );
+		
+		if(vTemp1_z <= vTemp2_z){
+			fCalc = hzm_waterReturnFloatNotNegative(vMins2_z);
+			if(	fTemp > (vMaxs1_z + fCalc)){
+				return 0;
+			}
+		}
+		else{
+			fCalc = (vMaxs2_z / 2);
+			if(fTemp > (hzm_waterReturnFloatNotNegative(vMins1_z) + fCalc)){
+				return 0;
+			}
+		}
+	}
+	return 1;
+}
+
+
+float hzm_waterReturnFloatNotNegative(float fNotNegative)
+////////////////////////////////////////////////////////////////////////////////
+//do not return negative value
+////////////////////////////////////////////////////////////////////////////////
+{
+	if(fNotNegative < 0){
+		fNotNegative = (fNotNegative - (fNotNegative*2));
+	}
+	return fNotNegative;
+}
+
+
+float hzm_waterCheckValueOfGiven(float fValue,float fGiven)
+////////////////////////////////////////////////////////////////////////////////
+//check if the value is a power of the given integer
+////////////////////////////////////////////////////////////////////////////////
+{
+	float fValueCalc;
+	fValueCalc = (fValue / fGiven);
+	fValueCalc = floor(fValueCalc);
+	if((fValueCalc * fGiven) == fValue){
+		return 1;
+	}
+	return 0;
+}
+

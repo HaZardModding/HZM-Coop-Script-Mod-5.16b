@@ -1,0 +1,514 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:        testMorph
+//  Script By:    Benson R., Adam B.
+//  Geometry By:  Adam B.
+//  Created on:   12/5/2002
+//
+//  Last Edited By:  Chrissstrahl 2007.04.09
+//
+//-----------------------------------------------------------------
+
+//==========================================================================================
+//==========================================================================================
+//  DEFINE SCRIPT
+//==========================================================================================
+//==========================================================================================
+
+void main();
+
+//--- setup routines
+void setupWorld();
+void setupActors();
+void end_level();
+
+//--- common functions
+void commonPlaydialog1();
+void commonPlaydialog2();
+void commonPlaydialog3();
+void commonPlaydialog4();
+void commonPlaydialog5();
+void commonPlaydialog6();
+void commonPlaydialog7();
+void commonPlaydialog8();
+void commonPlaydialog9();
+void commonPlaydialog10();
+void commonPlaydialog11();
+void commonPlaydialog12();
+void commonPlaydialog13();
+void commonPlaydialog14();
+void commonPlaydialog15();
+void commonPlaydialog16();
+void commonPlaydialog17();
+void commonPlaydialog18();
+void commonPlaydialog19();
+void commonPlaydialog20();
+void commonPlaydialog21();
+void coop_endLevel();
+
+
+//==========================================================================================
+//==========================================================================================
+//  INCLUDES
+//==========================================================================================
+//==========================================================================================
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/main.scr"
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "maps/global_scripts/global_common.scr"
+#include "maps/global_scripts/global_archetype.scr"
+
+//==========================================================================================
+//==========================================================================================
+//  MAIN FUNCTION
+//==========================================================================================
+//==========================================================================================
+//---------------------
+void main()
+//---------------------
+{
+
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+		coop_string_nextMapToCheck		= "ent-training_weap1";//set the map we gona load next while we are in testmode
+//Give Weapon
+		coop_string_weapon1		= "models/weapons/worldmodel-Tricorder-stx.tik";
+//Set spawnangles for this level
+		coop_float_spawnAngle0 	= 90;//SpawnOrigin0 Angle
+		coop_float_spawnAngle1 	= 90;//SpawnOrigin1 Angle
+		coop_float_spawnAngle2 	= 90;//SpawnOrigin2 Angle
+		coop_float_spawnAngle3 	= 90;//SpawnOrigin3 Angle
+		coop_float_spawnAngle4 	= 90;//SpawnOrigin4 Angle
+		coop_float_spawnAngle5 	= 90;//SpawnOrigin5 Angle
+		coop_float_spawnAngle6 	= 90;//SpawnOrigin6 Angle
+		coop_float_spawnAngle7 	= 90;//SpawnOrigin7 Angle
+		coop_float_spawnAngle8 	= 90;//SpawnOrigin8 Angle
+//spawnorigins, Spawn Players on those locations, at map start
+		coop_vector_spawnOrigin1 	= '147 -430 0';
+		coop_vector_spawnOrigin2 	= '238 -430 0';
+		coop_vector_spawnOrigin3 	= '238 -530 0';
+		coop_vector_spawnOrigin4 	= '147 -530 0';
+		coop_vector_spawnOrigin5 	= '147 -630 0';
+		coop_vector_spawnOrigin6 	= '238 -630 0';
+		coop_vector_spawnOrigin7 	= '238 -744 0';
+		coop_vector_spawnOrigin8 	= '147 -744 0';
+//Start the Co-Op Script
+		globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+//--- run setup functions
+	thread setupWorld();	
+}
+
+
+//==========================================================================================
+//==========================================================================================
+//  SETUP FUNCTIONS
+//==========================================================================================
+//==========================================================================================
+
+
+
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+entity selectClosestPlayer(entity watchingActor)
+//Pain in the but to make that crap function!!!
+//Return closest player to the actor who have been touched...
+{
+entity 	e;
+float	COOP_PLAYER_ID_IN_USE=1;
+	
+	e = getentity("player"+ COOP_PLAYER_ID_IN_USE );
+	while( COOP_PLAYER_ID_IN_USE <= coop_integer_maxPlayers ){
+		if( doesEntityExist(e) ){
+			if(e.iswithindistanceof(watchingActor,60)){
+				return e;
+			}
+		}
+		COOP_PLAYER_ID_IN_USE++;
+		e = getentity("player"+ COOP_PLAYER_ID_IN_USE );
+	}
+	if( doesEntityExist($player) ){
+		return $player;
+	}
+
+}
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+
+
+//---------------------
+// setupWorld
+// setup world objects
+//---------------------
+void setupWorld()
+{
+	//--- setup distance fog
+	$world.farplane( 5000 );
+	$world.farplane_color( '.3 .2 0' );
+	
+	globalArchetype_Setup ( $panel_arch, "KlingonDoorPanel" );
+/* 	$klingonMerc.angle(0);
+	$oolpax.angle(0); */
+	$oolpax.solid();
+	$chang.angle(270);
+	$franklin.angle(270);
+	$katarina.angle(270);
+	$sydney.angle(270);
+	$tuvok.angle(270);
+	$gonzales.angle(270);
+	$korban.angle(270);
+	$chell.angle(270);
+	$jurot.angle(270);
+	$telsia.angle(270);
+	$munro.angle(270);
+	$picard.angle(270);
+	setupActors();
+}
+
+//---------------------
+// end_level
+// redundent comment about this self explanatory function
+//---------------------
+void end_level()
+{
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	if(	cvar_bool_multiplayer ){
+		wait(2);
+		coop_endLevel();
+		return;
+	}
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	stuffcmd( "disconnect\n" );
+}
+
+//---------------------
+// setupActors
+// setup the actors
+//---------------------
+void setupActors()
+{
+	$munro.useactorweapon( "none" );
+	$telsia.useactorweapon( "none" );
+	$jurot.useactorweapon( "none" );
+	$chell.useactorweapon( "none" );
+	$korban.useactorweapon( "none" );
+	$gonzales.useactorweapon( "none" );
+	$tuvok.useactorweapon( "none" );
+	$picard.useactorweapon( "none" );
+	$sydney.useactorweapon( "none" );
+	$katarina.useactorweapon( "none" );
+	$franklin.useactorweapon( "none" );
+	$stemmons.useactorweapon( "none" );
+	$drullFather.useactorweapon( "none" );
+	$krindo.useactorweapon( "none" );
+	$kleeya.useactorweapon( "none" );
+	$romulanSTXCommander.useactorweapon( "none" );
+	$romulanRebelCommander.useactorweapon( "none" );
+	$romulanInformant.useactorweapon( "none" );
+	$oolpax.useactorweapon( "none" );
+	$chang.useactorweapon( "none" );
+	$klingonMerc.useactorweapon( "none" );
+	globalCoop_main_waitAFrame();
+	
+	$munro.setmovetype( "none" );
+	$telsia.setmovetype( "none" );
+	$jurot.setmovetype( "none" );
+	$chell.setmovetype( "none" );
+	$korban.setmovetype( "none" );
+	$gonzales.setmovetype( "none" );
+	$tuvok.setmovetype( "none" );
+	$picard.setmovetype( "none" );
+	$sydney.setmovetype( "none" );
+	$katarina.setmovetype( "none" );
+	$franklin.setmovetype( "none" );
+	$stemmons.setmovetype( "none" );
+	$drullFather.setmovetype( "none" );
+	$krindo.setmovetype( "none" );
+	$kleeya.setmovetype( "none" );
+	$romulanSTXCommander.setmovetype( "none" );
+	$romulanRebelCommander.setmovetype( "none" );
+	$romulanInformant.setmovetype( "none" );
+	$oolpax.setmovetype( "none" );
+	$chang.setmovetype( "none" );
+	$klingonMerc.setmovetype( "none" );
+	globalCoop_main_waitAFrame();
+	
+	$munro.pushable(0);
+	$telsia.pushable(0);
+	$jurot.pushable(0);
+	$chell.pushable(0);
+	$korban.pushable(0);
+	$gonzales.pushable(0);
+	$tuvok.pushable(0);
+	$picard.pushable(0);
+	$sydney.pushable(0);
+	$katarina.pushable(0);
+	$franklin.pushable(0);
+	$stemmons.pushable(0);
+	$drullFather.pushable(0);
+	$krindo.pushable(0);
+	$kleeya.pushable(0);
+	$romulanSTXCommander.pushable(0);
+	$romulanRebelCommander.pushable(0);
+	$romulanInformant.pushable(0);
+	$oolpax.pushable(0);
+	$chang.pushable(0);
+	$klingonMerc.pushable(0);
+	globalCoop_main_waitAFrame();
+	
+	if(!cvar_bool_multiplayer){//Single-player
+		//avoid -> ERROR: CL_GetServerCommand: a reliable command was cycled out
+		globalCoop_player_waitForFreeReliableServerCommand($player);
+	}
+	
+	globalCommon_AiDummy( $munro, "" );
+	globalCommon_AiDummy( $telsia, "" );
+	globalCommon_AiDummy( $jurot, "" );
+	globalCommon_AiDummy( $chell, "" );
+	globalCommon_AiDummy( $korban, "" );
+	globalCommon_AiDummy( $gonzales, "" );
+	globalCommon_AiDummy( $tuvok, "" );
+	globalCommon_AiDummy( $picard, "" );
+	globalCommon_AiDummy( $sydney, "" );
+	globalCommon_AiDummy( $katarina, "" );
+	globalCommon_AiDummy( $franklin, "" );
+	globalCommon_AiDummy( $stemmons, "" );
+	globalCommon_AiDummy( $drullFather, "" );
+	globalCommon_AiDummy( $krindo, "" );
+	globalCommon_AiDummy( $kleeya, "" );
+	globalCommon_AiDummy( $romulanSTXCommander, "" );
+	globalCommon_AiDummy( $romulanRebelCommander, "" );
+	globalCommon_AiDummy( $romulanInformant, "" );
+	globalCommon_AiDummy( $oolpax, "" );
+	globalCommon_AiDummy( $chang, "" );
+	globalCommon_AiDummy( $klingonMerc, "" );
+	
+	if(!cvar_bool_multiplayer){//Single-player
+		//avoid -> ERROR: CL_GetServerCommand: a reliable command was cycled out
+		globalCoop_player_waitForFreeReliableServerCommand($player);
+	}
+	
+	thread globalCommon_OnUse( $munro, "commonPlaydialog1" );
+	thread globalCommon_OnUse( $telsia, "commonPlaydialog2" );
+	thread globalCommon_OnUse( $jurot, "commonPlaydialog3" );
+	thread globalCommon_OnUse( $chell, "commonPlaydialog4" );
+	thread globalCommon_OnUse( $korban, "commonPlaydialog5" );
+	thread globalCommon_OnUse( $gonzales, "commonPlaydialog6" );
+	thread globalCommon_OnUse( $tuvok, "commonPlaydialog7" );
+	thread globalCommon_OnUse( $picard, "commonPlaydialog8" );
+	thread globalCommon_OnUse( $sydney, "commonPlaydialog9" );
+	thread globalCommon_OnUse( $katarina, "commonPlaydialog10" );
+	thread globalCommon_OnUse( $franklin, "commonPlaydialog11" );
+	thread globalCommon_OnUse( $stemmons, "commonPlaydialog12" );
+	thread globalCommon_OnUse( $drullFather, "commonPlaydialog13" );
+	thread globalCommon_OnUse( $krindo, "commonPlaydialog14" );
+	thread globalCommon_OnUse( $kleeya, "commonPlaydialog15" );
+	thread globalCommon_OnUse( $romulanSTXCommander, "commonPlaydialog16" );
+	thread globalCommon_OnUse( $romulanRebelCommander, "commonPlaydialog17" );
+	thread globalCommon_OnUse( $romulanInformant, "commonPlaydialog18" );
+	thread globalCommon_OnUse( $oolpax, "commonPlaydialog19" );
+	thread globalCommon_OnUse( $chang, "commonPlaydialog20" );
+	thread globalCommon_OnUse( $klingonMerc, "commonPlaydialog21" );
+}
+
+
+
+//==========================================================================================
+//==========================================================================================
+//  COMMON FUNCTIONS
+//==========================================================================================
+//==========================================================================================
+
+//---------------------
+// commonPlaydialog
+// say the dialog line
+//---------------------
+//munro
+void commonPlaydialog1()
+{
+	$munro.headwatch(selectClosestPlayer($munro));
+	thread globalCoop_dialog_play($munro,"dm/mp_munro1.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$munro.resetHead();
+}
+//telsia
+void commonPlaydialog2()
+{
+	$telsia.headwatch(selectClosestPlayer($telsia));
+	thread globalCoop_dialog_play($telsia,"dm/mp_telsia2.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$telsia.resetHead();
+}
+//jurot
+void commonPlaydialog3()
+{
+	$jurot.headwatch(selectClosestPlayer($jurot));
+	thread globalCoop_dialog_play($jurot,"dm/mp_jurot1.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$jurot.resetHead();
+}
+//chell
+void commonPlaydialog4()
+{
+	$chell.headwatch(selectClosestPlayer($chell));
+	thread globalCoop_dialog_play($chell,"dm/mp_chell1.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$chell.resetHead();
+}
+//korban
+void commonPlaydialog5()
+{
+	$korban.headwatch(selectClosestPlayer($korban));
+	thread globalCoop_dialog_play($korban,"m7l1/korban_mighty.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$korban.resetHead();
+}
+//gonzalez
+void commonPlaydialog6()
+{
+	$gonzales.headwatch(selectClosestPlayer($gonzales));
+	thread globalCoop_dialog_play($gonzales,"m4l2/gonz_dallas.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$gonzales.resetHead();
+}	
+//tuvok
+void commonPlaydialog7()
+{
+	$tuvok.headwatch(selectClosestPlayer($tuvok));
+	thread globalCoop_dialog_play($tuvok,"ent_m8/tuvok_longway.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$tuvok.resetHead();
+}
+//picard
+void commonPlaydialog8()
+{
+	$picard.headwatch(selectClosestPlayer($picard));
+	thread globalCoop_dialog_play($picard,"dm/mp_picard1.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$picard.resetHead();
+}
+//sydney
+void commonPlaydialog9()
+{
+	$sydney.headwatch(selectClosestPlayer($sydney));
+	thread globalCoop_dialog_play($sydney,"ent_m8/syd_poorg.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$sydney.resetHead();
+}
+//katarina
+void commonPlaydialog10()
+{
+	$katarina.headwatch(selectClosestPlayer($katarina));
+	thread globalCoop_dialog_play($katarina,"dallas02/kat_engineer.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$katarina.resetHead();
+}
+//franklin
+void commonPlaydialog11()
+{
+	$franklin.headwatch(selectClosestPlayer($franklin));
+	thread globalCoop_dialog_play($franklin,"dallas01/frank_leader.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$franklin.resetHead();
+}
+//stemmons
+void commonPlaydialog12()
+{
+	$stemmons.headwatch(selectClosestPlayer($stemmons));
+	thread globalCoop_dialog_play($stemmons,"m2l2/stem_lawless.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$stemmons.resetHead();
+}
+//drullFather
+void commonPlaydialog13()
+{
+	$drullFather.headwatch(selectClosestPlayer($drullFather));
+	thread globalCoop_dialog_play($drullFather,"ent_m4/inigor_killers.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$drullFather.resetHead();
+}
+//krindo
+void commonPlaydialog14()
+{
+	$krindo.headwatch(selectClosestPlayer($krindo));
+	thread globalCoop_dialog_play($krindo,"ent_m4/krindo_allowstay.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$krindo.resetHead();
+}
+//kleeya
+void commonPlaydialog15()
+{
+	$kleeya.headwatch(selectClosestPlayer($kleeya));
+	thread globalCoop_dialog_play($kleeya,"m11l3/kleeya_ihope.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$kleeya.resetHead();
+}
+//romulanSTXCommander
+void commonPlaydialog16()
+{
+	$romulanSTXCommander.headwatch(selectClosestPlayer($romulanSTXCommander));
+	thread globalCoop_dialog_play($romulanSTXCommander,"m11l1/romgen_violated.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$romulanSTXCommander.resetHead();
+}
+
+//romulanRebelCommander
+void commonPlaydialog17()
+{
+	$romulanRebelCommander.headwatch(selectClosestPlayer($romulanRebelCommander));
+	thread globalCoop_dialog_play($romulanRebelCommander,"dm/mp_rene1.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$romulanRebelCommander.resetHead();
+}
+//romulanInformant
+void commonPlaydialog18()
+{
+	$romulanInformant.headwatch(selectClosestPlayer($romulanInformant));
+	thread globalCoop_dialog_play($romulanInformant,"dm/mp_inform1.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$romulanInformant.resetHead();
+}
+//oolpax
+void commonPlaydialog19()
+{
+	$oolpax.headwatch(selectClosestPlayer($oolpax));
+	thread globalCoop_dialog_play($oolpax,"ent_m7/omag_wayout.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$oolpax.resetHead();
+}
+//chang
+void commonPlaydialog20()
+{
+	$chang.headwatch(selectClosestPlayer($chang));
+	thread globalCoop_dialog_play($chang,"m2l1/chang_toss.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$chang.resetHead();
+}
+//klingonMerc
+void commonPlaydialog21()
+{
+	$klingonMerc.headwatch(selectClosestPlayer($klingonMerc));
+	thread globalCoop_dialog_play($klingonMerc,"dm/mp_lurok2.mp3", 2, 1000, 0);
+	wait((randomfloat(5) + 3));
+	$klingonMerc.resetHead();
+}
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed("ent-training1");
+}

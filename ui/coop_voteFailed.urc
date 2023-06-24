@@ -1,0 +1,30 @@
+menu "coop_voteFailed" 2560 480 NONE 0
+bgcolor 0 0 0 0
+align center left
+direction from_left 0.3
+depth 0.3
+noresize
+gamefocus
+
+resource 
+Widget
+{
+    name "Default"
+    rect 0 180 2560 40
+    fgcolor 			1.00 1.00 1.00 1.00
+    bgcolor 			0.00 0.00 0.00 0.7
+    borderstyle "NONE"
+}
+resource 
+Label
+{
+	title "^1$$VoteFailed$$"
+    name "Default"
+    rect 2 190 400 30
+    fgcolor 			1.00 1.00 1.00 1.00
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+	font startrekfilmbt-18
+	horizontaljustify left
+}
+end.

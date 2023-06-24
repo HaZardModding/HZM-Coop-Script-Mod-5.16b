@@ -1,0 +1,186 @@
+//-----------------------------------------------------------------------------------
+// Script By:	Christian Sebastian Strahl (Chrissstrahl)
+// Created on:	2009.01.06
+// E-Mail:		chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+// CONTAINING TEAMMATE ACTOR RELATED FUNCTIONS FOR THE HZM CO-OP MOD
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2012 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////DECLARE
+////////////////////////////////////////////////////////////////////////////////
+void globalCoop_teammate_register(entity eActor);
+void globalCoop_teammate_unregister(entity eActor);
+void globalCoop_teammate_follow();
+void globalCoop_teammate_followUpdate(entity eActor);
+void globalCoop_teammate_followPlayer(entity eActor,entity ePlayer);
+
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////Functions
+////////////////////////////////////////////////////////////////////////////////
+void globalCoop_teammate_register(entity eActor)
+//----------------------------------------------------------------------
+//
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eActor)){
+//MAKE ACCESSABLE VIA USE - COMMANDABLE
+		globalCoop_level_setFloatVar(eActor,"coop_teammate",1);
+//ENLIST & REGISTER
+		string sActorTargetname;
+		sActorTargetname = eActor.getRawTargetname();
+		
+		if(!doesEntityExist(coop_entity_actorTeammate1))
+		{
+			coop_entity_actorTeammate1=eActor;
+			addrosterteammate1(coop_entity_actorTeammate1);
+		}
+		else if(!doesEntityExist(coop_entity_actorTeammate2))
+		{
+			coop_entity_actorTeammate2=eActor;
+			addrosterteammate2(coop_entity_actorTeammate2);
+		}
+		else if(!doesEntityExist(coop_entity_actorTeammate3))
+		{
+			coop_entity_actorTeammate3=eActor;
+			addrosterteammate3(coop_entity_actorTeammate3);
+		}
+		else
+		{
+			coop_entity_actorTeammate4=eActor;
+			addrosterteammate4(coop_entity_actorTeammate4);
+		}
+	}
+}
+
+void globalCoop_teammate_unregister(entity eActor)
+//----------------------------------------------------------------------
+//
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eActor)){
+		globalCoop_level_setFloatVar(eActor,"coop_teammate",0);
+		entity eEmpty;
+		string sActorTargetname;
+		sActorTargetname = eActor.getRawTargetname();
+		if(coop_entity_actorTeammate1.getRawTargetname() == sActorTargetname)
+		{
+			coop_entity_actorTeammate1=eEmpty;
+			removerosterteammate1();
+		}
+		if(coop_entity_actorTeammate2.getRawTargetname() == sActorTargetname)
+		{
+			coop_entity_actorTeammate2=eEmpty;
+			removerosterteammate2();
+		}
+		if(coop_entity_actorTeammate3.getRawTargetname() == sActorTargetname)
+		{
+			coop_entity_actorTeammate3=eEmpty;
+			removerosterteammate3();
+		}
+		if(coop_entity_actorTeammate4.getRawTargetname() == sActorTargetname)
+		{
+			coop_entity_actorTeammate4=eEmpty;
+			removerosterteammate4();
+		}
+	}
+}
+
+void globalCoop_teammate_follow()
+//----------------------------------------------------------------------
+//Makes all teammates follow the closest player
+//----------------------------------------------------------------------
+{
+	globalCoop_teammate_followUpdate(coop_entity_actorTeammate1);
+	globalCoop_teammate_followUpdate(coop_entity_actorTeammate2);
+	globalCoop_teammate_followUpdate(coop_entity_actorTeammate3);
+	globalCoop_teammate_followUpdate(coop_entity_actorTeammate4);
+	coop_integer_playerToFollow=0;
+}
+
+void globalCoop_teammate_followUpdate(entity eActor)
+//----------------------------------------------------------------------
+//Makes given actor follow an existing player
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eActor))
+	{
+		entity ePlayer;
+		
+		if(coop_integer_playerToFollow > 0)
+		{
+			ePlayer = getEntity("player"+coop_integer_playerToFollow);
+			globalCoop_teammate_followPlayer(eActor,ePlayer);
+		}
+		else
+		{
+			string sTargetname;
+			sTargetname	= eActor.getStringVar("coop_aiOrderFollowTargetname");
+			ePlayer		= getEntity(sTargetname);
+		
+			if(!doesEntityExist(ePlayer))
+			{
+				float fPlayerIdInUse;
+				for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++)
+				{
+					ePlayer = getEntity("player"+fPlayerIdInUse);
+					if(doesEntityExist(ePlayer))
+					{
+						thread globalCoop_teammate_followPlayer(eActor,ePlayer);
+						return;
+					}
+				}
+			}
+		}
+	}
+}
+
+void globalCoop_teammate_followPlayer(entity eActor,entity ePlayer)
+//----------------------------------------------------------------------
+//Follow the Given Player now.
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eActor))
+	{
+		eActor.settendency("follow",1);
+	//check if dude is still alive
+		if(globalCoop_check_existingLivingEntity(ePlayer))
+		{
+		//Set Info for the Hybrid AI
+		float fRounds;
+		float fPlayerID;
+		//Get the player's ID
+			fPlayerID	= globalCoop_return_integerPlayerId(ePlayer);
+		//Do not watch the others!
+			while(fRounds < 9)
+			{
+				if(fPlayerID != fRounds){
+					eActor.settendency("follow_player"+fRounds,0);
+				}
+				fRounds++;
+				globalCoop_main_waitAFrame();
+			}
+			eActor.followrange(450);
+			eActor.followrangemin(164);
+			eActor.followtarget(ePlayer);
+		//Order the AI to follow this player
+			eActor.settendency("follow_player"+fPlayerID,1);
+		//Set the info which player we are following
+			eActor.setStringVar("coop_aiOrderFollowTargetname","player"+fPlayerID);
+			//globalCoop_main_printTimeAndString(eActor.getRawTargetname()+" FOLLOW ->	$player"+fPlayerID);
+		}
+	}
+}

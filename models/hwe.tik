@@ -1,0 +1,37 @@
+TIKI
+
+setup
+	{
+	scale 1
+	fade_dist_mod 1
+	lod 350 1 6000 0.75 25000
+	radius 20
+	
+	path models/item/backpacks
+	surface material1 shader heavy-weapons.tga
+	}
+init
+	{
+	server
+		{
+		setsize "-8 -13 0" "10 13 29"
+		targetname coop_HeavyWeapons
+		}
+      client
+		{
+		}
+
+	}
+animations 
+	{
+
+	idle	heavy-weapons.tan
+		{
+		}
+	}
+   
+/*QUAKED    coop_class_heavyweapons    (0.5 0.25 0.25)    (0 0 0)    (0 0 0)
+Co-op Mod Class Selection for Heavy Weapons
+Used to allow Players selecting Heavy Weapons Class by walking over this.
+Do NOT make static!
+*/   

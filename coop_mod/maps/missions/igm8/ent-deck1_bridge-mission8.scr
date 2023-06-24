@@ -1,0 +1,1073 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	      ent-deck1 - MISSION 8
+//  Script By:    K.Thompson
+//  Created on:   08/12/2002
+//	Last Edited:  08/12/2002 - kt
+//-----------------------------------------------------------------
+
+void setupMission8Deck1();
+void justLoadedDeckThreadIGM8();
+
+void startBreifingCinematicIGM8();
+
+void cinematicPicardBreifingIGM8();
+void cinematicPicardBreifingIGM8Skipthread();
+
+void telsiaCommsMunroIGM8();
+
+void tuvok_workIGM8();
+void tuvokDialog8_1();
+
+void picard_workIGM8();
+void picardDialog8_1();
+void picardDialog8_2();
+
+void ambientActorsIGM8();
+
+void jacobs_workIGM8();
+void useJacobsIGM8();
+void jacobsDialog8_0();
+void jacobsDialog8_1();
+void jacobsDialog8_2();
+void jacobsDialog8_3();
+void jacobsDialog8_4();
+void jacobsDialog8_5();
+
+void manaan_workIGM8();
+void manaanDialog8_1();
+void manaanDialog8_2();
+
+void johnson_workIGM8();
+void johnsonDialog8_1();
+void johnsonDialog8_2();
+void johnsonDialog8_3();
+
+void stratton_workIGM8();
+void strattonDialog8_1();
+void strattonDialog8_2();
+
+void dialogChoiceChooseDeckIGM8();
+void entDeck1IGM8Option1();
+void entDeck1IGM8Option2();
+
+float appropriateDeckChoiceIsMade = 0;
+
+//===================================================================================================================
+// Setup
+//===================================================================================================================
+
+//---------------------
+// setupMission8Deck1
+// does all the setup stuff for the mission
+//---------------------
+void setupMission8Deck1()
+{
+	if(!cvar_bool_multiplayer)
+	{
+		//Needed For dialog
+		globalCommon_SpawnActor( "char/hazardteam_sf-telsia.tik", "telsia", '2078.38 -4536.62 -16.00', 250 );
+		globalCommon_AiActorUseWeapon( $telsia, "none" );
+		$telsia.hide();
+		$telsia.notsolid();
+
+		globalCommon_SpawnActor( "char/kleeya-noweapon.tik", "kleeya", '2078.38 -4536.62 -16.00', 180 );
+		globalCommon_AiActorUseWeapon( $kleeya, "none" );
+		$kleeya.hide();
+		$kleeya.notsolid();
+	}
+	else
+	{
+		stuffcmd("seta coop_igmT 1\n");
+	//set for internal script reference
+		setfloatvar( "level.deckToChangeToIGM", 1 );
+		setFloatVar( "game.globalMissionEnterprise", 8 );
+		setfloatvar( "game.checkEntMission8RoomsVisited", 2 );
+	//spawn inside the turbolift
+	//spawn inside the turbolift
+	//spawn inside the turbolift
+	//spawn inside the turbolift
+	//spawn inside the turbolift
+	//Set spawnangles for this level
+		coop_float_spawnAngle1		= 335;
+		coop_float_spawnAngle2		= 311;
+		coop_float_spawnAngle3		= 311;
+		coop_float_spawnAngle4		= 325;
+		coop_float_spawnAngle5		= 216;
+		coop_float_spawnAngle6		= 249;
+		coop_float_spawnAngle7		= 248;
+		coop_float_spawnAngle8		= 219;
+	//spawnorigins, Spawn Players on those locations, at map start
+		coop_vector_spawnOrigin1	= '1514 -4799 0';
+		coop_vector_spawnOrigin2	= '1553 -4731 0';
+		coop_vector_spawnOrigin3	= '1508 -4703 0';
+		coop_vector_spawnOrigin4	= '1466 -4740 0';
+		coop_vector_spawnOrigin5	= '2403 -4797 0';
+		coop_vector_spawnOrigin6	= '2346 -4744 0';
+		coop_vector_spawnOrigin7	= '2382 -4705 0';
+		coop_vector_spawnOrigin8	= '2440 -4757 0';
+	
+		spawn("script_model","model","fx/fx-dummy.tik","targetname","kleeya");
+		spawn("script_model","model","fx/fx-dummy.tik","targetname","telsia");
+	//Definie Objective
+		coop_string_objectiveItem1			= "IGM8RemoveImplants";
+		coop_string_objectiveItem2			= "IGM8MeetWithPicard";
+		coop_string_objectiveItem3			= "IGM8MeetTelsiaOrKleeya";
+
+		//IGM8RemoveImplants
+		//IGM8MeetWithPicard
+		//IGM8MeetTelsiaOrKleeya
+		thread globalCoop_objectives_update("complete",1,0);//state,slot,show
+		thread globalCoop_objectives_update("incomplete",2,1);//state,slot,show
+	}
+	
+	$triggerObservation1.thread( "startBreifingCinematicIGM8" );
+	$triggerObservation2.thread( "startBreifingCinematicIGM8" );
+
+	spawn( "Camera", "targetname", "cam1" );
+	spawn( "Camera", "targetname", "cam2" );
+
+	cam.load( "cam1_ent_deck1_igm4" );
+
+	globalCommon_SpawnActor( "char/starfleet_tuvok.tik", "tuvok", '2062.45 -4588.55 -16.00', 70 );
+	globalCommon_AiActorUseWeapon( $tuvok, "none" );
+
+	globalCommon_SpawnActor( "char/starfleet_picard.tik", "picard", '2095.45 -4570.55 -16.00', 160 );
+	globalCommon_AiActorUseWeapon( $picard, "none" );
+
+	globalCommon_SpawnActor( "char/hazardteam_sf-munro.tik", "scriptmunro", '2078.38 -4536.62 -16.00', 250 );
+	globalCommon_AiActorUseWeapon( $scriptmunro, "none" );
+	$scriptmunro.hide();
+	$scriptmunro.notsolid();
+	
+	ambientActorsIGM8();
+
+	$picard.anim( "ent-seta_sit-idle1" );
+	$tuvok.anim( "ent-seta_sit-idle1" );
+	$scriptmunro.anim( "ent-seta_sit-idle1" );
+
+	//Thread to spawn cinematic
+	//$triggerBridge.thread( "useJacobsIGM8" );
+}
+
+//---------------------
+// munroHereToSeePicardIGM8
+// Triggered and check to see if A cinematic should happen.
+//------------------------
+void justLoadedDeckThreadIGM8()
+{
+	if(!cvar_bool_multiplayer)
+	{
+		if( getfloatvar( "game.IGM8RemoveImplants" ) >= 1 )
+		{
+			$player.setobjectiveshow( "IGM8RemoveImplants", 1 );
+		}
+		if( getfloatvar( "game.IGM8RemoveImplants" ) == 2 )
+		{
+			$player.setobjectivecomplete( "IGM8RemoveImplants", 1 );
+		}
+		if( getfloatvar( "game.IGM8MeetWithPicard" ) >= 1 )
+		{
+			$player.setobjectiveshow( "IGM8MeetWithPicard", 1 );
+		}
+		if( getfloatvar( "game.IGM8MeetWithPicard" ) == 2 )
+		{
+			$player.setobjectivecomplete( "IGM8MeetWithPicard", 1 );
+		}
+
+		if( getfloatvar( "game.IGM8MeetTelsiaOrKleeya" ) >= 1 )
+		{
+			$player.setobjectiveshow( "IGM8MeetTelsiaOrKleeya", 1 );
+		}
+		if( getfloatvar( "game.IGM8MeetTelsiaOrKleeya" ) == 2 )
+		{
+			$player.setobjectivecomplete( "IGM8MeetTelsiaOrKleeya", 1 );
+		}
+	}
+}
+
+//---------------------
+// startBreifingCinematicIGM8
+// Start Cinimatic
+//---------------------
+void startBreifingCinematicIGM8()
+{
+	$triggerObservation1.thread( "" );
+	$triggerObservation2.thread( "" );
+
+	thread cinematicPicardBreifingIGM8();
+}
+
+//---------------------
+// cinematicPicardBreifingIGM8
+// setup and begin cinematicPicardBreifingIGM8
+//---------------------
+void cinematicPicardBreifingIGM8()
+{
+	entity ePlayer;
+	ePlayer=getCurrentEntity();
+	if(doesEntityExist(ePlayer))
+	{
+		ePlayer = ePlayer.getLastActivatingEntity();
+	}
+	
+	//--- start cinematic commands
+	globalCoop_main_camFadeOut(0.5);
+	wait( .6 );
+	
+	//--- move the player out of the doorways
+	if(doesEntityExist(ePlayer))
+	{
+		ePlayer.immobilize(1);
+		ePlayer.origin( '2240 -4560 8' );
+		
+		ePlayer.turnTowardsEntity( $picard );		
+	}
+	
+	wait( .1 );
+	globalCoop_cin_start();
+	if(!cvar_bool_multiplayer)
+	{
+		ePlayer.immobilize(0);
+	}
+	
+	//--- setup the scene
+	globalCommon_AiDummy( $scriptmunro, "" );
+	$scriptmunro.headwatch( $picard );
+	$picard.headwatch( $scriptmunro );
+
+	cam.load( "IGM8_Deck1_Briefing_Shot1" );
+	cam.load( "IGM8_Deck1_Briefing_Shot2" );
+	cam.load( "IGM8_Deck1_Briefing_Shot3" );
+	cam.load( "IGM8_Deck1_Briefing_Shot4" );
+	cam.load( "IGM8_Deck1_Briefing_Shot5" );
+	wait( .1 );
+
+
+
+	// --- Skip Thread
+	globalCoop_cin_skipThread("cinematicPicardBreifingIGM8Skipthread");
+
+	//--------------------------------------------------------
+	//shot 1 - establishing shot of the 3 in the briefing room, slow dolly in
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 60 );
+	globalCoop_cin_follow($cam1, $IGM8_Deck1_Briefing_Shot1 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( .1 );
+
+    //--- fade in
+    cam_fadein( 1, 0, 0, 0, 1, 0 );
+    wait( .5 );
+
+	globalCoop_dialog_play($scriptmunro,"ent_m8/munro_cross.mp3", 1, 20000, 0 ); //The informant double-crossed us and Ensign Gonzalez perished as a result.
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//shot 2 - over the shoulder looking at picard
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 60 );
+	globalCoop_cin_follow($cam2, $IGM8_Deck1_Briefing_Shot2 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam2 );
+
+	thread globalCoop_dialog_play($picard,"ent_m8/picard_sorry.mp3", 1, 20000, 0 ); //Ensign Gonzalez' made his choice with full knowledge of the potential consequences.  You can't blame yourself.  He made the ultimate sacrifice for what will save the lives of countless others.
+	wait( 5.75 );
+
+	//--------------------------------------------------------
+	//shot 3 - closeup of picard
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 60 );
+	globalCoop_cin_follow($cam1, $IGM8_Deck1_Briefing_Shot3 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam1 );
+
+	//--- wait for picard to finish
+	globalCoop_dialog_waitForDialog( $picard );
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//shot 4 - closeup on munro
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 60 );
+	globalCoop_cin_follow($cam2, $IGM8_Deck1_Briefing_Shot4 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam2 );
+
+	globalCoop_dialog_play($scriptmunro,"ent_m8/munro_died.mp3", 1, 20000, 0 ); //Yes, sir.  After analyzing the datapad that we recovered, we learned the location of the Master Control Facility.  It's on the planet Tolochon Two
+
+	//--------------------------------------------------------
+	//shot 5 - over shoulder at picard
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 60 );
+	globalCoop_cin_follow($cam1, $IGM8_Deck1_Briefing_Shot2 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam1 );
+
+	globalCoop_dialog_play($picard,"ent_m8/picard_setcourse.mp3", 1, 20000, 0 ); //Set a course for Tolochon Two. Maximum warp.
+	wait( .2 );
+
+	globalCoop_dialog_play($jacobs,"ent_m8/jacobs_ayesir.mp3", 1, 20000, 1 ); //Aye, sir.
+
+	//--------------------------------------------------------
+	//shot 6 - closeup on picard
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 60 );
+	globalCoop_cin_follow($cam2, $IGM8_Deck1_Briefing_Shot3 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam2 );
+
+	thread globalCoop_dialog_play($picard,"ent_m8/picard_timeoff.mp3", 1, 20000, 0 ); //You've been in action since you arrived. I want you to take some time off at the earliest convenience.  I can't expect my crew to work at maximum efficiency without an opportunity to unwind
+	wait( 6 );
+
+	//--------------------------------------------------------
+	//shot 7 - closeup on munro
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 60 );
+	globalCoop_cin_follow($cam1, $IGM8_Deck1_Briefing_Shot4 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam1 );
+
+	//--- wait for picard to finish
+	globalCoop_dialog_waitForDialog( $picard );
+	wait( .3 );
+
+	globalCoop_dialog_play($scriptmunro,"ent_m8/munro_after.mp3", 1, 20000, 0 ); //Thank you sir. I will. AFTER Tolochon Two.
+
+	//--------------------------------------------------------
+	//shot 8 - over munro's shoulder at picard and tuvok
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 60 );
+	globalCoop_cin_follow($cam2, $IGM8_Deck1_Briefing_Shot5 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam2 );
+
+	globalCoop_dialog_play($picard,"ent_m8/picard_brief.mp3", 1, 20000, 0 ); //Very well.   Lieutenant Commander Tuvok will be conducting a debriefing with you at 1800 hours.
+	wait( .2 );
+
+	globalCoop_dialog_play($scriptmunro,"ent_m8/munro_yessir4.mp3", 1, 20000, 0); //Yes, sir.
+	wait( .3 );
+
+	thread globalCoop_dialog_play($picard,"ent_m8/picard_lt.mp3", 1, 20000, 0); //And, Lieutenant?  Good job down there.  Dismissed.
+	wait( 1 );
+
+	//--------------------------------------------------------
+	//shot 9 - closeup on picard
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 60 );
+	globalCoop_cin_follow($cam1, $IGM8_Deck1_Briefing_Shot3 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam1 );
+
+	//--- wait for picard to finish talking
+	globalCoop_dialog_waitForDialog( $picard );
+	wait( .5 );
+
+	//--------------------------------------------------------
+	//shot 10 - closeup on munro
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 60 );
+	globalCoop_cin_follow($cam2, $IGM8_Deck1_Briefing_Shot4 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam2 );
+
+	globalCoop_dialog_play($scriptmunro,"ent_m8/munro_tysir.mp3", 1, 20000, 0); //Thank you, sir.
+	wait( .5 );
+
+	//--- End Thread
+	thread cinematicPicardBreifingIGM8Skipthread();
+}
+
+//---------------------
+// cinematicPicardBreifingIGM8Skipthread
+// skipthread that calls the skipthread routines
+//------------------------
+void cinematicPicardBreifingIGM8Skipthread()
+{
+	//--- kill the cinematicPicardBreifingIGM8 thread
+	skipthread( "Null" );
+	killthread( "cinematicPicardBreifingIGM8" );
+
+	//--- fade out and set the level up
+	cam_fadeout( .5, 0, 0, 0, 1, 0 );
+	wait( .75 );
+
+	setfloatvar( "game.IGM8MeetWithPicard", 2 );
+	justLoadedDeckThreadIGM8();
+
+	killAllTalking();
+
+	$scriptmunro.hide();
+	$scriptmunro.notsolid();
+	$scriptmunro.resetHead();
+
+	$picard.origin( '1950.00 -4993.00  2.00' );
+	$picard.angle( 270 );
+	$picard.resetHead();
+
+	$tuvok.origin( '1757.39 -5013.61  2.00' );
+	$tuvok.angle( 330 );
+	
+	//Picard isn't waiting anymore.
+	setNextDialog( $jacobs, 5 );
+	
+	thread picard_workIGM8();
+	thread tuvok_workIGM8();
+	thread randomlyAnimateActor( $picard, "ent-mainchair" );
+	thread randomlyAnimateActor( $tuvok, "ent-stand" );
+
+	//$player.origin( '2208 -4576 -8' );
+	
+	globalCoop_cin_end();
+
+	if(cvar_bool_multiplayer)
+	{
+		thread globalCoop_objectives_update("complete",2,1);//state,slot,show
+	//set buttons/triggers for coop mod use
+		entity e;
+		e=getEntity("elevatorButton");
+		while(doesEntityExist(e))
+		{
+			e.remove();
+			e=getNextEntity(e);
+		}
+		spawn("trigger_use","targetname","liftLeft","origin","2326 -4690 60","thread","mom_basic");
+		spawn("trigger_use","targetname","liftRight","origin","1450 -4817 60","thread","mom_basic");	
+		globalCoop_main_waitAFrame();
+		$liftLeft.setStringVar("uservar1","coop_ent-deck8_igm8_turbo");
+		$liftLeft.setStringVar("uservar2","coop_turbo");
+		$liftRight.setStringVar("uservar1","coop_ent-deck8_igm8_turbo");
+		$liftRight.setStringVar("uservar2","coop_turbo");
+	}
+	wait( .1 );
+
+	cam_fadein( .5, 0, 0, 0, 1, 0 ) ;
+	wait( 2 );
+
+	telsiaCommsMunroIGM8();
+}
+
+void telsiaCommsMunroIGM8()
+{
+	globalCoop_dialog_play($kleeya,"ent_m8/kleeya_meetastro2.mp3", 1, 10000, 1); //Alex, can you meet me in Astrometrics?
+
+	wait( 2 );
+
+	globalCoop_dialog_play($telsia,"ent_m8/telsia_wetalk.mp3", 1, 10000, 1); //Hi, Munro. Can we talk?
+	
+	if(cvar_bool_multiplayer)
+	{
+		thread globalCoop_objectives_update("incomplete",3,1);//state,slot,show
+	}
+	
+	//Turn Exit Triggers On
+	$triggerExit.triggerable();
+
+	setfloatvar( "game.IGM8MeetTelsiaOrKleeya", 1 );
+	justLoadedDeckThreadIGM8();
+
+	setfloatvar( "game.checkEntMission8RoomsVisited", 2 );
+}
+
+///////////////////////////
+// picardOnUseWaitIGM8
+// Wait for player to talk to actor
+///////////////////////////
+void picard_workIGM8()
+{
+	setNextDialog( $picard, 1 );
+	setDialogFunction( $picard, "picardDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $picard, "", "", 0 );
+		talkUntilDone( $picard );
+		globalCoop_main_waitAFrame();
+	}
+}
+
+///////////////////////////
+// picardDialog8_1
+// Player and actor talk
+///////////////////////////
+void picardDialog8_1()
+{
+	coop_headWatchClosestPlayer($picard);
+	globalCoop_dialog_play($picard,"ent_m8/picard_subspace.mp3", 1, 128, 0); //I will contact Starfleet Command through subspace channels to inform them of our status.
+
+	setNextDialog( $picard, 2 );
+	$picard.resethead();
+	setDialogFinished( $picard );
+}
+
+///////////////////////////
+// picardDialog8_2
+// Player and actor talk
+///////////////////////////
+void picardDialog8_2()
+{
+	coop_headWatchClosestPlayer($picard);
+	globalCoop_dialog_play($picard,"ent_m8/picard_onway3.mp3", 1, 128, 0); //On your way, Lieutenant.
+	globalCoop_dialog_waitForDialog( $picard );
+
+	setNextDialog( $picard, 1 );
+	$picard.resethead();
+	setDialogFinished( $picard );
+}
+
+//===================================================================================================================
+// Ambient Actors
+//===================================================================================================================
+//---------------------
+// ambientActorsIGM8
+// Set up ambient Actors
+//---------------------
+void ambientActorsIGM8()
+{
+	globalCommon_SpawnActor( "char/starfleet_crew-male.tik", "jacobs", '2190.39 -5209.61  0.00', 210 );
+	thread randomlyAnimateActor( $jacobs, "ent-vchair" );
+	thread jacobs_workIGM8();
+
+	globalCommon_SpawnActor( "char/starfleet_crew-female.tik", "manaan", '2020.97 -5059.03 -14.00', 225 );
+	thread randomlyAnimateActor( $manaan, "ent-vchair-sm" );
+	thread manaan_workIGM8();
+
+	globalCommon_SpawnActor( "char/starfleet_crew-male4.tik", "johnson", '1910.00 -5319.00 -32.00', 270 );
+	thread randomlyAnimateActor( $johnson, "ent-frontchair" );
+	thread johnson_workIGM8();
+
+	globalCommon_SpawnActor( "char/starfleet_crew-male3.tik", "stratton", '1878.97 -5058.03 -16.00', 315 );
+	thread randomlyAnimateActor( $stratton, "ent-vchair-sm" );
+	thread stratton_workIGM8();
+}
+
+///////////////////////////
+// tuvokOnUseWaitIGM8
+// Wait for player to talk to actor
+///////////////////////////
+void tuvok_workIGM8()
+{
+	setNextDialog( $tuvok, 1 );
+	setDialogFunction( $tuvok, "tuvokDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $tuvok, "", "", 0 );
+		talkUntilDone( $tuvok );
+		globalCoop_main_waitAFrame();
+	}
+}
+
+///////////////////////////
+// tuvokDialog8_1
+// Player and actor talk
+///////////////////////////
+void tuvokDialog8_1()
+{
+	$tuvok.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+	$tuvok.anim( "ent-stand-scan" );
+	coop_headWatchClosestPlayer($tuvok);
+
+	globalCoop_dialog_play($tuvok,"ent_m8/tuvok_longway.mp3", 1, 128, 0); //You have come a long way since the days on Voyager, Lieutenant.
+
+	setNextDialog( $tuvok, 1 );
+	$tuvok.resethead();
+	setDialogFinished( $tuvok );
+	$tuvok.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// jacobsOnUseWaitIGM8
+// Wait for player to talk to actor
+///////////////////////////
+void jacobs_workIGM8()
+{
+	setNextDialog( $jacobs, 1 );
+	setDialogFunction( $jacobs, "jacobsDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $jacobs, "", "", 0 );
+		talkUntilDone( $jacobs );
+	}
+}
+
+///////////////////////////
+// useJacobsIGM8
+// This make Jacobs say the waiting for you line on arrival to the bridge
+///////////////////////////
+void useJacobsIGM8()
+{
+	$triggerBridge.thread( "" );
+	centerprint("!!! fix me: useJacobsIGM8 !!!");
+	//$player.useentity( $jacobs );
+}
+
+///////////////////////////
+// jacobsDialog8_1
+// Player and actor talk
+///////////////////////////
+void jacobsDialog8_0()
+{
+	globalCoop_dialog_play($jacobs,"ent_m8/jacobs_picwait.mp3", 1, 10000, 1); //Captain Picard is waiting for you in the ready room.
+
+	setNextDialog( $jacobs, 1 );
+	setDialogFinished( $jacobs );
+}
+
+///////////////////////////
+// jacobsDialog8_1
+// Player and actor talk
+///////////////////////////
+void jacobsDialog8_1()
+{
+	$jacobs.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+	$jacobs.anim( "ent-vchair-scan" );
+	coop_headWatchClosestPlayer($jacobs);
+
+	globalCoop_dialog_play($jacobs,"ent_m8/jacobs_picwait.mp3", 1, 128, 0); //Captain Picard is waiting for you in the ready room.
+
+	setNextDialog( $jacobs, 2 );
+	$jacobs.resethead();
+	setDialogFinished( $jacobs );
+	$jacobs.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// jacobsDialog8_2
+// Player and actor talk
+///////////////////////////
+void jacobsDialog8_2()
+{
+	$jacobs.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+	$jacobs.anim( "ent-vchair-scan" );
+	coop_headWatchClosestPlayer($jacobs);
+
+	globalCoop_dialog_play($jacobs,"ent_m8/jacobs_likewait.mp3", 1, 128, 0); //He doesn’t like to be kept waiting.
+
+	setNextDialog( $jacobs, 3 );
+	$jacobs.resethead();
+	setDialogFinished( $jacobs );
+	$jacobs.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// jacobsDialog8_3
+// Player and actor talk
+///////////////////////////
+void jacobsDialog8_3()
+{
+	$jacobs.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+	$jacobs.anim( "ent-vchair-scan" );
+	coop_headWatchClosestPlayer($jacobs);
+	
+	globalCoop_dialog_play($jacobs,"ent_m8/jacobs_tea.mp3", 1, 128, 0); //And whatever you do don’t bring him lukewarm tea.  He hates that.
+
+	setNextDialog( $jacobs, 4 );
+	$jacobs.resethead();
+	setDialogFinished( $jacobs );
+	$jacobs.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+
+///////////////////////////
+// jacobsDialog8_4
+// Player and actor talk
+///////////////////////////
+void jacobsDialog8_4()
+{
+	$jacobs.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+	$jacobs.anim( "ent-vchair-scan" );
+	coop_headWatchClosestPlayer($jacobs);
+
+	globalCoop_dialog_play($jacobs,"ent_m8/jacobs_herbal.mp3", 1, 128, 0); //One time we slipped him some herbal tea, and he nearly went on a rampage.
+
+	setNextDialog( $jacobs, 5 );
+	$jacobs.resethead();
+	setDialogFinished( $jacobs );
+	$jacobs.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+
+///////////////////////////
+// jacobsDialog8_5
+// Player and actor talk
+///////////////////////////
+void jacobsDialog8_5()
+{
+	$jacobs.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+	$jacobs.anim( "ent-vchair-scan" );
+	coop_headWatchClosestPlayer($jacobs);
+
+	globalCoop_dialog_play($jacobs,"ent_m8/jacobs_busy6.mp3", 1, 128, 0); //Sorry I'm kinda busy here.
+
+	setNextDialog( $jacobs, 3 );
+	$jacobs.resethead();
+	setDialogFinished( $jacobs );
+	$jacobs.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// manaanOnUseWaitIGM8
+// Wait for player to talk to actor
+///////////////////////////
+void manaan_workIGM8()
+{
+	setNextDialog( $manaan, 1 );
+	setDialogFunction( $manaan, "manaanDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $manaan, "", "", 0 );
+		talkUntilDone( $manaan );
+	}
+}
+
+///////////////////////////
+// manaanDialog8_1
+// Player and actor talk
+///////////////////////////
+void manaanDialog8_1()
+{
+	$manaan.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+	$manaan.anim( "ent-vchair-sm-scan" );
+	coop_headWatchClosestPlayer($manaan);
+
+	globalCoop_dialog_play($manaan,"ent_m3/myamoto_whatit.mp3", 1, 128, 0); //What is it?
+
+	setNextDialog( $manaan, 2 );
+	$manaan.resethead();
+	setDialogFinished( $manaan );
+	$manaan.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// manaanDialog8_2
+// Player and actor talk
+///////////////////////////
+void manaanDialog8_2()
+{
+	$manaan.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+	$manaan.anim( "ent-vchair-sm-scan" );
+	coop_headWatchClosestPlayer($manaan);
+
+	globalCoop_dialog_play($manaan,"ent_m3/myamoto_sorry.mp3", 1, 128, 0); //Sorry, I can't chat right now.
+
+	setNextDialog( $manaan, 1 );
+	$manaan.resethead();
+	setDialogFinished( $manaan );
+	$manaan.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// manaanDialog8_3
+// Player and actor talk
+///////////////////////////
+//void manaanDialog8_3()
+//{
+//	$manaan.setFloatVar( "pauseRandomAnimate", 1 );
+//	wait( .25 );
+//	$manaan.anim( "ent-vchair-sm-scan" );
+//	$manaan.headwatch( $player, 10 );
+//
+//	globalCoop_dialog_play($manaan,"ent_m8/manaan_please6.mp3", 1, 128, 0); //Please Lieutenant, I need to get back to work.
+//
+//	setNextDialog( $manaan, 4 );
+//	$manaan.resethead();
+//	setDialogFinished( $manaan );
+//	$manaan.setFloatVar( "pauseRandomAnimate", 0 );
+//}
+
+///////////////////////////
+// manaanDialog8_4
+// Player and actor talk
+///////////////////////////
+void manaanDialog8_4()
+{
+	$manaan.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+	$manaan.anim( "ent-vchair-sm-scan" );
+	coop_headWatchClosestPlayer($manaan);
+
+	globalCoop_dialog_play($manaan,"ent_m8/manaan_destroy.mp3", 1, 128, 0); //You know, destroying is easier than creating.  But more fun.
+
+	setNextDialog( $manaan, 5 );
+	$manaan.resethead();
+	setDialogFinished( $manaan );
+	$manaan.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// manaanDialog8_5
+// Player and actor talk
+///////////////////////////
+void manaanDialog8_5()
+{
+	$manaan.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+	$manaan.anim( "ent-vchair-sm-scan" );
+	coop_headWatchClosestPlayer($manaan);
+
+	globalCoop_dialog_play($manaan,"ent_m8/manaan_holo.mp3", 1, 128, 0); //I’m a bit preoccupied at the moment. Shouldn’t you be blowing up the Holodeck or something?
+
+	setNextDialog( $manaan, 1 );
+	$manaan.resethead();
+	setDialogFinished( $manaan );
+	$manaan.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// johnsonOnUseWaitIGM8
+// Wait for player to talk to actor
+///////////////////////////
+void johnson_workIGM8()
+{
+	setNextDialog( $johnson, 1 );
+	setDialogFunction( $johnson, "johnsonDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $johnson, "", "", 0 );
+		talkUntilDone( $johnson );
+	}
+}
+
+///////////////////////////
+// johnsonDialog8_1
+// Player and actor talk
+///////////////////////////
+void johnsonDialog8_1()
+{
+	$johnson.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+	$johnson.anim( "ent-frontchair-scan" );
+	coop_headWatchClosestPlayer($johnson);
+
+	globalCoop_dialog_play($johnson,"ent_m8/johnson_endnow.mp3", 1, 128, 0); //We must end the Exomorph threat here and now, despite the Romulan response.
+
+	setNextDialog( $johnson, 2 );
+	$johnson.resethead();
+	setDialogFinished( $johnson );
+	$johnson.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// johnsonDialog8_2
+// Player and actor talk
+///////////////////////////
+void johnsonDialog8_2()
+{
+	$johnson.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+	$johnson.anim( "ent-frontchair-scan" );
+	coop_headWatchClosestPlayer($johnson);
+
+	globalCoop_dialog_play($johnson,"ent_m8/johnson_overrun.mp3", 1, 128, 0); //If we don’t they could overrun the entire quadrant and destroy the Federation.
+
+	setNextDialog( $johnson, 3 );
+	$johnson.resethead();
+	setDialogFinished( $johnson );
+	$johnson.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// johnsonDialog8_3
+// Player and actor talk
+///////////////////////////
+void johnsonDialog8_3()
+{
+	$johnson.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+	$johnson.anim( "ent-frontchair-scan" );
+	coop_headWatchClosestPlayer($johnson);
+
+	globalCoop_dialog_play($johnson,"ent_m8/johnson_unfort.mp3", 1, 128, 0); //Unfortunately, no one can be told what the Master Matrix is. You have to see it for yourself.
+
+	setNextDialog( $johnson, 1 );
+	$johnson.resethead();
+	setDialogFinished( $johnson );
+	$johnson.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// strattonOnUseWaitIGM8
+// Wait for player to talk to actor
+///////////////////////////
+void stratton_workIGM8()
+{
+	setNextDialog( $stratton, 1 );
+	setDialogFunction( $stratton, "strattonDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $stratton, "", "", 0 );
+		talkUntilDone( $stratton );
+	}
+}
+
+///////////////////////////
+// strattonDialog8_1
+// Player and actor talk
+///////////////////////////
+void strattonDialog8_1()
+{
+	$stratton.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+	$stratton.anim( "ent-vchair-sm-scan" );
+	coop_headWatchClosestPlayer($stratton);
+
+	globalCoop_dialog_play($stratton,"ent_m8/stratton_busy6.mp3", 1, 128, 0); //I'm busy.
+
+	setNextDialog( $stratton, 2 );
+	$stratton.resethead();
+	setDialogFinished( $stratton );
+	$stratton.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+///////////////////////////
+// strattonDialog8_2
+// Player and actor talk
+///////////////////////////
+void strattonDialog8_2()
+{
+	$stratton.setFloatVar( "pauseRandomAnimate", 1 );
+	wait( .25 );
+	$stratton.anim( "ent-vchair-sm-scan" );
+	coop_headWatchClosestPlayer($stratton);
+
+	globalCoop_dialog_play($stratton,"ent_m8/stratton_please6.mp3", 1, 128, 0); //Please Lieutenant, I need to get back to work.
+
+	setNextDialog( $stratton, 1 );
+	$stratton.resethead();
+	$stratton.setFloatVar( "pauseRandomAnimate", 0 );
+}
+
+//===================================================================================================================
+// Deck Change Check
+//===================================================================================================================
+//---------------------
+// checkForDeckChangeIGM8
+//---------------------
+void checkForDeckChangeIGM8()
+{
+	//centerprint( "Room " + getfloatvar( "game.checkEntMission8RoomsVisited" ) + " " );
+	if( getfloatvar( "game.checkEntMission8RoomsVisited" ) == 2 )
+	{
+		//do this because the pause would break the function
+		thread dialogChoiceChooseDeckIGM8();
+		while( appropriateDeckChoiceIsMade == 0 )
+		{
+			wait( .05 );
+		}
+	}
+	//centerprint( "Room " + getfloatvar( "game.checkEntMission8RoomsVisited" ) + "\n" );
+}
+
+//---------------------
+// Dialog Choice Choose Deck
+//---------------------
+void dialogChoiceChooseDeckIGM8()
+{
+	if(!cvar_bool_multiplayer)
+	{
+		$telsia.branchdialog( "entDeck1IGM8BranchingDialog" );
+		pause();
+	}
+}
+
+//---------------------
+// Player choses Deck 11
+//---------------------
+void entDeck1IGM8Option1()
+{
+	setfloatvar(  "level.deckToChangeToIGM", 11 );
+	if(cvar_bool_multiplayer)
+	{
+		stuffCmd("seta coop_igm 8\n");
+		stuffCmd("seta coop_igmR 2\n");
+		stuffCmd("seta coop_igmT 11\n");
+	}
+	globalCoop_dialog_play($scriptmunro,"ent_m1/munro_d11astro_alt.mp3", 1, 10000, 0); //Deck 11: Stellar Cartography
+	appropriateDeckChoiceIsMade = 1;
+	
+	if(cvar_bool_multiplayer)
+	{
+		turboLiftDeckChangeGo();
+	}
+}
+
+//---------------------
+// Player choses Deck 7c
+//---------------------
+void entDeck1IGM8Option2()
+{
+	setfloatvar(  "level.deckToChangeToIGM", 73 );
+	if(cvar_bool_multiplayer)
+	{
+		stuffCmd("seta coop_igm 8\n");
+		stuffCmd("seta coop_igmR 2\n");
+		stuffCmd("seta coop_igmT 73\n");
+	}
+	globalCoop_dialog_play($scriptmunro,"ent_m1/munro_hazcrew.mp3", 1, 10000, 0); //Hazard Crew Quarters
+	appropriateDeckChoiceIsMade = 1;
+	
+	if(cvar_bool_multiplayer)
+	{
+		turboLiftDeckChangeGo();
+	}
+}
+
+
+void coop_turbo_One()
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+	if(globalCoop_vote("$$DeckNumber$$^0_^8->^0_^8$$StellarCartography$$",ePlayer))
+	{
+		entDeck1IGM8Option1();
+	}
+}
+
+void coop_turbo_Two()
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+	if(globalCoop_vote("$$DeckNumber$$^0_^8->^0_^8$$CrewQuarters$$",ePlayer))
+	{
+		entDeck1IGM8Option2();
+	}
+}
+

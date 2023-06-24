@@ -1,0 +1,178 @@
+//------------------------------------------------------------------------------
+// Script By:   Christian SebastianStrahl [Chrissstrahl]
+// Created on:	2012.10.16
+// E-Mail:		chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+// VOTE SCRIPT ALLOWS SPECIAL VOTING FOR COOP USERS
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2012 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////Functions
+////////////////////////////////////////////////////////////////////////////////
+float globalCoop_vote(string sVoteText,entity ePlayer)
+//------------------------------------------------------------------------------
+// Inizial vote
+//------------------------------------------------------------------------------
+{
+	float fResult;
+	mom_exitMenuPlayer(ePlayer);
+	if(/*doesEntityExist(ePlayer) == 1 && */coop_bool_voteInProgress != 1 && coop_bool_settingsChanged != 1)
+	{
+		coop_bool_voteInProgress=1;
+		float	fTime = 300,
+				fYes,fNo,
+				fPlayerId,
+				fQuantity,
+				coop_playerIdInUse;
+		string	sVote;		
+		coop_voteText	= sVoteText;
+		fPlayerId		= globalCoop_return_integerPlayerId(ePlayer);
+		
+//debug debug debug
+		ePlayer.hudprint(coop_voteText+"\n");
+		
+		
+//register and count for this player
+		thread globalCoop_player_transmitter(ePlayer,"globalwidgetcommand coop_voteDscr title "+coop_voteText);
+		globalCoop_huds_textOrHud(ePlayer,"coop_vote","^0=\n^0=\n^5$$NewVote$$^7 ^3(9 = $$Yes$$ / 0 = $$No$$)^8: "+coop_voteText+"\n^0=\n");
+		fYes++;
+		
+//give yes and no to all except the vote starter
+		thread globalCoop_voteEquipAll(fPlayerId);
+
+		while(fTime > -1)
+		{
+			for(coop_playerIdInUse=1;coop_playerIdInUse<=coop_integer_maxPlayers;coop_playerIdInUse++)
+			{
+				ePlayer = getentity("player"+coop_playerIdInUse);
+				
+				if(doesEntityExist(ePlayer))
+				{
+					if(ePlayer.getFloatVar("globalCoop_hasVoted")!=1)
+					{
+						sVote=globalCoop_return_stringActiveWeaponName(ePlayer);
+						
+						if(sVote=="Yes" || sVote=="No")
+						{
+							if(sVote=="Yes")
+							{
+								fYes++;
+							}
+							else
+							{
+								fNo++;
+							}
+							ePlayer.hudprint("^5Coop Mod:^8 $$VoteCast$$: ^5$$"+sVote+"$$\n");			
+							thread globalCoop_voteUnEquip(ePlayer);
+						}
+					}
+				}
+			}
+		//return all but spectators
+			fQuantity = globalCoop_return_integerPlayersQuantity(2);
+		//50% rule when more than 2 players
+			if(fQuantity > 2)
+			{
+				fQuantity = (fQuantity / 2);
+				
+			}
+		//1 player, 51%yes, 51%no, timeout 
+			if(fQuantity == fYes || fYes > fQuantity || fNo > fQuantity || fTime == 0)
+			{
+				fTime=0;
+				sVote="Failed";
+				if(fYes > fNo)
+				{
+					sVote="Passed";
+					fResult=1;
+				}
+				coop_voteTextResult = sVote;
+			}
+			fTime--;
+			wait(0.05);
+		}
+		//$player1.hudprint("^5fQuantity:^8"+fQuantity+" - yes:"+fYes+" no:"+fNo+" - result:"+sVote+"\n");
+		globalCoop_huds_RemoveAll("coop_vote");
+		centerprint("^5Coop Mod^8: $$Vote"+sVote+"$$");
+		coop_bool_voteInProgress=0;
+		globalCoop_voteEquipAll(-1);
+	}
+	return fResult;
+}
+
+void globalCoop_voteEquipAll(float fNotMe)
+//------------------------------------------------------------------------------
+// Give YES and NO or TAKE it to ALL
+//------------------------------------------------------------------------------
+{
+	entity e;
+	float coop_playerIdInUse;
+	coop_playerIdInUse = 1;
+	
+	while(coop_playerIdInUse<=coop_integer_maxPlayers)
+	{
+		if(fNotMe != coop_playerIdInUse)
+		{
+			e = getentity("player"+coop_playerIdInUse);
+			thread globalCoop_voteEquip(e);
+		}
+		coop_playerIdInUse++;
+	}
+}
+void globalCoop_voteEquip(entity ePlayer)
+//------------------------------------------------------------------------------
+// Give YES and NO or TAKE it
+//------------------------------------------------------------------------------
+{
+	if(doesEntityExist(ePlayer))
+	{
+		if(coop_bool_voteInProgress==1)
+		{
+			if(ePlayer.getFloatVar("coop_hasCoopInstalled"))
+			{
+				thread globalCoop_player_transmitter(ePlayer,"globalwidgetcommand coop_voteDscr title "+coop_voteText);
+			}
+			else
+			{
+				thread globalCoop_player_transmitter(ePlayer,"bind 9 use yes\nbind 0 use no");
+			}
+			
+			ePlayer.setStringVar("globalCoop_weapon",ePlayer.getActiveWeaponName());
+			ePlayer.give("weapons/yes.tik");
+			ePlayer.give("weapons/no.tik");
+			globalCoop_main_waitAFrame();
+			thread globalCoop_huds_AddTemporary(ePlayer,"coop_voteNotify",3);
+			thread globalCoop_huds_textOrHud(ePlayer,"coop_vote","^0=\n^0=\n^5$$NewVote$$^7 ^3(9 = $$Yes$$ / 0 = $$No$$)^8: "+coop_voteText+"\n^0=\n");
+		}
+		else
+		{
+			globalCoop_voteUnEquip(ePlayer);
+		}
+	}
+}
+void globalCoop_voteUnEquip(entity ePlayer)
+//------------------------------------------------------------------------------
+// Player has voted, or vote is over
+//------------------------------------------------------------------------------
+{
+	if(coop_voteTextResult != "")
+	{
+		thread globalCoop_huds_AddTemporary(ePlayer,"coop_vote"+coop_voteTextResult,3);
+	}
+	ePlayer.take("weapons/yes.tik");
+	ePlayer.take("weapons/no.tik");
+	globalCoop_armory_restoreWeapon(ePlayer);
+}
+

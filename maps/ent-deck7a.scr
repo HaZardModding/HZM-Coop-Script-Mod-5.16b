@@ -1,0 +1,452 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	      ent-deck7a - Enterprise Deck 7a
+//  Script By:    Luke W, Kenny T
+//  Geometry By:  Adam B., Kenny T., Benson R.
+//  Created on:   07/08/2002
+//	Last Edited:  09/22/2002 - Benson R
+//-----------------------------------------------------------------
+
+string sNextLevelToLoadForCoop;
+void coop_endLevel();
+void main();
+void init();
+
+void checkMissionNumber();
+void justLoadedDeckThread();
+
+void tricorderPuzzelCancled();
+void tricorderPuzzelUsed();
+void tricorderPuzzelUsedMunro();
+void tricorderPuzzelUsedJurot();
+void tricorderPuzzelSolved();
+void tricorderPuzzelSolvedJurot();
+void tricorderPuzzelSolvedMunro();
+entity coop_replaceForMom(entity e);
+void coop_tricoderFailed();
+
+void killAllTalking();
+
+
+//DEFINY FOR INCLUSION; DUMMY!
+void checkForDeckChangeIGM2(){}
+void checkForDeckChangeIGM5(){}
+
+//-----------------------------------------------------------
+//-----------------------------------------------------------
+//--- variables
+
+float missionEnterprise = 0;
+float currentDeck = 71;
+string currentPuzzel;
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  INCLUDES
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/igm_main.scr"
+//#include "coop_mod/maps/optional_modules/puzzles_advanced.scr"
+#include "coop_mod/maps/optional_modules/codepanel.scr"
+#include "coop_mod/maps/global/global_common.scr"
+#include "coop_mod/maps/missions/igm_common/igm_turbolift.scr"
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "maps/global_scripts/global_debugUtils.scr"
+#include "maps/global_scripts/global_math.scr"
+#include "maps/global_scripts/global_cinematicFX.scr"
+#include "coop_mod/maps/global/igm_dialog.scr"
+#include "maps/global_scripts/global_archetype.scr"
+#include "maps/global_scripts/global_tricorderBase.scr"
+#include "maps/global_scripts/global_tricorderKeypad.scr"
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/missions/igm1/ent-deck7a-mission1.scr"
+//#include "coop_mod/maps/missions/igm2/ent-deck7a-mission2.scr"
+#include "coop_mod/maps/missions/igm3/ent-deck7a-mission3.scr"
+#include "coop_mod/maps/missions/igm4/ent-deck7a-mission4.scr"
+#include "coop_mod/maps/missions/igm6/ent-deck7a-mission6.scr"
+#include "coop_mod/maps/missions/igm7/ent-deck7a-mission7.scr"
+#include "coop_mod/maps/missions/igm8/ent-deck7a-mission8.scr"
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+//===================================================================================================================
+// Main Stuff 
+//===================================================================================================================
+//---------------------
+// main	
+// do start up stuff
+//---------------------
+void main()
+{
+	$turboLift.sound_locked("");//stop deny sound to be played
+	//--- set the sky portal
+	$sky.rendereffects( "+skyorigin" );
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_string_playerModelResetTiki = "models/char/munro_sf.tik";
+	coop_string_nextMapToCheck			= "m3l1a-forever";//set the map we gona load next while we are in testmode
+//Set spawnangles for this level
+	coop_float_spawnAngle0 				= 270;//SpawnOrigin0 Angle
+//Give each player a Item/weapon
+	coop_string_weapon1 				= "models/weapons/worldmodel-Tricorder-stx.tik";
+//spawnorigins, Spawn Players on those locations, at map start
+	coop_float_spawnAngle0 				= 223;
+	coop_float_spawnAngle1 				= 134;	
+	coop_vector_spawnOrigin1 			= '-9939 784 0';
+	coop_vector_spawnOrigin2 			= '-9963 949 0';
+	coop_vector_spawnOrigin3 			= '-10023 1008 0';
+	coop_vector_spawnOrigin4 			= '-9952 1080 0';
+	coop_vector_spawnOrigin5 			= '-9902 1030 0';
+	coop_vector_spawnOrigin6 			= '-9849 1084 0';
+	coop_vector_spawnOrigin7 			= '-9895 1128 0';
+	coop_vector_spawnOrigin8 			= '-9823 1201 0';
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	missionEnterprise = getCvarInt("coop_igm");
+	if(!cvar_bool_multiplayer){
+		missionEnterprise=getfloatvar("game.globalMissionEnterprise");
+	}
+	if(missionEnterprise < 1){
+		missionEnterprise=1;
+		setfloatvar("game.globalMissionEnterprise",1);
+	}
+
+	init();
+	if(!cvar_bool_multiplayer){//single-player
+		dontSaveOrientation();
+		waitforplayer();
+		$player.health( 100 );
+		stuffCMD("set g_playerModel char/munro_sf");
+	}
+	$world.clearAvailableViewModes();
+	$world.addAvailableViewMode( "none" );
+//STARTED BY INFO_PLAYER_START in sp, start manually in mp
+	if(cvar_bool_multiplayer){
+		thread justLoadedDeckThread();
+	}
+}
+
+entity coop_replaceForMom(entity e)
+{
+	if(doesEntityExist(e))
+	{
+		entity eNew;
+		vector vMins,vMaxs;
+		vMins = e.getMins();
+		vMaxs = e.getMaxs();
+		eNew = spawn("trigger_use","targetname",""+e.getRawTargetname(),"origin",""+e.getOrigin());
+		e.remove();
+		globalCoop_main_waitAFrame();
+		e = eNew;
+		e.setsize(vMins,vMaxs);
+		e.thread("mom_basic");
+		e.setstringvar("coop_codepannelFailed","coop_tricoderFailed");//failed thread
+		e.setstringvar("uservar1","coop_tricorderKeypad");//hud to display
+		e.setstringvar("uservar2","codepanel");//tell mom what thread to run (codepanel_one,codepanel_two)
+	}
+	return e;
+}
+
+void coop_tricoderFailed()
+{
+}
+
+//---------------------
+// init	
+// nonthread init stuff
+//---------------------
+void init()
+{
+	float x;
+	entity e;
+
+	//Turn Exit Triggers Off
+	$triggerExit.nottriggerable();
+	
+	//Lock Secret Door. Unlocked In appropreiate IGM
+	$secretDoor.lock();
+	
+	entTurboLiftSetup();
+	//ent_turboliftInit();
+	
+	checkMissionNumber();
+
+	//Archetypes
+	globalArchetype_Setup ( $elevatorButtonArchetype, "TurboLiftControls" );
+	float fRandom,fLength;
+	vector vCode;
+	
+	for( x = 1; x <= 10; x++ )
+	{
+		globalArchetype_Setup ( getentity( "lockerDoorArchetype" + x ), "HazardLocker" );
+		
+		e = getentity( "lockerDoorPuzzel" + x );
+		
+	//know bugs:
+	//- "0" can't be entered by players but can be inside this generated number
+		if(cvar_bool_multiplayer)
+		{
+			fLength	= 3;
+			fRandom = randomint(999);
+			e = coop_replaceForMom(e);
+			e.setstringvar("coop_codepannelSucess","tricorderPuzzelSolved");//sucess thread
+			if(fRandom < 100)
+			{
+				fLength = 2;
+			}
+			if(fRandom < 10)
+			{
+				fLength = 1;
+			}
+			vCode_y	= fRandom;
+			vCode_z = fLength;
+			e.setvectorvar("coop_codepannelCCD",vCode);//countdown,code,length
+			//e.setfloatvar("coop_codepannelTell",1);//show code to player	
+			//e.key("Tricorder");
+		}
+		else
+		{
+			e.puzzleobject_canceledthread( "tricorderPuzzelCancled" );
+			e.puzzleobject_failedthread( "tricorderPuzzelCancled" );
+			e.puzzleobject_itemusedthread( "tricorderPuzzelUsed" );
+			e.puzzleobject_solvedthread( "tricorderPuzzelSolved" );
+			e.puzzleobject_itemtouse( "Tricorder" );
+		}
+	}
+	
+	globalArchetype_Setup ( $lockerDoorArchetypeMunro, "HazardLocker" );
+	globalArchetype_Setup ( $lockerDoorArchetypeJurot, "HazardLocker" );
+	if(!cvar_bool_multiplayer){//single-player
+		$lockerDoorPuzzelMunro.puzzleobject_canceledthread( "tricorderPuzzelCancled" );
+		$lockerDoorPuzzelMunro.puzzleobject_failedthread( "tricorderPuzzelCancled" );
+		$lockerDoorPuzzelMunro.puzzleobject_itemusedthread( "tricorderPuzzelUsedMunro" );
+		$lockerDoorPuzzelMunro.puzzleobject_solvedthread( "tricorderPuzzelSolvedMunro" );
+		$lockerDoorPuzzelMunro.puzzleobject_itemtouse( "Tricorder" );
+		$lockerDoorPuzzelJurot.puzzleobject_canceledthread( "tricorderPuzzelCancled" );
+		$lockerDoorPuzzelJurot.puzzleobject_failedthread( "tricorderPuzzelCancled" );
+		$lockerDoorPuzzelJurot.puzzleobject_itemusedthread( "tricorderPuzzelUsedJurot" );
+		$lockerDoorPuzzelJurot.puzzleobject_solvedthread( "tricorderPuzzelSolvedJurot" );
+		$lockerDoorPuzzelJurot.puzzleobject_itemtouse( "Tricorder" );
+	}else{
+		globalCoop_level_remove($turboLiftPlayerClip);
+
+		e = coop_replaceForMom($lockerDoorPuzzelMunro);
+		//x=time until failure,Y=code,z=how many numbers does the code have
+		e.setvectorvar("coop_codepannelCCD",'0 216 3');//countdown,code,length
+		e.setfloatvar("coop_codepannelTell",1);//show code to player		
+		e.setstringvar("coop_codepannelSucess","tricorderPuzzelSolvedMunro");//sucess thread
+		e.setstringvar("coop_codepannelFailed","coop_tricoderFailed");//failed thread
+		
+		e = coop_replaceForMom($lockerDoorPuzzelJurot);
+		//x=time until failure,Y=code,z=how many numbers does the code have
+		e.setvectorvar("coop_codepannelCCD",'0 746 3');//countdown,code,length	
+		e.setstringvar("coop_codepannelSucess","tricorderPuzzelSolvedJurot");//sucess thread
+		e.setstringvar("coop_codepannelFailed","coop_tricoderFailed");//failed thread
+	}
+	
+	//Hide this in all missions, only show in first mission
+	$jurotCodeTablet.hide();
+	$jurotCodeTablet.notsolid();
+	
+	//Make Telsia's Lock Display, only in first mission hide();
+	$lockerPanelBlank.hide();
+	
+	//--- hide the briefing screen images
+	$briefingScreen_Border.hide();
+	$briefingScreen_Blank.hide();
+	$briefingScreen_IGM8_Plate1.hide();
+	$briefingScreen_IGM8_Plate2.hide();
+	$briefingScreen_IGM8_Plate3.hide();
+	$briefingScreen_IGM8_Plate4.hide();
+}
+
+void checkMissionNumber()
+{
+	if( missionEnterprise < 3 ){
+		thread setupMission1Deck7a();
+	}
+	if( missionEnterprise == 3 ){
+		thread setupMission3Deck7a();
+	}
+	if( missionEnterprise == 4 ){
+		thread setupMission4Deck7a();
+	}
+	if( missionEnterprise == 6 ){
+		thread setupMission6Deck7a();
+	}
+	if( missionEnterprise == 7 ){
+		thread setupMission7Deck7a();
+	}
+	if( missionEnterprise == 8 ){
+		thread setupMission8Deck7a();
+	}
+	
+	string stringSoundTrack;
+	
+	stringSoundTrack = "music/igm" + missionEnterprise + ".mus";
+	//--- set the soundtrack
+ 	soundtrack( stringSoundTrack );
+}
+
+//---------------------
+// justLoadedDeckThread	
+// creats a trigger to call the approiate deckJustLoadedThreadIGMx thread
+//---------------------
+void justLoadedDeckThread()
+{
+	string deckJustLoadedThread;
+	deckJustLoadedThread = ( "justLoadedDeckThreadIGM" + missionEnterprise );
+	thread entTurboLiftCheck();
+
+	waitforplayer();
+//we take care later of this
+	if(!cvar_bool_multiplayer){//single-player
+		if( missionEnterprise == 4 ){
+			if( getfloatvar( "game.IGM4GoToJurot" ) >= 1 ){
+				$player.loadobjectives("IGM4alt");		
+			}
+			else{
+				$player.loadobjectives("IGM4");
+			}
+		}
+		else if( missionEnterprise == 6 ){
+			if( getfloatvar( "game.IGM6MeetJurot" ) >= 1 ){
+				$player.loadobjectives("IGM6alt");
+			}
+			else{
+				$player.loadobjectives("IGM6");
+			}
+		}
+		else $player.loadobjectives( "IGM" + missionEnterprise );
+	}	
+//LAUNCH THE SETUP FOR EACH MISSION	
+	if( missionEnterprise == 1 ) thread justLoadedDeckThreadIGM1();
+	if( missionEnterprise == 3 ) thread justLoadedDeckThreadIGM3();
+	if( missionEnterprise == 7 ) thread justLoadedDeckThreadIGM7();
+}
+
+void tricorderPuzzelCancled()
+{
+	if(!cvar_bool_multiplayer){//SINGLEPLAYER
+		entity e;
+		e = getentity( currentPuzzel );
+		e.puzzleobject_reset();
+	}
+}
+
+void tricorderPuzzelUsed()
+{
+	if(!cvar_bool_multiplayer){//single-player
+		float a,b,c,d,x,f,g,h,i;
+		entity e;
+		e = getcurrententity();
+		
+		currentPuzzel = e.getrawtargetname();
+		
+		a = randomint( 9 ) + 1;
+		b = randomint( 9 ) + 1;
+		c = randomint( 9 ) + 1;
+		d = randomint( 9 ) + 1;
+		x = randomint( 9 ) + 1;
+		f = randomint( 9 ) + 1;
+		g = randomint( 9 ) + 1;
+		h = randomint( 9 ) + 1;
+		i = randomint( 9 ) + 1;
+		
+		globalTricorderKeypad_SetSecretCode( a,b,c,d,x,f,g,h,i );
+		globalTricorderKeypad_SetScannedCodeFlag( FALSE );
+		thread globalTricorderKeypad_Run( e, 0, 1 );
+	}
+}
+
+void tricorderPuzzelUsedMunro()
+{
+	if(!cvar_bool_multiplayer){//single-player
+		entity e;
+		e = getcurrententity();
+		currentPuzzel = e.getrawtargetname();
+
+		globalTricorderKeypad_SetSecretCode( 2,1,6,0,0,0,0,0,0 );
+		globalTricorderKeypad_SetScannedCodeFlag( TRUE );
+		thread globalTricorderKeypad_Run( e, 0, 1 );
+	}
+}
+
+void tricorderPuzzelUsedJurot()
+{
+	if(!cvar_bool_multiplayer){//single-player
+		entity e;
+		e = getcurrententity();
+		currentPuzzel = e.getrawtargetname();
+
+		globalTricorderKeypad_SetSecretCode( 7,4,6,0,0,0,0,0,0 );
+		globalTricorderKeypad_SetScannedCodeFlag( FALSE );
+		thread globalTricorderKeypad_Run( e, 0, 1 );
+	}
+}
+
+void tricorderPuzzelSolved()
+{
+	centerprint( "$$WowSecret$$" );
+}
+
+void tricorderPuzzelSolvedJurot()
+{
+	$lockerDoor1Jurot.bind( $lockerDoor1JurotOrigin );
+	
+	//Sound open
+	$lockerDoor2Jurot.time( 2 );
+	$lockerDoor2Jurot.moveDown( 40 );
+	
+	$lockerDoor1JurotOrigin.time( 2 );
+	$lockerDoor1JurotOrigin.rotateZup( 90 );
+	//Sound stop
+	
+	waitfor( $lockerDoor2Jurot );
+	
+	if( missionEnterprise == 1 ) thread imodWait();
+}
+
+
+void tricorderPuzzelSolvedMunro()
+{
+	$lockerDoor1Munro.bind( $lockerDoor1MunroOrigin );
+	
+	//Sound open
+	$lockerDoor2Munro.time( 2 );
+	$lockerDoor2Munro.moveDown( 40 );
+	
+	$lockerDoor1MunroOrigin.time( 2 );
+	$lockerDoor1MunroOrigin.rotateZup( 90 );
+	//Sound stop
+	
+	waitfor( $lockerDoor2Munro );
+}
+
+//---------------------
+// killAllTalking
+// This stops all talking on the level
+//------------------------
+void killAllTalking()
+{
+	$player.killalldialog();
+}
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed(sNextLevelToLoadForCoop);
+}

@@ -1,0 +1,393 @@
+//--- cinematics
+void cinematicTelsiaSaved();
+void cinematicTelsiaSaved_Skipthread();
+void cinematicTelsiaSaved_WalkMunro();
+void cinematic_ending();
+
+
+//-----------------------------
+// cinematicTelsiaSaved
+// the player saved telsia
+//-----------------------------
+void cinematicTelsiaSaved()
+{
+//make sure next map is loadad when time runs out during cin
+	globalCoop_mission_accomplished();
+	
+	//--- spawn cinematic cameras
+	spawn( "Camera", "targetname", "cam1" );
+	spawn( "Camera", "targetname", "cam2" );
+
+	//--- load the camera paths
+	cam.load( "m1l1c_rescuecam" );
+	cam.load( "m1l1c_TelsiaLost_Shot1" );
+	cam.load( "m1l1c_TelsiaLost_Shot3" );
+	cam.load( "m1l1c_TelsiaLost_Shot4" );
+	cam.load( "m1l1c_Telsia_Shot5" );
+	cam.load( "m1l1c_Telsia_Shot6" );
+	cam.load( "m1l1c_Telsia_Shot7" );
+	
+	//--- start cinematic commands
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.3);
+	wait( .3 );
+	
+	//--- position all the actors
+	globalCommon_AiDummy( $telsia, "idle" );
+	globalCommon_AiDummy( $chell, "tricorder_fire" );
+	globalCommon_AiDummyHide( $munro );
+	wait( .1 );
+	globalCineFX_PositionObject( $munro, $nodeMunro_Start );
+	globalCineFX_PositionObject( $chell, $nodeChell_Start );
+	globalCineFX_PositionObject( $telsia, $nodeTelsia_Start );
+	wait( .1 );
+	
+	$telsia.resethead();//stop watching the player(s)
+	
+	//--- set the weapons on the actors
+	$munro.useActorWeapon( "none" );
+	$telsia.useActorWeapon( "none" );
+	$chell.useActorWeapon( "tricorder" );
+
+	//--- have telsia facing chell
+	$telsia.turnTowardsEntity( $chell );
+
+	//--------------------------------------------------------
+	//shot1 establishing, pov of munro walking into room
+	
+	//--- set music
+	forcemusic ("aux7","normal");
+	
+	//--- set camera
+	globalCoop_cin_fov($cam2, 80 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_follow($cam2, $m1l1c_TelsiaLost_Shot1 );
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam2 );
+	wait( .1 );
+
+	//--set skipthread
+	globalCoop_cin_skipThread( "cinematicTelsiaSaved_Skipthread");
+
+	//--- fade in
+	globalCoop_main_camFadeIn(1);
+	wait( 3.75 );
+
+	//--------------------------------------------------------
+	//shot2 closeup of terminal extending
+	
+	//--- next paths
+	//$cam1.pause();
+	wait( .2 );
+	globalCoop_cin_fov($cam1, 80 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_follow($cam1, $m1l1c_TelsiaLost_Shot3 );
+	
+	globalCoop_cin_cuecamera( $cam1 );
+	//$cam1.continue();
+	wait( .35 );
+	
+	thread infoTerminal_Extend();
+	wait( 5 );
+
+	//--------------------------------------------------------
+	//shot3 dolly around info terminal, watching munro walkup to the group
+	
+	//--- next paths
+	globalCoop_cin_fov($cam2, 80 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_follow($cam2, $m1l1c_TelsiaLost_Shot4 );
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam2 );
+	wait( 1 );
+
+	//--- start munro walking into the room
+	thread cinematicTelsiaSaved_WalkMunro();
+	wait( 2 );
+	
+	//--- walk chell to the info terminal
+	$chell.walkto( "$nodeChell_WalkTo1", "walk" );
+	wait( 2 );
+
+	//--- have telsia facing chell
+	$telsia.turnTowardsEntity( $chell );
+		
+	//--- have chell pull out and use his tricorder
+	$chell.useactorweapon( "tricorder" );
+	$chell.anim( "tricorder_fire" );
+	
+	thread globalCineFX_CameraFOVLerp( $cam2, 80, 60, 3, "rampupdown" );
+	wait( 2 );
+
+	globalCoop_dialog_play($telsia,"borg01/telsia_goodjob.mp3", 1, 20000, 0 ); //Thanks, Munro.
+	wait( .5 );
+	thread globalCoop_dialog_play($telsia,"borg01/telsia_thatprice.mp3", 1, 20000, 0 ); //I found the Dampening Field Generators. They’re up in Sub-Junction 37, near the Borg Central Plexus.
+	wait( 3.25 );
+
+	//--------------------------------------------------------
+	//shot4 reaction and answer from Munro
+	
+	//--- set camera
+	globalCoop_cin_fov($cam1, 50 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_follow($cam1, $m1l1c_Telsia_Shot5 );
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam1 );
+	
+	//--- wait for telsia to finish speaking
+	globalCoop_dialog_waitForDialog( $telsia );
+	wait( .2 );
+	
+	globalCoop_dialog_play($munro,"borg01/munro_goodj1.mp3", 1, 20000, 0 ); //Good job
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//shot5 slow pan around group as telsia and chell speak
+	
+	//--- set camera
+	globalCoop_cin_fov($cam2, 60 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_follow($cam2, $m1l1c_Telsia_Shot6 );
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam2 );
+	
+	thread globalCoop_dialog_play($telsia,"borg01/telsia_endata.mp3", 1, 20000, 0 ); //They beamed in right after I decrypted data about new drone technology
+	wait( 2 );
+	
+	//--- have chell face the group
+	$chell.anim( "idle" );
+	$chell.useActorWeapon( "none" );
+	$chell.turnTowardsEntity( $munro );
+	$chell.headWatchTarget( "telsia", 3 );
+
+	globalCoop_dialog_waitForDialog( $telsia );
+	wait( .2 );
+
+	thread globalCoop_dialog_play($chell,"borg01/chell_major.mp3", 1, 20000, 0 ); //That must be some important data. They didn't beam in even when we were shooting up the place
+	wait( .5 );
+	
+	$munro.turnToAngle( 270 );
+	$telsia.turnToAngle( 0 );
+	
+	$munro.headWatchTarget( "chell", 3 );
+	$telsia.headWatchTarget( "chell", 3 );
+	wait( 2 );
+	
+	$chell.headWatchTarget( "munro", 2 );
+	
+	globalCoop_dialog_waitForDialog( $chell );
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//shot6 push in on munro
+	
+	//--- set camera
+	globalCoop_cin_fov($cam1, 50 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_follow($cam1, $m1l1c_Telsia_Shot7 );
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam1 );
+
+	thread globalCoop_dialog_play($munro,"borg01/munro_messy.mp3", 1, 20000, 0 ); //That means they classified us as a threat. This just got messy
+	wait( .2 );
+	
+	$telsia.headWatchTarget( "munro", 5 );
+	wait( 1.8 );
+	
+	$munro.headWatchTarget( "telsia", 5 );
+
+	//--- wait for munro to finish speaking
+	globalCoop_dialog_waitForDialog( $munro );
+	wait( 1 );
+	
+	$munro.morph( "exp_brows_down" );
+	//$munro.headWatchTarget( "chell", 5 );
+	wait( 1 );
+	
+	thread cinematicTelsiaSaved_Skipthread();
+}
+
+//-----------------------------
+// cinematicTelsiaSaved_Skipthread
+// skipthread for cinematic
+//-----------------------------
+void cinematicTelsiaSaved_Skipthread()
+{
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematicTelsiaSaved" );
+
+	//fade to black
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	//--- stop the chatter
+	$munro.stopdialog();
+	$telsia.stopdialog();
+	$chell.stopdialog();
+	
+	
+//delete the camera paths, reduce entity count
+	globalCoop_level_removePath($m1l1c_rescuecam);
+	globalCoop_level_removePath($m1l1c_TelsiaLost_Shot1);
+	globalCoop_level_removePath($m1l1c_TelsiaLost_Shot3);
+	globalCoop_level_removePath($m1l1c_TelsiaLost_Shot4);
+	globalCoop_level_removePath($m1l1c_Telsia_Shot5);
+	globalCoop_level_removePath($m1l1c_Telsia_Shot6);
+	globalCoop_level_removePath($m1l1c_Telsia_Shot7);
+	
+	//--- hide the fake munro
+	globalCommon_AiDummyHide( $munro );
+	
+	//--- reset any headwatches
+	$munro.headWatchTarget( "none", 10 );
+	$chell.headWatchTarget( "none", 10 );
+	$telsia.headWatchTarget( "none", 10 );
+	
+	//--- warp the player
+	$munro.warpTo( "nodeMunro_WalkTo1" );
+	wait( .1 );
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.warp( $munro.getOrigin() );
+		wait( .1 );
+		$player.turnTowardsEntity( $chell );
+		$chell.turnTowardsEntity( $player );
+	}
+	$telsia.turnTowardsEntity( $chell );
+	wait( .5 );
+	
+	globalCoop_cin_end();
+	wait( .3 );
+
+	//--- fade in	
+	globalCoop_main_camFadeIn(.3);
+	wait( .3 );
+
+	//--TEMP: show archtype after cinematic due to it originally causing visual interference
+	$plasma6_model_damaged.solid();
+
+	//--- chell gives the next objective anc retract the terminal
+	thread infoTerminal_Retract();
+	
+	globalCoop_dialog_play($chell,"borg01/chell_getto.mp3", 1, 20000, 1 ); //We need to get to the lift to Sub-Junction 37.  I've fed the location to your tricorder
+
+	globalCoop_objectives_update("complete",5,0);
+	thread globalCoop_objectives_update("inComplete",6,1);
+	
+	//--- set the objective
+	setfloatvar( "game.saveTelsiaObjective", 2 );
+	setfloatvar( "game.getToMainLift", 1 );
+	//setupObjectives();
+
+	//--- give teammates compression rifles after cinematic, before resuming
+	$chell.useactorweapon( "CompressionRifle" );
+	$telsia.useactorweapon( "CompressionRifle" );
+	
+	//--- turn on the teammates AI
+	globalCommon_AiActor( $chell );
+	globalCommon_AiActor( $telsia );
+	$telsia.settendency( "follow" , 1 );
+	
+	coop_followClosestPlayer($telsia);
+	coop_followClosestPlayer($chell);
+	$chell.allowFall(0);
+	$telisa.allowFall(0);
+
+	//--- set trigger
+	$seq_underattack4_trigger.triggerable();
+}
+
+//-----------------------------
+// walk munro into the room
+void cinematicTelsiaSaved_WalkMunro()
+{
+	globalCommon_AiDummy( $munro, "" );
+	globalCineFX_PositionObject( $munro, $nodeMunro_Start );
+	wait( .1 );
+	
+	$munro.walkto( "$nodeMunro_WalkTo1", "walk" );
+	waitFor( $munro );
+	
+	$munro.turnTowardsEntity( $telsia );
+	wait( .2 );
+	
+	$telsia.turnTowardsEntity( $munro );
+}
+
+
+//===================================================================================================================================================
+//===================================================================================================================================================
+
+//------------------------
+void cinematic_ending()
+//------------------------
+{
+	//--- start cinematic commands
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	cam.load( "m1l1c_endlift" );
+
+	//--- alter the music
+    allowMusicDucking( 0 );
+    music ("success");
+
+	//--- turn off teammates
+	$chell.ai_off();
+	$telsia.ai_off();
+	$munro.ai_off();
+	
+	$munro.show();
+
+	//--- position and show the cinematic characters	
+	$munro.warpto( "$cinematic_ending_munro5" );
+	$chell.warpto( "$cinematic_ending_chell5" );
+	$telsia.warpto( "$cinematic_ending_telsia5" );
+	
+	$munro.useActorWeapon( "none" );
+	$chell.useActorWeapon( "none" );
+	$telsia.useActorWeapon( "none" );
+	wait( 1 );	
+
+	//--------------------------------------------------------
+	//--- shot of munro and korban exiting the holodeck
+	
+	globalCoop_cin_fov($cam1, 60 );
+	globalCoop_cin_follow($cam1, $m1l1c_endlift );
+	//$cam1.watch ( "$cinematic_munro" );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( .2 );
+
+	//--- fade in
+	globalCoop_main_camFadeIn(.5);
+	$endlift.playsound( "sound/environment/switches/switch_01.wav", 6, 1, 250 );
+	wait( .5 );
+
+	thread globalAccelMove( $endlift, '0 0 750', 7, "rampupdown", "sound/environment/machine/solanlift.wav" );
+	if(!cvar_bool_multiplayer){//Singleplayer
+		wait( 4.25 );
+	}else{
+		wait( 3.5 );
+		thread coop_endLevel();
+	}
+	
+	globalCoop_main_camFadeOut(.4);
+	wait( .4 );
+
+	if(!cvar_bool_multiplayer){//SP
+		//--- change levels
+		spawn ( "trigger_changelevel", "targetname", "trigger_endlevel", "map", "m1l2a-borg_sphere" );
+		wait ( .5 );
+		trigger ( "$trigger_endlevel" );
+	}
+	thread globalCoop_level_removePath($m1l1c_endlift);
+}
+

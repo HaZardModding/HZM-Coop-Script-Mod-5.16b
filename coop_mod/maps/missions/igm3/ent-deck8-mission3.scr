@@ -1,0 +1,943 @@
+//-----------------------------------------------------------------
+//
+//	EF2	Level Script File
+//
+//	Level:		  ent-deck8	- MISSION 3
+//	Script By:	  K.Thompson
+//	Created	on:	  08/12/2002
+//	Last Edited:  08/12/2002 - kt
+//-----------------------------------------------------------------
+
+void setupMission3Deck8();
+void justLoadedDeckThreadIGM3();
+
+void munroOnDeck8IGM3();
+void picardCallsPlayer();
+
+void cinematicSickBayLurker();
+void cinematicSickBayLurkerSkipthread();
+void cinematicSickBayLurkerEnd();
+
+void korban_workIGM3();
+void korbanDialog3_1();
+void korbanDialog3_2();
+
+void tuvok_workIGM3();
+void tuvokDialog3_1();
+void tuvokDialog3_2();
+void tuvokDialog3_3();
+
+void hidePicardAndTuvokIGM3();
+
+void ambientActorsIGM3();
+
+void russelWatersTalkIGM3();
+
+void strattonJohnsonTalkIGM3();
+
+void stratton_workIGM3();
+void strattonDialog3_1();
+
+void johnson_workIGM3();
+void johnsonDialog3_1();
+
+void katchersideJacobsTalkIGM3();
+
+void katcherside_workIGM3();
+void katchersideDialog3_1();
+
+void jacobs_workIGM3();
+void jacobsDialog3_1();
+
+void dorchev_workIGM3();
+void dorchevDialog3_1();
+void dorchevDialog3_2();
+void dorchevDialog3_3();
+
+void stevenson_workIGM3();
+void stevensonDialog3_1();
+void stevensonDialog3_2();
+void stevensonDialog3_3();
+
+void kretar_workIGM3();
+void kretarDialog3_1();
+void kretarDialog3_2();
+void kretarDialog3_3();
+//void kretarDialog3_4();
+
+void jurot_workIGM3();
+void jurotDialog3_1();
+void jurotDialog3_2();
+void jurotDialog3_3();
+
+//-----------------------------
+//--- variables
+
+entity cinematicArm_IGM3_Sickbay;
+
+
+//===================================================================================================================
+// Setup
+//===================================================================================================================
+
+//---------------------
+// setupMission3Deck8
+// does	all	the	setup stuff	for	the	mission
+//---------------------
+void setupMission3Deck8()
+{
+	//--- set the player
+	coop_string_objectiveItem1			= "IGM3TalkWithPicard";
+	coop_string_objectiveItem2			= "IGM3GoToLibaray";
+	coop_string_objectiveItem3			= "IGM3MeetInBriefingRoom";
+	coop_string_objectiveItem4			= "IGM3GoToTransporterRoom";
+	if(!cvar_bool_multiplayer)
+	{
+		waitforplayer();
+		$player.immobilize( 1 );
+		$player.origin ( '-9760 -1240 32' );
+		$player.playerviewangles( '0 270 0' );
+		$player.model( "models/char/munro_sf.tik" );
+		
+		setfloatvar("game.checkEntMission3RoomsVisited",0);
+	}
+	else{
+		stuffcmd("seta coop_igmT 0\n");
+	}
+	cam.load( "cam1_ent_deck8_igm3"	);
+	cam.load( "cam2_ent_deck8_igm3"	);
+
+	coop_freeinventoryHealth100AndGive("models/weapons/worldmodel-tricorder-stx.tik");
+
+	ambientActorsIGM3();	
+	
+//SPAWN CHARS - LOAD FROM CAM FILE, SO WE DO NOTUSE STATMENTS IN SCRIPT
+	cam.load( "ent_deck8_igm3_chars" );
+	globalCoop_main_waitAFrame();
+	$picard.ai_off();
+	$picard.angle(300);
+	$tuvok.ai_off();
+	$tuvok.angle(315);
+	$stevenson.ai_off();
+	$stevenson.angle(90);
+	$scriptmunro.ai_off();
+	$scriptmunro.angle(270);
+	$scriptmunro.hide();
+	$korban.ai_off();
+	$korban.angle(90);
+/*
+	globalCommon_SpawnActor("char/starfleet_picard.tik","picard",'-11052 -1132 16',300);
+	globalCommon_SpawnActor("char/starfleet_tuvok.tik","tuvok",'-11108 -1132 16',315);
+	globalCommon_SpawnActor("char/starfleet_crew-female3.tik","stevenson",'-11028 -1236 16',90);
+	globalCommon_SpawnActor("char/hazardteam_sf-munro.tik","scriptmunro",'-9760 -1240 36',270);
+	globalCommon_SpawnActor("char/hazardteam_sf-kourban.tik","korban",'-12492 -1252 0',90);
+*/
+	
+	thread randomlyAnimateActor( $korban, "ent-stand" );
+	$korban.setfloatVar( "actorToRandomlyUseTricorder", 1 );
+	thread korban_workIGM3();
+
+	globalCommon_SpawnScriptModel( "char/alien-type1a-lurker-autopsy.tik", "lurker", '-11036 -1182 50', 270 );
+	$lurker.anim( "idle" );
+
+	globalCoop_level_hideAndNotSolid($scriptmunro);
+	thread munroOnDeck8IGM3();
+
+	//--- armature setup
+	cinematicArm_IGM3_Sickbay = createCinematic( "igm3-autopsy"	);
+	cinematicArm_IGM3_Sickbay.setendthread(	"cinematicSickBayLurkerEnd"	);
+	
+//setup objective
+	thread globalCoop_objectives_update("inComplete",1,1);//state,slot,show
+}
+
+//---------------------
+// justLoadedDeckThreadIGM3
+// Triggered and check to see if A cinematic should	happen.
+//------------------------
+void justLoadedDeckThreadIGM3()
+{
+/*
+	if(getfloatvar("game.spokenWithPicardIGM3") >= 1 ){
+		$player.setobjectiveshow( "IGM3TalkWithPicard", 1);
+	}
+	if(getfloatvar("game.spokenWithPicardIGM3") == 2 ){
+		$player.setobjectivecomplete( "IGM3TalkWithPicard", 1 );
+	}
+	if(getfloatvar("game.goToLibaryIGM3") >= 1 ){
+		$player.setobjectiveshow("IGM3GoToLibaray", 1);
+	}
+	if(getfloatvar("game.goToLibaryIGM3") == 2 ){
+		$player.setobjectivecomplete( "IGM3GoToLibaray", 1 );
+	}
+
+	if(getfloatvar("game.IGM3MeetInBriefingRoom") >= 1 ){
+		$player.setobjectiveshow( "IGM3MeetInBriefingRoom", 1 );
+	}
+	if(getfloatvar("game.IGM3MeetInBriefingRoom") == 2 ){
+		$player.setobjectivecomplete( "IGM3MeetInBriefingRoom", 1 );
+	}
+*/
+
+}
+
+//---------------------
+// munroOnDeck8IGM3
+// Calls Picards Dialogue Line
+//---------------------
+void munroOnDeck8IGM3()
+{
+	if(cvar_bool_multiplayer){
+		globalCoop_main_waitForWarmupTime();
+		wait(1.5);
+	}
+	camfadein05();
+
+	globalCoop_player_displayEffectAll("TransportIn","Federation");
+	wait_3();
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.immobilize( 0 );
+	}
+
+	thread picardCallsPlayer();
+
+	globalCoop_main_waitZeroDot5();
+
+	//--- objectives
+	setfloatvar("game.spokenWithPicardIGM3",1);
+	justLoadedDeckThreadIGM3();
+	$sickBayTableTrigger.thread( "cinematicSickBayLurker" );
+}
+
+//---------------------
+// cinematicSickBayLurker
+// Setup and begin cinematic
+//---------------------
+void picardCallsPlayer()
+{
+	//Picard to	Munro. Meet	me in Sickbay.
+	globalCoop_dialog_play($picard,"ent_m3/picard_sickbay.mp3", 1, 10000, 1);
+	wait_45();
+
+	//Lieutenant Munro, we are waiting for you in sickbay.
+	globalCoop_dialog_play($picard,"ent_m3/picard_hurrysick.mp3", 1, 10000, 1);
+	wait_45();
+
+//Code Bug = Hack ***********************************************************************************************************
+//	while( 1 )
+//	{
+		//Lieutenant, you are ordered to report to sickbay immediately.
+		globalCoop_dialog_play($picard,"ent_m3/Picard_hurrysick2.mp3", 1,	10000, 1);
+		wait_45();
+//	}
+
+//	$player.missionfailed();
+}
+
+//---------------------
+// cinematicSickBayLurker
+// Setup and begin cinematic
+//---------------------
+void cinematicSickBayLurker()
+{
+	$sickBayTableTrigger.thread( ""	);
+
+	//Keep Mission From Failing
+	killthread( "picardCallsPlayer" );
+	globalCoop_dialog_stopAll();
+
+	//--- starting cinematic commands
+	globalCoop_cin_start();
+
+	//--- fade out
+	globalCoop_main_camFadeOut(.5);
+	wait_06();
+
+
+	//--- hide the player and AI
+	globalCommon_AiDummyHide( $scriptmunro );
+	globalCommon_AiDummyHide( $picard );
+	$stevenson.hide();
+	$tuvok.hide();
+
+	//--- start the	armature
+	cinematicArm_IGM3_Sickbay.beginCinematic( "igm3_autopsy" );
+	globalCoop_main_waitZeroDot2();
+
+	//--- fade in
+	camfadein1();
+	//allowmusicducking ( 0 );
+	music ( "aux3" );
+
+	//--- set the skipthread
+	globalCoop_cin_skipThread( "cinematicSickBayLurkerEnd" );
+}
+
+//---------------------
+// cinematicSickBayLurkerSkipthread
+// skipthread that calls the skipthread	routines
+//------------------------
+void cinematicSickBayLurkerSkipthread()
+{
+	//--- kill the cinematic thread
+	skipthread( "Null" );
+	killthread( "cinematicSickBayLurker" );
+	thread cinematicSickBayLurkerEnd();
+}
+
+
+//---------------------
+// cinematicSickBayLurkerEnd
+// wrapup the cinematic
+//------------------------
+void cinematicSickBayLurkerEnd()
+{
+	//kill the cinematic
+	skipthread( "null" );
+
+	//fade to black
+	camfadeout05();
+	wait_06();
+	music ( "normal" );
+
+	//--- end the armature cinematics, FALSE means don't launch the	end thread
+	cinematicArm_IGM3_Sickbay.endCinematic(	FALSE );
+
+	killthread( "cinematicSickBayLurker" );
+
+	globalCoop_dialog_stopAll();
+
+	//--- position and setup ambient actors
+	$triggerHoloDeck.thread( "hidePicardAndTuvokIGM3" );
+	$triggerTransporterRoom.thread(	"hidePicardAndTuvokIGM3" );
+	$triggerBrig.thread( "hidePicardAndTuvokIGM3" );
+
+	//--- set the player
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.warp( '-11124 -1244 16'	);
+		$player.turnTowardsEntity( $stevenson );
+	}
+
+	//Turn Exit Triggers On
+	$triggerExit.triggerable();
+
+	$stevenson.show();
+	$stevenson.origin( '-11128 -1184 0' );
+	$stevenson.angle( 0 );
+	thread randomlyAnimateActor( $stevenson, "ent-sickbed" );
+	$stevenson.setfloatVar( "actorToRandomlyUseTricorder", 1 );
+	thread stevenson_workIGM3();
+
+	$tuvok.show();
+	globalCommon_AiActorUseWeapon( $tuvok, "EnterpriseDatapad" );
+	$tuvok.pushable( 0 );
+	$tuvok.angle( 315 );
+	$tuvok.anim( "ent-datapad-use" );
+	thread tuvok_workIGM3();
+
+	//--- release the cinematic
+	globalCoop_cin_end();
+	globalCoop_main_waitZeroDot5();
+
+	camfadein05();
+	if(!cvar_bool_multiplayer){//Singleplayer
+		setFloatVar("game.spokenWithPicardIGM3",2);
+		setFloatVar("game.goToLibaryIGM3",2);
+		setFloatVar("game.checkEntMission3RoomsVisited",1);
+		setFloatVar("game.checkEntMission3RoomsVisited",1);
+		setfloatvar("level.deckToChangeToIGM",11);
+	}
+	else{
+		stuffCMD("seta coop_igmT 11\n");
+	}
+	globalCoop_main_waitZeroDot5();
+	
+	globalCoop_objectives_update("complete",1,0);//state,slot,show
+	thread globalCoop_objectives_update("inComplete",2,1);//state,slot,show
+	//justLoadedDeckThreadIGM3();
+	
+//Kre'tar shouldn't talk about Picard waiting on him now. (office-doctor)
+	setNextDialog( $kretar,	2 );
+	
+//allow Turbolift to change the deck now
+	setfloatvar("level.playerTalkedWithPicard",1);
+}
+
+//---------------------
+// hidePicardAndTuvokIGM3
+// Hide	actors after relvent cinematic && player is out	of sight
+//------------------------
+void hidePicardAndTuvokIGM3()
+{
+	//Null threads except one to see if it is beamout cinematic	time.
+	$triggerHoloDeck.thread( "" );
+	$triggerDeck8Cargo1.thread( "" );
+	$triggerDeck8Cargo2.thread( "" );
+	$triggerDeck8Cargo2.thread( "" );
+	$triggerBrig.thread( ""	);
+
+	globalCoop_level_hideAndNotSolid($picard);
+	globalCoop_level_hideAndNotSolid($tuvok);
+}
+
+//---------------------
+// korban_workIGM3
+// Makes Kourban Patrol
+//---------------------
+void korban_workIGM3()
+{
+	setNextDialog( $korban,	1 );
+	setDialogFunction( $korban, "korbanDialog" );
+
+	while( 1 )
+	{
+		workUntilUsed( $korban,	"", "", 0 );
+		talkUntilDone( $korban );
+	}
+}
+
+//---------------------
+// korbanIGMDialog3_1
+// First Lie of	Kourbans Dialog
+//---------------------
+void korbanDialog3_1()
+{
+	//Korban.
+	globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($korban),"ent_m3/munro_korban1.mp3",1,10000,0);
+	//I	yearn for battle!
+	coop_ambientActorDialog($korban,"ent_m3/korban_yearn.mp3","ent-stand-scan",0);
+}
+
+//---------------------
+// korbanIGMDialog3_2
+// First Lie of	Kourbans Dialog
+//---------------------
+void korbanDialog3_2()
+{
+	//Hello.
+	globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($korban),"ent_m3/munro_hello3.mp3", 1,	10000, 0);
+	//These	aliens do not frighten me.
+	coop_ambientActorDialog($korban,"ent_m3/korban_notfright.mp3","ent-stand-scan",0);
+}
+
+///////////////////////////
+// tuvokOnUseWaitIGM3
+// Wait	for	player to talk to actor
+///////////////////////////
+void tuvok_workIGM3()
+{
+	setNextDialog( $tuvok, 1 );
+	setDialogFunction( $tuvok, "tuvokDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $tuvok, "", "", 0 );
+		talkUntilDone( $tuvok );
+	}
+}
+
+///////////////////////////
+// tuvokDialog3_1
+// Player and actor	talk
+///////////////////////////
+void tuvokDialog3_1()
+{
+	//I believe you have a planet to	investigate, lieutenant.
+	coop_ambientActorDialog($tuvok,"ent_m3/tuvok_planet.mp3","ent-datapad-scan",1);
+	$tuvok.angle( 315 );
+	$tuvok.anim( "ent-datapad-use" );
+}
+
+///////////////////////////
+// tuvokDialog3_2
+// Player and actor	talk
+///////////////////////////
+void tuvokDialog3_2()
+{
+	//Use caution, as you will likely encounter	other aliens on	your mission.
+	coop_ambientActorDialog($tuvok,"ent_m3/tuvok_unknown.mp3","ent-datapad-scan",1);
+	$tuvok.angle( 315 );
+	$tuvok.anim( "ent-datapad-use" );
+}
+
+///////////////////////////
+// tuvokDialog2_3
+// Player and actor	talk
+///////////////////////////
+void tuvokDialog3_3()
+{
+	//Lieutenant, I don't have time to speak to you now.
+	coop_ambientActorDialog($tuvok,"ent_m3/tuvok_10forw.mp3","ent-datapad-scan",1);
+	$tuvok.angle( 315 );
+	$tuvok.anim( "ent-datapad-use" );
+}
+
+//===================================================================================================================
+// Ambient Actors
+//===================================================================================================================
+//---------------------
+// ambientActorsIGM3
+// Set up ambient Actors
+//---------------------
+void ambientActorsIGM3()
+{
+	coop_SpawnActorRandomAnimPushable0( "char/starfleet_crew-male2.tik", "dorchev", '-9787 -1663 24', 210,"ent-transporter-front");
+	thread dorchev_workIGM3();
+
+	globalCommon_SpawnActor( "char/starfleet_crew-female4.tik", "kretar", '-11744 -848  0', 180 );
+	thread randomlyAnimateActor( $kretar, "ent-table-laptop" );
+	thread kretar_workIGM3();
+
+	globalCommon_SpawnScriptModel( "enviro/enterprise_electronic_laptop.tik", "laptop", '-11757 -848 46', 0 );
+	globalCoop_main_waitAFrame();
+	$laptop.anim( "open_idle" );
+
+	globalCommon_SpawnActor( "char/hazardteam_sf-jurot.tik", "jurot", '-11484 -968 2', 0 );
+	thread randomlyAnimateActor( $jurot, "ent-sickbed-sitting" );
+	thread jurot_workIGM3();
+
+	globalCoop_main_waitAFrame();
+	
+	globalCommon_SpawnActor( "char/hazardteam_sf-redshirt3.tik", "mustaine", '-11984 -2330 16', 0 );
+	$mustaine.setnodeid( 52 );
+/* 	COOP
+	$mustaine.alias( "mustaineIGMA1", "localization/sound/dialog/ent_m3/devald_sorry.mp3", 1, 128, 0); //Sorry, I can't chat right now.
+	$mustaine.dialog( "mustaineIGMA" ); */
+	$mustaine.ai_on();
+
+	coop_SpawnActorRandomAnimPushable0("char/starfleet_crew-male6.tik","russel",'-12056 -1252 16',90,"conv");
+	coop_SpawnActorRandomAnimPushable0("char/hazardteam_sf-redshirt4.tik","waters",'-12056 -1192 16',270,"conv");
+	$triggerArmoryHall.thread( "russelWatersTalkIGM3" );
+	$russel.headwatch( $waters, 5 );
+	$waters.headwatch( $russel, 5 );
+	globalCoop_main_wait1DotZero();
+
+	coop_SpawnActorRandomAnimPushable0("char/starfleet_crew-male3.tik","stratton",'-11908 -72 16',315,"conv");
+	coop_SpawnActorRandomAnimPushable0("char/starfleet_crew-male4.tik","johnson",'-11868 -112 16',135,"conv");
+	$stratton.headwatch( $johnson, 5 );
+	$johnson.headwatch( $stratton, 5 );
+	$triggerIndentHall.thread( "strattonJohnsonTalkIGM3" );
+	globalCoop_main_wait1DotZero();
+
+	coop_SpawnActorRandomAnimPushable0("char/hazardteam_sf-redshirt5.tik","katcherside",'-12048 -2428 16',205,"conv");
+	coop_SpawnActorRandomAnimPushable0("char/starfleet_crew-male.tik","jacobs",'-12096 -2460 16',35,"conv");
+	$triggerTurboliftHall.thread( "katchersideJacobsTalkIGM3" );
+	$katcherside.headwatch(	$jacobs, 5 );
+	$jacobs.headwatch( $katcherside, 5 );
+}
+
+///////////////////////////
+// katchersideJacobsTalkIGM3
+// Wait	for	player to walk to actor
+///////////////////////////
+
+void katchersideJacobsTalkIGM3()
+{
+	$triggerTurboliftHall.thread( "" );
+
+	$katcherside.setFloatVar( "pauseRandomAnimate",	1 );
+	$jacobs.setFloatVar( "pauseRandomAnimate", 1 );
+	wait_025();
+	$katcherside.anim( "idle" );
+	$jacobs.anim( "idle" );
+
+	//I'm really enjoying the Federation Assault	Rifle.	It's a big improvement.
+	coop_playDialogNoHead_64($jacobs,"ent_m3/crewm1_stelcart.mp3");
+	//I	disagree. Nothing really beats	the	Compression	Rifle for pure skill.
+	coop_playDialogNoHead_64($katcherside,"ent_m3/crewm2_dontgoup.mp3");
+	//It	depends	on the situation.  For sheer damage	to a close target,	I'll take the Assault Rifle	over the Compression Rifle any day.
+	coop_playDialogNoHead_64($jacobs,"ent_m3/crewm1_checkout.mp3");
+	//There's no skill involved	in firing a	weapon like	that.  You'll hit anything closer than 3 meters.
+	coop_playDialogNoHead_64($katcherside,"ent_m3/crewm2_allright.mp3");
+	//Some	situations call	for	that kind of firepower.
+	coop_playDialogNoHead_64($jacobs,"ent_m3/crewm1_hotter.mp3");
+	//I prefer the Compression Rifle's ability to	hit	targets	at range.
+	coop_playDialogNoHead_64($katcherside,"ent_m3/crewm2_oriond.mp3");
+	//To	each his own.
+	coop_playDialogNoHead_64($jacobs,"ent_m3/crewm1_notjusts.mp3");
+	$katcherside.setFloatVar( "pauseRandomAnimate",	0 );
+	$jacobs.setFloatVar( "pauseRandomAnimate", 0 );
+
+	thread katcherside_workIGM3();
+	thread jacobs_workIGM3();
+}
+
+///////////////////////////
+// Wait	for player to talk to actor
+///////////////////////////
+void katcherside_workIGM3()
+{
+	setNextDialog( $katcherside, 1 );
+	setDialogFunction( $katcherside, "katchersideDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $katcherside, "", "", 0 );
+		talkUntilDone( $katcherside	);
+	}
+}
+
+
+///////////////////////////
+// Player and actor talk
+///////////////////////////
+void katchersideDialog3_1()
+{
+	//Can I	help you?
+	coop_ambientActorDialog($katcherside,"ent_m3/devald_canihelp.mp3","idle",1);
+	$katcherside.turnTowardsEntity(	$jacobs	);
+}
+
+///////////////////////////
+// Wait	for player to talk to actor
+///////////////////////////
+void jacobs_workIGM3()
+{
+	setNextDialog( $jacobs,	1 );
+	setDialogFunction( $jacobs, "jacobsDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $jacobs,	"", "",	0 );
+		talkUntilDone( $jacobs );
+	}
+}
+
+
+///////////////////////////
+// Player and actor talk
+///////////////////////////
+void jacobsDialog3_1()
+{
+	//I'm busy.
+	coop_ambientActorDialog($jacobs,"ent_m2/stratton_busy1.mp3","idle",1);
+	$jacobs.turnTowardsEntity( $katcherside );
+}
+
+
+///////////////////////////
+// russelWatersTalkIGM3
+// Wait	for player to walk to actor
+///////////////////////////
+
+void russelWatersTalkIGM3()
+{
+	$triggerArmoryHall.thread( "" );
+
+	$russel.setFloatVar( "pauseRandomAnimate", 1 );
+	$waters.setFloatVar( "pauseRandomAnimate", 1 );
+	wait_025();
+	$russel.anim( "idle" );
+	$waters.anim( "idle" );
+
+	//Ever since we returned from Rigel I've	been feeling under the weather.
+	coop_playDialogNoHead_64($russel,"ent_m3/crewm1_stopsick.mp3");
+	//You look really	ill.  I	wonder if you have Rigel fever?
+	coop_playDialogNoHead_64($waters,"ent_m3/crewm2_nothear.mp3");
+	//No one's had that for a hundred years.
+	coop_playDialogNoHead_64($russel,"ent_m3/crewm1_week.mp3");
+	//Feeling	under the weather is the main symptom.	You better rest and have the doctor run some scans.
+	coop_playDialogNoHead_64($waters,"ent_m3/crewm2_partcon.mp3");
+	//Ok, but	this won't keep	me from	playing	tonight's game in our chess tournament.
+	coop_playDialogNoHead_64($russel,"ent_m3/crewm1_ordered.mp3");
+	//It's still not to late to forfeit.
+	coop_playDialogNoHead_64($waters,"ent_m3/crewm2_refuse.mp3");
+	//Forget it.  Even if I	have Rigel fever, I'm gonna beat you again, and make it six games to nothing.
+	coop_playDialogNoHead_64($russel,"ent_m3/crewm1_markw.mp3");
+
+	$russel.resethead();
+	$waters.resethead();
+
+	$russel.setnodeid( 50 );
+/* 	coop
+	$russel.alias( "russelIGMA1", "localization/sound/dialog/ent_m3/devald_canihelp.mp3" ); //Can I help you?
+	$russel.dialog( "russelIGMA" ); */
+	$russel.ai_on();
+
+	$waters.setnodeid( 51 );
+/*  coop
+	$waters.alias( "watersIGMA1", "localization/sound/dialog/ent_m2/stratton_busy1.mp3" ); //I'm busy.
+	$waters.dialog( "watersIGMA" ); */
+	$waters.ai_on();
+}
+
+///////////////////////////
+// strattonJohnsonTalkIGM3
+// Wait	for player to talk to actor
+///////////////////////////
+void strattonJohnsonTalkIGM3()
+{
+	$triggerIndentHall.thread( "" );
+
+	//You really think those were the same creatures that attacked the Dallas?
+	coop_playDialogNoHead_64($stratton,"ent_m3/crewm1_samec.mp3");
+	//Looks like it.
+	coop_playDialogNoHead_64($johnson,"ent_m3/crewm2_seemso.mp3");
+	//I heard they nearly wiped out the entire space station. A lot of Attrexians were killed.
+	coop_playDialogNoHead_64($stratton,"ent_m3/crewm1_virtual.mp3");
+	//As long as the remaining Dallas crew members are safe..
+	coop_playDialogNoHead_64($johnson,"ent_m3/crewm2_hopefull.mp3");
+	//That's a	bit callous, don't you think?
+	coop_playDialogNoHead_64($stratton,"ent_m3/crewm1_call.mp3");
+	//I'm just saying	we could use the extra crew. You saw what they	did to the Dallas. We need to be prepared in case they attack.
+	coop_playDialogNoHead_64($johnson,"ent_m3/crewm2_yousaw.mp3");
+	//We're not going to make the same	mistake	the Dallas made. We won't let them get close enough to attack.
+	coop_playDialogNoHead_64($stratton,"ent_m3/crewm1_none.mp3");
+
+	$stratton.setFloatVar( "pauseRandomAnimate", 0 );
+	$johnson.setFloatVar( "pauseRandomAnimate", 0 );
+
+	thread stratton_workIGM3();
+	thread johnson_workIGM3();
+}
+
+///////////////////////////
+// Wait	for player to talk to actor
+///////////////////////////
+void stratton_workIGM3 ()
+{
+	setNextDialog( $stratton, 1 );
+	setDialogFunction( $stratton, "strattonDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $stratton, "", "", 0 );
+		talkUntilDone( $stratton );
+	}
+}
+
+///////////////////////////
+// Player and actor	talk
+///////////////////////////
+void strattonDialog3_1()
+{
+	//Can I help you?
+	coop_ambientActorDialog($stratton,"ent_m3/devald_canihelp.mp3","idle",1);
+	$stratton.turnTowardsEntity( $johnson );
+}
+
+///////////////////////////
+// Wait	for player to talk to actor
+///////////////////////////
+void johnson_workIGM3 ()
+{
+	setNextDialog( $johnson, 1 );
+	setDialogFunction( $johnson, "johnsonDialog"	);
+	while( 1 )
+	{
+		workUntilUsed( $johnson, "", "", 0 );
+		talkUntilDone( $johnson	);
+	}
+}
+
+
+///////////////////////////
+// Player and actor talk
+///////////////////////////
+void johnsonDialog3_1()
+{
+	//I'm busy.
+	coop_ambientActorDialog($johnson,"ent_m2/stratton_busy1.mp3","idle",1);
+	$johnson.turnTowardsEntity( $stratton );
+}
+
+///////////////////////////
+// dorchevOnUseWaitIGM3
+// Wait	for	player to talk to actor
+///////////////////////////
+void dorchev_workIGM3()
+{
+	setNextDialog( $dorchev, 1 );
+	setDialogFunction( $dorchev, "dorchevDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $dorchev, "", "", 0  );
+		talkUntilDone( $dorchev	);
+	}
+}
+
+///////////////////////////
+// dorchevDialog3_1
+// Player and actor	talk
+///////////////////////////
+void dorchevDialog3_1()
+{
+//Hey Munro.
+	coop_ambientActorDialog($dorchev,"ent_m3/dorchev_heymunro.mp3","ent-transporter-front-scan",0);
+}
+
+///////////////////////////
+// dorchevDialog3_2
+// Player and actor talk
+///////////////////////////
+void dorchevDialog3_2()
+{
+	//I'm very busy, Munro. Can we talk later?
+	coop_ambientActorDialog($dorchev,"ent_m3/dorchev_later.mp3","ent-transporter-front-scan",0);
+}
+
+///////////////////////////
+// dorchevDialog3_3
+// Player and actor talk
+///////////////////////////
+void dorchevDialog3_3()
+{
+	//The Captain is waiting for you in	sickbay.
+	coop_ambientActorDialog($dorchev,"ent_m3/dorchev_sickbay.mp3","ent-transporter-front-scan",0);
+}
+
+///////////////////////////
+// stevensonOnUseWaitIGM3
+// Wait	for player to talk to actor
+///////////////////////////
+void stevenson_workIGM3()
+{
+	setNextDialog( $stevenson, 1 );
+	setDialogFunction( $stevenson, "stevensonDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $stevenson, "", "", 0 );
+		talkUntilDone( $stevenson );
+	}
+}
+
+///////////////////////////
+// stevensonDialog3_1
+// Player and actor talk
+///////////////////////////
+void stevensonDialog3_1()
+{
+	//Thanks for bringing back this	alien. It's	yielding a lot of useful information.
+	coop_ambientActorDialog($stevenson,"ent_m3/doc_scanalien.mp3","ent-sickbed-scan",0);
+}
+
+///////////////////////////
+// stevensonDialog3_2
+// Player and actor talk
+///////////////////////////
+void stevensonDialog3_2()
+{
+	//Your team	has	performed admirably	under pressure.
+	coop_ambientActorDialog($stevenson,"ent_m3/doc_admirably.mp3","ent-sickbed-scan",0);
+}
+
+///////////////////////////
+// stevensonDialog3_3
+// Player and actor talk
+///////////////////////////
+void stevensonDialog3_3()
+{
+	//Come see me	if you need	medical	attention.
+	coop_ambientActorDialog($stevenson,"ent_m3/doc_comesee.mp3","ent-sickbed-scan",0);
+}
+
+///////////////////////////
+// kretarOnUseWaitIGM3
+// Wait	for player to talk to actor
+///////////////////////////
+void kretar_workIGM3()
+{
+	setNextDialog( $kretar,	1 );
+	setDialogFunction( $kretar, "kretarDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $kretar,	"", "",	0 );
+		talkUntilDone( $kretar );
+	}
+}
+
+///////////////////////////
+// kretarDialog3_1
+// Player and actor talk
+///////////////////////////
+void kretarDialog3_1()
+{
+	//Doctor Stevenson, Commander Tuvok, and Captain Picard are waiting for you.
+	coop_ambientActorDialog($kretar,"ent_m3/kretar_waiting.mp3","ent-table-laptop-scan",0);
+}
+
+///////////////////////////
+// kretarDialog3_2
+// Player and actor talk
+///////////////////////////
+void kretarDialog3_2()
+{
+	//Can	I help you?
+	coop_ambientActorDialog($kretar,"ent_m4/kretar_helpyou.mp3","ent-table-laptop-scan",0);
+	setNextDialog( $kretar,	3 );
+}
+
+///////////////////////////
+// kretarDialog3_3
+// Player and actor	talk
+///////////////////////////
+void kretarDialog3_3()
+{
+	//Do you need medical attention?
+	coop_ambientActorDialog($kretar,"ent_m4/kretar_needmed.mp3","ent-table-laptop-scan",0);
+	setNextDialog( $kretar,	2 );
+}
+
+///////////////////////////
+// jurotOnUseWaitIGM3
+// Wait	for	player to talk to actor
+///////////////////////////
+void jurot_workIGM3()
+{
+	setNextDialog( $jurot, 1 );
+	setDialogFunction( $jurot, "jurotDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $jurot, "", "", 0 );
+		talkUntilDone( $jurot );
+	}
+}
+
+///////////////////////////
+// jurotDialog3_1
+// Player and actor talk
+///////////////////////////
+void jurotDialog3_1()
+{
+	//I find the medical services onboard this ship most impressive.
+	coop_ambientActorDialog($jurot,"ent_m3/jurot_impressive.mp3","ent-sickbed-sitting-scan",0);
+}
+
+///////////////////////////
+// jurotDialog3_2
+// Player and actor talk
+///////////////////////////
+void jurotDialog3_2()
+{
+	//Munro, I'm about to receive a	physical.
+	coop_ambientActorDialog($jurot,"ent_m3/jurot_receive.mp3","ent-sickbed-sitting-scan",0);
+}
+
+///////////////////////////
+// jurotDialog3_3
+// Player and actor	talk
+///////////////////////////
+void jurotDialog3_3()
+{
+	//It's	good to	have Telsia	back.
+	coop_ambientActorDialog($jurot,"ent_m3/jurot_goodtels.mp3","ent-sickbed-sitting-scan",0);
+	$jurot.setFloatVar( "pauseRandomAnimate", 1 );
+	setNextDialog( $jurot, 1 );
+}
+
+//===================================================================================================================
+// Deck	Change Check
+//===================================================================================================================
+//---------------------
+// checkForDeckChangeIGM3
+//---------------------
+void checkForDeckChangeIGM3()
+{
+	entity eTrigger,ePlayer;
+	eTrigger=getCurrentEntity();
+	ePlayer=eTrigger.getLastActivatingEntity();
+	if(getfloatvar("level.playerTalkedWithPicard") == 1){
+		if(!cvar_bool_multiplayer){//Singleplayer
+			ePlayer=$scriptmunro;
+		}
+		thread coop_playDialogNoHead_20000(ePlayer,"ent_m1/munro_d11lib.mp3"); //Deck 11: Library
+	}
+}
+

@@ -1,0 +1,1468 @@
+
+void initDialog();
+
+//--- main character loadouts
+void initDialog_Telsia( entity entActor );
+void initDialog_Chell( entity entActor );
+void initDialog_Chang( entity entActor );
+void initDialog_Tuvok( entity entActor );
+void initDialog_Porter( entity entActor );
+void initDialog_Harry( entity entActor );
+void initDialog_Headmaster( entity entActor );
+void initDialog_Receptionist( entity entActor );
+
+//--- conversational character loadouts
+void initDialog_ConversationVoyager_Cadet1( entity entActor );
+void initDialog_ConversationVoyager_Cadet2( entity entActor );
+
+void initDialog_ConversationInquisition_Cadet1( entity entActor );
+void initDialog_ConversationInquisition_Cadet2( entity entActor );
+void initDialog_ConversationInquisition_Teacher( entity entActor );
+
+void initDialog_ConversationFemale_Female( entity entActor );
+void initDialog_ConversationFemale_Male( entity entActor );
+
+//--- generic character loadouts
+void initDialog_OfficialMale( entity entActor, float boolDoConversationalAnims, string strHeadCommand );
+void initDialog_OfficialFemale( entity entActor, float boolDoConversationalAnims, string strHeadCommand );
+void initDialog_TeacherMale( entity entActor, float boolDoConversationalAnims, string strHeadCommand );
+void initDialog_TeacherFemale( entity entActor, float boolDoConversationalAnims, string strHeadCommand );
+void initDialog_CadetMale( entity entActor, float boolDoConversationalAnims, string strHeadCommand );
+void initDialog_CadetFemale( entity entActor, float boolDoConversationalAnims, string strHeadCommand );
+
+//--- variables
+float intChoicePrevious_Male;
+float intActorChoicePrevious_Male;
+float intChoicePrevious_Female;
+float intActorChoicePrevious_Female;
+
+float intChoicePrevious_TeacherMale;
+float intActorChoicePrevious_TeacherMale;
+float intChoicePrevious_TeacherFemale;
+float intActorChoicePrevious_TeacherFemale;
+
+float intChoicePrevious_OfficialMale;
+float intActorChoicePrevious_OfficialMale;
+float intChoicePrevious_OfficialFemale;
+float intActorChoicePrevious_OfficialFemale;
+
+float intCounter = 1;
+
+
+
+//--------------------------------------------------------------------------------------
+// Dialog Script
+// 	Contains all dialog setup code for one specific BSP.  That map's script should
+//	#include this file and call the function "initDialog" somewhere in it's main function.
+//--------------------------------------------------------------------------------------
+void initDialog()
+{
+	//print( "SETTING UP DIALOG!!!\n" );
+	
+	//----------------------------------------------------------------------------------
+	//--- MAIN BUILDING
+	//----------------------------------------------------------------------------------
+
+	//-----------------------------------------
+	//--- stemmons
+	//--- dialog and watch modes
+	$stemmons.setdialogmode( "normal" );
+	$stemmons.settalkwatchmode ( "ignore", 0 );
+	
+	//--- alias and registering
+	$stemmons.alias( "generalStemmonsDialog1" , "localization/sound/dialog/m2l1/stem_dont.mp3", "stop" );	//The subject of your reassignment is closed, Lieutenant.
+	$stemmons.alias( "generalStemmonsDialog2" , "localization/sound/dialog/m2l1/stem_out.mp3", "stop" );	//There is nothing to be gained by petitioning my office. No one sees a need for a Hazard Team.
+	$stemmons.alias( "generalStemmonsDialog3" , "localization/sound/dialog/m2l1/stem_prec2.mp3" );			//I mean precisely what I say, Lieutenant. Now, if you don’t mind, some of us have jobs to do. 
+	
+	$stemmons.dialog( "generalStemmonsDialog" );
+
+	//--- receptionist
+	initDialog_Receptionist( $mainBuilding_ReceptionistFemale );
+
+	//--- officials
+	initDialog_OfficialMale( $mainBuilding_OfficialMale1, TRUE, "headwatchonly" );
+	initDialog_OfficialMale( $mainBuilding_OfficialMale2, TRUE, "headwatchonly" );
+	initDialog_OfficialFemale( $mainBuilding_OfficialFemale1, TRUE, "headwatchonly" );
+	initDialog_OfficialFemale( $mainBuilding_OfficialFemale2, TRUE, "headwatchonly" );
+	initDialog_OfficialFemale( $mainBuilding_OfficialFemale3, TRUE, "headwatchonly" );
+
+	//--- teachers
+	initDialog_TeacherMale( $mainBuilding_TeacherMale1, TRUE, "headwatchonly" );
+	initDialog_TeacherMale( $mainBuilding_TeacherMale2, FALSE, "turnto" );
+	initDialog_TeacherMale( $mainBuilding_TeacherMale4, FALSE, "ignore" );
+
+	//--- cadets
+	initDialog_CadetMale( $mainBuilding_CadetMale1, FALSE, "headwatchonly" );
+	initDialog_CadetMale( $mainBuilding_CadetMale2, FALSE, "headwatchonly" );
+	initDialog_CadetMale( $mainBuilding_CadetMale3, FALSE, "ignore" );
+	initDialog_CadetMale( $mainBuilding_CadetMale4, FALSE, "headwatchonly" );
+	initDialog_CadetMale( $mainBuilding_CadetMale5, TRUE, "headwatchonly" );
+	initDialog_CadetFemale( $mainBuilding_CadetFemale1, TRUE, "headwatchonly" );
+	initDialog_CadetFemale( $mainBuilding_CadetFemale2, FALSE, "headwatchonly" );
+	initDialog_CadetFemale( $mainBuilding_CadetFemale3, FALSE, "headwatchonly" );
+	initDialog_CadetFemale( $mainBuilding_CadetFemale4, FALSE, "turnto" );
+	initDialog_CadetFemale( $mainBuilding_CadetFemale5, FALSE, "ignore" );
+	initDialog_CadetFemale( $mainBuilding_CadetFemale6, TRUE, "turnto" );
+
+	//----------------------------------------------------------------------------------
+	//--- COURTYARD
+	//----------------------------------------------------------------------------------
+
+	//--- porter the maintenance man
+	//initDialog_Porter( $porter );
+
+	//--- harry, porter's assistant
+	initDialog_Harry( $harry );
+
+	//--- officials
+	initDialog_OfficialMale( $mainCourtyard_OfficialMale1, TRUE, "headwatchonly" );
+	initDialog_OfficialMale( $mainCourtyard_OfficialMale2, TRUE, "turnto" );
+	//initDialog_OfficialMale( $mainCourtyard_OfficialMale3, FALSE, "turnto" );
+	initDialog_OfficialMale( $porter, TRUE, "headwatchonly" );
+	initDialog_OfficialFemale( $mainCourtyard_OfficialFemale1, TRUE, "headwatchonly" );
+	initDialog_OfficialFemale( $mainCourtyard_OfficialFemale2, TRUE, "headwatchonly" );
+	
+	//--- teachers
+	initDialog_TeacherMale( $mainCourtyard_TeacherMale1, FALSE, "ignore" );
+	initDialog_TeacherMale( $mainCourtyard_TeacherMale2, TRUE, "headwatchonly" );
+	initDialog_TeacherFemale( $mainCourtyard_TeacherFemale1, TRUE, "headwatchonly" );
+	initDialog_TeacherFemale( $mainCourtyard_TeacherFemale2, TRUE, "headwatchonly" );
+	initDialog_TeacherFemale( $mainCourtyard_TeacherFemale3, FALSE, "headwatchonly" );
+	initDialog_TeacherFemale( $mainCourtyard_TeacherFemale4, FALSE, "headwatchonly" );
+
+	//--- cadets
+	//initDialog_CadetMale( $mainCourtyard_CadetMale1, TRUE, "turnto" );
+	initDialog_CadetMale( $mainCourtyard_CadetMale2, TRUE, "headwatchonly" );
+	initDialog_CadetMale( $mainCourtyard_CadetMale3, FALSE, "ignore" );
+	initDialog_CadetMale( $mainCourtyard_CadetMale4, FALSE, "headwatchonly" );
+	initDialog_CadetMale( $mainCourtyard_CadetMale5, FALSE, "ignore" );
+	initDialog_CadetMale( $mainCourtyard_CadetMale6, FALSE, "headwatchonly" );
+	initDialog_CadetMale( $mainCourtyard_CadetMale7, FALSE, "headwatchonly" );
+	initDialog_CadetMale( $mainCourtyard_CadetMale8, TRUE, "headwatchonly" );
+	initDialog_CadetFemale( $mainCourtyard_CadetFemale1, FALSE, "headwatchonly" );
+	initDialog_CadetFemale( $mainCourtyard_CadetFemale2, TRUE, "headwatchonly" );
+	initDialog_CadetFemale( $mainCourtyard_CadetFemale3, TRUE, "headwatchonly" );
+	initDialog_CadetFemale( $mainCourtyard_CadetFemale4, FALSE, "headwatchonly" );
+	initDialog_CadetFemale( $mainCourtyard_CadetFemale5, FALSE, "headwatchonly" );
+	initDialog_CadetFemale( $mainCourtyard_CadetFemale6, TRUE, "turnto" );
+	initDialog_CadetFemale( $mainCourtyard_CadetFemale7, FALSE, "headwatchonly" );
+	initDialog_CadetFemale( $mainCourtyard_CadetFemale8, FALSE, "headwatchonly" );
+}
+
+
+
+
+//===================================================================================================================================================
+//===================================================================================================================================================
+//  DIALOG LOADING FUNCTIONS
+//===================================================================================================================================================
+//===================================================================================================================================================
+
+//-----------------------------------------------------------------------------------------------------
+//--- MAIN CHARACTERS
+//-----------------------------------------------------------------------------------------------------
+
+//-------------------------------------------
+// initDialog_Telsia
+// setup +use dialog for Telsia
+//-------------------------------------------
+void initDialog_Telsia( entity entActor )
+{
+	//--- dialog and watch modes
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( "turnto" );
+	
+	//--- alias and registering
+	entActor.alias( "generalTelsia1", "localization/sound/dialog/m2l1/telsia_fileapp.mp3", "stop" );	//I'm going to file the appeal with Starfleet Command right now.
+	entActor.alias( "generalTelsia2", "localization/sound/dialog/m2l1/telsia_haslist.mp3", "stop" );	//I’m going to MAKE Starfleet listen.  This can't be the end.
+	entActor.alias( "generalTelsia3", "localization/sound/dialog/m2l1/telsia_commyou.mp3", "stop" );	//I'll comm you after I get a response
+	entActor.alias( "generalTelsia4", "localization/sound/dialog/m2l1/telsia_thankslist.mp3" );			//Thanks for listening, Munro..
+	//entActor.alias( "generalTelsia5", "localization/sound/dialog/ent_m7/telsia_timetalk.mp3" );	 		//I wish we had more time to talk.
+
+	entActor.alias( "greetingTelsia1", "localization/sound/dialog/ent_m1/munro_tels.mp3" );				//Telsia.
+	entActor.alias( "greetingTelsia2", "localization/sound/dialog/ent_m1/munro_htels.mp3" );			//Hey Telsia.
+
+	entActor.dialog( "generalTelsia", "dependsnot", "level.telsiaInCourtyard"  );
+	entActor.dialog( "greetingTelsia", "greetingDialog", "dependsnot", "telsiaInCourtyard" );
+}
+
+
+//-------------------------------------------
+// initDialog_Chang
+// setup +use dialog for Chang
+//-------------------------------------------
+void initDialog_Chang( entity entActor )
+{
+	//--- dialog and watch modes
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( "turnto" );
+	
+	//--- alias and registering
+	entActor.alias( "generalChang1", "localization/sound/dialog/m2l1/chang_toss.mp3" );		//I'll see you up there, Munro. They can’t keep a guy like you dirtside.
+	//entActor.alias( "generalChang2", "localization/sound/dialog/m2l1/chang_roll.mp3", "stop" );		//What's the big deal……..watch him flop and roll down the building….hit the ground…….it's good for the grass……..just need a new window afterwards.
+	//entActor.alias( "generalChang3", "localization/sound/dialog/m2l1/chang_chellb.mp3", "stop" );	//What the heck is Chell blabbering about?!
+	//entActor.alias( "generalChang4", "localization/sound/dialog/ent_m7/chang_busy1.mp3" ); 			//I'm kinda busy now, can we chat later?
+
+	entActor.alias( "greetingChang1", "localization/sound/dialog/ent_m1/munro_chang.mp3" );			//Chang.
+	entActor.alias( "greetingChang2", "localization/sound/dialog/ent_m1/munro_hchang.mp3" );		//Hey Chang.
+
+	entActor.dialog( "generalChang" );
+	entActor.dialog( "greetingChang", "greetingDialog" );
+}
+
+
+//-------------------------------------------
+// initDialog_Chell
+// setup +use dialog for Chell
+//-------------------------------------------
+void initDialog_Chell( entity entActor )
+{
+	//--- dialog and watch modes
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( "turnto" );
+	
+	//--- alias and registering
+	entActor.alias( "generalChell1", "localization/sound/dialog/m2l1/chell_conv.mp3" );		//So, do you really think Telsia has a chance of getting Starfleet to reverse this decision? 
+	entActor.alias( "generalChell2", "localization/sound/dialog/m2l1/chell_notlook.mp3" );	//Well, it could be worse. There are some exciting experiements going on in the Guernica system… I guess.
+	//entActor.alias( "generalChell3", "localization/sound/dialog/m2l1/chell_neverm.mp3" );			//You wouldn't by chance be able to tell me what a……ahhh…..never mind…..
+
+	entActor.alias( "greetingChell1", "localization/sound/dialog/ent_m1/munro_chell.mp3" );			//Chell.
+	entActor.alias( "greetingChell2", "localization/sound/dialog/ent_m1/munro_hchell.mp3" );		//Hey Chell.
+
+	entActor.dialog( "generalChell" );
+	entActor.dialog( "greetingChell", "greetingDialog" );
+}
+
+
+//-------------------------------------------
+// initDialog_Tuvok
+// setup +use dialog for Tuvok
+//-------------------------------------------
+void initDialog_Tuvok( entity entActor )
+{
+	//--- dialog and watch modes
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( "turnto", FALSE );
+	
+	//--- alias and registering
+	entActor.alias( "generalTuvok1", "localization/sound/dialog/m2l1/tuvok_goodag.mp3", "stop" );	//It was good to see you again, Lieutenant. You will make a fine instructor here at the academy.
+	entActor.alias( "generalTuvok2", "localization/sound/dialog/m2l1/tuvok_ma3.mp3", "stop" );		//I trust our experiences in the Delta Quadrant will generate intriguing lesson plans.
+	entActor.alias( "generalTuvok3", "localization/sound/dialog/m2l1/tuvok_goodb.mp3", "stop" );	//I look forward to the opportunity to work with you again.
+	entActor.alias( "generalTuvok4", "localization/sound/dialog/m2l1/tuvok_thankgo.mp3", "stop" );	//Live long and prosper.
+	entActor.alias( "generalTuvok5", "localization/sound/dialog/m2l1/tuvok_persist.mp3" );	 		//Continuing to bump into me can best be summed up as, Illogical.
+	entActor.alias( "generalTuvok6", "localization/sound/dialog/m2l1/tuvok_irrit.mp3" );	 		//I believe you have duties to attend to, Lieutenant.
+
+	entActor.alias( "greetingTuvok1", "localization/sound/dialog/ent_m1/munro_tuv.mp3" );			//Tuvok.
+	entActor.alias( "greetingTuvok2", "localization/sound/dialog/ent_m1/munro_htuv.mp3" );			//Hey Tuvok.
+
+	entActor.dialog( "generalTuvok" );
+	entActor.dialog( "greetingTuvok", "greetingDialog" );
+}
+
+
+//-------------------------------------------
+// initDialog_Porter
+// setup +use dialog for Porter, the maintenance man
+//-------------------------------------------
+void initDialog_Porter( entity entActor )
+{
+	//--- dialog and watch modes
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( "headwatchonly" );
+	
+	//--- alias and registering
+	//--- before finding the broken lift
+	entActor.alias( "liftNormalPorter1", "localization/sound/dialog/m2l1/porter_newguy.mp3", "stop" );			//I'm the repair tech here at Starfleet Academy.  My name is Porter.
+	entActor.alias( "liftNormalPorter2", "localization/sound/dialog/m2l1/porter_beenwhile.mp3", "stop" );		//I've been here longer then most of the teachers.  I've forgotten more about engineering then you'll ever know.
+	entActor.alias( "liftNormalPorter3", "localization/sound/dialog/m2l1/porter_yupgood.mp3", "stop" );			//If you need anything fixed, just find me.  Nice meeting you, lieutenant.
+	entActor.alias( "liftNormalPorter4", "localization/sound/dialog/m2l1/porter_likesaid.mp3" );				//Like I said, if you need anything taken care of, just let me know.
+	
+	//--- after finding the lift and en-route to fix it
+	entActor.alias( "liftGotPorterPorter1", "localization/sound/dialog/m2l1/porter_blasted.mp3", "stop" );		//Damn turbolifts! They’re almost as bad as transporters!
+	entActor.alias( "liftGotPorterPorter2", "localization/sound/dialog/m2l1/porter_flakey.mp3", "stop" );		//Oh yeah. Transporters are unsafe!  I won't be caught dead in one.
+	entActor.alias( "liftGotPorterPorter3", "localization/sound/dialog/m2l1/porter_onetime.mp3", "stop" );		//You never know if you'll end up with your head on backwards when the transporter finally spits you out.
+	entActor.alias( "liftGotPorterPorter4", "localization/sound/dialog/m2l1/porter_darnstup.mp3", "stop" );		//Nope. Don’t trust transporters. Or communicators.
+	entActor.alias( "liftGotPorterPorter5", "localization/sound/dialog/m2l1/porter_somefood.mp3" );				//I don’t trust anything I don’t fix with my own hands.
+	//entActor.alias( "liftGotPorterPorter6", "localization/sound/dialog/m2l1/porter_turnip.mp3", "stop" );		//You ever seen a  turnip crossed with a radish???  Believe me son….you don't want to!!
+	//entActor.alias( "liftGotPorterPorter7", "localization/sound/dialog/m2l1/porter_veggies.mp3" );				//Ohhhh the veggies……musn't think about it!!
+	
+	//--- waiting for the player to return with the phase inverter
+	entActor.alias( "liftWaitingPorter1", "localization/sound/dialog/m2l1/porter_gottasay.mp3", "stop" );		//O, I better stay here and make sure nobody tries to use this lift!
+	entActor.alias( "liftWaitingPorter2", "localization/sound/dialog/m2l1/porter_officeover.mp3", "stop" );		//My office is over there in the main building. You should have no trouble finding it.
+	entActor.alias( "liftWaitingPorter3", "localization/sound/dialog/m2l1/porter_snag.mp3", "stop" );			//If you hit a snag, find Harry. He should be able to help you.
+	entActor.alias( "liftWaitingPorter4", "localization/sound/dialog/m2l1/porter_goonnow.mp3" );				//Go on now. I don't have all day.
+	//entActor.alias( "liftWaitingPorter5", "localization/sound/dialog/m2l1/porter_tarnat.mp3", "stop" );			//Look I really need you to find my assistant.  Can you hurry up?
+	//entActor.alias( "liftWaitingPorter6", "localization/sound/dialog/m2l1/porter_outhtere.mp3", "stop" );			//You know..I'm still HERE!!!  I need to be OUT THERE!  And I'm HERE!!  Ya..ya see!!  I'm HERE now!!  Do you understand that!!  And I'm only here because I'm waitin' on your slow butt!!
+	//entActor.alias( "liftWaitingPorter7", "localization/sound/dialog/m2l1/porter_swear.mp3" );					//I swear, I regret the day they took my phaser!!!
+
+	//--- after the lift is fixed
+	entActor.alias( "liftFixedPorter1", "localization/sound/dialog/m2l1/porter_bigprob.mp3", "stop" );			//It's fixed.  No big problem. Just a minor malfunction in that pulse phase inverter.
+	//entActor.alias( "liftFixedPorter2", "localization/sound/dialog/m2l1/porter_darnfools.mp3", "stop" );		//Darned fools they have makin' some of this stuff….makes you wonder if they speak English!!
+	entActor.alias( "liftFixedPorter2", "localization/sound/dialog/m2l1/porter_harrym.mp3", "stop" );			//Well, I gotta go lock Harry in the maintenance office. I'll see ya ‘round.
+	entActor.alias( "liftFixedPorter3", "localization/sound/dialog/m2l1/porter_likesaid2.mp3" );				//Like I said, if ya need anything taken care of, just drop by.
+	
+	entActor.alias( "greetingPorter1", "localization/sound/dialog/ent_m1/munro_hello.mp3" );		//Hello
+	entActor.alias( "greetingPorter2", "localization/sound/dialog/ent_m1/munro_porter.mp3" );		//Porter.
+	entActor.alias( "greetingPorter3", "localization/sound/dialog/ent_m1/munro_hporter.mp3" );		//Hey Porter.
+
+	entActor.dialog( "liftNormalPorter", "depends", "level.liftNormal" );
+	entActor.dialog( "liftGotPorterPorter", "depends", "level.liftGotPorter" );
+	entActor.dialog( "liftWaitingPorter", "depends", "level.liftWaiting" );
+	entActor.dialog( "liftFixedPorter", "depends", "level.liftFixed" );
+	entActor.dialog( "greetingPorter", "greetingDialog" );
+}
+
+
+//-------------------------------------------
+// initDialog_Harry
+// setup +use dialog for Harry, Porter's assistant
+//-------------------------------------------
+void initDialog_Harry( entity entActor )
+{
+	//--- dialog and watch modes
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( "headwatchonly" );
+	
+	//--- alias and registering
+	//--- before finding the broken lift
+	entActor.alias( "liftNormalHarry1", "localization/sound/dialog/m2l1/harry_protsend.mp3", "stop" );	//Uh-oh. What did I do now?
+	entActor.alias( "liftNormalHarry2", "localization/sound/dialog/m2l1/harry_assist.mp3", "stop" );	//Oh, sorry.  I'm Porter’s assistant, Harry.I thought I was in trouble again.
+	entActor.alias( "liftNormalHarry3", "localization/sound/dialog/m2l1/harry_chiefrep.mp3", "stop" );	//Porter's the chief repair tech for Starfleet Academy.  If you need something fixed, he's your man.  Alas, I'm new here this year and still learning the ropes…….but he doesn't seem to take that into consideration.
+	entActor.alias( "liftNormalHarry4", "localization/sound/dialog/m2l1/harry_betterbe.mp3" );			//I better get back to work before Porter sees me talking to you…
+	
+	//--- after finding the lift, but have not found porter yet
+	entActor.alias( "liftFoundHarry1", "localization/sound/dialog/m2l1/harry_turbbrok.mp3", "stop" );	//That turbolift's broken? Again? Oh, Porter's going to be upset. He'll probably blame me for it!
+	entActor.alias( "liftFoundHarry2", "localization/sound/dialog/m2l1/harry_shudd.mp3", "stop" );		//Porter's the one you have to talk to about fixing it.  If I touch it… ***shudder***
+	entActor.alias( "liftFoundHarry3", "localization/sound/dialog/m2l1/harry_courty.mp3" );				//Porter was out in the courtyard the last time I saw him.
+	
+	//--- waiting for the player to get the inverter
+	entActor.alias( "liftWaitingHarry1", "localization/sound/dialog/m2l1/harry_wantsyou.mp3", "stop" );	//Porter wants you to get a pulse phase inverter?  There should be one in the maintenance office.
+	entActor.alias( "liftWaitingHarry2", "localization/sound/dialog/m2l1/harry_right.mp3" );			//The maintenance office is to the right when you walk into the main building.  Just go down the hallway and you'll find it.
+
+	//--- finding the maintenance room is locked
+	entActor.alias( "liftGotHarryHarry1", "localization/sound/dialog/m2l1/harry_gounlock.mp3" );		//Let's go unlock that office before he finds out! 
+
+	//--- finding the maintenance room is unlocked
+	entActor.alias( "liftOfficeUnlockedHarry1", "localization/sound/dialog/m2l1/harry_thereg.mp3" );	//There you go.
+
+	//--- player picked up the inverter
+	entActor.alias( "liftGotInverterHarry1", "localization/sound/dialog/m2l1/harry_youneedg.mp3" );	//You need to get that phase inverter over to Porter, before he gets really upset.
+	//entActor.alias( "liftGotInverterHarry2", "localization/sound/dialog/m2l1/harry_ups.mp3" );				//You don't want to see him upset.......it's...it's.......*shudder* ohhhhhh
+
+	//--- after the lift is fixed
+	entActor.alias( "liftFixedHarry1", "localization/sound/dialog/m2l1/harry_protman.mp3", "stop" );	//See? I told you. Porter’s the one you need if you want something fixed.
+	entActor.alias( "liftFixedHarry2", "localization/sound/dialog/m2l1/harry_upset.mp3" );				//Hey…uh…..he wasn't too upset was he?
+	//entActor.alias( "liftFixedHarry3", "localization/sound/dialog/m2l1/harry_whimper.mp3", "stop" );	//Ohhh no!!  no!!  Not again!! *whimpering*
+	//entActor.alias( "liftFixedHarry4", "localization/sound/dialog/m2l1/harry_whyme.mp3" );				//*whimpering*…..why me????
+	
+	entActor.alias( "greetingHarry1", "localization/sound/dialog/ent_m1/munro_ex1.mp3" );			//Excuse me.
+	entActor.alias( "greetingHarry2", "localization/sound/dialog/ent_m1/munro_harry.mp3" );			//Harry.
+	entActor.alias( "greetingHarry3", "localization/sound/dialog/ent_m1/munro_hharry.mp3" );		//Excuse me.
+
+	entActor.dialog( "liftNormalHarry", "depends", "level.liftNormal" );
+	entActor.dialog( "liftFoundHarry", "depends", "level.liftFound" );
+	entActor.dialog( "liftWaitingHarry", "depends", "level.liftWaiting" );
+	entActor.dialog( "liftGotHarryHarry", "depends", "level.liftGotHarry" );
+	entActor.dialog( "liftOfficeUnlockedHarry", "depends", "level.liftOfficeUnlocked" );
+	entActor.dialog( "liftGotInverterHarry", "depends", "level.liftGotInverter" );
+	entActor.dialog( "liftFixedHarry", "depends", "level.liftFixed" );
+	entActor.dialog( "greetingHarry", "greetingDialog", "dependsnot", "level.liftTransition" );
+}
+
+
+//-------------------------------------------
+// initDialog_Headmaster
+// setup +use dialog for the headmaster
+//-------------------------------------------
+void initDialog_Headmaster( entity entActor )
+{
+	//--- dialog and watch modes
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( "headwatchonly", FALSE );
+	
+	//--- alias and registering
+	entActor.alias( "generalHeadmaster1", "localization/sound/dialog/m2l1/headmaster_fine.mp3", "stop" );		//I'm sure you'll be an asset to the Academy, Lieutenant.
+	entActor.alias( "generalHeadmaster2", "localization/sound/dialog/m2l1/headmaster_wellgood.mp3", "stop" );	//I look forward to reviewing your lesson plans.
+	entActor.alias( "generalHeadmaster3", "localization/sound/dialog/m2l1/headmaster_unhappy.mp3", "stop" );	//Excuse me, but I have duties to attend to. 
+	entActor.alias( "generalHeadmaster4", "localization/sound/dialog/m2l1/headmaster_rathbusy.mp3" );			//Can we talk later.
+
+	entActor.alias( "greetingHeadmaster1", "localization/sound/dialog/ent_m2/munro_sir.mp3" );			//sir
+
+	entActor.dialog( "generalHeadmaster" );
+	entActor.dialog( "greetingHeadmaster", "greetingDialog" );
+}
+
+
+//-------------------------------------------
+// initDialog_Receptionist
+// setup +use dialog for the receptionist
+//-------------------------------------------
+void initDialog_Receptionist( entity entActor )
+{
+	//--- dialog and watch modes
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( "headwatchonly", FALSE );
+
+	entActor.alias( "receptionistFound1" , "localization/sound/dialog/m2l1/femrec_porter.mp3", "stop" ); 			//If something is broken, report it to Porter, our repair tech. I saw him working in the courtyard this morning.
+	entActor.alias( "receptionistWaiting1" , "localization/sound/dialog/m2l1/femrec_downhall.mp3", "stop" );	 	//The maintenance office is on the first floor of this building, down the hall.
+	entActor.alias( "receptionistOfficeLocked1" , "localization/sound/dialog/m2l1/femrec_harry.mp3", "stop" ); 		//Porter's assistant, Harry, can open the maintenance office for you.  He should be somewhere in this building.
+
+	entActor.alias( "receptionistGeneral1" , "localization/sound/dialog/m2l1/femrec_sfa.mp3", "stop" ); 	//Welcome to Starfleet Academy sir.
+	entActor.alias( "receptionistGeneral2" , "localization/sound/dialog/m2l1/femrec_findsom.mp3" ); 		//Can I help you find something sir?
+
+	entActor.alias( "receptionistGreeting1", "localization/sound/dialog/ent_m1/munro_ex1.mp3" );			//Excuse me.
+	entActor.alias( "receptionistGreeting2", "localization/sound/dialog/ent_m1/munro_hello.mp3" );			//Hello
+
+	entActor.dialog( "receptionistFound", "depends", "level.liftFound" );
+	entActor.dialog( "receptionistWaiting", "depends", "level.liftWaiting" );
+	entActor.dialog( "receptionistOfficeLocked", "depends", "level.liftOfficeLocked" );
+	entActor.dialog( "receptionistGeneral" );
+	entActor.dialog( "receptionistGreeting", "greetingDialog" );
+}
+
+
+//-----------------------------------------------------------------------------------------------------
+//--- CONVERSATIONAL CHARACTERS
+//-----------------------------------------------------------------------------------------------------
+
+//-------------------------------------------
+// initDialog_ConversationVoyager_Cadet1
+// setup +use dialog for voyager conversational character female cadet 1
+//-------------------------------------------
+void initDialog_ConversationVoyager_Cadet1( entity entActor )
+{
+	//--- dialog and watch modes
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( "turnto" );
+	
+	//--- alias and registering
+	entActor.alias( "conversationVoyager1Cadet1", "localization/sound/dialog/m2l1/femc1_newhere.mp3" );		//Hello.
+	//entActor.alias( "conversationVoyager1Cadet2", "localization/sound/dialog/m2l1/femc1_evheard.mp3", "stop" );		//Have you ever heard about Voyager and her crew??
+	//entActor.alias( "conversationVoyager1Cadet3", "localization/sound/dialog/m2l1/femc1_sure.mp3", "stop" );			//Yeah….right!!!  Sure you're THE Alex Munro from Voyager….you look nothing like him!!!
+	//entActor.alias( "conversationVoyager1Cadet4", "localization/sound/dialog/m2l1/femc1_ohcomeon.mp3", "stop" );		//Ohhh come on, take a hint!!!
+	//entActor.alias( "conversationVoyager1Cadet5", "localization/sound/dialog/m2l1/femc1_nothing.mp3", "stop" );		//Alright!!  First off, you look nothing like that…(thinking)..who was he……that 20th century actor who was really famous for being in some long running TV show about beaches and women in swimsuits running in slow motion!!  Second, the REAL Munro would be off somewhere receiving a hero's welcome and getting assigned to the ship of his choice!!  And third, you have too many colors in your face!!  Now go away and stop trying to hit on my friend and I!!!!
+	//entActor.alias( "conversationVoyager1Cadet5", "localization/sound/dialog/m2l1/femc1_sigh.mp3" );	 				//*sigh*…….*hmmmmph*
+
+	entActor.alias( "greetingVoyager1Cadet1", "localization/sound/dialog/ent_m1/munro_ex1.mp3" );			//Excuse me.
+	entActor.alias( "greetingVoyager1Cadet2", "localization/sound/dialog/ent_m1/munro_cadet.mp3" );			//Cadet.
+	entActor.alias( "greetingVoyager1Cadet3", "localization/sound/dialog/ent_m1/munro_hello.mp3" );			//Hello
+
+	entActor.dialog( "conversationVoyager1Cadet" );
+	entActor.dialog( "greetingVoyager1Cadet", "greetingDialog" );
+}
+
+
+//-------------------------------------------
+// initDialog_ConversationVoyager_Cadet2
+// setup +use dialog for voyager conversational character female cadet 2
+//-------------------------------------------
+void initDialog_ConversationVoyager_Cadet2( entity entActor )
+{
+	//--- dialog and watch modes
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( "turnto" );
+	
+	//--- alias and registering
+	entActor.alias( "conversationVoyager2Cadet1", "localization/sound/dialog/m2l1/femc2_dontmet.mp3", "stop" );		//Hi.  I don't think we've met.
+	entActor.alias( "conversationVoyager2Cadet2", "localization/sound/dialog/m2l1/femc2_headm.mp3", "stop" );		//If you're looking for the headmaster's office, it's by the Main Lecture Hall
+	//entActor.alias( "conversationVoyager2Cadet3", "localization/sound/dialog/m2l1/femc2_excuse.mp3", "stop" );		//You'll have to excuse my friend here, she has a slight, bordering on psychotic, fixation with anything Voyager related.
+	entActor.alias( "conversationVoyager2Cadet3", "localization/sound/dialog/m2l1/femc2_seear.mp3" );				//Well I hope to see you around.
+
+	entActor.alias( "greetingVoyager2Cadet1", "localization/sound/dialog/ent_m1/munro_ex2.mp3" );			//Excuse me.
+	entActor.alias( "greetingVoyager2Cadet2", "localization/sound/dialog/ent_m1/munro_cadet.mp3" );			//Cadet.
+	entActor.alias( "greetingVoyager2Cadet3", "localization/sound/dialog/ent_m1/munro_hello.mp3" );			//Hello
+
+	entActor.dialog( "conversationVoyager2Cadet" );
+	entActor.dialog( "greetingVoyager2Cadet", "greetingDialog" );
+}
+
+
+//-------------------------------------------
+// initDialog_ConversationInquisition_Cadet1
+// setup +use dialog for inquisition conversation cadet1
+//-------------------------------------------
+void initDialog_ConversationInquisition_Cadet1( entity entActor )
+{
+	//--- dialog and watch modes
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( "turnto" );
+	
+	//--- alias and registering
+	entActor.alias( "generalInquisition1Cadet1", "localization/sound/dialog/m2l1/cadet1_swear.mp3" );		//I never seem to earn high grades in temporal field dynamics.
+	entActor.alias( "generalInquisition1Cadet2", "localization/sound/dialog/m2l1/cadet1_orworse.mp3" );		//Temporal field dynamics still baffle me.
+	//entActor.alias( "generalInquisition1Cadet3", "localization/sound/dialog/m2l1/cadet1_deepth.mp3" );		//I'm sorry, I'm just too deep in thought at the moment to talk 
+
+	entActor.alias( "greetingInquisition1Cadet1", "localization/sound/dialog/ent_m1/munro_cadet.mp3" );			//Cadet.
+	entActor.alias( "greetingInquisition1Cadet2", "localization/sound/dialog/ent_m1/munro_hello.mp3" );			//Hello
+	entActor.alias( "greetingInquisition1Cadet3", "localization/sound/dialog/ent_m1/munro_ex1.mp3" );			//Excuse me.
+
+	entActor.dialog( "generalInquisition1Cadet" );
+	entActor.dialog( "greetingInquisition1Cadet", "greetingDialog" );
+}
+
+
+//-------------------------------------------
+// initDialog_ConversationInquisition_Cadet2
+// setup +use dialog for inquisition conversation cadet2
+//-------------------------------------------
+void initDialog_ConversationInquisition_Cadet2( entity entActor )
+{
+	//--- dialog and watch modes
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( "turnto" );
+	
+	//--- alias and registering
+	entActor.alias( "generalInquisition2Cadet1", "localization/sound/dialog/m2l1/cadet2_nitpick.mp3", "stop" );	//Do you know how to modulate forcefields?
+	entActor.alias( "generalInquisition2Cadet2", "localization/sound/dialog/m2l1/cadet2_legit.mp3", "stop" );	//I always modulate amplitude when I mean to adjust frequency. Can you imagine doing that in combat?
+	entActor.alias( "generalInquisition2Cadet3", "localization/sound/dialog/m2l1/cadet2_accept.mp3" );			//I guess I need to keep experimenting with my tricorder.
+	//entActor.alias( "generalInquisition2Cadet4", "localization/sound/dialog/m2l1/cadet2_nothelp.mp3" );			//Well it's obvious you're not going to help us!!
+
+	entActor.alias( "greetingInquisition2Cadet1", "localization/sound/dialog/ent_m1/munro_cadet.mp3" );			//Cadet.
+	entActor.alias( "greetingInquisition2Cadet2", "localization/sound/dialog/ent_m1/munro_hello.mp3" );			//Hello
+	entActor.alias( "greetingInquisition2Cadet3", "localization/sound/dialog/ent_m1/munro_ex2.mp3" );			//Excuse me.
+
+	entActor.dialog( "generalInquisition2Cadet" );
+	entActor.dialog( "greetingInquisition2Cadet", "greetingDialog" );
+}
+
+
+//-------------------------------------------
+// initDialog_ConversationInquisition_Teacher
+// setup +use dialog for inquisition conversation teacher
+//-------------------------------------------
+void initDialog_ConversationInquisition_Teacher( entity entActor )
+{
+	//--- dialog and watch modes
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( "turnto" );
+	
+	//--- alias and registering
+	entActor.alias( "generalInquisitionTeacher1", "localization/sound/dialog/m2l1/teacher_wrongk.mp3", "stop" );	//Teaching is an ancient and honorable profession.
+	entActor.alias( "generalInquisitionTeacher2", "localization/sound/dialog/m2l1/teacher_presch.mp3" );			//Sometimes I wish I received a posting to a starship.
+
+	entActor.alias( "greetingInquisitionTeacher1", "localization/sound/dialog/ent_m1/munro_prof.mp3" );			//Professor.
+	entActor.alias( "greetingInquisitionTeacher2", "localization/sound/dialog/ent_m2/munro_sir.mp3" );			//sir
+	entActor.alias( "greetingInquisitionTeacher3", "localization/sound/dialog/ent_m1/munro_hello.mp3" );		//Hello
+
+	entActor.dialog( "generalInquisitionTeacher" );
+	entActor.dialog( "greetingInquisitionTeacher", "greetingDialog" );
+}
+
+
+//-------------------------------------------
+// initDialog_ConversationFemale_Female
+// setup +use dialog for female conversation female
+//-------------------------------------------
+void initDialog_ConversationFemale_Female( entity entActor )
+{
+	//--- dialog and watch modes
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( "ignore" );
+	
+	//--- alias and registering
+	entActor.alias( "generalFemaleFemale1", "localization/sound/dialog/m2l1/female_guyjerk.mp3", "stop" );	//I'd like to be left alone.
+	entActor.alias( "generalFemaleFemale2", "localization/sound/dialog/m2l1/female_youguy.mp3" );			//I'm really not in a talking mood.
+
+	entActor.alias( "greetingFemaleFemale1", "localization/sound/dialog/ent_m1/munro_cadet.mp3" );			//Cadet.
+	entActor.alias( "greetingFemaleFemale2", "localization/sound/dialog/ent_m1/munro_hello.mp3" );			//Hello
+	entActor.alias( "greetingFemaleFemale3", "localization/sound/dialog/ent_m1/munro_ex1.mp3" );			//Excuse me.
+
+	entActor.dialog( "generalFemaleFemale" );
+	entActor.dialog( "greetingFemaleFemale", "greetingDialog" );
+}
+
+
+//-------------------------------------------
+// initDialog_ConversationFemale_Male
+// setup +use dialog for female conversation male
+//-------------------------------------------
+void initDialog_ConversationFemale_Male( entity entActor )
+{
+	//--- dialog and watch modes
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( "turnto" );
+	
+	//--- alias and registering
+	entActor.alias( "generalFemaleMale1", "localization/sound/dialog/m2l1/male_whybeta.mp3" );		//I really didn't know what I was getting into when I decided to date a Betazoid.
+
+	entActor.alias( "greetingFemaleMale1", "localization/sound/dialog/ent_m1/munro_cadet.mp3" );	//Cadet.
+	entActor.alias( "greetingFemaleMale2", "localization/sound/dialog/ent_m1/munro_hello.mp3" );	//Hello
+	entActor.alias( "greetingFemaleMale3", "localization/sound/dialog/ent_m1/munro_ex2.mp3" );		//Excuse me.
+
+	entActor.dialog( "generalFemaleMale" );
+	entActor.dialog( "greetingFemaleMale", "greetingDialog" );
+}
+
+
+//-----------------------------------------------------------------------------------------------------
+//--- GENERIC CHARACTERS
+//-----------------------------------------------------------------------------------------------------
+
+//-------------------------------------------
+// initDialog_OfficialMale
+// setup generic dialog for an official male
+//-------------------------------------------
+void initDialog_OfficialMale( entity entActor, float boolDoConversationalAnims, string strHeadCommand )
+{
+	float intChoice;
+	float intActorChoice;
+	float intCounterCurrent;
+	
+	string strAliasBase;
+	string strAliasGeneral1;
+	string strAliasGeneral2;
+	string strAliasGeneral_Base;
+	string strAliasGreeting1;
+	string strAliasGreeting2;
+	string strAliasGreeting_Base;
+	
+	//--- create unique alias'
+	intCounterCurrent = intCounter;
+	intCounter ++;
+	strAliasBase = "OfficialMale" + intCounterCurrent;
+	strAliasGeneral1 = strAliasBase + "_general1";
+	strAliasGeneral2 = strAliasBase + "_general2";
+	strAliasGeneral_Base = strAliasBase + "_general";
+	strAliasGreeting1 = strAliasBase + "_greeting1";
+	strAliasGreeting2 = strAliasBase + "_greeting2";
+	strAliasGreeting_Base = strAliasBase + "_greeting";
+	
+	//--- pick a dialog choice
+	intChoice = randomint( 2 );
+	
+	//--- pick an actor choice
+	intActorChoice = randomint( 3 );
+	
+	//--- if the choice picked was the previous one used, pick again until it's different
+	while( (intChoice == intChoicePrevious_OfficialMale) && (intActorChoice == intActorChoicePrevious_OfficialMale) )
+	{
+		intChoice = randomint( 2 );
+		intActorChoice = randomint( 3 );
+	}
+	
+	//--- store the setting for checking on the next person
+	intChoicePrevious_OfficialMale = intChoice;
+	intActorChoicePrevious_OfficialMale = intActorChoice;
+
+	//print( "----------------------------------------------------------------------------------------------\n" );
+	//print( "DIALOG MALE OFFICIAL: actor: " + entActor.getrawtargetname() + " : basename: " + strAliasBase +"\n" );
+	//print( "DIALOG MALE OFFICIAL: actor choice: " + intActorChoice + " : dialog choice: " + intChoice + "\n" );
+	//print( "----------------------------------------------------------------------------------------------\n" );
+	
+	//--- start setting dialog
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( strHeadCommand, boolDoConversationalAnims );
+	
+	if( intActorChoice == 0 )  //--- actor choice 1
+	{
+    	if( intChoice == 0 )	//--- only alias the 'I'm busy' line
+    	{
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/officialm1_chat.mp3" ); 	//I wish I could chat right now, Lieutenant; perhaps later.
+    		//print( "DIALOG MALE OFFICIAL: actor0: " + strAliasBase + " : general1 alias - can't talk now: " + strAliasGeneral1 + "\n" );
+    	}
+    	else
+    	{
+    		//--- alias the common lines
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/officialm1_glad.mp3", "stop" ); 	//I'm glad Voyager made it back safely. What an amazing high point to a career in Starfleet.
+    		//print( "DIALOG MALE OFFICIAL: actor0: " + strAliasBase + " : general1 alias: " + strAliasGeneral1 + "\n" );
+    		entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/officialm1_good.mp3" ); 			//Good day to you Lieutenant Munro.
+    		//print( "DIALOG MALE OFFICIAL: actor0: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    	}
+    }
+    else if( intActorChoice == 1 )	//--- actor choice 2
+    {
+    	if( intChoice == 0 )	//--- only alias the 'I'm busy' line
+    	{
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/officialm2_come.mp3" ); 	//If you come back another time, I should be able to spare a few moments professor.
+    		//print( "DIALOG MALE OFFICIAL: actor1: " + strAliasBase + " : general1 alias - can't talk now: " + strAliasGeneral1 + "\n" );
+    	}
+    	else
+    	{
+    		//--- alias the common lines
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/officialm2_need.mp3", "stop" ); 			//Is there anything you need?
+    		//print( "DIALOG MALE OFFICIAL: actor1: " + strAliasBase + " : general1 alias: " + strAliasGeneral1 + "\n" );
+    		entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/officialm2_hello.mp3" ); 				//Hello professor
+    		//print( "DIALOG MALE OFFICIAL: actor1: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    	}
+    }
+    else	//--- actor choice 3
+    {
+		//--- alias the common lines
+		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/malead1_onepiece.mp3", "stop" ); 	//It's good to have Voyager back safe and in one piece
+		//print( "DIALOG MALE OFFICIAL: actor2: " + strAliasBase + " : general1 alias: " + strAliasGeneral1 + "\n" );
+		entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/malead1_welcome.mp3" ); 				//Welcome to Starfleet Academy Lieutenant Munro
+		//print( "DIALOG MALE OFFICIAL: actor2: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    }
+    	
+	entActor.alias( strAliasGreeting1 , "localization/sound/dialog/ent_m2/munro_sir.mp3" );	//sir
+	
+	//print( "============== REGISTER DIALOG ====================\n" );
+	
+	//-------------------------------------------------------------------
+	//--- register all the alias'
+	entActor.dialog( strAliasGeneral_Base );
+	//print( "DIALOG MALE OFFICIAL: actor: " + strAliasBase + " : general base alias: " + strAliasGeneral_Base + "\n" );
+	entActor.dialog( strAliasGreeting_Base, "greetingDialog" );
+
+	//print( "--------------------------------- END CHARACTER ----------------------------------\n" );
+	//print( "----------------------------------------------------------------------------------\n" );
+}
+
+
+//-------------------------------------------
+// initDialog_OfficialFemale
+// setup generic dialog for an official female
+//-------------------------------------------
+void initDialog_OfficialFemale( entity entActor, float boolDoConversationalAnims, string strHeadCommand )
+{
+	float intChoice;
+	float intActorChoice;
+	float intCounterCurrent;
+	
+	string strAliasBase;
+	string strAliasGeneral1;
+	string strAliasGeneral2;
+	string strAliasGeneral_Base;
+	string strAliasGreeting1;
+	string strAliasGreeting2;
+	string strAliasGreeting_Base;
+	
+	//--- create unique alias'
+	intCounterCurrent = intCounter;
+	intCounter ++;
+	strAliasBase = "OfficialFemale" + intCounterCurrent;
+	strAliasGeneral1 = strAliasBase + "_general1";
+	strAliasGeneral2 = strAliasBase + "_general2";
+	strAliasGeneral_Base = strAliasBase + "_general";
+	strAliasGreeting1 = strAliasBase + "_greeting1";
+	strAliasGreeting2 = strAliasBase + "_greeting2";
+	strAliasGreeting_Base = strAliasBase + "_greeting";
+	
+	//--- pick a dialog choice
+	intChoice = randomint( 2 );
+	
+	//--- pick an actor choice
+	intActorChoice = randomint( 3 );
+	
+	//--- if the choice picked was the previous one used, pick again until it's different
+	while( (intChoice == intChoicePrevious_OfficialFemale) && (intActorChoice == intActorChoicePrevious_OfficialFemale) )
+	{
+		intChoice = randomint( 2 );
+		intActorChoice = randomint( 3 );
+	}
+	
+	//--- store the setting for checking on the next person
+	intChoicePrevious_OfficialFemale = intChoice;
+	intActorChoicePrevious_OfficialFemale = intActorChoice;
+
+	//print( "----------------------------------------------------------------------------------------------\n" );
+	//print( "DIALOG FEMALE OFFICIAL: actor: " + entActor.getrawtargetname() + " : basename: " + strAliasBase +"\n" );
+	//print( "DIALOG FEMALE OFFICIAL: actor choice: " + intActorChoice + " : dialog choice: " + intChoice + "\n" );
+	//print( "----------------------------------------------------------------------------------------------\n" );
+	
+	//--- start setting dialog
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( strHeadCommand, boolDoConversationalAnims );
+	
+	if( intActorChoice == 0 )  //--- actor choice 1
+	{
+    	if( intChoice == 0 )	//--- only alias the 'I'm busy' line
+    	{
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/officialf1_talk.mp3" ); 	//I'm very sorry professor, but I can't talk right now
+    		//print( "DIALOG FEMALE OFFICIAL: actor0: " + strAliasBase + " : general1 alias - can't talk now: " + strAliasGeneral1 + "\n" );
+    	}
+    	else
+    	{
+    		//--- alias the common lines
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/officialf1_good.mp3", "stop" ); 	//It's good to have you back in the Alpha Quadrant
+    		//print( "DIALOG FEMALE OFFICIAL: actor0: " + strAliasBase + " : general1 alias: " + strAliasGeneral1 + "\n" );
+    		entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/officialf1_greet.mp3" ); 		//Greetings, Lieutenant Munro.
+    		//print( "DIALOG FEMALE OFFICIAL: actor0: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    	}
+    }
+    else if( intActorChoice == 1 )	//--- actor choice 2
+    {
+    	if( intChoice == 0 )	//--- only alias the 'I'm busy' line
+    	{
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/officialf2_sorry.mp3" ); 	//I'm sorry, but I don't have time to talk right now professor
+    		//print( "DIALOG FEMALE OFFICIAL: actor1: " + strAliasBase + " : general1 alias - can't talk now: " + strAliasGeneral1 + "\n" );
+    	}
+    	else
+    	{
+    		//--- alias the common lines
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/officialf2_doing.mp3", "stop" ); 	//How are you doing at the academy?
+    		//print( "DIALOG FEMALE OFFICIAL: actor1: " + strAliasBase + " : general1 alias: " + strAliasGeneral1 + "\n" );
+    		entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/officialf2_seeyou.mp3" ); 			//Hello, Lieutenant, it's good to see you.
+    		//print( "DIALOG FEMALE OFFICIAL: actor1: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    	}
+    }
+    else	//--- actor choice 3
+    {
+		//--- alias the common lines
+		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/femad1_lonely.mp3", "stop" );	//Your journey aboard Voyager must have been very exciting.
+		//print( "DIALOG FEMALE OFFICIAL: actor2: " + strAliasBase + " : general1 alias: " + strAliasGeneral1 + "\n" );
+		entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/femad1_callme.mp3" ); 			//I would have loved a chance to see the Delta Quadrant.
+		//print( "DIALOG FEMALE OFFICIAL: actor2: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    }
+    	
+	entActor.alias( strAliasGreeting1 , "localization/sound/dialog/ent_m2/munro_sir.mp3" );	//sir
+	
+	//print( "============== REGISTER DIALOG ====================\n" );
+	
+	//-------------------------------------------------------------------
+	//--- register all the alias'
+	entActor.dialog( strAliasGeneral_Base );
+	//print( "DIALOG FEMALE OFFICIAL: actor: " + strAliasBase + " : general base alias: " + strAliasGeneral_Base + "\n" );
+	entActor.dialog( strAliasGreeting_Base, "greetingDialog" );
+
+	//print( "--------------------------------- END CHARACTER ----------------------------------\n" );
+	//print( "----------------------------------------------------------------------------------\n" );
+}
+
+
+//-------------------------------------------
+// initDialog_TeacherMale
+// setup generic dialog for an teacher male
+//-------------------------------------------
+void initDialog_TeacherMale( entity entActor, float boolDoConversationalAnims, string strHeadCommand )
+{
+	float intChoice;
+	float intActorChoice;
+	float intCounterCurrent;
+	
+	string strAliasBase;
+	string strAliasGeneral1;
+	string strAliasGeneral2;
+	string strAliasGeneral_Base;
+	string strAliasGreeting1;
+	string strAliasGreeting2;
+	string strAliasGreeting_Base;
+	
+	//--- create unique alias'
+	intCounterCurrent = intCounter;
+	intCounter ++;
+	strAliasBase = "TeacherMale" + intCounterCurrent;
+	strAliasGeneral1 = strAliasBase + "_general1";
+	strAliasGeneral2 = strAliasBase + "_general2";
+	strAliasGeneral_Base = strAliasBase + "_general";
+	strAliasGreeting1 = strAliasBase + "_greeting1";
+	strAliasGreeting2 = strAliasBase + "_greeting2";
+	strAliasGreeting_Base = strAliasBase + "_greeting";
+	
+	//--- pick a dialog choice
+	intChoice = randomint( 2 );
+	
+	//--- pick an actor choice
+	intActorChoice = randomint( 3 );
+	
+	//--- if the choice picked was the previous one used, pick again until it's different
+	while( (intChoice == intChoicePrevious_TeacherMale) && (intActorChoice == intActorChoicePrevious_TeacherMale) )
+	{
+		intChoice = randomint( 2 );
+		intActorChoice = randomint( 3 );
+	}
+	
+	//--- store the setting for checking on the next person
+	intChoicePrevious_TeacherMale = intChoice;
+	intActorChoicePrevious_TeacherMale = intActorChoice;
+
+	//print( "----------------------------------------------------------------------------------------------\n" );
+	//print( "DIALOG MALE TEACHER: actor: " + entActor.getrawtargetname() + " : basename: " + strAliasBase +"\n" );
+	//print( "DIALOG MALE TEACHER: actor choice: " + intActorChoice + " : dialog choice: " + intChoice + "\n" );
+	//print( "----------------------------------------------------------------------------------------------\n" );
+	
+	//--- start setting dialog
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( strHeadCommand, boolDoConversationalAnims );
+	
+	if( intActorChoice == 0 )  //--- actor choice 1
+	{
+    	if( intChoice == 0 )	//--- only alias the 'I'm busy' line
+    	{
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/teacherm1_afraid.mp3" ); 	//I'm afraid I'm rather busy at the moment, Lieutenant.
+    		//print( "DIALOG MALE TEACHER: actor0: " + strAliasBase + " : general1 alias - can't talk now: " + strAliasGeneral1 + "\n" );
+    	}
+    	else
+    	{
+    		//--- alias the common lines
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/teacherm1_find.mp3", "stop" ); 	//Can I help you find anything, Lieutenant?
+    		//print( "DIALOG MALE TEACHER: actor0: " + strAliasBase + " : general1 alias: " + strAliasGeneral1 + "\n" );
+    		entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/teacherm1_hello.mp3" ); 			//Hello.
+    		//print( "DIALOG MALE TEACHER: actor0: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    	}
+    }
+    else if( intActorChoice == 1 )	//--- actor choice 2
+    {
+    	if( intChoice == 0 )	//--- only alias the 'I'm busy' line
+    	{
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/teacherm2_afford.mp3" ); 	//I really can't talk to you now.
+    		//print( "DIALOG MALE TEACHER: actor1: " + strAliasBase + " : general1 alias - can't talk now: " + strAliasGeneral1 + "\n" );
+    	}
+    	else
+    	{
+    		//--- alias the common lines
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/teacherm2_youre.mp3", "stop" ); 	//Oh, hello.
+    		//print( "DIALOG MALE TEACHER: actor1: " + strAliasBase + " : general1 alias: " + strAliasGeneral1 + "\n" );
+    		entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/teacherm2_busy.mp3" ); 			//Please, I'm quite busy, Lieutenant.
+    		//print( "DIALOG MALE TEACHER: actor1: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    	}
+    }
+    else	//--- actor choice 3
+    {
+		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/malet1_busy1.mp3" ); 	//I am busy preparing for my class.  But I’d love to chat later.
+		//print( "DIALOG MALE TEACHER: actor2: " + strAliasBase + " : general1 alias - can't talk now: " + strAliasGeneral1 + "\n" );
+    }
+    	
+	entActor.alias( strAliasGreeting1 , "localization/sound/dialog/ent_m1/munro_prof.mp3" );	//Professor.
+	entActor.alias( strAliasGreeting2 , "localization/sound/dialog/ent_m1/munro_hello.mp3" );	//Hello
+	
+	//print( "============== REGISTER DIALOG ====================\n" );
+	
+	//-------------------------------------------------------------------
+	//--- register all the alias'
+	entActor.dialog( strAliasGeneral_Base );
+	//print( "DIALOG MALE TEACHER: actor: " + strAliasBase + " : general base alias: " + strAliasGeneral_Base + "\n" );
+	entActor.dialog( strAliasGreeting_Base, "greetingDialog" );
+
+	//print( "--------------------------------- END CHARACTER ----------------------------------\n" );
+	//print( "----------------------------------------------------------------------------------\n" );
+}	
+
+
+//-------------------------------------------
+// initDialog_TeacherFemale
+// setup generic dialog for an teacher female
+//-------------------------------------------
+void initDialog_TeacherFemale( entity entActor, float boolDoConversationalAnims, string strHeadCommand )
+{
+	float intChoice;
+	float intActorChoice;
+	float intCounterCurrent;
+	
+	string strAliasBase;
+	string strAliasGeneral1;
+	string strAliasGeneral2;
+	string strAliasGeneral_Base;
+	string strAliasGreeting1;
+	string strAliasGreeting2;
+	string strAliasGreeting_Base;
+	
+	//--- create unique alias'
+	intCounterCurrent = intCounter;
+	intCounter ++;
+	strAliasBase = "TeacherFemale" + intCounterCurrent;
+	strAliasGeneral1 = strAliasBase + "_general1";
+	strAliasGeneral2 = strAliasBase + "_general2";
+	strAliasGeneral_Base = strAliasBase + "_general";
+	strAliasGreeting1 = strAliasBase + "_greeting1";
+	strAliasGreeting2 = strAliasBase + "_greeting2";
+	strAliasGreeting_Base = strAliasBase + "_greeting";
+	
+	//--- pick a dialog choice
+	intChoice = randomint( 2 );
+	
+	//--- pick an actor choice
+	intActorChoice = randomint( 3 );
+	
+	//--- if the choice picked was the previous one used, pick again until it's different
+	while( (intChoice == intChoicePrevious_TeacherFemale) && (intActorChoice == intActorChoicePrevious_TeacherFemale) )
+	{
+		intChoice = randomint( 2 );
+		intActorChoice = randomint( 3 );
+	}
+	
+	//--- store the setting for checking on the next person
+	intChoicePrevious_TeacherFemale = intChoice;
+	intActorChoicePrevious_TeacherFemale = intActorChoice;
+
+	//print( "----------------------------------------------------------------------------------------------\n" );
+	//print( "DIALOG FEMALE TEACHER: actor: " + entActor.getrawtargetname() + " : basename: " + strAliasBase +"\n" );
+	//print( "DIALOG FEMALE TEACHER: actor choice: " + intActorChoice + " : dialog choice: " + intChoice + "\n" );
+	//print( "----------------------------------------------------------------------------------------------\n" );
+	
+	//--- start setting dialog
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( strHeadCommand, boolDoConversationalAnims );
+	
+	if( intActorChoice == 0 )  //--- actor choice 1
+	{
+    	if( intChoice == 0 )	//--- only alias the 'I'm busy' line
+    	{
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/teacherf1_bitbusy.mp3" ); 	//I'm a bit busy now, Lieutenant, but I could talk to you after dinner….
+    		//print( "DIALOG FEMALE TEACHER: actor0: " + strAliasBase + " : general1 alias - can't talk now: " + strAliasGeneral1 + "\n" );
+    	}
+    	else
+    	{
+    		//--- alias the common lines
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/teacherf1_howtoday.mp3", "stop" ); 	//How are you today…(sultry)…professor..
+    		//print( "DIALOG FEMALE TEACHER: actor0: " + strAliasBase + " : general1 alias: " + strAliasGeneral1 + "\n" );
+    		entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/teacherf1_somehelp.mp3" ); 			//Is there…something I can help you with professor?
+    		//print( "DIALOG FEMALE TEACHER: actor0: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    	}
+    }
+    else if( intActorChoice == 1 )	//--- actor choice 2
+    {
+    	if( intChoice == 0 )	//--- only alias the 'I'm busy' line
+    	{
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/teacherf2_time.mp3" ); 	//I don't have time to talk right now.
+    		//print( "DIALOG FEMALE TEACHER: actor1: " + strAliasBase + " : general1 alias - can't talk now: " + strAliasGeneral1 + "\n" );
+    	}
+    	else
+    	{
+    		//--- alias the common lines
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/teacherf2_munrois.mp3", "stop" ); 	//Hello…..Munro is it?
+    		//print( "DIALOG FEMALE TEACHER: actor1: " + strAliasBase + " : general1 alias: " + strAliasGeneral1 + "\n" );
+    		entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/teacherf2_glad.mp3" ); 				//Glad to have you with here at the academy.
+    		//print( "DIALOG FEMALE TEACHER: actor1: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    	}
+    }
+    else	//--- actor choice 3
+    {
+    	if( intChoice == 0 )	//--- only alias the 'I'm busy' line
+    	{
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/femt1_whatdo.mp3" ); 	//What can I do for you?
+    		//print( "DIALOG FEMALE TEACHER: actor2: " + strAliasBase + " : general1 alias - can't talk now: " + strAliasGeneral1 + "\n" );
+    	}
+    	else
+    	{
+    		//--- alias the common lines
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/femt2_welcome.mp3", "stop" ); 	//Welcome back to the Alpha Quadrant Lieutenant.
+    		//print( "DIALOG FEMALE TEACHER: actor2: " + strAliasBase + " : general1 alias: " + strAliasGeneral1 + "\n" );
+    		entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/femt2_yeslt.mp3" ); 				//Yes Lieutenant?
+    		//print( "DIALOG FEMALE TEACHER: actor2: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+	   	}
+    }
+    	
+	entActor.alias( strAliasGreeting1 , "localization/sound/dialog/ent_m1/munro_prof.mp3" );	//Professor.
+	entActor.alias( strAliasGreeting2 , "localization/sound/dialog/ent_m1/munro_hello.mp3" );	//Hello
+	
+	//print( "============== REGISTER DIALOG ====================\n" );
+	
+	//-------------------------------------------------------------------
+	//--- register all the alias'
+	entActor.dialog( strAliasGeneral_Base );
+	//print( "DIALOG FEMALE TEACHER: actor: " + strAliasBase + " : general base alias: " + strAliasGeneral_Base + "\n" );
+	entActor.dialog( strAliasGreeting_Base, "greetingDialog" );
+
+	//print( "--------------------------------- END CHARACTER ----------------------------------\n" );
+	//print( "----------------------------------------------------------------------------------\n" );
+}
+
+
+//-------------------------------------------
+// initDialog_CadetMale
+// setup generic dialog for an cadet male
+//-------------------------------------------
+void initDialog_CadetMale( entity entActor, float boolDoConversationalAnims, string strHeadCommand )
+{
+	float intActorChoice;
+	float intChoice;
+	float intCounterCurrent;
+	
+	string strAliasBase;
+	string strAliasFound;
+	string strAliasFound_Base;
+	string strAliasWaiting;
+	string strAliasWaiting_Base;
+	string strAliasOfficeLocked;
+	string strAliasOfficeLocked_Base;
+	string strAliasGeneral1;
+	string strAliasGeneral2;
+	string strAliasGeneral3;
+	string strAliasGeneral_Base;
+	string strAliasGreeting1;
+	string strAliasGreeting2;
+	string strAliasGreeting_Base;
+	
+	//--- create unique alias'
+	intCounterCurrent = intCounter;
+	intCounter ++;
+	strAliasBase = "CadetMale" + intCounterCurrent;
+	strAliasFound = strAliasBase + "_liftFound1";
+	strAliasFound_Base = strAliasBase + "_liftFound";
+	strAliasWaiting = strAliasBase + "_liftWaiting1";
+	strAliasWaiting_Base = strAliasBase + "_liftWaiting";
+	strAliasOfficeLocked = strAliasBase + "_liftOfficeLocked1";
+	strAliasOfficeLocked_Base = strAliasBase + "_liftOfficeLocked";
+	strAliasGeneral1 = strAliasBase + "_general1";
+	strAliasGeneral2 = strAliasBase + "_general2";
+	strAliasGeneral3 = strAliasBase + "_general3";
+	strAliasGeneral_Base = strAliasBase + "_general";
+	strAliasGreeting1 = strAliasBase + "_greeting1";
+	strAliasGreeting2 = strAliasBase + "_greeting2";
+	strAliasGreeting_Base = strAliasBase + "_greeting";
+	
+	//--- pick a dialog set choice
+	intChoice = randomint( 4 );
+
+	//--- pick an actor choice
+	intActorChoice = randomint( 2 );
+	
+	//--- if the choice picked was the previous one used, pick again until it's different
+	while( (intChoice == intChoicePrevious_Male) && (intActorChoice == intActorChoicePrevious_Male) )
+	{
+		intChoice = randomint( 4 );
+		intActorChoice = randomint( 2 );
+	}
+	
+	//--- store the setting for checking on the next person
+	intChoicePrevious_Male = intChoice;
+	intActorChoicePrevious_Male = intActorChoice;
+	
+	//--- start setting dialog
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( strHeadCommand, boolDoConversationalAnims );
+
+	//print( "----------------------------------------------------------------------------------------------\n" );
+	//print( "DIALOG MALE CADET: actor: " + entActor.getrawtargetname() + " : basename: " + strAliasBase +"\n" );
+	//print( "DIALOG MALE CADET: actor choice: " + intActorChoice + " : dialog choice: " + intChoice + "\n" );
+	//print( "----------------------------------------------------------------------------------------------\n" );
+		
+	if( intActorChoice == 0 )  //--- actor choice 1
+	{
+    	//--- alias the turbolift dialog
+    	entActor.alias( strAliasFound, "localization/sound/dialog/m2l1/cadetm1_porter.mp3", "stop" ); 	//Porter the repair chief is around here somewhere, he should be able to fix that turbolift for you sir.
+    	//print( "DIALOG MALE CADET: actor0: " + strAliasBase + " : found alias: " + strAliasFound + "\n" );
+    	
+    	entActor.alias( strAliasWaiting, "localization/sound/dialog/m2l1/cadetm1_maint.mp3", "stop" ); 	//The maintenance office is in the main building sir.
+    	//print( "DIALOG MALE CADET: actor0: " + strAliasBase + " : waiting alias: " + strAliasWaiting + "\n" );
+    	
+    	entActor.alias( strAliasOfficeLocked, "localization/sound/dialog/m2l1/cadetm1_locked.mp3", "stop" ); 	//The maintenance office is locked again? You should ask Harry to help you.
+    	//print( "DIALOG MALE CADET: actor0: " + strAliasBase + " : office locked alias: " + strAliasOfficeLocked + "\n" );
+    	
+    	if( intChoice == 3 )	//--- only alias the 'I'm busy' line
+    	{
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/cadetm1_sorrysir.mp3" ); 	//I'm sorry sir, but I really have to crack this problem.
+    		//print( "DIALOG MALE CADET: actor0: " + strAliasBase + " : general1 alias - can't talk now: " + strAliasGeneral1 + "\n" );
+    	}
+    	else
+    	{
+    		//--- alias the common lines
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/cadetm1_hello.mp3" ); 		//Hello sir.
+    		//print( "DIALOG MALE CADET: actor0: " + strAliasBase + " : general1 alias: " + strAliasGeneral1 + "\n" );
+    		
+    		entActor.alias( strAliasGeneral3 , "localization/sound/dialog/m2l1/cadetm1_someneed.mp3" ); 	//Is there something you need sir?
+    		//print( "DIALOG MALE CADET: actor0: " + strAliasBase + " : general3 alias: " + strAliasGeneral3 + "\n" );
+    	
+    		//--- alias one of the random possible one-liners
+    		//if( intChoice == 0 )
+    		//{
+    		//	entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/cadetm1_chance.mp3", "stop" ); //If you get a chance to take a 20th century history class, check out a company called Ritual Entertainment…..they made these awesome video games…..like SiN, and FAKK2
+    		//	print( "DIALOG MALE CADET: actor0: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    		//}
+    		//else
+    		//{
+    			entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/cadetm1_beaut.mp3", "stop" ); 	//I’m sorry, sir. I’m trying to focus on a thermodynamics problem.
+    			//print( "DIALOG MALE CADET: actor0: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    		//}
+    	}
+    }
+    else	//--- actor choice 2
+    {
+    	//--- alias the turbolift dialog
+    	entActor.alias( strAliasFound , "localization/sound/dialog/m2l1/cadetm2_lookar.mp3", "stop" ); 	//Look around in the courtyard. , I think I remember seeing Porter out there.  He's the repair tech here.
+    	//print( "DIALOG MALE CADET: actor1: " + strAliasBase + " : found alias: " + strAliasFound + "\n" );
+    	
+    	entActor.alias( strAliasWaiting , "localization/sound/dialog/m2l1/cadetm2_should.mp3", "stop" ); //You should find the maintenance office in the main building sir.
+    	//print( "DIALOG MALE CADET: actor1: " + strAliasBase + " : waiting alias: " + strAliasWaiting + "\n" );
+    	
+    	entActor.alias( strAliasOfficeLocked , "localization/sound/dialog/m2l1/cadetm2_unlock.mp3", "stop" ); 	//Harry can unlock the maintenance office for you.  He's quite scared of Porter, so you'll probably find him as far away from Porter as he can get.
+    	//print( "DIALOG MALE CADET: actor1: " + strAliasBase + " : office locked alias: " + strAliasOfficeLocked + "\n" );
+    	
+    	if( intChoice == 3 )	//--- only alias the 'I'm busy' line
+    	{
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/cadetm2_forgive.mp3" ); 	//Forgive me sir, but I really can't talk at the moment.
+    		//print( "DIALOG MALE CADET: actor1: " + strAliasBase + " : general1 alias - can't talk now: " + strAliasGeneral1 + "\n" );
+    	}
+    	else
+    	{
+    		//--- alias the common lines
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/cadetm2_yessir.mp3" ); //Yes sir?
+    		//print( "DIALOG MALE CADET: actor1: " + strAliasBase + " : general1 alias: " + strAliasGeneral1 + "\n" );
+    	
+    		entActor.alias( strAliasGeneral3 , "localization/sound/dialog/m2l1/cadetm2_howdo.mp3" ); 	//How are you doing today sir?
+    		//print( "DIALOG MALE CADET: actor1: " + strAliasBase + " : general3 alias: " + strAliasGeneral3 + "\n" );
+    	
+    		//--- alias one of the random possible one-liners
+    		if( intChoice == 0 )
+    		{
+    			entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/cadetm2_amazing.mp3", "stop" ); //Amazing thing about Voyager coming back.  After all these years, I bet they're getting a hero's welcome!
+    			//print( "DIALOG MALE CADET: actor1: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    		}
+    		else if( intChoice == 1 )
+    		{
+    			entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/cadetm2_serve.mp3", "stop" ); 	//I hope I get a chance to serve on the Enterprise sir!
+    			//print( "DIALOG MALE CADET: actor1: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    		}
+    		else
+    		{
+    			entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/cadetm2_warp.mp3", "stop" ); 	//Warp engine mechanics is such a tough class, sir!  I REALLY don't want take it again.
+    			//print( "DIALOG MALE CADET: actor1: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    		}
+    	}
+    }
+	
+	
+/*		
+	//--- alias and registering
+	if( intChoice == 0 )
+	{
+    	entActor.alias( "general1" , "localization/sound/dialog/m2l1/malec1_parties.mp3" ); 	//I hear the parties at the Vulcan compound in Sausilito are quite entertaining.
+    	entActor.alias( "general2" , "localization/sound/dialog/m2l1/malec1_warp.mp3" ); 		//My area of specialization is warp core physics.
+    	entActor.alias( "general3" , "localization/sound/dialog/m2l1/malec1_ent.mp3" ); 		//I am hoping to get assigned to the Enterprise when I graduate.
+    }
+    else
+    {
+    	entActor.alias( "general1" , "localization/sound/dialog/m2l1/malec3_late.mp3" );		//Excuse me sir, I'm late for my class.
+    }
+*/  
+
+	entActor.alias( strAliasGreeting1, "localization/sound/dialog/ent_m1/munro_cadet.mp3" );			//Cadet.
+	//print( "DIALOG MALE CADET: actor: " + strAliasBase + " : greeting1 alias: " + strAliasGreeting1 + "\n" );
+
+	entActor.alias( strAliasGreeting2, "localization/sound/dialog/ent_m1/munro_hello.mp3" );			//Hello
+	//print( "DIALOG MALE CADET: actor: " + strAliasBase + " : greeting2 alias: " + strAliasGreeting2 + "\n" );
+	
+	//-------------------------------------------------------------------
+	//--- register all the alias'
+	
+	//print( "============== REGISTER DIALOG ====================\n" );
+	
+	entActor.dialog( strAliasFound_Base, "depends", "level.liftFound" );
+	//print( "DIALOG MALE CADET: actor: " + strAliasBase + " : found base alias: " + strAliasFound_Base + "\n" );
+	
+	entActor.dialog( strAliasWaiting_Base, "depends", "level.liftWaiting" );
+	//print( "DIALOG MALE CADET: actor: " + strAliasBase + " : waiting base alias: " + strAliasWaiting_Base + "\n" );
+	
+	entActor.dialog( strAliasOfficeLocked_Base, "depends", "level.liftOfficeLocked" );
+	//print( "DIALOG MALE CADET: actor: " + strAliasBase + " : office locked base alias: " + strAliasOfficeLocked_Base + "\n" );
+	
+	entActor.dialog( strAliasGeneral_Base );
+	//print( "DIALOG MALE CADET: actor: " + strAliasBase + " : general base alias: " + strAliasGeneral_Base + "\n" );
+	
+	entActor.dialog( strAliasGreeting_Base, "greetingDialog" );
+	//print( "DIALOG MALE CADET: actor: " + strAliasBase + " : greeting base alias: " + strAliasGreeting_Base + "\n" );
+
+	//print( "--------------------------------- END CHARACTER ----------------------------------\n" );
+	//print( "----------------------------------------------------------------------------------\n" );
+}
+
+
+//-------------------------------------------
+// initDialog_CadetFemale
+// setup generic dialog for an cadet female
+//-------------------------------------------
+void initDialog_CadetFemale( entity entActor, float boolDoConversationalAnims, string strHeadCommand )
+{
+	float intActorChoice;
+	float intChoice;
+	float intCounterCurrent;
+	
+	string strAliasBase;
+	string strAliasFound;
+	string strAliasFound_Base;
+	string strAliasWaiting;
+	string strAliasWaiting_Base;
+	string strAliasOfficeLocked;
+	string strAliasOfficeLocked_Base;
+	string strAliasGeneral1;
+	string strAliasGeneral2;
+	string strAliasGeneral3;
+	string strAliasGeneral_Base;
+	string strAliasGreeting1;
+	string strAliasGreeting2;
+	string strAliasGreeting_Base;
+	
+	//--- create unique alias'
+	intCounterCurrent = intCounter;
+	intCounter ++;
+	strAliasBase = "CadetFemale" + intCounterCurrent;
+	strAliasFound = strAliasBase + "_liftFound1";
+	strAliasFound_Base = strAliasBase + "_liftFound";
+	strAliasWaiting = strAliasBase + "_liftWaiting1";
+	strAliasWaiting_Base = strAliasBase + "_liftWaiting";
+	strAliasOfficeLocked = strAliasBase + "_liftOfficeLocked1";
+	strAliasOfficeLocked_Base = strAliasBase + "_liftOfficeLocked";
+	strAliasGeneral1 = strAliasBase + "_general1";
+	strAliasGeneral2 = strAliasBase + "_general2";
+	strAliasGeneral3 = strAliasBase + "_general3";
+	strAliasGeneral_Base = strAliasBase + "_general";
+	strAliasGreeting1 = strAliasBase + "_greeting1";
+	strAliasGreeting2 = strAliasBase + "_greeting2";
+	strAliasGreeting_Base = strAliasBase + "_greeting";
+	
+	//--- pick a dialog set choice
+	intChoice = randomint( 4 );
+
+	//--- pick an actor choice
+	intActorChoice = randomint( 2 );
+	
+	//--- if the choice picked was the previous one used, pick again until it's different
+	while( (intChoice == intChoicePrevious_Female) && (intActorChoice == intActorChoicePrevious_Female) )
+	{
+		intChoice = randomint( 4 );
+		intActorChoice = randomint( 2 );
+	}
+	
+	//--- store the setting for checking on the next person
+	intChoicePrevious_Female = intChoice;
+	intActorChoicePrevious_Female = intActorChoice;
+	
+	//--- start setting dialog
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( strHeadCommand, boolDoConversationalAnims );
+	
+	//print( "----------------------------------------------------------------------------------------------\n" );
+	//print( "DIALOG FEMALE CADET: actor: " + entActor.getrawtargetname() + " : basename: " + strAliasBase +"\n" );
+	//print( "DIALOG FEMALE CADET: actor choice: " + intActorChoice + " : dialog choice: " + intChoice + "\n" );
+	//print( "----------------------------------------------------------------------------------------------\n" );
+	
+	if( intActorChoice == 0 )  //--- actor choice 1
+	{
+    	//--- alias the turbolift dialog
+    	entActor.alias( strAliasFound, "localization/sound/dialog/m2l1/cadetf1_shouldfind.mp3", "stop" ); 	//Hmmm, you should find Porter, the chief repair tech!  He'll be able to fix that turbolift sir.
+    	//print( "DIALOG FEMALE CADET: actor0: " + strAliasBase + " : found alias: " + strAliasFound + "\n" );
+    	
+    	entActor.alias( strAliasWaiting, "localization/sound/dialog/m2l1/cadetf1_maint.mp3", "stop" ); 	//The maintenance office is in the main building sir.
+    	//print( "DIALOG FEMALE CADET: actor0: " + strAliasBase + " : waiting alias: " + strAliasWaiting + "\n" );
+    	
+    	entActor.alias( strAliasOfficeLocked, "localization/sound/dialog/m2l1/cadetf1_harryun.mp3", "stop" ); 	//Harry can unlock the maintenance office.  You should find him around here somewhere sir.
+    	//print( "DIALOG FEMALE CADET: actor0: " + strAliasBase + " : office locked alias: " + strAliasOfficeLocked + "\n" );
+    	
+    	if( intChoice == 3 )	//--- only alias the 'I'm busy' line
+    	{
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/cadetf1_lovetalk.mp3" ); 	//I would love to talk to you sir, but this is not a good time.
+    		//print( "DIALOG FEMALE CADET: actor0: " + strAliasBase + " : general1 alias - can't talk now: " + strAliasGeneral1 + "\n" );
+    	}
+    	else
+    	{
+    		//--- alias the common lines
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/cadetf1_hellosir.mp3" ); 		//Hello sir.
+    		//print( "DIALOG FEMALE CADET: actor0: " + strAliasBase + " : general1 alias: " + strAliasGeneral1 + "\n" );
+    		
+    		entActor.alias( strAliasGeneral3 , "localization/sound/dialog/m2l1/cadetf1_sirhelp.mp3" ); 	//Yes sir, can I help you?
+    		//print( "DIALOG FEMALE CADET: actor0: " + strAliasBase + " : general3 alias: " + strAliasGeneral3 + "\n" );
+    	
+    		//--- alias one of the random possible one-liners
+    		if( intChoice == 0 )
+    		{
+    			entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/cadetf1_stardesign.mp3", "stop" ); //I'm studying starship design and engineering.  I'm hoping to be able to design starships at Utopia Planetia someday.
+    			//print( "DIALOG FEMALE CADET: actor0: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    		}
+    		else if( intChoice == 1 )
+    		{
+    			entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/cadetf1_class.mp3", "stop" ); 	//Have you had a class with Professor Sieh?  I really enjoyed his class in Xenoethnography.
+    			//print( "DIALOG FEMALE CADET: actor0: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    		}
+    		else
+    		{
+    			entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/cadetf1_heardnews.mp3", "stop" ); 	//Have you heard the news about voyager returning home after all these years?!
+    			//print( "DIALOG FEMALE CADET: actor0: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    		}
+    	}
+    }
+    else	//--- actor choice 2
+    {
+    	//--- alias the turbolift dialog
+    	entActor.alias( strAliasFound , "localization/sound/dialog/m2l1/cadetf2_repairtech.mp3", "stop" ); 	//You should tell the repair tech about that turbolift, sir.
+    	//print( "DIALOG FEMALE CADET: actor1: " + strAliasBase + " : found alias: " + strAliasFound + "\n" );
+    	
+    	entActor.alias( strAliasWaiting , "localization/sound/dialog/m2l1/cadetf2_find.mp3", "stop" ); //You should find the maintenance office in the main building sir.
+    	//print( "DIALOG FEMALE CADET: actor1: " + strAliasBase + " : waiting alias: " + strAliasWaiting + "\n" );
+    	
+    	entActor.alias( strAliasOfficeLocked , "localization/sound/dialog/m2l1/cadetf2_portass.mp3", "stop" ); 	//Porter's assistant, Harry knows the code to get into the maintenance office sir.
+    	//print( "DIALOG FEMALE CADET: actor1: " + strAliasBase + " : office locked alias: " + strAliasOfficeLocked + "\n" );
+    	
+    	if( intChoice == 3 )	//--- only alias the 'I'm busy' line
+    	{
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/cadetf2_talk.mp3" ); 	//Thank you sir, but I can't really talk right now.
+    		//print( "DIALOG FEMALE CADET: actor1: " + strAliasBase + " : general1 alias - can't talk now: " + strAliasGeneral1 + "\n" );
+    	}
+    	else
+    	{
+    		//--- alias the common lines
+    		entActor.alias( strAliasGeneral1 , "localization/sound/dialog/m2l1/cadetf2_goodd.mp3" ); //Good day sir.
+    		//print( "DIALOG FEMALE CADET: actor1: " + strAliasBase + " : general1 alias: " + strAliasGeneral1 + "\n" );
+    	
+    		entActor.alias( strAliasGeneral3 , "localization/sound/dialog/m2l1/cadetf2_some.mp3" ); 	//Is there something I can help you with sir?
+    		//print( "DIALOG FEMALE CADET: actor1: " + strAliasBase + " : general3 alias: " + strAliasGeneral3 + "\n" );
+    	
+    		//--- alias one of the random possible one-liners
+    		if( intChoice == 0 )
+    		{
+    			entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/cadetf2_prank.mp3", "stop" ); 	//Did you hear about the prank the techs pulled on Professor Ba'albaki? They rigged a food replicator to dispense Klingon Gagh instead of linguini. Heh heh. They’re always pulling pranks on faculty! 
+    			//print( "DIALOG FEMALE CADET: actor1: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    		}
+    		else if( intChoice == 1 )
+    		{
+    			entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/cadetf2_exams.mp3", "stop" ); 	//Uhhh, I've got five exams coming up , a Parisis Squares conference game, three labs, four papers to write, and a group project to manage!  But, WORST of all… my parents are coming to visit!
+    			//print( "DIALOG FEMALE CADET: actor1: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    		}
+    		else
+    		{
+    			entActor.alias( strAliasGeneral2 , "localization/sound/dialog/m2l1/cadetf2_cute.mp3", "stop" ); 	//I'm really enjoying my time at the Academy.  Everyone here is so friendly.
+    			//print( "DIALOG FEMALE CADET: actor1: " + strAliasBase + " : general2 alias: " + strAliasGeneral2 + "\n" );
+    		}
+    	}
+    }
+	
+	
+/*		
+	//--- alias and registering
+	if( intChoice == 0 )
+	{
+    	entActor.alias( "general1" , "localization/sound/dialog/m2l1/malec1_parties.mp3" ); 	//I hear the parties at the Vulcan compound in Sausilito are quite entertaining.
+    	entActor.alias( "general2" , "localization/sound/dialog/m2l1/malec1_warp.mp3" ); 		//My area of specialization is warp core physics.
+    	entActor.alias( "general3" , "localization/sound/dialog/m2l1/malec1_ent.mp3" ); 		//I am hoping to get assigned to the Enterprise when I graduate.
+    }
+    else
+    {
+    	entActor.alias( "general1" , "localization/sound/dialog/m2l1/malec3_late.mp3" );		//Excuse me sir, I'm late for my class.
+    }
+*/  
+	entActor.alias( strAliasGreeting1, "localization/sound/dialog/ent_m1/munro_cadet.mp3" );			//Cadet.
+	//print( "DIALOG FEMALE CADET: actor: " + strAliasBase + " : greeting1 alias: " + strAliasGreeting1 + "\n" );
+
+	entActor.alias( strAliasGreeting2, "localization/sound/dialog/ent_m1/munro_hello.mp3" );			//Hello
+	//print( "DIALOG FEMALE CADET: actor: " + strAliasBase + " : greeting2 alias: " + strAliasGreeting2 + "\n" );
+	
+	//-------------------------------------------------------------------
+	//--- register all the alias'
+	
+	//print( "============== REGISTER DIALOG ====================\n" );
+	
+	entActor.dialog( strAliasFound_Base, "depends", "level.liftFound" );
+	//print( "DIALOG FEMALE CADET: actor: " + strAliasBase + " : found base alias: " + strAliasFound_Base + "\n" );
+	
+	entActor.dialog( strAliasWaiting_Base, "depends", "level.liftWaiting" );
+	//print( "DIALOG FEMALE CADET: actor: " + strAliasBase + " : waiting base alias: " + strAliasWaiting_Base + "\n" );
+	
+	entActor.dialog( strAliasOfficeLocked_Base, "depends", "level.liftOfficeLocked" );
+	//print( "DIALOG FEMALE CADET: actor: " + strAliasBase + " : office locked base alias: " + strAliasOfficeLocked_Base + "\n" );
+	
+	entActor.dialog( strAliasGeneral_Base );
+	//print( "DIALOG FEMALE CADET: actor: " + strAliasBase + " : general base alias: " + strAliasGeneral_Base + "\n" );
+	
+	entActor.dialog( strAliasGreeting_Base, "greetingDialog" );
+	//print( "DIALOG FEMALE CADET: actor: " + strAliasBase + " : greeting base alias: " + strAliasGreeting_Base + "\n" );
+
+	//print( "--------------------------------- END CHARACTER ----------------------------------\n" );
+	//print( "----------------------------------------------------------------------------------\n" );
+	
+/*
+	entActor.setdialogmode( "normal" );
+	entActor.settalkwatchmode ( "headwatchonly" );
+
+	
+	//--- alias and registering
+	entActor.alias( "generalCadetFemale1" , "localization/sound/dialog/m2l1/femc2_busy.mp3" );			//Sorry sir, I'm busy studying for my next class.
+
+	entActor.alias( "greetingCadetFemale1" , "localization/sound/dialog/ent_m1/munro_hello1.mp3" );	//hello
+	entActor.alias( "greetingCadetFemale2" , "localization/sound/dialog/ent_m1/munro_hi1.mp3" );		//hi
+
+	entActor.dialog( "generalCadetFemale" );
+	entActor.dialog( "greetingCadetFemale", "greetingDialog" );
+*/
+}
+
+

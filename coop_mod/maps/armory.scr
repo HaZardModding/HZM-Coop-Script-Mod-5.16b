@@ -1,0 +1,388 @@
+//-----------------------------------------------------------------------------------
+// Script By:	Christian Sebastian Strahl (Chrissstrahl)
+// Created on:	2007.09.29
+// E-Mail:		chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+// CONTAINING ARMORY RELATED FUNCTIONS FOR THE HZM CO-OP MOD
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2012 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+
+//ALL WEAPON TIKIS HAVE TO BE EXACTLY LIKE THIS
+//CASE SENSITIVE ("phaser" IS NOT EQUAL TO "Phaser")!
+// models/weapons/worldmodel-Phaser.tik
+// models/weapons/worldmodel-Phaser-stx.tik
+// models/weapons/worldmodel-BurstRifle.tik
+// models/weapons/worldmodel-CompressionRifle.tik
+// models/weapons/worldmodel-FieldAssaultRifle.tik
+// models/weapons/worldmodel-GrenadeLauncher.tik
+// models/weapons/worldmodel-Knife.tik
+// models/weapons/worldmodel-Tricorder-stx.tik
+// models/weapons/worldmodel-Tricorder.tik
+// models/weapons/worldmodel-Batleth.tik
+//
+// models/weapons/worldmodel-sniperrifle.tik
+// models/weapons/worldmodel-imod.tik
+// models/weapons/worldmodel-rom-datapad.tik
+// models/weapons/worldmodel-rom-disruptor.tik
+// models/weapons/worldmodel-tetryon.tik
+// models/weapons/worldmodel-attrex-rifle.tik
+// models/weapons/worldmodel-drull-staff.tik
+// models/weapons/worldmodel-attrex-rifle.tik
+// models/weapons/worldmodel-photon.tik
+// models/weapons/worldmodel-rom-radgun.tik
+// models/weapons/worldmodel-enterprise.tik
+
+void globalCoop_armory_idendifyDefaultSpawnWeapon(string sWeapon)
+//----------------------------------------------------------------------
+// IDENDIFY AN SET THE DEFAULT WEAPON PLAYER SPAWN WITH
+//----------------------------------------------------------------------
+{
+	if(coop_string_mp_playerDefaultStartWeaponName == "" && sWeapon != "None")
+	{
+		coop_string_mp_playerDefaultStartWeaponName = sWeapon;
+		coop_string_mp_waponToTakeAwayFromPlayer1	= globalCoop_armory_returnTikiFromWeaponname(sWeapon);
+
+		if(	coop_string_mp_playerDefaultStartWeaponName ==  "Phaser"	||
+			coop_string_mp_playerDefaultStartWeaponName ==  "Batleth"	||
+			coop_string_mp_playerDefaultStartWeaponName ==  "Spawn")
+		{
+			coop_string_mp_altPlayerStartWeapon			= "models/weapons/worldmodel-Phaser-stx.tik";
+		}
+		if(coop_string_mp_playerDefaultStartWeaponName ==  "Phaser-stx"){
+			coop_string_mp_altPlayerStartWeapon			= "models/weapons/worldmodel-Phaser.tik";
+		}
+		if(coop_string_mp_playerDefaultStartWeaponName == "FederationSniperRifle"){
+			coop_string_mp_altPlayerStartWeapon			= "models/weapons/worldmodel-CompressionRifle.tik";
+		}
+		if(coop_string_mp_playerDefaultStartWeaponName == "Tricorder-stx"){
+			coop_string_mp_altPlayerStartWeapon			= "models/weapons/worldmodel-Tricorder.tik";
+		}
+		if(coop_string_mp_playerDefaultStartWeaponName == "Tricorder-rom" || coop_string_mp_playerDefaultStartWeaponName == "Tricorder"){
+			coop_string_mp_altPlayerStartWeapon			= "models/weapons/worldmodel-Tricorder-stx.tik";
+		}
+		if(coop_string_mp_playerDefaultStartWeaponName == "RomulanDisruptor"){
+			coop_string_mp_waponToTakeAwayFromPlayer2 = "models/weapons/worldmodel-rom-disruptor-romhands.tik";
+			coop_string_mp_altPlayerStartWeapon		  = "models/weapons/worldmodel-CompressionRifle.tik";
+		}
+	}
+}
+
+void globalCoop_armory_waitForWeapon(entity ePlayer,string sWeapon,float fTimeout)
+//----------------------------------------------------------------------
+// WAIT FOR A SPECIFIC WEAPON TO BE DRAWN - -1 allows infinity wait
+//----------------------------------------------------------------------
+{
+//allow counting into the negative ebbys by using "Zerö"
+	string sCurrentWeapon;
+	while(fTimeout != 0)
+	{
+		fTimeout--;
+		if(doesEntityExist(ePlayer))
+		{
+			sCurrentWeapon	= ePlayer.getActiveWeaponName();
+			
+			if(sCurrentWeapon == sWeapon)
+			{
+				fTimeout=0;
+			}
+			else
+			{
+				wait(0.06);//works better with this - no func call
+			}
+		}
+		else
+		{
+			return;
+		}
+	}
+}
+
+void globalCoop_armory_waitForWeaponChange(entity ePlayer,string sWeapon,float fTimeout)
+//----------------------------------------------------------------------
+// WAIT FOR A SPECIFIC WEAPON TO BE DRAWN - -1 allows infinity wait
+//----------------------------------------------------------------------
+{
+//allow counting into the negative ebbys by using "Zerö"
+	string sCurrentWeapon;
+	while(fTimeout != 0)
+	{
+		fTimeout--;
+		if(doesEntityExist(ePlayer))
+		{
+			sCurrentWeapon	= ePlayer.getActiveWeaponName();
+			
+			if(sCurrentWeapon != sWeapon)
+			{
+				fTimeout=0;
+			}
+			else
+			{
+				wait(0.06);//works better with this - no func call
+			}
+		}
+		else
+		{
+			return;
+		}
+	}
+}
+
+
+void globalCoop_armory_putAwayWeapon(entity ePlayer)
+//----------------------------------------------------------------------
+// put away weapon of the given player, or actor
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(ePlayer)){
+		string sActiveWeapon,sAnimname;
+		sActiveWeapon = ePlayer.getActiveWeaponName();
+		if(globalCoop_return_integerPlayerId(ePlayer) > -1 && sActiveWeapon != coop_string_mp_playerDefaultStartWeaponName)
+		{
+			if(sActiveWeapon != coop_string_mp_playerDefaultStartWeaponName)//&& sActiveWeapon != "Knife"
+			{
+				ePlayer.setStringVar("globalCoop_weapon",sActiveWeapon);
+				ePlayer.safeholster(1);
+				globalCoop_main_waitZeroDotZero5();//wait for the player model animation to change
+				ePlayer.take(sActiveWeapon);
+				wait(0.1);//wait for the update about the current weapon
+				ePlayer.give(globalCoop_armory_returnTikiFromWeaponname(sActiveWeapon));
+			}
+		}
+		else{
+			// put away current weapon
+			ePlayer.useActorWeapon(sActiveWeapon);
+			sAnimname = sActiveWeapon+"_putaway";
+			ePlayer.anim( sAnimname );
+			waitforanimation(ePlayer,sAnimname);
+			ePlayer.anim("Idle");
+			ePlayer.useActorWeapon("none");
+		}
+	}
+}
+
+void globalCoop_armory_restoreWeapon(entity ePlayer)
+//----------------------------------------------------------------------
+// put away weapon of the given player, or actor
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(ePlayer))
+	{
+		string sWeapon;
+		sWeapon = ePlayer.getStringVar("globalCoop_weapon");
+		if(	sWeapon == ""		||
+			sWeapon == "None"	||
+			sWeapon == "Knife"	||
+			sWeapon == "Menu"	)
+		{
+			sWeapon = coop_string_weapon1;
+		}
+		ePlayer.use(sWeapon);	
+	}
+}
+
+
+void globalCoop_armory_equip(entity ePlayer)
+//----------------------------------------------------------------------
+// EQUIP PLAYER WITH WEAPONS
+//----------------------------------------------------------------------
+{
+	if(coop_string_mp_playerDefaultStartWeaponName != "")
+	{	
+		if(doesEntityExist(ePlayer))
+		{
+			string sWeapon;
+			sWeapon = globalCoop_armory_equipWithWeapons(ePlayer);
+			if(!globalCoop_check_activeWeaponType(ePlayer,"Tricorder") && sWeapon != "")
+			{
+				globalCoop_main_waitAFrame();
+				
+				if(doesEntityExist(ePlayer))
+				{
+					ePlayer.use(sWeapon);
+				//if player has just entred the game, give full ammo
+					if((ePlayer.getFloatVar("globalCoop_timeEquiped") + 3) > getLevelTime())
+					{
+						thread globalCoop_armory_giveAmmo(ePlayer,1000);
+					}
+				}
+			}
+		//use this weapon to make sure player does no longer have it
+			ePlayer.use(coop_string_mp_waponToTakeAwayFromPlayer1);
+		}
+	}
+}
+
+
+void globalCoop_armory_giveAmmo(entity ePlayer,float fAmmount)
+//----------------------------------------------------------------------
+//GIVE AMMO...
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(ePlayer))
+	{
+		ePlayer.giveAmmoOverTime("Plasma",fAmmount,2);
+		ePlayer.giveAmmoOverTime("Idryll",fAmmount,2);
+		ePlayer.giveAmmoOverTime("Fed",fAmmount,2);
+	}
+}
+
+
+void globalCoop_armory_weaponRegister(string sWeaponTiki)
+//----------------------------------------------------------------------
+//Register a weapon for Multiplayer use
+//----------------------------------------------------------------------
+{
+//Do not allow that the player gets the weapon he/she spawns with (multiplayer only)
+	sWeaponTiki = globalCoop_armory_weaponCheckWeaponAndReturnValid(sWeaponTiki);
+//Register to the singleplayer inventory list
+	if(coop_string_weapon1 == "" || coop_string_weapon1 == sWeaponTiki){coop_string_weapon1 = sWeaponTiki;}
+	else if(coop_string_weapon2 == "" || coop_string_weapon2 == sWeaponTiki){coop_string_weapon2 = sWeaponTiki;}
+	else if(coop_string_weapon3 == "" || coop_string_weapon3 == sWeaponTiki){coop_string_weapon3 = sWeaponTiki;}
+	else if(coop_string_weapon4 == "" || coop_string_weapon4 == sWeaponTiki){coop_string_weapon4 = sWeaponTiki;}
+	else if(coop_string_weapon5 == "" || coop_string_weapon5 == sWeaponTiki){coop_string_weapon5 = sWeaponTiki;}
+	else if(coop_string_weapon6 == "" || coop_string_weapon6 == sWeaponTiki){coop_string_weapon6 = sWeaponTiki;}
+	else if(coop_string_weapon7 == "" || coop_string_weapon7 == sWeaponTiki){coop_string_weapon7 = sWeaponTiki;}
+	else{coop_string_weapon8 = sWeaponTiki;}
+}
+
+
+void globalCoop_armory_weaponUnregister(string sWeaponTiki)
+//----------------------------------------------------------------------
+//unRegister a weapon form any var
+//----------------------------------------------------------------------
+{
+//Do not allow that the player gets the weapon he/she spawns with (multiplayer only)
+	sWeaponTiki = globalCoop_armory_weaponCheckWeaponAndReturnValid(sWeaponTiki);
+//unRegister the given weapon
+	if(coop_string_weapon1 == sWeaponTiki){coop_string_weapon1 = "";}
+	if(coop_string_weapon2 == sWeaponTiki){coop_string_weapon2 = "";}
+	if(coop_string_weapon3 == sWeaponTiki){coop_string_weapon3 = "";}
+	if(coop_string_weapon4 == sWeaponTiki){coop_string_weapon4 = "";}
+	if(coop_string_weapon5 == sWeaponTiki){coop_string_weapon5 = "";}
+	if(coop_string_weapon6 == sWeaponTiki){coop_string_weapon6 = "";}
+	if(coop_string_weapon7 == sWeaponTiki){coop_string_weapon7 = "";}
+	if(coop_string_weapon8 == sWeaponTiki){coop_string_weapon8 = "";}
+}
+
+
+string globalCoop_armory_weaponCheckWeaponAndReturnValid(string sWeaponTiki)
+//----------------------------------------------------------------------
+//Check if the given weapon is illegal, if so replace it
+//----------------------------------------------------------------------
+{
+	if(sWeaponTiki == coop_string_mp_waponToTakeAwayFromPlayer1 && cvar_bool_multiplayer == 1){
+		sWeaponTiki	= coop_string_mp_altPlayerStartWeapon;
+	}
+	return sWeaponTiki+"";
+}
+
+
+string globalCoop_armory_weaponGiveAndReturnAsString(entity ePlayer,string sWeaponTiki)
+//----------------------------------------------------------------------
+// Ensure it's a valid weapon give it to the player and return the string
+//----------------------------------------------------------------------
+{
+	if(cvar_bool_multiplayer)
+	{
+//CHECK FOR GENERAL VALID WEAPON, DO NOT GIVE THE SPAWN WEAPON
+		sWeaponTiki = globalCoop_armory_weaponCheckWeaponAndReturnValid(sWeaponTiki);
+	}
+//GIVE WEAPON
+	ePlayer.give(sWeaponTiki);	
+//RETURN INFO
+	return ""+sWeaponTiki;
+}
+
+string globalCoop_armory_equipWithWeapons(entity ePlayer)
+//----------------------------------------------------------------------
+// Give Player all curently available weapons
+//----------------------------------------------------------------------
+{
+	if(coop_string_mp_playerDefaultStartWeaponName == "" && cvar_bool_multiplayer != 0){
+		return "";
+	}
+	string sWeaponToUse;
+	if(coop_string_weapon8 != ""){sWeaponToUse = globalCoop_return_string1IfString2IsEmpty(sWeaponToUse,globalCoop_armory_weaponGiveAndReturnAsString(ePlayer,coop_string_weapon8));}
+	if(coop_string_weapon7 != ""){sWeaponToUse = globalCoop_return_string1IfString2IsEmpty(sWeaponToUse,globalCoop_armory_weaponGiveAndReturnAsString(ePlayer,coop_string_weapon7));}
+	if(coop_string_weapon6 != ""){sWeaponToUse = globalCoop_return_string1IfString2IsEmpty(sWeaponToUse,globalCoop_armory_weaponGiveAndReturnAsString(ePlayer,coop_string_weapon6));}
+	if(coop_string_weapon5 != ""){sWeaponToUse = globalCoop_return_string1IfString2IsEmpty(sWeaponToUse,globalCoop_armory_weaponGiveAndReturnAsString(ePlayer,coop_string_weapon5));}
+	if(coop_string_weapon4 != ""){sWeaponToUse = globalCoop_return_string1IfString2IsEmpty(sWeaponToUse,globalCoop_armory_weaponGiveAndReturnAsString(ePlayer,coop_string_weapon4));}
+	if(coop_string_weapon3 != ""){sWeaponToUse = globalCoop_return_string1IfString2IsEmpty(sWeaponToUse,globalCoop_armory_weaponGiveAndReturnAsString(ePlayer,coop_string_weapon3));}
+	if(coop_string_weapon2 != ""){sWeaponToUse = globalCoop_return_string1IfString2IsEmpty(sWeaponToUse,globalCoop_armory_weaponGiveAndReturnAsString(ePlayer,coop_string_weapon2));}
+	if(coop_string_weapon1 != ""){sWeaponToUse = globalCoop_return_string1IfString2IsEmpty(sWeaponToUse,globalCoop_armory_weaponGiveAndReturnAsString(ePlayer,coop_string_weapon1));}
+	return sWeaponToUse+"";
+}
+
+
+string globalCoop_armory_returnTikiFromWeaponname(string sWeaponName)
+//----------------------------------------------------------------------
+// return the tiki for the waponname
+//----------------------------------------------------------------------
+{
+//ALL WEAPON TIKIS HAVE TO BE EXACTLY LIKE THIS
+//CASE SENSITIVE ("phaser" IS NOT EQUAL TO "Phaser")!
+// models/weapons/worldmodel-Phaser.tik
+// models/weapons/worldmodel-Phaser-stx.tik
+// models/weapons/worldmodel-BurstRifle.tik
+// models/weapons/worldmodel-CompressionRifle.tik
+// models/weapons/worldmodel-FieldAssaultRifle.tik
+// models/weapons/worldmodel-GrenadeLauncher.tik
+// models/weapons/worldmodel-Knife.tik
+// models/weapons/worldmodel-Tricorder-stx.tik
+// models/weapons/worldmodel-Tricorder.tik
+// models/weapons/worldmodel-Batleth.tik
+//
+// models/weapons/worldmodel-sniperrifle.tik
+// models/weapons/worldmodel-imod.tik
+// models/weapons/worldmodel-rom-datapad.tik
+// models/weapons/worldmodel-rom-disruptor.tik
+// models/weapons/worldmodel-tetryon.tik
+// models/weapons/worldmodel-attrex-rifle.tik
+// models/weapons/worldmodel-drull-staff.tik
+// models/weapons/worldmodel-attrex-rifle.tik
+// models/weapons/worldmodel-photon.tik
+// models/weapons/worldmodel-rom-radgun.tik
+// models/weapons/worldmodel-enterprise.tik
+
+	string sTikiName;
+	sTikiName = "models/weapons/worldmodel-"+sWeaponName+".tik";
+	if(sWeaponName == "Spawn" || sWeaponName == "Menu")
+		{sTikiName = "models/weapons/"+sWeaponName+".tik";}
+	if(sWeaponName == "FederationSniperRifle")
+		{sTikiName = "models/weapons/worldmodel-Sniperrifle.tik";}
+	if(sWeaponName == "I-Mod")
+		{sTikiName = "models/weapons/worldmodel-imod.tik";}
+	if(sWeaponName == "Tricorder-rom")
+		{sTikiName = "models/weapons/worldmodel-rom-datapad.tik";}
+	if(sWeaponName == "RomulanDisruptor")
+		{sTikiName = "models/weapons/worldmodel-rom-disruptor.tik";}
+	if(sWeaponName == "TetryonGatlingGun")
+		{sTikiName = "models/weapons/worldmodel-tetryon.tik";}
+	if(sWeaponName == "AttrexianRifle")
+		{sTikiName = "models/weapons/worldmodel-attrex-rifle.tik";}
+	if(sWeaponName == "DrullStaff")
+		{sTikiName = "models/weapons/worldmodel-drull-staff.tik";}
+	if(sWeaponName == "AttrexianRifle")
+		{sTikiName = "models/weapons/worldmodel-attrex-rifle.tik";}
+	if(sWeaponName == "PhotonBurst")
+		{sTikiName = "models/weapons/worldmodel-photon.tik";}
+	if(sWeaponName == "RomulanRadGun")
+		{sTikiName = "models/weapons/worldmodel-rom-radgun.tik";}
+	if(sWeaponName == "EnterpriseCannon")
+		{sTikiName = "models/weapons/worldmodel-enterprise.tik";}
+	return sTikiName+"";
+}
+
+

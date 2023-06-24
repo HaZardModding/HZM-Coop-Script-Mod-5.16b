@@ -1,0 +1,38 @@
+//--------------------------------------------------------------------------------------
+// Dialog Script
+// 	Contains all dialog setup code for one specific BSP.  That map's script should
+//	#include this file and call the function "initDialog" somewhere in it's main function.
+//--------------------------------------------------------------------------------------
+void initDialog()
+{
+	/*print( "Initializing dialog\n" );*/
+	
+	// setup hallway actor onuse dialog
+	$idryll1.setdialogmode( "normal" );
+	$idryll2.setdialogmode( "normal" );
+	$idryll3.setdialogmode( "normal" );
+
+	$idryll1.settalkwatchmode ( "turnto" );
+	$idryll2.settalkwatchmode ( "turnto" );
+	$idryll3.settalkwatchmode ( "turnto" );
+
+	if(!cvar_bool_multiplayer){//Singleplayer temporary only for sp until we have a alternative for the co-op mod
+		$idryll1.alias( "campIdryll1Dialog1" , "localization/sound/dialog/m5l1/idryll1_truerep.mp3" );
+		$idryll1.alias( "campIdryll1Dialog2" , "localization/sound/dialog/m5l1/idryll1_studseek.mp3" );
+		$idryll1.alias( "campIdryll1Dialog3" , "localization/sound/dialog/m5l1/idryll1_resfed.mp3" );
+		$idryll1.alias( "campIdryll1Dialog4" , "localization/sound/dialog/m5l1/idryll1_binary.mp3" );
+		$idryll1.alias( "campIdryll1Dialog5" , "localization/sound/dialog/m5l1/idryll1_terain.mp3" );
+		$idryll1.alias( "campIdryll1Dialog6" , "localization/sound/dialog/m5l1/idryll1_dying.mp3" );
+		$idryll1.alias( "campIdryll1Dialog7" , "localization/sound/dialog/m5l1/idryll1_exotic.mp3" );
+		$idryll1.dialog( "campIdryll1Dialog" );
+
+		$idryll2.alias( "campIdryll2Dialog1" , "localization/sound/dialog/m5l1/idryll2_story.mp3" );
+		$idryll2.alias( "campIdryll2Dialog2" , "localization/sound/dialog/m5l1/idryll2_campus.mp3" );
+		$idryll2.alias( "campIdryll2Dialog3" , "localization/sound/dialog/m5l1/idryll2_wejust.mp3" );
+		$idryll2.dialog( "campIdryll2Dialog" );
+				
+		$idryll3.alias( "campIdryll3Dialog1" , "localization/sound/dialog/m5l1/idryll3_conc.mp3" );
+		$idryll3.alias( "campIdryll3Dialog2" , "localization/sound/dialog/m5l1/idryll3_goneoff.mp3"  );
+		$idryll3.dialog( "campIdryll3Dialog" );
+	}
+}

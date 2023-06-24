@@ -1,0 +1,103 @@
+//-----------------------------------------------
+// Cinematic Name: c:\projects\ef2\ef2\base\cins\m6l1_picgun.cin
+// Export Version: 1
+// Export Date:    Tue Dec 03 13:00:00 2002
+//-----------------------------------------------
+
+Origins
+{
+    Origin
+    {
+          name          "m6l1_Picgun"
+          origin         2012.883911 -4935.711914 1.678156
+          yaw            0.000000
+    }
+}
+
+
+Actors
+{
+    Actor
+    {
+        name          "armMunro"
+        tiki          "char/hazardteam_munro.tik"
+        anim          "cin-m6l1_picgun_Munro"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         105.193970 96.548340 -2.466454
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "armPicard"
+        tiki          "char/starfleet_picard.tik"
+        anim          "cin-m6l1_picgun_Picard"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         -40.451294 -72.780762 -2.252825
+        yaw            -90.000000
+    }
+}
+
+
+Cameras
+{
+	//ResetCamera	   	 false
+    Camera
+    {
+        name         "cam02-m6l1-picgun"
+        camfile      "cam02-m6l1-picgun"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+	selfRemoving   false
+    }
+	//ResetCamera	   	 false
+    Camera
+    {
+        name         "cam03-m6l1-picgun"
+        camfile      "cam03-m6l1-picgun"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+	selfRemoving   false
+    }
+    Cut
+    {
+        toCamera     "cam02-m6l1-picgun"
+        frame         0
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam03-m6l1-picgun"
+        frame         62
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam02-m6l1-picgun"
+        frame         100
+        fadeout       20
+        fadein        0
+        lerp          false
+    }
+}

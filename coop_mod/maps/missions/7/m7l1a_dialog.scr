@@ -1,0 +1,46 @@
+
+//--------------------------------------------------------------------------------------
+// Dialog Script
+// 	Contains all dialog setup code for one specific BSP.  That map's script should
+//	#include this file and call the function "initDialog" somewhere in it's main function.
+//--------------------------------------------------------------------------------------
+void initDialogPower()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		print( "Initializing dialog\n" );
+		
+		$attrex_power_router1.setdialogmode( "normal" );
+
+		$attrex_power_router1.settalkwatchmode ( "turnto" );
+
+		$attrex_power_router1.alias( "attrex_power_router1Dialog1" , "localization/sound/dialog/m7l1/attrex1_help.mp3" );
+		$attrex_power_router1.alias( "attrex_power_router1Dialog2" , "localization/sound/dialog/m7l1/attrex1_where.mp3" );
+		$attrex_power_router1.alias( "attrex_power_router1Dialog3" , "localization/sound/dialog/m7l1/attrex2_please.mp3" );
+		$attrex_power_router1.alias( "attrex_power_router1Dialog4" , "localization/sound/dialog/m7l1/attrex3_stop.mp3" );
+		$attrex_power_router1.dialog( "attrex_power_router1Dialog" );
+	}
+}
+
+void initDialogUnlocker()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		print( "Initializing dialog\n" );
+		
+		// setup hallway actor onuse dialog
+		$attrex_unlocker1.setdialogmode( "normal" );
+		$attrex_unlocker2.setdialogmode( "normal" );
+
+		$attrex_unlocker1.settalkwatchmode ( "turnto" );
+		$attrex_unlocker2.settalkwatchmode ( "turnto" );
+
+		$attrex_unlocker1.alias( "attrex_unlocker1Dialog1" , "localization/sound/dialog/m4l1/attrex_didthings.mp3" );
+		$attrex_unlocker1.alias( "attrex_unlocker1Dialog2" , "localization/sound/dialog/m4l1/attrex_stopinv.mp3" );
+		$attrex_unlocker1.dialog( "attrex_unlocker1Dialog" );
+
+		$attrex_unlocker2.alias( "attrex_unlocker2Dialog1" , "localization/sound/dialog/m7l1/attrex1_help.mp3" );
+		$attrex_unlocker2.alias( "attrex_unlocker2Dialog2" , "localization/sound/dialog/m7l1/attrex1_where.mp3" );
+		$attrex_unlocker2.alias( "attrex_unlocker2Dialog3" , "localization/sound/dialog/m7l1/attrex2_please.mp3" );
+		$attrex_unlocker2.alias( "attrex_unlocker2Dialog4" , "localization/sound/dialog/m7l1/attrex3_stop.mp3" );
+		$attrex_unlocker2.dialog( "attrex_unlocker2Dialog" );
+	}
+}

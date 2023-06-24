@@ -1,0 +1,33 @@
+menu "coop_vote" 2560 480 NONE 0
+bgcolor 0 0 0 0
+align top left
+direction from_top 0.3
+depth 0.3
+noresize
+gamefocus
+
+resource 
+Label
+{
+	title "Coop Mod vote:"
+    name "coop_voteTitle"
+    rect 0 0 2560 60
+    fgcolor 			1.00 1.00 1.00 1.00
+    bgcolor 			0.00 0.00 0.00 0.90
+    borderstyle "NONE"
+	font startrekfilmbt-18
+	horizontaljustify left
+}
+resource 
+Label
+{
+	title " "
+    name "coop_voteDscr"
+    rect 200 0 2560 60
+    fgcolor 			1.00 1.00 1.00 1.00
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+	font serpentinemedium-14
+	horizontaljustify left
+}
+end.

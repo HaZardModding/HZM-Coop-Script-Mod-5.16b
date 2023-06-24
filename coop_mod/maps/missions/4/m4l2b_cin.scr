@@ -1,0 +1,795 @@
+void cinematic_intro();
+void cinematicArm_MeetGonzales_Start();
+void cinematicArm_MeetGonzales_ArmEnd();
+void cinematic_EngineerRescue();
+void cinematic_EngineerRescueGonzalesWalk();
+void cinematic_EngineerRescueSkipthread();
+void cinematic_end();
+void cinematic_endScene2();
+void cinematic_endScene2Projectiles();
+void coreController();
+void cinematic_end_skipthread();
+
+
+//---------------------
+// Intro cinematic
+// Munro comms picard and then rides the short bus of doom
+//---------------------
+void cinematic_intro()
+{
+//--- spawn cameras
+	spawn( "Camera", "targetname", "cam1");
+	spawn( "Camera", "targetname", "cam2");
+	spawn( "Camera", "targetname", "cam3");
+//--- load camera paths
+	cam.load( "m4l2b_intro_adam1" );
+	cam.load( "m4l2b_intro_adam2" );
+	cam.load( "m4l2b_intro_adam3" );
+	cam.load( "m4l2b_intro_adam4" );
+	cam.load( "m4l2b_intro_adam5" );
+	cam.load( "m4l2b_intro_adam6" );
+	cam.load( "m4l2b_intro_adam7" );
+	
+	//--- begin cinematic
+	globalCoop_cin_start();
+	allowMusicDucking( 0 );
+
+	$intro_basher1.anim( "nosound_idle1" );
+	$intro_munro.useactorweapon( "none" );
+
+	//--- change the music
+	forcemusic( "aux1" );
+
+	//--- set skipthread
+	globalCoop_cin_skipThread("cinematicArm_MeetGonzales_ArmEnd");
+
+	wait(.1);
+	globalCoop_cin_follow($cam1,$m4l2b_intro_adam1 );
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( 2 );
+	
+	// SHOT 1 ------------------------------------------------------------
+	globalCoop_main_camFadeIn(1);
+
+	$intro_munro.anim("idle");
+	$intro_munro.walkto( "intro_node1" );
+	waitfor( $intro_munro );
+	wait( 1 );
+
+	$intro_munro.headwatch( $intro_lookat2 , 3 );
+	wait( 2 );
+
+	globalCoop_cin_follow($cam2, $m4l2b_intro_adam2 );
+	wait( .5 );
+	
+
+	
+// SHOT 2 ------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam2 );
+
+	$intro_munro.walkto( "intro_node2" );
+	waitfor( $intro_munro );
+
+	wait( 7 );
+
+	globalCoop_main_camFadeOut(.5);
+	wait( .5 );
+
+	globalCoop_cin_follow($cam1,$m4l2b_intro_adam3 );
+	//$intro_munro.origin('-3071.30 7808.70 -236.00');
+	$intro_munro.origin('-3071.30 7808.70 -225');
+	$intro_munro.angle(270);
+	$intro_munro.notsolid();
+	$intro_munro.anim("crouch_idle");
+	//$intro_munro.animateonce("duck_down");
+	
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( 1 );
+	
+	$intro_munro.bind( $tram_origin );
+
+// SHOT 3 ------------------------------------------------------------
+	globalCoop_main_camFadeIn(.5);
+
+	wait( 4 );
+
+//bind the cam to teh tram, lil complicated, as we can not read if anything is binded
+	$cam3 = globalCoop_cin_returnFakeCamera($cam3);//set fake cam manually
+	globalCoop_cin_fov($cam3,90);
+	
+	if(cvar_bool_multiplayer){
+		$cam3.origin( '-3070 7700 -164' );
+	}else{
+		$cam3.origin( '-3070.09 7815.56 -164.38' );
+	}
+	
+	$cam3.angles( '359.6 269.5 0.0' );
+	$cam3.bind( $tram_origin );
+
+	globalCoop_cin_follow($cam2, $m4l2b_intro_adam4 );
+
+	wait( .5 );
+
+	// SHOT 4 ------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam2 );
+
+	//$intro_munroTram.anim( "cin-igm2_debrief_Munro" );
+
+	wait( .5 );
+
+	$tram_origin.time( 10 );
+	$tram_origin.moveSouth( 2048  );
+
+	wait( 4 );
+
+	$intro_basher1.time( 5 );
+	$intro_basher1.rotateYdown( 35 );
+
+	wait( 4 );
+
+	globalCoop_cin_follow($cam1,$m4l2b_intro_adam5 );
+
+	wait( .5 );
+
+	// SHOT 5 ------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam1 );
+
+	//$intro_munroTram.anim( "cin-igm2_debrief_Munro" );
+
+	$tram_origin.time( 8 );
+	$tram_origin.moveSouth( 2048  );
+
+	globalCineFX_CameraFOVLerp( $cam1, 20, 60, 4, "rampup" );
+
+	$intro_munro.hide();
+
+	// SHOT 6 ------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam3 );
+
+	$tram_origin.time( 5 );
+	$tram_origin.moveSouth( 2048  );
+
+	wait( 4 );
+
+	globalCoop_cin_follow($cam1,$m4l2b_intro_adam6 );
+
+	wait( .5 );
+
+	// SHOT 7 ------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam1 );
+
+	$tram_origin.time( 6.5 );
+	$tram_origin.moveSouth( 6000 );
+
+	//forcemusic( "suspense" );
+
+	$intro_basher2.walkto( "basher_node1" , "run" );
+	waitfor( $intro_basher2 );
+
+	$intro_basher2.anim( "ranged_attack_prefire" );
+	waitForAnimation( $intro_basher2 , "ranged_attack_prefire" );
+
+	globalCoop_level_triggerEntity( $intro_explosion1 );
+
+	$intro_basher2.anim( "ranged_attack" );
+	waitForAnimation( $intro_basher2 , "ranged_attack" );
+
+	globalCoop_level_triggerEntity( $intro_explosion2 );
+
+	$intro_basher2.anim( "ranged_attack_postfire" );
+	waitForAnimation( $intro_basher2 , "ranged_attack_postfire" );
+
+	$intro_basher2.anim( "attackcombo3" );
+
+	wait( .25 );
+
+	globalCoop_level_triggerEntity( $intro_explosion1 );
+
+	$tracks_busted.show();
+	$tracks_nonbusted.remove();
+	$tracks_fire1.show();
+	$tracks_fire2.show();
+
+	wait( .25 );
+
+	$intro_basher2.remove();
+
+// SHOT 8 ------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam3 );
+
+	$tram_origin.time( 8 );
+	$tram_origin.moveSouth( 6000 );
+
+	globalCoop_level_triggerEntity( $intro_explosion3 );
+	wait( .5 );
+
+	globalCoop_level_triggerEntity( $intro_basherSpawner1 );
+	globalCoop_level_triggerEntity( $intro_explosion4 );
+
+	$tram_origin.time( 3 );
+	$tram_origin.rotateYdown( 15 );
+	$tram_origin.rotateXup( 10 );
+	$tram_origin.rotateZdown( 5 );
+
+	wait( .5 );
+
+	globalCoop_level_triggerEntity( $intro_basherSpawner2 );
+	globalCoop_level_triggerEntity( $intro_explosion5 );
+	wait( .5 );
+
+	globalCoop_level_triggerEntity( $intro_explosion6 );
+	wait( 1 );
+
+	globalCoop_cin_follow($cam1,$m4l2b_intro_adam7 );
+	wait( .5 );
+
+	$intro_basher3.remove();
+	$intro_basher4.remove();
+
+	// SHOT 9 ------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam1 );
+
+	globalCoop_level_triggerEntity( $intro_explosion6 );
+	wait( .5 );
+
+	//forcemusic( "normal" );
+	cam_fadeout( 1, 1, 1, 1, 1, 0 );
+
+	wait( 6 );
+
+	thread cinematicArm_MeetGonzales_Start();
+}
+
+void cinematicArm_MeetGonzales_Start()
+{
+	//--- hide the player and AI
+	globalCommon_AiDummyHide( $intro_munro );
+	globalCommon_AiDummyHide( $gonzales );
+	
+	//--- armature setup
+	cinematicArm_MeetGonzales = createCinematic( "m4l2-gonz" );
+	cinematicArm_MeetGonzales.setendthread( "cinematicArm_MeetGonzales_ArmEnd" );
+
+	wait(.1);
+	
+	//--- start the armature
+	cinematicArm_MeetGonzales.beginCinematic( "m4l2-gonz" );
+	wait( .2 );
+
+	//--- fade in
+	cam_fadein( 4, 1, 1, 1, 1, 0 );
+}
+
+//---------------------
+// cinematicArm_MeetGonzales_ArmEnd
+// end the armature
+//---------------------
+void cinematicArm_MeetGonzales_ArmEnd()
+{
+//kill the cinematic
+	skipthread( "null" );
+//--- end the armature cinematics, FALSE means don't launch the end thread
+	cinematicArm_MeetGonzales.endCinematic( FALSE );
+	$intro_munro.unbind();
+	
+//fade to black
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	killthread( "cinematic_intro" );
+	killthread( "cinematicArm_MeetGonzales_Start" );
+	
+//remove paths, reduce entity count on the server!
+	coop_removePath($m4l2b_intro_adam1);
+	coop_removePath($m4l2b_intro_adam2);
+	coop_removePath($m4l2b_intro_adam3);
+	coop_removePath($m4l2b_intro_adam4);
+	coop_removePath($m4l2b_intro_adam5);
+	coop_removePath($m4l2b_intro_adam6);
+	coop_removePath($m4l2b_intro_adam7);
+	
+//remove the AI
+	globalCoop_level_remove($intro_basher1);
+	globalCoop_level_remove($intro_basher2);
+	globalCoop_level_remove($intro_basher3);
+
+//--- show gonzales
+	globalCommon_AiDummy( $gonzales, "idle" );
+
+	//--- set the player
+	//$player.warp( '-1384 -1568 -424' );
+	if(!cvar_bool_multiplayer){//single
+		$player.turnTowardsEntity( $gonzales );
+	}
+
+	//--- release the cinematic
+	globalCoop_cin_end();
+	clearletterbox(.5);//bugfix
+	
+    music ("normal");
+
+//spawn Class Selection
+	if(cvar_bool_multiplayer){//Multiplayer
+		thread globalCoop_class_setup("Medic",'-1330 -2473 -300');
+		thread globalCoop_class_setup("HeavyWeapons",'-1530 -2473 -300');
+		thread globalCoop_class_setup("Technician",'-1430 -2473 -300');
+		globalCoop_player_warpToSpawnOriginAll();
+	}	
+
+	globalCoop_main_camFadeIn(.5);
+	wait( .5 );
+
+//--- activate gonzales
+	globalCommon_AiActor( $gonzales );
+	
+//Inizial Objectives
+	globalCoop_objectives_update("incomplete",1,0);
+	globalCoop_objectives_update("incomplete",2,1);
+	thread globalCoop_objectives_update("complete",2,1);
+}
+
+
+//---------------------
+// EngineerRescue Cinematic
+// On Use Thread for the Engineer during the rescue sequence
+//---------------------
+void cinematic_EngineerRescue()
+{
+	$Engineer.setactorflag("cannotuse" , 1.0 );
+	//--- fade out
+	globalCoop_main_camFadeOut(.1);
+	wait( .1 );
+//--- begin cinematic
+	globalCoop_cin_start();
+
+//--- change the music
+	allowMusicDucking( 0 );
+	forcemusic( "aux3" );
+
+	//--- set skipthread
+	globalCoop_cin_skipThread("cinematic_EngineerRescueSkipthread");
+
+	$Engineer.origin( '320 -2704 -408' );
+	$Engineer.angle( 225 );
+	$gonzales.setmovetype( "step" );
+	$gonzales.ai_off();
+	$gonzales.origin( '224 -2704 -408' );
+	$gonzales.angle( 340 );
+	$gonzales.anim( "idle" );
+	$gonzales.useactorweapon( "None" );
+	$gonzales.notsolid();
+
+	$intro_munro.ai_off();
+	//$intro_munro.origin('160 -2721 -408');
+	$intro_munro.warpto( "$MunroOrigin" );
+	wait(.1);
+	$intro_munro.angle( 45 );
+	$intro_munro.anim( "idle" );
+	$intro_munro.useactorweapon( "None" );
+	$intro_munro.show();
+	
+	$Engineer.headwatch( $intro_munro );
+	$intro_munro.headwatch( $Engineer );
+	$gonzales.headwatch( $Engineer );
+	
+//--- load camera path
+	cam.load( "m4l2b_engineer_adam1" );
+	wait(.1);
+	
+	globalCoop_cin_follow($cam1, $m4l2b_engineer_adam1 );
+	wait( .25 );
+	globalCoop_cin_cut($cam1);
+// SHOT 1 ------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam1 );
+	thread globalCineFX_CameraFOVLerp( $cam1, 45, 60, 8, "rampup" );
+	wait( .25 );
+	globalCoop_main_camFadeIn(.5);
+
+	globalCoop_dialog_play($intro_munro,"m4l2/munro_online.mp3", 1, 10000, 0); //If I get you to the main power core, can you get the defensive grid back online
+
+	globalCoop_dialog_play($Engineer,"m4l2/vorchov_flow.mp3", 1, 10000, 0); //Yes, but I need someone regulating the energy flow from here.
+
+	$intro_munro.headwatch( $gonzales , 5 );
+	$Engineer.headwatch( $gonzales , 3 );
+	$gonzales.headwatch( $intro_munro , 3 );
+
+	globalCoop_dialog_play($gonzales,"m4l2/gonz_doit.mp3", 1, 10000, 0); //I'll do it
+
+	
+//--- load camera path
+	cam.load( "m4l2b_engineer_adam2" );
+	wait( .25 );
+
+	// make gonzales do his thing
+	thread cinematic_EngineerRescueGonzalesWalk();
+
+	globalCoop_cin_follow($cam2, $m4l2b_engineer_adam2 );
+	wait( .5 );
+
+// SHOT 2 ------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam2 );
+
+	$intro_munro.headwatch( $Engineer , 3 );
+
+	globalCoop_dialog_play($intro_munro,"m4l2/munro_tocore.mp3", 1, 10000, 0); //Good. Stay here while I take Vorch'ov to the core.
+	wait( .5 );
+
+	thread cinematic_EngineerRescueSkipthread();
+}
+
+void cinematic_EngineerRescueGonzalesWalk()
+{
+	wait( .25 );
+
+	$gonzales.resethead();
+	globalCoop_actor_walkTo($gonzales,"gonzales_stand1","walk");
+
+	$gonzales.angle( 90 );
+
+	wait( .25 );
+
+	globalCoop_actor_animateWaitForAnimation($gonzales,"ent-library-stand-gesture1");
+	globalCoop_actor_animateWaitForAnimation($gonzales,"ent-library-stand-idle");
+}
+
+void cinematic_EngineerRescueSkipthread()
+{
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematic_EngineerRescue" );
+	killthread( "cinematic_EngineerRescueGonzalesWalk" );
+	
+	//fade to black
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	$Engineer.stopdialog();
+	$intro_munro.stopdialog();
+	$gonzales.stopdialog();
+
+	$Engineer.resethead();
+	$intro_munro.resethead();
+	$gonzales.resethead();
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.origin( '416 -2616 -408' );
+		$player.playerviewangles( '0 -486 0' );
+	}
+
+	globalCoop_level_warpEntityToVectorSafty($gonzales,'284 -2556 -392');//avoid getting stuck inside a player
+	$gonzales.angle( 90 );
+	$gonzales.useactorweapon( "None" );
+	$gonzales.anim( "ent-library-stand-idle" );
+	$gonzales.solid();
+	$gonzales.pushable( 0 );
+	
+	$intro_munro.hide();
+	$intro_munro.notsolid();
+
+	wait( 1 );
+    music ("normal");
+	
+//--- release the cinematic	
+	globalCoop_cin_end();
+	
+//remove paths, keep entity count low
+	coop_removePath($m4l2b_engineer_adam1);
+	coop_removePath($m4l2b_engineer_adam2);
+	
+	globalCoop_main_camFadeIn(.5);
+
+	$Engineer.setactorflag("cannotuse" , 0 );
+	$Engineer.updatebosshealth( 1 , 1 );
+	$Engineer.health( 200 ); //<<-- XYZ = amount of health you want him to have
+	$Engineer.maxbosshealth( 200 ); //<<-- must be EXACTLY the same number from the line above.
+	$Engineer.sethatemodifier( 20 );
+
+	wait( .5 );
+
+	// call the blasted dialog thread, ya heard?
+	thread SequenceCoreBelow();
+
+//move to the lift
+	globalCoop_level_warpEntityToVectorSafty($Engineer,$Engineer.getOrigin());//make sure she does not get stuck in a palyer
+	globalCoop_actor_walkTo($Engineer,"$lift_node1","run");
+	$Engineer.turntoangle( 360 );
+	
+//allow lift to go
+	$CoreLift_Trigger.triggerable();
+}
+
+
+//---------------------
+// End Cinematic
+// Start the end cinematic
+//---------------------
+void cinematic_end()
+{
+	if(doesEntityExist($FakeChell))
+		$FakeChell.targetname("Chell");
+	if(doesEntityExist($FakePicard))
+		$FakePicard.targetname("Picard");
+	
+//--- load camera paths
+	cam.load( "m4l2b_end_adam1" );
+	cam.load( "m4l2b_end_adam2" );
+	cam.load( "m4l2b_end_adam3" );
+	
+	// fade to black
+	globalCoop_main_camFadeOut(.5);
+	wait( .5 );
+
+	//--- begin cinematic
+	globalCoop_cin_start();
+	
+	allowMusicDucking( 0 );
+    forcemusic ("aux4");
+	
+	// get rid of ALL the stupid monsters
+	removeActorsNamed( "Lurker" );
+	removeActorsNamed( "Chewer" );
+
+	level_ai ( 0 );
+
+	$intro_munro.useactorweapon( "none" );
+	$intro_munro.origin( '2864 -2992 -4176' );
+	$intro_munro.angle( 315 );
+	$intro_munro.show();
+
+	$Engineer.ai_off();
+	$Engineer.origin( '2744 -2976 -4176' );
+	$Engineer.angle( 300 );
+
+	//--- change the music
+	forcemusic( "aux5" );
+
+	//--- set skipthread
+	globalCoop_cin_skipThread( "cinematic_end_skipthread");
+
+	globalCoop_cin_follow($cam1, $m4l2b_end_adam1 );
+	wait( 1 );
+
+	level_ai ( 0 );
+
+// SHOT 1 -----------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam1 );
+	
+	globalCoop_main_camFadeIn(.6);
+
+	wait( .5 );
+
+	globalCoop_dialog_play($intro_munro,"m4l2/munro_getus.mp3", 1, 10000, 0);
+ 	globalCoop_dialog_play($gonzales,"m4l2/gonz_poweron.mp3", 1, 10000, 1);
+
+	globalCoop_cin_follow($cam2, $m4l2b_end_adam2 );
+	$intro_munro.walkto( "munroEndNode1" );
+	globalCoop_level_triggerEntity($coreQuake);
+	wait( .2 );
+
+	// SHOT 2 -----------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam2 );
+
+	globalCineFX_CameraFOVLerp( $cam2, 60, 90, 2.5, "rampup" );
+
+	globalCoop_dialog_play($intro_munro,"m4l2/munro_turnon.mp3", 1, 10000, 0);
+	globalCoop_dialog_play($Chell,"m4l2/chell_poweron.mp3", 1, 10000, 1);
+	
+// EXTERIOR SCENE -----------------------------------------------------------------
+	cinematic_endScene2();
+
+	wait( .5 );
+
+	globalCoop_cin_fov($cam1, 90 );
+	globalCoop_cin_follow($cam1, $m4l2b_end_adam3 );
+
+	wait( .25 );
+
+// SHOT 3 -----------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam1 );
+	
+	globalCoop_main_camFadeIn(1);
+	wait( 1 );
+
+	globalCoop_dialog_play($Picard,"m4l2/picard_neutral.mp3", 1, 10000, 1);
+	wait( .5 );
+
+	globalCoop_dialog_play($intro_munro,"m4l2/munro_onebeam.mp3", 1, 10000, 0);
+	wait( .5 );
+
+	$intro_munro.displayeffect( "TransportOut", "FederationNoAnim" );
+	wait( 3 );
+
+	cinematic_end_skipthread();
+}
+
+void cinematic_endScene2()
+{
+	globalCoop_main_camFadeOut(1);
+//--- load camera paths
+	cam.load( "m4l2b_exterior_adam1" );
+	cam.load( "m4l2b_exterior_adam2" );
+	wait( .5 );
+	
+	$turret7_target.followpath( $turret7_targetPath , "loop" );
+	$turret4_target.followpath( $turret4_targetPath , "loop" );
+	$turret1_target.followpath( $turret1_targetPath , "loop" );
+	thread cinematic_endScene2Projectiles();
+	globalCoop_cin_follow($cam3, $m4l2b_exterior_adam1 );
+	wait( .5 );
+	// SHOT 1 -----------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam3 );
+	globalCoop_main_waitAFrame();
+	globalCoop_main_camFadeIn(1);
+
+	////////// FLY IN SOME ALIENS
+	$flyingChewer1.followpath( $flyingChewer1Path , "loop" , "normalangles" );
+	wait( 1 );
+
+	$flyingChewer4.followpath( $flyingChewer1Path , "loop" , "normalangles" );
+	wait( .5 );
+
+	$flyingChewer2.followpath( $flyingChewer2Path , "loop" , "normalangles" );
+	wait( 1 );
+
+	$flyingChewer5.followpath( $flyingChewer2Path , "loop" , "normalangles" );
+	wait( .5 );
+
+	$flyingChewer3.followpath( $flyingChewer3Path , "loop" , "normalangles" );
+	wait( 1 );
+
+	$flyingChewer6.followpath( $flyingChewer3Path , "loop" , "normalangles" );
+
+	////////// BLOW UP THE ALIENS
+	$flyingChewer1.anim( "death_gib" );
+	wait( 1 );
+
+	$flyingChewer2.anim( "death_gib" );
+	wait( .5 );
+
+	$flyingChewer3.anim( "death_gib" );
+	wait( .5 );
+
+	$flyingChewer4.anim( "death_gib" );
+	wait( 1 );
+
+	$flyingChewer5.anim( "death_gib" );
+	wait( .5 );
+
+	$flyingChewer6.anim( "death_gib" );
+	wait( .5 );
+
+	globalCoop_cin_follow($cam1, $m4l2b_exterior_adam2 );
+	wait( .5 );
+
+// SHOT 2 -----------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam1 );
+	globalCoop_main_waitAFrame();
+
+	////////// FLY IN SOME ALIENS
+	$flyingChewer7.followpath( $flyingChewer1Path , "loop" , "normalangles" );
+	wait( 1 );
+
+	$flyingChewer8.followpath( $flyingChewer1Path , "loop" , "normalangles" );
+	wait( .5 );
+
+	$flyingChewer9.followpath( $flyingChewer2Path , "loop" , "normalangles" );
+	wait( 1 );
+
+	$flyingChewer10.followpath( $flyingChewer2Path , "loop" , "normalangles" );
+	wait( .5 );
+
+	////////// BLOW UP THE ALIENS
+	$flyingChewer7.anim( "death_gib" );
+	wait( 1 );
+
+	$flyingChewer8.anim( "death_gib" );
+	wait( .5 );
+
+	$flyingChewer9.anim( "death_gib" );
+	wait( .5 );
+
+	$flyingChewer10.anim( "death_gib" );
+	wait( 1 );
+
+	globalCoop_main_camFadeOut(1);
+	wait( 1 );
+}
+
+void cinematic_endScene2Projectiles()
+{
+	while( 1 )
+	{
+		$turret1.projectileattackentity( "models/projectile/m4_turretprojectile.tik" , "$turret1_target" ); wait( .5 );
+		$turret2.projectileattackentity( "models/projectile/m4_turretprojectile.tik" , "$turret1_target" ); wait( .5 );
+		$turret3.projectileattackentity( "models/projectile/m4_turretprojectile.tik" , "$turret4_target" ); wait( .5 );
+		$turret4.projectileattackentity( "models/projectile/m4_turretprojectile.tik" , "$turret4_target" ); wait( .5 );
+		$turret5.projectileattackentity( "models/projectile/m4_turretprojectile.tik" , "$turret7_target" ); wait( .5 );
+		$turret6.projectileattackentity( "models/projectile/m4_turretprojectile.tik" , "$turret7_target" ); wait( .5 );
+		$turret7.projectileattackentity( "models/projectile/m4_turretprojectile.tik" , "$turret7_target" ); wait( .5 );
+	}
+}
+
+void coreController()
+{
+	// sadly, i didnt have time to finish scripting this bad boy =(
+	$spinjobby1.rotateX( 120 );  //TEMP: Adam's for testing purposes
+	$spinjobby2.rotateX( -120 ); //TEMP: Adam's for testing purposes
+	$sideBeam1.anim( "active" ); //TEMP: Adam's for testing purposes
+	$sideBeam2.anim( "active" ); //TEMP: Adam's for testing purposes
+
+	$sugarbush.rotateY( -300 );
+	wait( .5 );
+
+	$coreBeam.anim( "active" );
+	$coreBeam.loopsound( "sound/environment/electric/elec_powerloop2.wav",1, 250 );
+	wait( 3.5 );
+
+	$sideBeam1.anim( "idle" );
+	$sideBeam2.anim( "idle" );
+
+	globalAccelMove_Rotate( $mushroomtip, '0 360 0', 2, "rampup", "sound/environment/machine/mech_move2.wav" );
+	waitfor( $mushroomtip );
+	$mushroomtip.loopsound( "sound/environment/electric/elec_powerloop2.wav",1, 200 );
+	$mushroomtip.rotateY( 180 );
+	/*
+	float coreOn = 1;
+	while( coreOn == 1 )
+	{
+		$sideBeam1.anim( "active" );
+		$sideBeam2.anim( "active" );
+		wait( .25 );
+		$sideBeam1.anim( "idle" );
+		$sideBeam2.anim( "idle" );
+		wait( .25 );
+	}
+	*/
+}
+
+//---------------------
+// End Cinematic Skipthread
+// End the end cinematic
+//---------------------
+void cinematic_end_skipthread()
+{
+	globalCoop_main_camFadeOut(1);
+	wait( 1 );
+
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematic_end" );
+	
+//remove monsters, to keep entity count low
+	globalCoop_level_remove($flyingChewer1);
+	globalCoop_level_remove($flyingChewer2);
+	globalCoop_level_remove($flyingChewer3);
+	globalCoop_level_remove($flyingChewer4);
+	globalCoop_level_remove($flyingChewer5);
+	globalCoop_level_remove($flyingChewer6);
+	globalCoop_level_remove($flyingChewer7);
+	
+//remove paths, keep entity count low
+	coop_removePath($m4l2b_exterior_adam1);
+	coop_removePath($m4l2b_exterior_adam2);
+	coop_removePath($flyingChewer1Path);
+	coop_removePath($flyingChewer2Path);
+	coop_removePath($flyingChewer3Path);
+	coop_removePath($turret1_targetPath);
+	coop_removePath($turret4_targetPath);
+	coop_removePath($turret7_targetPath);
+	coop_removePath($m4l2b_end_adam1);
+	coop_removePath($m4l2b_end_adam2);
+	coop_removePath($m4l2b_end_adam3);
+//SET INFO FOR IMG
+	setfloatvar("game.globalMissionEnterprise",3);
+	
+	if(cvar_bool_multiplayer){//MP
+		thread coop_endLevel();
+	}else{//SP
+		spawn ( "trigger_changelevel", "targetname", "trigger_endlevel", "map", "ent-deck8" );
+		wait ( .25 );
+		trigger ( "$trigger_endlevel" );
+	}
+}
+
+
+

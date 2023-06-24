@@ -1,0 +1,20 @@
+LevelProperties
+{
+	mapname				"ent-deck"
+	longmapname			"^5Co-Op ^3^5IGM Select ^8ent-deck"
+	screenshot			"sysimg/mapshots/ent-deck.tga"
+	
+	gametype			"Holomatch"
+	gametype			"TeamHolomatch"
+	gametype			"CaptureTheFlag"
+	
+	modifier            "instantkill"
+	modifier            "actionhero"
+	modifier            "handicap"
+	modifier            "weaponscore"
+	modifier            "controlpoints"
+	modifier            "oneflag"
+	modifier            "elimination"
+	
+	recommendedplayers	"2-4"
+}

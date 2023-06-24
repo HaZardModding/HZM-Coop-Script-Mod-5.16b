@@ -1,0 +1,6 @@
+menu "mp_teamred" 640 12 NONE 0
+bgcolor 1 0 0 .35
+align top center
+depth 0.9
+
+end.

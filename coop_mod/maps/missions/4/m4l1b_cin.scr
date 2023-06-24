@@ -1,0 +1,1691 @@
+void controlRoom_seq01_cinematic();
+void controlRoom_seq01_cinematic_skipthread();
+void cinematic_commandCore();
+void cinematic_commandCore_skipthread();
+void cinematicEndRescue();
+void cinematicEndRescue_SetupStart();
+void cinematicEndRescue_Skipthread();
+void cinematicEndRescue_ChangJurotFire();
+void cinematicEndRescue_LurkerFirstWave();
+void cinematicEndRescue_LurkerSecondWave();
+void cinematicEndRescue_Attrexian1Backup();
+void cinematicEndRescue_LurkerRunToCommander();
+void cinematicEndRescue_MunroSaveTheDay();
+void cinematicEndRescue_LurkerLeaps();
+void cinematicEndRescue_AttrexianCommanderCower();
+void cinematicEndRescue_SetupSecondScene();
+void cinematicEndRescue_AllWalkToGroup();
+void cinematicEndRescue_ChellWalkToGroup();
+void cinematicEndRescue_JurotWalkToGroup();
+
+
+//---------------------
+// Control Room Cinematic
+// Player runs into a couple attrexians who have trapped an alien in an escape pod
+//---------------------
+void controlRoom_seq01_cinematic()
+{
+//spawn cameras
+	if(!doesEntityExist($cam1)){spawn( "Camera", "targetname", "cam1");}
+	if(!doesEntityExist($cam2)){spawn( "Camera", "targetname", "cam2");}
+	
+//Start animating the basher
+	thread trappedBasherTaunt();
+	
+//Load cam paths
+	cam.load( "m4l1b_podlaunch_adam1" );
+	cam.load( "m4l1b_podlaunch_adam2" );
+	cam.load( "m4l1b_podlaunch_adam3" );
+	cam.load( "m4l1b_podlaunch_adam4" );
+	cam.load( "m4l1b_podlaunch_adam5" );
+	cam.load( "m4l1b_podlaunch_adam6" );
+	cam.load( "m4l1b_podlaunch_adam7" );
+	
+	globalCoop_main_camFadeOut(.5);
+	if(cvar_bool_multiplayer){//Multiplayer	
+		//relocate spawn
+		coop_float_spawnAngle1 				= 360;
+		coop_float_spawnAngle2 				= 360;
+		coop_float_spawnAngle3 				= 360;
+		coop_float_spawnAngle4 				= 360;
+		coop_float_spawnAngle5 				= 360;
+		coop_float_spawnAngle6 				= 360;
+		coop_float_spawnAngle7 				= 360;
+		coop_float_spawnAngle8 				= 360;
+		coop_vector_spawnOrigin8 			= '6950 3500 2112';
+		coop_vector_spawnOrigin7 			= '6950 3430 2112';
+		coop_vector_spawnOrigin6 			= '6950 3360 2112';
+		coop_vector_spawnOrigin5 			= '6950 3190 2112';
+		coop_vector_spawnOrigin4 			= '7020 3190 2112';
+		coop_vector_spawnOrigin3 			= '7020 3360 2112';
+		coop_vector_spawnOrigin2 			= '7020 3430 2112';
+		coop_vector_spawnOrigin1 			= '7020 3500 2112';
+		globalCoop_applaySpawnOriginOnReSpwanOrigin();
+	//relocate Class Selection
+		globalCoop_level_warpDroptofloor($coop_class_HeavyWeaponsModel,'7600 3555 2120');
+		globalCoop_level_warpDroptofloor($coop_class_TechnicianModel,'7500 3555 2120');
+		globalCoop_level_warpDroptofloor($coop_class_MedicModel,'7400 3555 2120');
+	}
+	wait(.5);
+	globalCoop_cin_start();
+
+	//--- change the music
+	music( "aux2" );
+
+	$podlaunch_munro.show();
+	$podlaunch_munro.useactorweapon( "none" );
+
+	globalCoop_cin_follow($cam1,$m4l1b_podlaunch_adam1 );
+
+	wait( 1 );
+
+// set globalCoop_cin_skipThread
+	globalCoop_cin_skipThread( "controlRoom_seq01_cinematic_skipthread");
+
+// SHOT 1 ---------------------------------------------------------------------
+	//globalCoop_cin_follow($cam1,$podlaunch_munro);
+	globalCoop_cin_watch($cam1,$podlaunch_munro);
+	globalCoop_cin_cuecamera( $cam1 );
+
+	wait( .25 );
+
+// fade in
+	globalCoop_main_camFadeIn(1);
+
+	$podlaunch_munro.walkto( "podlaunch_munro_node1" );
+	wait( 2 );
+
+	globalCoop_cin_follow($cam2, $m4l1b_podlaunch_adam2 );
+
+	wait( .25 );
+
+// SHOT 2 ---------------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam2 );
+	wait( 2 );
+
+	$podlaunch_munro.headwatch( $controlRoom_seq02_attrexian2 );
+
+// attrexian walks out
+	// Help! Help!
+	thread globalCoop_dialog_play($controlRoom_seq02_attrexian,"m4l1/att4_help2.mp3", 1, 800, 0 );
+
+	$controlRoom_seq02_attrexian.walkto( "cinematic_controlRoom_node01", "run" );
+
+	// open the door
+	trigger( "$controlRoomDoor" );
+	controlRoomDoorOpen = 1;
+
+	waitfor( $controlRoom_seq02_attrexian );
+
+	$podlaunch_munro.headwatch( $controlRoom_seq02_attrexian );
+	$controlRoom_seq02_attrexian.headwatch($podlaunch_munro);
+	$controlRoom_seq02_attrexian.turntoangle( 170 );
+
+	// close the door
+	trigger( "$controlRoomDoor" );
+	controlRoomDoorOpen = 0;
+
+	wait( .25 );
+
+	//He just breached the inner wall!
+	globalCoop_dialog_play($controlRoom_seq02_attrexian2,"m4l1/att4_breached.mp3", 1, 500, 0);
+
+	globalCoop_cin_follow($cam1, $m4l1b_podlaunch_adam6 );
+	wait( .25 );
+
+// SHOT 3 ---------------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam1 );
+
+	//What's going on?
+	globalCoop_dialog_play($podlaunch_munro,"m4l1/munro_whatgo.mp3", 1, 10000, 0);
+	wait( .5 );
+
+	globalCoop_cin_follow($cam2, $m4l1b_podlaunch_adam5 );
+	wait( .25 );
+
+// SHOT 4 ---------------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam2 );
+
+	$controlRoom_seq02_attrexian2.walkto( "cinematic_controlRoom_node02" , "run" );
+
+
+
+	//We've caught one of the invaders!	
+	thread globalCoop_dialog_play($controlRoom_seq02_attrexian,"m4l1/att5_caught.mp3", 1, 10000, 0);
+	$controlRoom_seq02_attrexian2.angle( 220 );
+	$controlRoom_seq02_attrexian2.headwatch($controlRoom_seq02_attrexian);
+	
+	wait(3);
+	
+	$controlRoom_seq02_attrexian2.headwatch($podlaunch_munro);
+	
+	//He's in this escape pod!
+	globalCoop_dialog_play($controlRoom_seq02_attrexian2,"m4l1/att4_hesin.mp3", 1, 10000, 0);
+	
+	globalCoop_cin_follow($cam1, $m4l1b_podlaunch_adam6 );
+	wait( .25 );
+
+// SHOT 5 ---------------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam1 );
+
+	//Jettison the pod!
+	globalCoop_dialog_play($podlaunch_munro,"m4l1/munro_jett.mp3", 1, 10000, 0);
+	
+	globalCoop_cin_follow($cam2, $m4l1b_podlaunch_adam7 );
+	wait( .25 );
+	
+// SHOT 6 ---------------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam2 );
+
+	//Our controls down here are broken.
+	globalCoop_dialog_play($controlRoom_seq02_attrexian,"m4l1/att4_broken.mp3", 1, 10000, 0);
+
+	//There is a release switch on the second floor. It’s in the master control room, overlooking the pod.
+	globalCoop_dialog_play($controlRoom_seq02_attrexian2,"m4l1/att5_second.mp3", 1, 10000, 0);
+	
+	globalCoop_cin_follow($cam1, $m4l1b_podlaunch_adam6 );
+	wait( .25 );
+	
+// SHOT 7 ---------------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam1 );
+	
+	//Then go upstairs and hit the release!
+	globalCoop_dialog_play($podlaunch_munro,"m4l1/munro_hitrel.mp3", 1, 10000, 0);
+	
+	globalCoop_cin_follow($cam2, $m4l1b_podlaunch_adam4 );
+	wait( .25 );
+	
+// SHOT 8 ---------------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam2 );
+
+	//The lift to the master control room is broken. I will try and reroute power, but it may not work.
+	globalCoop_dialog_play($controlRoom_seq02_attrexian,"m4l1/att4_liftbrr.mp3", 1, 10000, 0);
+	
+	globalCoop_cin_follow($cam1, $m4l1b_podlaunch_adam3 );
+	wait( .25 );
+	
+// SHOT 9 ---------------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam1 );
+
+	//Try! We need to get that lift juiced up before the creature gets loose!
+	globalCoop_dialog_play($podlaunch_munro,"m4l1/munro_juiced.mp3", 1, 10000, 0);
+	wait( .5 );
+
+	controlRoom_seq01_cinematic_skipthread();
+}
+
+//---------------------
+// Control Room Cinematic
+// globalCoop_cin_skipThread
+//---------------------
+void controlRoom_seq01_cinematic_skipthread()
+{
+	skipthread( "null" );
+	killthread( "controlRoom_seq01_cinematic" );
+	
+	globalCoop_main_camFadeOut(.5);
+	wait( .5 );
+	
+	$podlaunch_munro.remove();
+	
+	$controlRoom_seq02_attrexian.origin('7824 3456 2112.5');
+	$controlRoom_seq02_attrexian2.origin( '7956 3524 2112.5' );
+	$controlRoom_seq02_attrexian2.angle( 0 );
+	$controlRoom_seq02_attrexian.resethead();
+	$controlRoom_seq02_attrexian2.resethead();
+
+	wait( .25 );
+
+	if( controlRoomDoorOpen == 1 )
+	{
+		trigger( "$controlRoomDoor" );
+	}
+	
+	
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.origin( '7760 3456 2112' );
+		$weNeedHelpTrigger.triggerable();
+	}
+	thread controlRoom_seq02();
+
+	globalCoop_cin_end();	
+	globalCoop_main_camFadeIn(.5);
+	
+	coop_removePath($$m4l1b_podlaunch_adam1);
+	coop_removePath($$m4l1b_podlaunch_adam2);
+	coop_removePath($$m4l1b_podlaunch_adam3);
+	coop_removePath($$m4l1b_podlaunch_adam4);
+	coop_removePath($$m4l1b_podlaunch_adam5);
+	coop_removePath($$m4l1b_podlaunch_adam6);
+	coop_removePath($$m4l1b_podlaunch_adam7);
+}
+
+
+
+//---------------------
+// Command Core Cinematic
+// Munro talks to command officials
+//---------------------
+void cinematic_commandCore()
+{
+//spawn cameras
+	if(!doesEntityExist($cam1)){spawn( "Camera", "targetname", "cam1");}
+	if(!doesEntityExist($cam2)){spawn( "Camera", "targetname", "cam2");}
+
+//load camera paths
+	cam.load( "m4l1b_command_adam1" );
+	cam.load( "m4l1b_command_adam2" );
+	cam.load( "m4l1b_command_adam3" );
+	cam.load( "m4l1b_command_adam5" );
+	
+	globalCoop_main_camFadeOut(.5);
+	wait(.5);
+	globalCoop_cin_start();
+	if(cvar_bool_multiplayer){
+	//relocate spawn
+		coop_float_spawnAngle1 				= 170;
+		coop_float_spawnAngle2 				= 170;
+		coop_float_spawnAngle3 				= 170;
+		coop_float_spawnAngle4 				= 170;
+		coop_float_spawnAngle5 				= 170;
+		coop_float_spawnAngle6 				= 170;
+		coop_float_spawnAngle7 				= 170;
+		coop_float_spawnAngle8 				= 170;
+		coop_vector_spawnOrigin8 			= '5130 3850 2700';
+		coop_vector_spawnOrigin7 			= '5130 3780 2700';
+		coop_vector_spawnOrigin6 			= '5130 3710 2700';
+		coop_vector_spawnOrigin5 			= '5130 3640 2700';
+		coop_vector_spawnOrigin4 			= '5130 3590 2700';
+		coop_vector_spawnOrigin3 			= '5130 3520 2700';
+		coop_vector_spawnOrigin2 			= '5130 3450 2700';
+		coop_vector_spawnOrigin1 			= '5130 3380 2700';
+	//Appay coords to respawn locations too!
+		thread globalCoop_applaySpawnOriginOnReSpwanOrigin();
+	//relocate Class Selection
+		thread globalCoop_level_warpDroptofloor($coop_class_HeavyWeaponsModel,'4792 3256 2410');
+		thread globalCoop_level_warpDroptofloor($coop_class_TechnicianModel,'4869 3208 2410');
+		thread globalCoop_level_warpDroptofloor($coop_class_MedicModel,'4869 3305 2410');
+	}
+
+	//--- change the music
+	music( "aux2" );
+
+	$cinematicMunro.show();
+	wait( .5 );
+
+	$cinematicMunro.useactorweapon( "none" );
+	$cinematicMunro.origin( '5047 3152 2384' );
+	$cinematicMunro.walkto( "munro_node1" );
+
+	globalCoop_cin_follow($cam1,$m4l1b_command_adam1);
+
+	wait( .5 );
+
+// SHOT 1 ---------------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam1 );
+
+	globalCoop_main_camFadeIn(.5);
+
+// set skipthread
+	globalCoop_cin_skipThread( "cinematic_commandCore_skipthread");
+
+	waitfor( $cinematicMunro );
+	$cinematicMunro.angle( 135 );
+
+	$cinematicMunro.headwatch( $commandOfficial03 );
+	$commandOfficial03.headwatch( $cinematicMunro );
+
+	globalCoop_dialog_play($commandOfficial03,"m4l1/att4_grid.mp3", 1, 10000, 0); //Those invaders have disabled our defensive grid. We need to get our systems functioning again, or we're all dead!
+
+	globalCoop_cin_follow($cam2,$m4l1b_command_adam2 );
+
+	wait( .5 );
+
+// SHOT 2 ---------------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam2 );
+	wait( .25 );
+
+	$cinematicMunro.anim( "tap_comm" );
+	$cinematicMunro.playsound( "sound/player/CommunicatorBeep.wav.wav", 9, 1, 999 );
+	waitForAnimation( $cinematicMunro, "tap_comm" );
+	$cinematicMunro.anim( "idle" );
+
+	globalCoop_dialog_play($cinematicMunro,"m4l1/munro_topic.mp3", 1, 10000, 0); //Munro to Picard.
+	wait( .25 );
+
+	globalCoop_dialog_play($picard,"m4l1/picard_goahead2.mp3", 1, 10000, 1); //Go ahead.
+
+	wait( .25 );
+
+	globalCoop_dialog_play($cinematicMunro,"m4l1/munro_safe.mp3", 1, 10000, 0); //The command officials are safe. No sign of the Dallas crew.
+
+	wait( .25 );
+
+	$cinematicMunro.playsound( "sound/chars/chewer/chew_amb1.wav", 9, 1, 999 );
+	wait( .25 );
+	$cinematicMunro.headwatch( $munroLook1 );
+	wait( .5 );
+	$commandOfficial03.playsound( "sound/chars/chewer/chew_amb2.wav", 9, 1, 999 );
+	wait( .25 );
+	$cinematicMunro.headwatch( $munroLook2 );
+	wait( .25 );
+
+	globalCoop_dialog_play($cinematicMunro,"m4l1/munro_hangon.mp3", 1, 10000, 0); //Hang on!
+
+	globalCoop_cin_follow($cam1,$m4l1b_command_adam5 );
+
+	wait( .5 );
+
+	// SHOT 3 ---------------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam1 );
+
+	wait( .25 );
+
+	$cinematicMunro.headwatch( $commandOfficial03 );
+
+	globalCoop_dialog_play($commandOfficial03,"m4l1/att4_theycome.mp3", 1, 10000, 0); //They're coming!
+
+	wait( .25 );
+
+	$cinematicMunro.giveActorWeapon( "models/weapons/worldmodel-actorweapon-fieldassaultrifle.tik" );
+	$cinematicMunro.useActorWeapon( "FieldAssaultRifle" );
+	$cinematicMunro.anim( "fieldassaultrifle_draw" );
+	waitforanimation( $cinematicMunro , "fieldassaultrifle_draw" );
+	$cinematicMunro.anim( "fieldassaultrifle_idle" );
+
+	globalCoop_dialog_play($cinematicMunro,"m4l1/munro_gottago.mp3", 1, 10000, 0); //Gotta go!
+	wait( .5 );
+
+	globalCoop_dialog_play($picard,"m4l1/picard_neworders.mp3", 1, 10000, 1); //New orders-- protect the command officials at all costs.
+
+	globalCoop_cin_follow($cam2,$m4l1b_command_adam3 );
+
+	wait( .5 );
+
+	// SHOT 2 ---------------------------------------------------------------------
+	globalCoop_cin_cuecamera( $cam2 );
+
+	wait( .25 );
+
+	globalCoop_dialog_play($cinematicMunro,"m4l1/munro_roger.mp3", 1, 10000, 0); //Roger.
+	wait( .25 );
+
+	globalCoop_dialog_play($cinematicMunro,"m4l1/munro_stayclose.mp3", 1, 10000, 0); //Stay close to each other! I'll protect you!
+	cinematic_commandCore_skipthread();
+}
+
+
+void cinematic_commandCore_skipthread()
+{
+	// kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematic_commandCore" );
+	
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+//--- shut everybody the heeeeeel up
+	$commandOfficial03.stopDialog();
+	$cinematicMunro.stopDialog();
+	$picard.stopDialog();
+	
+//remove camera paths	
+	coop_removePath($m4l1b_command_adam1);
+	coop_removePath($m4l1b_command_adam2);
+	coop_removePath($m4l1b_command_adam3);
+	coop_removePath($m4l1b_command_adam5);
+	
+	$cinematicMunro.resethead();
+	$commandOfficial03.resethead();
+
+	$cinematicMunro.remove();
+	if(!cvar_bool_multiplayer)//sp only !!!
+	{
+		$player.origin( '4879 3200 2416' );
+		$player.use ( "FieldAssaultRifle" );
+	}
+	
+	wait( 1 );
+	globalCoop_cin_end();
+	
+	globalCoop_main_camFadeIn(.5);
+	
+//--- set objective
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.setobjectivecomplete ( "CommandCenter" , 1 );
+		$player.setobjectiveshow ( "HelpDefendStation" , 1 );
+	}else{
+		globalCoop_objectives_update("complete",1,0);
+		thread globalCoop_objectives_update("incomplete",4,1);	
+	}
+	
+//let em Come, ha ha ha ha (... --- ...)
+	thread commandCore_seq01();
+}
+
+
+
+
+//---------------------
+// cinematicEndRescue
+// Team rescues talks to command officials
+//---------------------
+void cinematicEndRescue()
+{
+//--- start cinematic commands
+	globalCoop_main_camFadeOut(.1);
+
+	allowMusicDucking( 0 );
+    forcemusic ("aux4");
+	
+	wait( .1 );
+
+	//get rid of ALL the stupid monsters
+	removeActorsNamed( "Lurker" );
+	removeActorsNamed( "Chewer" );
+	level_ai( 0 );
+	
+	globalCoop_cin_start();
+	
+	//--- place the end characters into their positions
+	cinematicEndRescue_SetupStart();
+	
+	wait( .1 );
+	cam_fadeout( .4, 1, 1, 1, 1, 0 );	//white out after letterboxed
+
+	//--------------------------------------------------------
+	//--------------------------------------------------------
+	//end action sequence of hazard team mopping up
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 70 );
+	globalCoop_cin_follow($cam1, $m4l1b_EndRescue_Shot1 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+
+   	//--- fade in
+	cam_fadeIn( .4, 1, 1, 1, 1, 0 );
+
+	//--- set skipthread
+	globalCoop_cin_skipThread( "cinematicEndRescue_Skipthread" );
+
+	//--- make Chang and Jurot shoot
+	thread cinematicEndRescue_ChangJurotFire();
+	wait( 1.5 );
+
+	//--------------------------------------------------------
+	//high angle, slow dolly left as first 2 lurkers get plastered
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 80 );
+	globalCoop_cin_follow($cam2, $m4l1b_EndRescue_Shot2 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera( $cam2 );
+	wait( .5 );
+
+	//--- have the first set of lurkers move in and die
+	thread cinematicEndRescue_LurkerFirstWave();
+	wait( 2.5 );
+
+	//--------------------------------------------------------
+	//close in on Chang as he's shooting
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 60 );
+	globalCoop_cin_follow($cam1, $m4l1b_EndRescue_Shot3 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( 1.5 );
+
+	//--------------------------------------------------------
+	//low, sweep right as the 3rd lurker bites it
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 60 );
+	globalCoop_cin_follow($cam2, $m4l1b_EndRescue_Shot4 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera( $cam2 );
+
+	//--- have the next lurker cut across the camera and get shot
+	thread cinematicEndRescue_LurkerSecondWave();
+	wait( 1.5 );
+
+	//--------------------------------------------------------
+	//quick shot of lurker gibbing
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 30 );
+	globalCoop_cin_follow($cam1, $m4l1b_EndRescue_Shot5 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( .9 );
+
+	//--------------------------------------------------------
+	//dolly in as comman attrexian backs up nervously
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 60 );
+	globalCoop_cin_follow($cam2, $m4l1b_EndRescue_Shot6 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera( $cam2 );
+	wait( .8 );
+
+	//--- the attrexian commander backs up
+	thread cinematicEndRescue_Attrexian1Backup();
+	wait( .9 );
+
+	//--------------------------------------------------------
+	//slow pan to the left seeing the remaining lurker coming towards the attrexian commander
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 60 );
+	globalCoop_cin_follow($cam1, $m4l1b_EndRescue_Shot7 );
+
+	//--- show lurker
+	globalCommon_AiDummyShow( $lurkerEndRescue5 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+
+	//--- run the last lurker towards the camera
+	thread cinematicEndRescue_LurkerRunToCommander();
+	wait( 1.15 );
+
+	//--------------------------------------------------------
+	//POV lurker leaping towards the attrexian commander
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 160 );
+	globalCoop_cin_follow($cam2, $m4l1b_EndRescue_Shot8 );
+	wait( .1 );
+
+	//--- show lurker
+	globalCommon_AiDummyHide( $lurkerEndRescue5 );
+
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera( $cam2 );
+	wait( .85 );
+
+	//--- start munro running
+	thread cinematicEndRescue_MunroSaveTheDay();
+	wait( .75 );
+
+	//--------------------------------------------------------
+	//POV of the commander looking at the lurker leaping
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 70 );
+	globalCoop_cin_follow($cam1, $m4l1b_EndRescue_Shot9 );
+	wait( .1 );
+
+	//--- show lurker
+	globalCommon_AiDummyShow( $lurkerEndRescue_Fake );
+
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+
+	//--- the lurker leaps
+	thread cinematicEndRescue_LurkerLeaps();
+	wait( .75 );
+
+	//--------------------------------------------------------
+	//POV lurker leaping onto the commander
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 30 );
+	globalCoop_cin_follow($cam2, $m4l1b_EndRescue_Shot10 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera( $cam2 );
+
+	//--- commander cowers in horror
+	thread cinematicEndRescue_AttrexianCommanderCower();
+
+	//--- set jurot and chang to stop shooting
+	boolCinematicEndRescue = FALSE;
+	wait( .8 );
+
+	//--------------------------------------------------------
+	//lurker bites it, with munro standing victorious behind
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 60 );
+	globalCoop_cin_follow($cam1, $m4l1b_EndRescue_Shot11 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( .25 );
+
+	//--- lurker explodes
+	$lurkerEndRescue_Fake.anim( "death_gib" );
+	wait( .75 );
+
+	//--------------------------------------------------------
+	//lurker bites it, with munro standing victorious behind
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 50 );
+	globalCoop_cin_follow($cam2, $m4l1b_EndRescue_Shot12 );
+	wait( .1 );
+
+	//--- put munro into face
+	$munro.morph( "exp_Anger" );
+
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera( $cam2 );
+	wait( 1.5 );
+
+	$munro.unmorph( "exp_Anger" );
+	wait( 1 );
+
+	//--- setup the second scene
+	thread cinematicEndRescue_SetupSecondScene();
+
+	//--- munro lowers his weapon
+	$munro.anim( "fieldassaultrifle_aim" );
+	wait( 2.5 );
+
+	thread cinematicEndRescue_AllWalkToGroup();
+	wait( .3 );
+
+	//-------------------- SCENE 2 ---------------------------
+	//--------------------------------------------------------
+	//every body meets in a group to discuss info N stuff
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 70 );
+	globalCoop_cin_follow($cam1, $m4l1b_EndRescue_Scene2_Shot1 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+
+	thread globalCineFX_CameraFOVLerp( $cam1, 70, 50, 3, "rampupdown" );
+	wait( 1 );
+	
+	thread globalCoop_dialog_play($commandOfficial01,"m4l1/attcomm_grat.mp3", 1, 20000, 0 ); //Please convey our gratitude to your Captain. You have the reverence of many future generations.
+	wait( 3 );
+
+	$commandOfficial01.headWatchTarget( "munro", 5 );
+	$commandOfficial02.headWatchTarget( "munro", 5 );
+	$commandOfficial03.headWatchTarget( "munro", 5 );
+
+	//--- put munro's weapon away
+	$munro.useActorWeapon( "none" );
+	globalCoop_dialog_waitForDialog( $commandOfficial01 );
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//close up munro asking for answers
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 50 );
+	globalCoop_cin_follow($cam2, $m4l1b_EndRescue_Scene2_Shot2 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera( $cam2 );
+
+	$munro.headWatchTarget( "commandOfficial02", 5 );
+
+	thread globalCoop_dialog_play($munro,"m4l1/munro_answers.mp3", 1, 20000, 0 ); //Thanks, but I’d rather have some answers. Have you ever seen these invaders before?
+	wait( 1 );
+
+	$munro.headWatchTarget( "commandOfficial01", 5 );
+	wait( 1.8 );
+
+	//--------------------------------------------------------
+	//two shot of munro and command attrex
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 70 );
+	globalCoop_cin_follow($cam1, $m4l1b_EndRescue_Scene2_Shot3 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+
+	//--- wait for munro to finish
+	globalCoop_dialog_waitForDialog( $munro );
+	wait( .2 );
+
+	globalCoop_dialog_play($commandOfficial01,"m4l1/attcomm_never.mp3", 1, 20000, 0 ); //Never.
+	wait( .1 );
+
+	globalCoop_dialog_play($munro,"m4l1/munro_whoen.mp3", 1, 20000, 0 ); //Who are your enemies?
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//close up on attrex 1
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 70 );
+	globalCoop_cin_follow($cam2, $m4l1b_EndRescue_Scene2_Shot4 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera( $cam2 );
+
+	$commandOfficial02.headWatchTarget( "commandOfficial01", 5 );
+
+	globalCoop_dialog_play($commandOfficial01,"m4l1/attcomm_noen.mp3", 1, 20000, 0 ); //We have no enemies.
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//pan to close up on attrex 2
+
+	//--- set the camera
+	//globalCoop_cin_follow($cam2, $m4l1b_EndRescue_Scene2_Shot5 );
+
+	thread globalCoop_dialog_play($commandOfficial02,"m4l1/att2_problems.mp3", 1, 20000, 0 ); //Well, we have ongoing problems with Attrexian smugglers. And Idryll separatists. And occasional Cardassian vessels looking for easy conquests.
+
+	$commandOfficial02.headWatchTarget( "munro", 5 );
+	wait( .5 );
+
+	$commandOfficial01.headWatchTarget( "commandOfficial02", 5 );
+	wait( 8 );
+
+	//--------------------------------------------------------
+	//follow chell entering the scene, ending on Munro
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 60 );
+	globalCoop_cin_follow($cam1, $m4l1b_EndRescue_Scene2_Shot6 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+
+	//--- walk chell over
+	thread cinematicEndRescue_ChellWalkToGroup();
+
+	$munro.headWatchTarget( "commandOfficial02", 5 );
+
+	//--- wait for the official to stop speaking
+	globalCoop_dialog_waitForDialog( $commandOfficial02 );
+	wait( .5 );
+
+	thread globalCoop_dialog_play($munro,"m4l1/munro_idryll.mp3", 1, 20000, 0 ); //Idryll?
+
+	$munro.headWatchTarget( "commandOfficial01", 5 );
+	$commandOfficial01.headWatchTarget( "munro", 5 );
+	globalCoop_dialog_waitForDialog( $munro );
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//over the shoulder at both attrexs
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 60 );
+	globalCoop_cin_follow($cam2, $m4l1b_EndRescue_Scene2_Shot7 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera( $cam2 );
+
+	$commandOfficial02.headWatchTarget( "commandOfficial01", 5 );
+	globalCoop_dialog_play($commandOfficial01,"m4l1/attcomm_backward.mp3", 1, 20000, 0 ); //A backward race. We’ve been assisting them for centuries.
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//mid close up on attrex 2
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 60 );
+	globalCoop_cin_follow($cam1, $m4l1b_EndRescue_Scene2_Shot8 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+
+	$commandOfficial02.headWatchTarget( "munro", 5 );
+	globalCoop_dialog_play($commandOfficial02,"m4l1/att2_gift.mp3", 1, 20000, 0 ); //We've given the Idryll the gifts of written language and the warp drive.
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//close up on attrex 1
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 70 );
+	globalCoop_cin_follow($cam2, $m4l1b_EndRescue_Scene2_Shot4 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera( $cam2 );
+
+	thread globalCoop_dialog_play($commandOfficial01,"m4l1/attcomm_grateful.mp3", 1, 20000, 0 ); //But the separatists are not grateful. They claim that many Attrexian systems are actually ancient Idryll homelands.
+	wait( .5 );
+
+	$commandOfficial02.headWatchTarget( "commandOfficial01", 5 );
+	wait( 2.4 );
+
+	//--------------------------------------------------------
+	//slow circle of the group
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 70 );
+	globalCoop_cin_follow($cam1, $m4l1b_EndRescue_Scene2_Shot9 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( .5 );
+
+	$commandOfficial01.headWatchTarget( "jurot", 5 );
+
+	//--- walk jurot over
+	thread cinematicEndRescue_JurotWalkToGroup();
+	wait( 1 );
+
+	$commandOfficial02.headWatchTarget( "munro", 5 );
+	wait( 1 );
+
+	$commandOfficial01.headWatchTarget( "munro", 5 );
+	$chell.headWatchTarget( "commandOfficial01", 5 );
+	$munro.headWatchTarget( "commandOfficial01", 5 );
+
+	globalCoop_dialog_waitForDialog( $commandOfficial01 );
+	wait( 1 );
+
+	thread globalCoop_dialog_play($commandOfficial02,"m4l1/att2_fiction.mp3", 1, 20000, 0 ); //They’ve created a delusional fiction in which they are an older race than we.
+	wait( .5 );
+
+	$munro.headWatchTarget( "commandOfficial02", 5 );
+	wait( .2 );
+
+	$chell.headWatchTarget( "commandOfficial02", 5 );
+	wait( .2 );
+
+	$jurot.headWatchTarget( "commandOfficial02", 5 );
+
+	globalCoop_dialog_waitForDialog( $commandOfficial02 );
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//mid close up on munro
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 60 );
+	globalCoop_cin_follow($cam2, $m4l1b_EndRescue_Scene2_Shot2 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera( $cam2 );
+
+	$munro.headWatchTarget( "commandOfficial01", 5 );
+	$chell.headWatchTarget( "commandOfficial01", 5 );
+	$jurot.headWatchTarget( "commandOfficial01", 5 );
+
+	globalCoop_dialog_play($munro,"m4l1/munro_disprove.mp3", 1, 20000, 0 ); //That should be easy to disprove.
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//mid close up on attrex 2
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 60 );
+	globalCoop_cin_follow($cam1, $m4l1b_EndRescue_Scene2_Shot8 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+
+	globalCoop_dialog_play($commandOfficial02,"m4l1/att2_itis.mp3", 1, 20000, 0 ); //It is. But cherished superstitions die hard. Fortunately, most Idryll don’t believe the separatists.
+	wait( .1 );
+
+	//--------------------------------------------------------
+	//under closeup on attrex 1
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 60 );
+	globalCoop_cin_follow($cam2, $m4l1b_EndRescue_Scene2_Shot10 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera( $cam2 );
+
+	$commandOfficial02.headWatchTarget( "commandOfficial01", 5 );
+	globalCoop_dialog_play($commandOfficial01,"m4l1/attcomm_wasting.mp3", 1, 20000, 0 ); //We’re wasting time. These aliens are not Idryll!
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//mid close up on attrex 2 and 1
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 70 );
+	globalCoop_cin_follow($cam1, $m4l1b_EndRescue_Scene2_Shot4 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+
+	thread globalCoop_dialog_play($commandOfficial02,"m4l1/att2_borg.mp3", 1, 20000, 0 ); //They must be an interstellar invasion force, like the Borg.
+	wait( .5 );
+
+	$commandOfficial01.headWatchTarget( "commandOfficial02", 5 );
+	wait( .5 );
+
+	$commandOfficial02.headWatchTarget( "munro", 5 );
+
+	globalCoop_dialog_waitForDialog( $commandOfficial02 );
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//over the shoulder at munro
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 60 );
+	globalCoop_cin_follow($cam2, $m4l1b_EndRescue_Scene2_Shot11 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera( $cam2 );
+
+	thread globalCoop_dialog_play($munro,"m4l1/munro_gridback.mp3", 1, 20000, 0 ); //Whatever they are, we can’t get them out of this station until we get your defensive grid back online.
+	wait( .5 );
+
+	$jurot.headWatchTarget( "munro", 5 );
+	$commandOfficial01.headWatchTarget( "munro", 5 );
+	wait( .2 );
+
+	$commandOfficial02.headWatchTarget( "munro", 5 );
+	wait( 1.2 );
+
+	$jurot.headWatchTarget( "commandOfficial01", 5 );
+	globalCoop_dialog_waitForDialog( $munro );
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//mid close up of attrexs
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 70 );
+	globalCoop_cin_follow($cam1, $m4l1b_EndRescue_Scene2_Shot4 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+
+	thread globalCoop_dialog_play($commandOfficial01,"m4l1/attcomm_ruins.mp3", 1, 20000, 0 ); //Our security generators are in ruins.
+	wait( .5 );
+
+	$commandOfficial02.headWatchTarget( "commandOfficial01", 5 );
+	$chell.headWatchTarget( "commandOfficial01", 5 );
+
+	globalCoop_dialog_waitForDialog( $commandOfficial01 );
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//chell
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 60 );
+	globalCoop_cin_follow($cam2, $m4l1b_EndRescue_Scene2_Shot12 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera( $cam2 );
+
+	$commandOfficial02.headWatchTarget( "chell", 5 );
+	$commandOfficial01.headWatchTarget( "commandOfficial02", 5 );
+
+	globalCoop_dialog_play($chell,"m4l1/chell_backup.mp3", 1, 20000, 0 ); //Don’t you have backup generators?
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//mid close up of attrexs
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 70 );
+	globalCoop_cin_follow($cam1, $m4l1b_EndRescue_Scene2_Shot4 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+
+	globalCoop_dialog_play($commandOfficial02,"m4l1/att2_powercore.mp3", 1, 20000, 0 ); //Yes. In the main power core, in the heart of the station.
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//chell
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 60 );
+	globalCoop_cin_follow($cam2, $m4l1b_EndRescue_Scene2_Shot12 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera( $cam2 );
+
+	thread globalCoop_dialog_play($chell,"m4l1/chell_figure.mp3", 1, 20000, 0 ); //If we can figure out how to manually connect the backup generators to the grid, we could eliminate all invaders on the station.
+	$chell.headWatchTarget( "commandOfficial02", 5 );
+	$commandOfficial01.headWatchTarget( "munro", 5 );
+	$commandOfficial02.headWatchTarget( "munro", 5 );
+	wait( 2.5 );
+
+	$munro.headWatchTarget( "chell", 5 );
+
+	$chell.headWatchTarget( "munro", 5 );
+	wait( 2 );
+
+	$chell.headWatchTarget( "commandOfficial01", 5 );
+	wait( .2 );
+
+	globalCoop_dialog_waitForDialog( $chell );
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//mid close up of attrex2
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 60 );
+	globalCoop_cin_follow($cam1, $m4l1b_EndRescue_Scene2_Shot8 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+
+	$munro.headWatchTarget( "commandOfficial01", 5 );
+	$chell.headWatchTarget( "commandOfficial01", 5 );
+	globalCoop_dialog_play($commandOfficial02,"m4l1/att2_chief.mp3", 1, 20000, 0 ); //Only our Chief Engineer could do that. But I don’t know where she is.
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//mid close up of the attrexs
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 70 );
+	globalCoop_cin_follow($cam2, $m4l1b_EndRescue_Scene2_Shot4 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera( $cam2 );
+
+	$commandOfficial01.headWatchTarget( "commandOfficial02", 5 );
+
+	thread globalCoop_dialog_play($commandOfficial01,"m4l1/attcomm_trapped.mp3", 1, 20000, 0 ); //I do. She reported in. She’s trapped in an office near the main power core.
+	wait( .5 );
+
+	$commandOfficial02.headWatchTarget( "commandOfficial01", 5 );
+	wait( 1.5 );
+
+	$commandOfficial01.headWatchTarget( "munro", 5 );
+	globalCoop_dialog_waitForDialog( $commandOfficial01 );
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//mid close up of munro
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 60 );
+	globalCoop_cin_follow($cam1, $m4l1b_EndRescue_Scene2_Shot2 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+
+	thread globalCoop_dialog_play($munro,"m4l1/munro_onway.mp3", 1, 20000, 0 ); //Tell her I’m on my way. Hazard Team, stay here and protect the Attrexians.
+	$jurot.headWatchTarget( "munro", 5 );
+	$commandOfficial01.headWatchTarget( "munro", 5 );
+	wait( 2.5 );
+
+	//--------------------------------------------------------
+	//over the shoulder of munro
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 60 );
+	globalCoop_cin_follow($cam2, $m4l1b_EndRescue_Scene2_Shot11 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera( $cam2 );
+
+	$munro.headWatchTarget( "chell", 8 );
+	wait( 1 );
+
+	$munro.headWatchTarget( "jurot", 8 );
+
+	//--- wait for munro's dialog to finish
+	globalCoop_dialog_waitForDialog( $munro );
+	wait( .3 );
+
+	globalCoop_dialog_play($jurot,"m4l1/jurot_aye.mp3", 1, 20000, 0 ); //Aye, sir.
+	$munro.headWatchTarget( "none", 8 );
+
+	//--------------------------------------------------------
+	//chell and munro - if player has not found attrexian rifle
+
+	if ( getfloatvar( "game.attrexianWeaponFound" ) != 1 )
+	{
+		$chell.giveactorweapon( "models/actorweapons/attrex-rifle.tik", 1.0 );
+		$munro.giveactorweapon( "models/actorweapons/attrex-rifle.tik", 1.0 );
+
+		//--- set the camera
+		$cam5.fov( 60 );
+		$cam5.follow( $m4l1b_EndRescue_Scene2_Shot13 );
+		wait( .1 );
+	
+		$chell.headWatchTarget( "munro", 8 );
+		$chell.useactorweapon( "AttrexianRifle");
+		
+		globalCoop_cin_cut($cam5);
+		globalCoop_cin_cuecamera( $cam5 );
+
+		$chell.anim( "attrexrifle_draw" );
+		waitforanimation( $chell , "attrexrifle_draw" );
+		$chell.anim( "attrexrifle_idle" );
+
+		$munro.headWatchTarget( "chell", 5 );
+
+		globalCoop_dialog_play($chell,"m4l1/chell_herehlp.mp3", 1, 20000, 0 ); //Here you go Munro.  Here's one of the weapons I found. this should help you out.
+
+		$chell.useactorweapon( "none");
+		$chell.anim( "idle" );
+
+		$munro.useactorweapon( "AttrexianRifle");
+		$munro.anim( "attrexrifle_draw" );
+		waitforanimation( $munro , "attrexrifle_draw" );
+		$munro.anim( "attrexrifle_idle" );
+
+		//centerprint( "Chell hand munro an attrexian rifle, munro examines it" );
+		wait( 1 );
+	}
+
+	//--------------------------------------------------------
+	//munro walking away from the group
+
+	$chell.resethead();
+	$munro.resethead();
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 70 );
+	globalCoop_cin_follow($cam1, $m4l1b_EndRescue_Scene2_Shot14 );
+	wait( .1 );
+
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+
+	$jurot.headwatchtarget( "none", 5 );
+	$chell.headwatchtarget( "munro", 5 );
+	$commandOfficial01.headwatchtarget( "munro", 5 );
+	$commandOfficial02.headwatchtarget( "munro", 5 );
+	wait( 1 );
+
+	//--- walk munro off camera
+	$munro.walkto( "$nodeJurot_EndRescue_SecondSceneStart", "walk" );
+	wait( .5 );
+
+	//--- end the cinematic
+	thread cinematicEndRescue_Skipthread();
+}
+
+
+//-----------------------------------------
+//--- setup the cinematic before it starts
+void cinematicEndRescue_SetupStart()
+{
+//spawn cameras
+	if(!doesEntityExist($cam1)){spawn( "Camera", "targetname", "cam1");}
+	if(!doesEntityExist($cam2)){spawn( "Camera", "targetname", "cam2");}
+	
+//--- load camera paths
+	cam.load( "m4l1b_EndRescue_Scene2_Shot9" );
+	cam.load( "m4l1b_EndRescue_Shot1" );
+	cam.load( "m4l1b_EndRescue_Shot2" );
+	cam.load( "m4l1b_EndRescue_Shot3" );
+	cam.load( "m4l1b_EndRescue_Shot4" );
+	cam.load( "m4l1b_EndRescue_Shot5" );
+	cam.load( "m4l1b_EndRescue_Shot6" );
+	cam.load( "m4l1b_EndRescue_Shot7" );
+	cam.load( "m4l1b_EndRescue_Shot8" );
+	cam.load( "m4l1b_EndRescue_Shot9" );
+	cam.load( "m4l1b_EndRescue_Shot10" );
+	cam.load( "m4l1b_EndRescue_Shot11" );
+	cam.load( "m4l1b_EndRescue_Shot12" );
+	cam.load( "m4l1b_EndRescue_LurkerJump" );
+	
+	wait(.1);
+
+//--- TEMPO TEMPO TEMOP load the next set of paths
+	cam.load( "m4l1b_EndRescue_Scene2_Shot1" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot2" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot3" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot4" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot5" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot6" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot7" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot8" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot9" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot10" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot11" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot12" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot13" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot14" );
+
+//--- hide actors and objects
+	globalCommon_AiDummyHide( $chell );
+	globalCommon_AiDummyHide( $munro );
+	globalCommon_AiDummy( $chang, "" );
+	globalCommon_AiDummy( $jurot, "" );
+	globalCommon_AiDummy( $commandOfficial01, "" );
+	globalCommon_AiDummy( $commandOfficial02, "" );
+	globalCommon_AiDummy( $commandOfficial03, "" );
+	$commandOfficial01.immortal( 1 );
+	$commandOfficial02.immortal( 1 );
+	$commandOfficial03.immortal( 1 );
+
+//--- position actors and objects
+	thread commonPositionObject( $munro, $nodeMunro_EndRescue_Start );
+	thread commonPositionObject( $chang, $nodeChang_EndRescue_Start );
+	thread commonPositionObject( $jurot, $nodeJurot_EndRescue_Start );
+	thread commonPositionObject( $chell, $nodeChell_EndRescue_Start );
+	thread commonPositionObject( $commandOfficial01, $nodeAttrexian1_EndRescue_Start );
+	thread commonPositionObject( $commandOfficial02, $nodeAttrexian2_EndRescue_Start );
+	thread commonPositionObject( $commandOfficial03, $nodeAttrexian3_EndRescue_Start );
+	wait( .5 );
+
+	//--- turn the female
+	$commandOfficial01.angles( '0 295 0' );
+
+	//--- give weapons to actors
+	$munro.giveActorWeapon( "models/weapons/worldmodel-actorweapon-fieldassaultrifle.tik" );
+	$munro.useActorWeapon( "FieldAssaultRifle" );
+
+	//--- put characters in their starting animations
+	$jurot.anim( "compressionrifle_aim" );
+	$chang.anim( "compressionrifle_aim" );
+	$chang.morph( "exp_Anger" );
+	$jurot.morph( "exp_Anger" );
+
+	$commandOfficial01.anim( "scared" );
+	$commandOfficial02.anim( "cowerr" );
+	$commandOfficial03.anim( "cowerl" );
+}
+
+
+
+//---------------------
+// cinematicEndRescue_Skipthread
+// globalCoop_cin_skipThread for end rescue officials cinematic
+//---------------------
+void cinematicEndRescue_Skipthread()
+{
+	//--- kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematicEndRescue" );
+	killthread( "cinematicEndRescue_ChangJurotFire" );
+
+	//TEMP TEMP
+	$jurot.removeactorweapon( "models/weapons/worldmodel-actorweapon-compressionrifle.tik" );
+	$chang.removeactorweapon( "models/weapons/worldmodel-actorweapon-compressionrifle.tik" );
+
+	//--- fade to black
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	//--- stop everyone talking
+	$commandOfficial01.stopdialog();
+	$commandOfficial02.stopdialog();
+	$commandOfficial03.stopdialog();
+	$munro.stopdialog();
+	$chell.stopdialog();
+	$chang.stopdialog();
+	$jurot.stopdialog();
+
+	thread end_level();
+}
+
+
+//-----------------------------------------
+//--- first two lurkers run in and get blown away
+void cinematicEndRescue_ChangJurotFire()
+{
+	boolCinematicEndRescue = TRUE;
+
+	while( boolCinematicEndRescue == TRUE )
+	{
+		//print( "boolEnd Jurot & Chang Fire: " + boolCinematicEndRescue + "\n" );
+
+    	$jurot.anim( "compressionrifle_fire" );
+    	wait( .7 );
+
+    	$chang.anim( "compressionrifle_aim" );
+    	wait( .5 );
+
+    	$jurot.anim( "compressionrifle_aim" );
+    	$chang.anim( "compressionrifle_fire" );
+    	wait( .6 );
+
+    	$jurot.anim( "compressionrifle_fire" );
+    	wait( .5 );
+
+    	$chang.anim( "compressionrifle_aim" );
+    	wait( .6 );
+
+    	$jurot.anim( "compressionrifle_aim" );
+    	$chang.anim( "compressionrifle_fire" );
+    	wait( .5 );
+    }
+
+	$jurot.anim( "compressionrifle_aim" );
+	$chang.anim( "compressionrifle_aim" );
+	wait( .5 );
+
+	//$jurot.anim( "fieldassaultrifle_aim" );
+	//$chang.anim( "fieldassaultrifle_aim" );
+
+	//TEMP TEMP
+	//$jurot.removeactorweapon( "models/weapons/worldmodel-actorweapon-compressionrifle.tik" );
+	//$chang.removeactorweapon( "models/weapons/worldmodel-actorweapon-compressionrifle.tik" );
+	$jurot.useActorWeapon( "none" );
+	$chang.useActorWeapon( "none" );
+}
+
+//-----------------------------------------
+//--- first two lurkers run in and get blown away
+void cinematicEndRescue_LurkerFirstWave()
+{
+	globalCommon_AiDummyShow( $lurkerEndRescue1 );
+	globalCommon_AiDummyShow( $lurkerEndRescue2 );
+
+	$lurkerEndRescue1.walkto( "$nodeLurkerEndRescue1_RunTo1", "run" );
+	wait( .4 );
+
+	$lurkerEndRescue2.walkto( "$nodeLurkerEndRescue2_RunTo1", "run" );
+	wait( .4 );
+
+	$lurkerEndRescue1.immortal( 0 );
+	$lurkerEndRescue1.hurt( 100000 );
+	wait( .6 );
+
+	$lurkerEndRescue2.immortal( 0 );
+	$lurkerEndRescue2.anim( "death_gib" );
+}
+
+//-----------------------------------------
+//--- second two lurkers run in and get blown away
+void cinematicEndRescue_LurkerSecondWave()
+{
+	globalCommon_AiDummyShow( $lurkerEndRescue3 );
+	globalCommon_AiDummyShow( $lurkerEndRescue4 );
+
+	$lurkerEndRescue3.walkto( "$nodeLurkerEndRescue1_RunTo1", "run" );
+	wait( 1.1 );
+
+	$lurkerEndRescue3.immortal( 0 );
+	$lurkerEndRescue3.hurt( 100000 );
+
+	$lurkerEndRescue4.walkto( "$nodeLurkerEndRescue2_RunTo1", "run" );
+	wait( .8 );
+
+	$lurkerEndRescue4.immortal( 0 );
+	$lurkerEndRescue4.anim( "death_gib" );
+}
+
+
+//-----------------------------------------
+//--- attrexain commander backs up and sees the remaining lurker
+void cinematicEndRescue_Attrexian1Backup()
+{
+	//$commandOfficial01.walkto( "$nodeAttrexian1_WalkTo1", "walk" );
+	//waitFor( $commandOfficial01 );
+	//wait( .2 );
+	$commandOfficial01.anim( "cin-backpedal" );
+	wait( 2.1 );
+
+	$commandOfficial01.anim( "idle" );
+
+	//--- have her face the lurker
+	$commandOfficial01.turnTowardsEntity( $lurkerEndRescue_Fake );
+}
+
+//-----------------------------------------
+//--- lurker 5 runs towards the command attrexian
+void cinematicEndRescue_LurkerRunToCommander()
+{
+	$lurkerEndRescue5.walkto( "$nodeLurkerEndRescue5_RunTo1", "run" );
+}
+
+//-----------------------------------------
+//--- munro runs in to save the day
+void cinematicEndRescue_MunroSaveTheDay()
+{
+	globalCommon_AiDummyShow( $munro );
+
+	$munro.walkto( "$nodeMunro_RunTo1", "run" );
+	waitFor( $munro );
+
+	$munro.turnTowardsEntity( $lurkerEndRescue_Fake );
+	//$munro.anim( "fieldassaultrifle_aim" );
+	$munro.anim( "compressionrifle_aim" );
+}
+
+//-----------------------------------------
+//--- the lurker leaps at the camera
+void cinematicEndRescue_LurkerLeaps()
+{
+	$lurkerEndRescue_Fake.anim( "cin-m4-lurker-jump" );
+	$lurkerEndRescue_Fake.followPath( $m4l1b_EndRescue_LurkerJump );
+}
+
+//-----------------------------------------
+//--- commander cowers in horror
+void cinematicEndRescue_AttrexianCommanderCower()
+{
+	$commandOfficial01.anim( "startled" );
+}
+
+//-----------------------------------------
+//--- setup the second scene
+void cinematicEndRescue_SetupSecondScene()
+{
+	//--- delete the first set of paths
+	globalCineFX_CameraPathRemove( $m4l1b_EndRescue_Shot1 );
+	globalCineFX_CameraPathRemove( $m4l1b_EndRescue_Shot2 );
+	globalCineFX_CameraPathRemove( $m4l1b_EndRescue_Shot3 );
+	globalCineFX_CameraPathRemove( $m4l1b_EndRescue_Shot4 );
+	globalCineFX_CameraPathRemove( $m4l1b_EndRescue_Shot5 );
+	globalCineFX_CameraPathRemove( $m4l1b_EndRescue_Shot6 );
+	globalCineFX_CameraPathRemove( $m4l1b_EndRescue_Shot7 );
+	globalCineFX_CameraPathRemove( $m4l1b_EndRescue_Shot8 );
+	globalCineFX_CameraPathRemove( $m4l1b_EndRescue_Shot9 );
+	globalCineFX_CameraPathRemove( $m4l1b_EndRescue_Shot10 );
+	globalCineFX_CameraPathRemove( $m4l1b_EndRescue_Shot11 );
+	globalCineFX_CameraPathRemove( $m4l1b_EndRescue_LurkerJump );
+
+	globalCoop_main_executeInSp("coop_mod/cfg/maps/m3l1a/cinematicEndRescue_SetupSecondScene.cfg");
+/* 	//--- load the next set of paths
+	cam.load( "m4l1b_EndRescue_Scene2_Shot1" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot2" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot3" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot4" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot5" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot6" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot7" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot8" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot9" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot10" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot11" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot12" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot13" );
+	cam.load( "m4l1b_EndRescue_Scene2_Shot14" ); */
+
+	//--- position jurot
+	globalCommon_AiDummyHide( $jurot );
+	commonPositionObject( $jurot, $nodeJurot_EndRescue_SecondSceneStart );
+}
+
+//-----------------------------------------
+//--- everybody walks to meet in a group
+void cinematicEndRescue_AllWalkToGroup()
+{
+	//--- move munro
+	$munro.walkto( "$nodeMunro_WalkTo2", "walk" );
+
+	//--- move the command attrexian
+	$commandOfficial01.walkto( "$nodeAttrexian1_RunTo2", "run" );
+	wait( 1 );
+
+	//--- move the second attrexian
+	$commandOfficial02.walkto( "$nodeAttrexian_InBetween1", "run" );
+	waitFor( $commandOfficial02 );
+
+	//--- move the third attrexian
+	$commandOfficial02.walkto( "$nodeAttrexian2_RunTo2", "run" );
+	$commandOfficial03.walkto( "$nodeAttrexian_InBetween1", "run" );
+	waitFor( $commandOfficial03 );
+
+	$commandOfficial03.walkto( "$nodeAttrexian3_RunTo2", "run" );
+	wait( .5 );
+
+	//--- move chang
+	$chang.walkto( "$nodeChang_RunTo2", "run" );
+}
+
+//-----------------------------------------
+//--- walk chell to the group
+void cinematicEndRescue_ChellWalkToGroup()
+{
+	$chell.useActorWeapon( "none" );
+
+	globalCommon_AiDummyShow( $chell );
+	$chell.walkto( "$nodeChell_WalkTo2", "walk" );
+	waitFor( $chell );
+
+	$chell.useActorWeapon( "none" );
+}
+
+//-----------------------------------------
+//--- walk jurot to the group
+void cinematicEndRescue_JurotWalkToGroup()
+{
+	$jurot.morph( "exp_Serious" );
+
+	globalCommon_AiDummyShow( $jurot );
+	$jurot.walkto( "$nodeJurot_WalkTo2", "walk" );
+}
+
+//---------------------
+// cinematicDeath
+// death thread if attrexian official bites it
+//---------------------
+void cinematicDeath()
+{
+	boolPlayerFailed = TRUE;
+	
+	globalCoop_main_camFadeOut(.5);
+	wait( .5 );
+
+	//--- start cinematic commands
+	globalCoop_cin_start();
+
+	//--- load camera paths
+	cam.load( "m4l1b_Death_Shot1" );
+
+	// get rid of ALL the stupid monsters
+	coop_removeMonsters();
+
+	//--- place the end characters into their positions
+	if(!cvar_bool_multiplayer){//Singleplayer
+		globalCineFX_PositionObject( $munro, $nodeMunro_DeathCam_Start );
+	}
+	$commandOfficial01_DeathCam.show();
+
+	//--- hide all the other characters
+	globalCommon_AiDummyHide( $chang );
+	globalCommon_AiDummyHide( $jurot );
+	globalCommon_AiDummyHide( $chell );
+	//globalCommon_AiDummyHide( $commanOfficial01 );
+	
+	$commandOfficial01.remove();
+	$commandOfficial02.remove();
+	$commandOfficial03.remove();
+	wait( .25 );
+
+	//--------------------------------------------------------
+	//shot 1 - fade up with camera pulling up over dead official as munro runs up and looks down at her
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 10 );
+	
+
+//SAVE!
+	globalCoop_cin_follow($cam1, $m4l1b_Death_Shot1 );
+	wait( .1 );
+	globalCoop_cin_cut($cam1);
+
+	globalCoop_cin_cuecamera( $cam1 );
+
+	//--- fade in
+	cam_fadein( .5, 1, 1, 1, 1, 0 );
+
+	//--- set globalCoop_cin_skipThread
+	globalCoop_cin_skipThread( "cinematicDeath_globalCoop_cin_skipThread" );
+
+	thread globalCineFX_CameraFOVLerp( $cam1, 10, 150, 9, "rampupdown" );
+
+	//--- reprimand
+	//The loss of the command officials just doomed any hope of cooperation from the Attrexians.
+	thread globalCoop_dialog_play($picard,"m4l1/picard_loss.mp3", 1, 10000, 1 );
+
+	// get rid of ALL the stupid monsters
+	coop_removeMonsters();
+	wait( 3 );
+
+	
+	//--- show and run munro over
+	$munro.show();
+	$munro.solid();
+	$munro.useActorWeapon( "none" );
+	$munro.headwatchTarget( "nodeMunro_DeathCam_LookAt", 10 );
+	$munro.warp( $nodeMunro_DeathCam_Start.getOrigin() );
+	$munro.walkTo( "$nodeMunro_DeathCam_RunTo", "run" );
+
+	// get rid of ALL the stupid monsters
+	coop_removeMonsters();
+	wait( 2.5 );
+
+	// get rid of ALL the stupid monsters
+	coop_removeMonsters();
+	$munro.headwatchTarget( "cam1", 10 );
+	wait( 2 );
+
+	// get rid of ALL the stupid monsters
+	coop_removeMonsters();
+
+	//--- fail the player
+	thread cinematicDeath_globalCoop_cin_skipThread();
+}
+
+//---------------------
+// cinematicDeath_globalCoop_cin_skipThread
+// globalCoop_cin_skipThread for cinematic
+//---------------------
+void cinematicDeath_globalCoop_cin_skipThread()
+{
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematicDeath" );
+	
+	globalCoop_main_camFadeOut(.5);
+	
+	globalCoop_mission_fail();
+}
+
+

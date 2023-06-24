@@ -1,0 +1,1692 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	  m9l1a-klingon_base (K7 Starbase)
+//  Script By:    Adam 'Senn' Bellefeuil
+//  Geometry By:  Richard H., Adam 'Senn' Bellefeuil
+//  Created on:   08/01/2002
+//  Last Edited:  02/20/2003 - Adam
+//-----------------------------------------------------------------
+
+void main();
+void init();
+
+void setupActors();
+void setupPlayer();
+void setupArchetypes();
+
+// Bar Sequence
+void bar_entrance();
+void enableBartender();
+void isBarDoorLocked();
+void bartender_lookbusy();
+void vip_bartender_lookbusy();
+void npcCheer();
+void npcBoo();
+
+float barDoorLocked = 1;
+float cageLowered = 0;
+
+// Dialog Sequences
+void teamDialog1();
+void dialogInBar1();
+void klingonTaunts();
+void barRomulanAleConversation();
+void barStarWarsConversation();
+void barMusicianConversation();
+void shuttlebayConversation1();
+void shuttlebayConversation2();
+void hallwayConversation1();
+void hallwayConversation2();
+
+float barRomulanAleConversationComplete = 0;
+float barStarWarsConversationComplete = 0;
+float barMusicianConversationComplete = 0;
+float shuttlebayConversation1Complete = 0;
+float shuttlebayConversation2Complete = 0;
+float hallwayConversation1Complete = 0;
+float hallwayConversation2Complete = 0;
+
+// Hallway Battle Sequences
+void hallway_seq01();
+void hallway_seq02();
+void hallway_seq03();
+void hallway_seq04();
+void hallway_seq05();
+
+// Omag Chase Sequences
+void omagFollowPath01();
+void omagFollowPath02();
+void omagFollowPath03();
+void barrelPuzzle();
+
+void setUpTeam(entity e);
+void coop_vipAttackPlayer(entity e);
+void coop_checkBatlethPlayer(entity ePlayer);
+void coop_takeBatleth();
+void coop_resetBatleth();
+void coop_endCinematic(entity e);
+void coop_waitForTeam();
+void coop_endLevel();
+entity ePlayerBatleth;
+
+//=============================================================================
+// Includes
+//=============================================================================
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/global/global_common.scr"
+//#include "coop_mod/maps/optional_modules/context.scr"
+#include "coop_mod/maps/missions/9/m9l1a_dialog.scr"
+#include "coop_mod/maps/optional_modules/teammate.scr"
+#include "maps/global_scripts/global_math.scr"
+#include "maps/global_scripts/global_acceleratedMovement.scr"
+#include "coop_mod/maps/missions/9/m9l1a_cin.scr"
+
+
+//-----------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------
+// LEVEL SETUP
+//-----------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------
+
+//---------------------
+// Main Function
+// Main level thread
+//---------------------
+void main()
+{
+	globalCoop_main_camFadeOut(.1);
+	//load camera paths
+	cam.load( "m9l1a_bar1" );
+	cam.load( "m9l1a_bar2" );
+	cam.load( "m9l1a_bartender1" );
+	cam.load( "m9l1a_bartender2" );
+	cam.load( "m9l1a_cage1" );
+	cam.load( "m9l1a_cage2" );
+
+
+	if(getCvarInt("g_gametype") == 0){
+		$boss.actortype( "friend" );//otherwise he gets attacked
+	}
+	globalCoop_level_remove($boss);
+	$triggerDialogInBar.nottriggerable();//ai spawns at 0 0 0 and trigger this trigger
+	$cageWallTriggers.remove();//not needed	
+	soundtrack( "music/m9l1a-klingon_base.mus" );
+	cam_fadeout( .1, 0, 0, 0, 1);
+	//--- setup distance fog
+	//$world.farplane( 5000 );
+	//$world.farplane_color( '.25 .2 .1' );
+	
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_string_nextMapToCheck	= "m9l1b-klingon_base";//set the map we gona load next while we are in testmode
+
+//Set spawnangles for this level
+	coop_float_spawnAngle1 		= 45;
+//Set spawnangles for this level	
+	coop_vector_spawnOrigin1 	= '-2154 -246 -14';	
+	coop_vector_spawnOrigin2 	= '-4000 -330 0';
+	coop_vector_spawnOrigin3 	= '-4000 -400 0';
+	coop_vector_spawnOrigin4 	= '-4000 -470 0';
+	coop_vector_spawnOrigin5 	= '-4000 -550 0';
+	coop_vector_spawnOrigin6 	= '-4000 -620 0';
+	coop_vector_spawnOrigin7 	= '-4000 -690 0';
+	coop_vector_spawnOrigin8 	= '-4000 -760 0';
+	
+// if(getCvar("username") == "Chrissstrahl")
+// {
+// coop_vector_spawnOrigin1 = '-4000 -250 0';
+// }
+	
+	
+//Definie Objective
+	coop_string_objectiveItem1	= "TakeKrindotoBar";
+	coop_string_objectiveItem2	= "LocateOmag";
+	coop_string_objectiveItem3	= "FollowOmag";
+	coop_string_objectiveItem4	= "DefeatKlingonBoss";
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+	//--- setup the level
+	$world.entity_fade_dist( 8000 );
+	init();
+
+	//--- setup the player
+	thread setupPlayer();
+
+	//--- launch the intro cinematic
+	thread cinematicArm_Intro_Start();	
+}
+
+void setupArchetypeObject( entity e, string theArchetype )
+{
+	e.contents( "targetable" );
+	e.archetype( theArchetype );
+}
+
+void setupCrateArchetypeObject( entity e, string theArchetype )
+{
+	e.contents( "+targetable" );
+	e.archetype( theArchetype );
+}
+
+//---------------------
+// Init Function
+// Setup the world
+//---------------------
+void init()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+	//raise cage
+		$cage.time( .1 );
+		$cage.moveUp( 320 );
+		$cage.solid ();//it's notsolid in the map so that pathnodes connect properly
+	}else{
+		$cage.remove();
+	}
+
+	// setup hallway battle guys
+	hallway_seq01();
+	hallway_seq05();
+
+	// setup dialog
+	initDialog();
+
+	// setup actors
+	setupActors();
+
+	// setup archetypes
+	setupArchetypes();
+	
+	//--turn on red light above door to VIP lounge (green off)
+	$world.light_lightstyle( "doorLight_red1" , "z" , 0 );
+	$world.light_lightstyle( "doorLight_green1" , "a" , 0 );
+
+	$world.light_lightstyle( "vipLight_red1" , "a" , 0 );
+	$world.light_lightstyle( "vipLight_green1" , "z" , 0 );
+
+	$shuttle.notsolid();
+	$shuttle_int.notsolid();
+	$shuttle_int.anim( "closed" );
+
+	//dancers
+	$dancer1.immortal(1);
+	$dancer2.immortal(1);
+	$dancer1.anim( "dance1" );
+	$dancer2.anim( "dance2" );
+	$innerBarDoor.noise( "sound/doors/door_locked.wav" );
+
+//make commandable
+	setUpTeam($krindo);
+	setUpTeam($gonzales);
+}
+
+//---------------------
+// setupPlayer
+// setup the player
+//---------------------
+void setupPlayer()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		waitForPlayer();
+		$player.putawayweapon( "dual" );
+		wait( .2 );
+		$player.disableuseweapon( 1 );
+	//--- load the objectives
+		$player.loadobjectives("m9l1a-klingon_base");
+		wait( .25 );
+	}
+}
+
+//---------------------
+// characterSetup
+// initial setup for ai & actor types
+//---------------------
+void setupActors()
+{
+	//CINEMATIC MUNRO
+	$munro_bar.removeactorweapon ( "CompressionRifle" );
+	globalCommon_AiDummyHide( $munro );
+
+	//KRINDO
+	globalCommon_AiDummyHide( $krindo );
+	$krindo.immortal( 1 );
+	$krindo.removeactorweapon ( "CompressionRifle" );
+	$krindo.followrange( 320 );		//---384 default
+	$krindo.followrangemin( 192 );		//---256
+	$krindo.followcombatrange( 384 );	//---512
+	$krindo.followcombatrangemin( 192 );	//---256
+	$krindo.allowfall( 1 );
+
+	// GONZALES
+	globalCommon_AiDummyHide( $gonzales );
+	$gonzales.immortal( 1 );
+	$gonzales.removeactorweapon ( "CompressionRifle" );
+	$gonzales.setTargetType( 4 );
+	$gonzales.followrange( 320 );		//---384 default
+	$gonzales.followrangemin( 192 );	//---256
+	$gonzales.followcombatrange( 384 );	//---512
+	$gonzales.followcombatrangemin( 192 );	//---256
+	$gonzales.allowfall( 1 );
+
+	// OMAG
+	$omag.immortal( 1 );
+	$omag.notsolid();
+
+	// NAUSICAN BOUNCER
+	$bonesaw.ai_off();
+	$bonesaw.immortal( 1 );
+	$bonesaw.settendency( "wander" , 0.0 );
+	$bonesaw.allowfall( 1 );
+
+	// KLINGON BARKEEP
+	$klingon_barkeep.immortal( 1 );
+	$klingon_barkeep.ai_off();
+	$klingon_barkeep.immortal( 1 );
+	$klingon_barkeep.pushable( 0 );
+
+	// VIP LOUNGE BARKEEP
+	$vip_barkeep.immortal( 1 );
+	$vip_barkeep.ai_off();
+	$vip_barkeep.immortal( 1 );
+	$vip_barkeep.pushable( 0 );
+	$vip_barkeep.mass( 99999 );
+	thread vip_bartender_lookbusy();
+
+	// HUMAN FEMALE 1 - wandering around the bar
+	$humanFemale1.immortal( 1 );
+	$humanFemale1.allowfall( 1 );
+	$humanFemale1.pushable( 0 );
+	$humanFemale1.settendency ( "wander" , 1.0 );
+
+	// HUMAN FEMALE 2 - standing at the bar
+	$humanFemale2.immortal( 1 );
+	$humanFemale2.ai_off();
+	$humanFemale2.anim( "bar_standing" );
+	$humanFemale2.pushable( 0 );
+
+	// HUMAN FEMALE 3 - standing at the bar in the vip room
+	$humanFemale3.immortal( 1 );
+	$humanFemale3.ai_off();
+	$humanFemale3.anim( "bar_standing" );
+	$humanFemale3.pushable( 0 );
+
+	// HUMAN MALE 1 - standing at bar
+	$humanMale1.immortal( 1 );
+	$humanMale1.ai_off();
+	$humanMale1.anim( "bar_standing" );
+	$humanMale1.pushable( 0 );
+
+	// HUMAN MALE 2 - standing at the bar in the vip room
+	$humanMale2.immortal( 1 );
+	$humanMale2.ai_off();
+	$humanMale2.anim( "bar_standing" );
+	$humanMale2.pushable( 0 );
+
+	// ANDORIAN MALE 1 - wandering around the bar
+	$andorianMale1.immortal( 1 );
+	$andorianMale1.settendency( "wander" , 0.0 );
+	$andorianMale1.allowfall( 1 );
+	$andorianMale1.pushable( 0 );
+
+	if(!cvar_bool_multiplayer){
+		// ANDORIAN MALE 2 - wandering around the vip room
+		$andorianMale2.immortal( 1 );
+		$andorianMale2.settendency( "wander" , 0.0 );
+		$andorianMale2.allowfall( 1 );
+		$andorianMale2.pushable( 0 );
+	}else{
+		globalCoop_level_remove($andorianMale2);
+	}
+
+	// ANDORIAN MALE 3 - standing at the bar
+	$andorianMale3.immortal( 1 );
+	$andorianMale3.ai_off();
+	$andorianMale3.anim( "bar_standing" );
+	$andorianMale3.pushable( 0 );
+
+	// ANDORIAN SITTING 1 - sitting at a table in the bar
+	$andorianSitting1.immortal( 1 );
+	$andorianSitting1.ai_off();
+	$andorianSitting1.anim( "bar_sitting_right" );
+	$andorianSitting1.pushable( 0 );
+
+	// ANDORIAN SITTING 2 - sitting on the couch in the champagne room
+	$andorianSitting2.immortal( 1 );
+	$andorianSitting2.ai_off();
+	$andorianSitting2.anim( "bar_sitting_left" );
+	$andorianSitting2.pushable( 0 );
+
+	// ANDORIAN SITTING 3 - sitting at a table in the vip room
+	$andorianSitting3.immortal( 1 );
+	$andorianSitting3.ai_off();
+	$andorianSitting3.anim( "bar_sitting_relaxed" );
+	$andorianSitting3.pushable( 0 );
+
+	// HUMAN FEMALE SITTING 1 - sitting on the couch in the champagne room
+	$humanFemale_sitting1.immortal( 1 );
+	$humanFemale_sitting1.ai_off();
+	$humanFemale_sitting1.anim( "bar_sitting_right" );
+	$humanFemale_sitting1.pushable( 0 );
+
+	// KLINGON SLEEPING 1 - male sleeping at a table in the bar
+	$klingonSleeping1.immortal( 1 );
+	$klingonSleeping1.ai_off();
+	$klingonSleeping1.anim( "bar_sitting_sleep" );
+	$klingonSleeping1.pushable( 0 );
+
+	// KLINGON SLEEPING 2 - female sleeping at a table in the vip room
+	$klingonSleeping2.immortal( 1 );
+	$klingonSleeping2.ai_off();
+	$klingonSleeping2.anim( "bar_sitting_sleep" );
+	$klingonSleeping2.pushable( 0 );
+
+	// HUMAN MALE SITTING 1 - sitting at a table in the bar
+	$humanMaleSitting1.immortal( 1 );
+	$humanMaleSitting1.ai_off();
+	$humanMaleSitting1.anim( "bar_sitting_left" );
+	$humanMaleSitting1.pushable( 0 );
+
+	// KLINGON FEMALE 1 - conversing in the champagne room
+	$klingonFemale1.immortal( 1 );
+	$klingonFemale1.ai_off();
+	$klingonFemale1.pushable( 0 );
+
+	// HUMAN MALE 3 - conversing in the champagne room
+	$humanMale3.immortal( 1 );
+	$humanMale3.ai_off();
+	$humanMale3.pushable( 0 );
+
+	// STAR WARS CANTINA CONVERSATION - sitting at a table in the bar
+	$HanSolo.immortal( 1 );
+	$HanSolo.ai_off();
+	$HanSolo.anim( "bar_sitting_forward" );
+	$HanSolo.pushable( 0 );
+	$LukeSkywalker.immortal( 1 );
+	$LukeSkywalker.ai_off();
+	$LukeSkywalker.anim( "bar_sitting_relaxed" );
+	$LukeSkywalker.pushable( 0 );
+	$ObiWanKenobi.immortal( 1 );
+	$ObiWanKenobi.ai_off();
+	$ObiWanKenobi.anim( "bar_sitting_relaxed" );
+	$ObiWanKenobi.pushable( 0 );
+
+	$shuttlebayConversation1_andorian1.pushable( 0 );
+	$shuttlebayConversation1_andorian2.pushable( 0 );
+
+	// HALLWAY MERCS
+	$hallway_klingon.pushable( 0 );
+	$hallway_klingon.aggressive(0);
+	$hallway_andorian.pushable( 0 );
+	$hallway_andorian.take("actorweapons/andorian-grenadelauncher.tik");
+	$andorianMale1.take("actorweapons/andorian-grenadelauncher.tik");
+	$hallway_klingon.take("actorweapons/klingon-batleth.tik");		
+	
+	if(cvar_bool_multiplayer){//Multiplayer
+		globalCoop_level_remove($hallway_ferengi);
+		globalCoop_level_remove($shuttlebayConversation2_male1);
+		globalCoop_level_remove($shuttlebayConversation2_male2);
+	}else{
+		$hallway_ferengi.pushable( 0 );
+		$shuttlebayConversation2_male1.pushable( 0 );
+		$shuttlebayConversation2_male2.pushable( 0 );
+	}
+
+	$hallwayConversation1_male1.pushable( 0 );
+	$hallwayConversation1_klingon1.pushable( 0 );
+
+	$hallwayConversation2_male1.pushable( 0 );
+	$hallwayConversation2_female1.pushable( 0 );
+}
+
+void vip_bartender_lookbusy()
+{
+	$vip_barkeep.attachmodel( "models/enviro/klingon_bottle1.tik" , "tag_Rhand" , 1 , "" , 0 , 0 , 1.0 );
+
+	while( doesEntityExist($vip_barkeep) )
+	{
+		$vip_barkeep.anim( "bar_idle" );
+		waitforanimation( $vip_barkeep , "bar_idle" );
+
+		$vip_barkeep.anim( "bar_shake" );
+		waitforanimation( $vip_barkeep , "bar_shake" );
+
+		$vip_barkeep.anim( "bar_idle" );
+		waitforanimation( $vip_barkeep , "bar_idle" );
+
+		$vip_barkeep.anim( "bar_spin" );
+		waitforanimation( $vip_barkeep , "bar_spin" );
+	}
+}
+
+//---------------------
+// setupArchetypes
+// setting up the archetypes
+//---------------------
+void setupArchetypes()
+{
+	setupArchetypeObject( $archetypeDoorPanel, "KlingonDoorPanel" );
+	setupCrateArchetypeObject( $arch_crate1, "TrilithiumResin" );
+}
+
+//-----------------------------------
+void inaccessible_sound()
+{
+	entity e;
+	e = getcurrententity();
+	e.playsound( "sound/doors/door_locked.wav", 2, .7, 800 );
+}
+
+//-----------------------------------
+void cageWallSound()
+{
+	entity e;
+	e = getcurrententity();
+	e.playsound( "sound/enviroment/machine/light_stop.wav", 6, .7, 800 ); // TEMP SOUND - adam
+
+	// NEW SOUND NEEDED ABOVE - need sound for cage russling when player brushes up against cage walls
+}
+
+//-----------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------
+// BAR SEQUENCES
+//-----------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------
+
+//---------------------
+// Take Players Weapons
+// Take away players weapons when he enters the bar
+//---------------------
+void bar_entrance()
+{
+	if(doesEntityExist($boss)){
+		$boss.walkto( "$bossnode1" );
+		waitfor( $boss );
+		$boss.walkto( "$bossnode2" );
+		waitfor( $boss );
+	}
+	
+	$innerBarDoor.close();
+	wait( .1 );
+	$innerBarDoor.lock();
+	
+	if(doesEntityExist($boss)){//single-player
+		wait( 1 );
+		$boss.remove();
+	}
+	$vipdoorclip.remove();
+}
+
+//---------------------
+// Bartender Trigger
+// Once krindo and gonzales are inside the call volume, the bartender walks over and the player can talk to her
+//---------------------
+void enableBartender()
+{
+	$klingon_barkeep.walkto( "$barkeepNode2" );
+	waitfor( $klingon_barkeep );
+	$bartenderTrigger.triggerable();
+//spawn cameras
+	spawn( "Camera", "targetname", "cam1");
+	spawn( "Camera", "targetname", "cam2");
+	spawn( "Camera", "targetname", "cam3");
+}
+
+//---------------------
+// VIP Door Locked Dialog
+// If the player uses VIP door prior to speaking to bartender, krindo babels
+//---------------------
+void isBarDoorLocked()
+{
+	if ( barDoorLocked == 1 )
+	{
+		globalCoop_dialog_play($krindo,"m9l1/krindo_vip.mp3", 1, 500, 1); //The VIP lounge is locked. Only the bartender can get you in.
+	}
+}
+
+//---------------------
+// Bar Fight Cinematic
+// Bar Fight Cinematic Start
+//---------------------
+void cinematic_CageMatch()
+{
+	//--- fade the world out
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(1);
+	wait( 1 );
+	allowMusicDucking( 0 );
+	forcemusic ("aux2");
+
+	$barStarWarsConversation_Trigger.nottriggerable();
+
+	// if conversations are still running, stop dialog to shut them up
+	
+	killthread("shuttlebayConversation1");
+	$shuttlebayConversation1_andorian1.stopdialog();
+	$shuttlebayConversation1_andorian2.stopdialog();
+	
+	if( barRomulanAleConversationComplete == 0)
+	{
+		killthread( "barRomulanAleConversation" );
+		$humanMale1.stopdialog();
+		$andorianMale3.stopdialog();
+	}
+
+	if( barStarWarsConversationComplete == 0 )
+	{
+		killthread( "barStarWarsConversation" );
+		$HanSolo.stopdialog();
+		$LukeSkywalker.stopdialog();
+		$ObiWanKenobi.stopdialog();
+	}
+
+	if( hallwayConversation1Complete == 0 )
+	{
+		killthread( "hallwayConversation1" );
+		$hallwayConversation1_male1.stopdialog();
+		$hallwayConversation1_klingon1.stopdialog();
+	}
+
+	if( hallwayConversation2Complete == 0 )
+	{
+		killthread( "hallwayConversation2" );
+		$hallwayConversation2_male1.stopdialog();
+		$hallwayConversation2_female1.stopdialog();
+	}
+
+	//--- move characters into position
+	$gonzales.ai_off();
+	$krindo.ai_off();
+
+	wait( .25 );
+
+	$munro_bar.show();
+	$gonzales.warpto( "$bar_origin2" );
+	$krindo.warpto( "$bar_origin3" );
+
+	$gonzales.angle( 160 );
+	$krindo.angle( 190 );
+
+	$munro_bar.headwatch( $klingon_barkeep );
+	$gonzales.headwatch( $klingon_barkeep );
+	$krindo.headwatch( $klingon_barkeep );
+
+	$humanMale1.ai_off();
+	$humanFemale1.ai_off();
+	$humanFemale2.ai_off();
+	$andorianMale1.ai_off();
+
+	$humanMale1.warpto( "$spectateNode1" );
+	$humanFemale1.warpto( "$spectateNode2" );
+	$humanFemale2.warpto( "$spectateNode3" );
+	$andorianMale1.warpto( "$spectateNode4" );
+	$andorianMale3.warpto( "$spectateNode5" );
+
+	//--- set skipthread
+	globalCoop_cin_skipThread( "cinematic_CageMatch_Skipthread");
+
+	globalCoop_cin_follow($cam1, $m9l1a_bartender1 );
+	globalCoop_cin_follow($cam2, $m9l1a_bartender2 );
+	globalCoop_cin_follow($cam3, $m9l1a_cage1 );
+	wait( .5 );
+	
+	//--- start the first shot
+	globalCoop_cin_cuecamera( $cam2 );
+
+	//--- fade in
+	cam_fadein( 1, 0, 0, 0, 1, 0 );
+	wait( 2 );
+	globalCoop_dialog_play($munro_bar,"m9l1/munro_howmuch.mp3", 1, 10000, 0); //How much to get into the VIP room?
+	wait( .25 );
+
+	//--- start the second shot
+	globalCoop_cin_cuecamera( $cam1 );
+
+	wait( .25 );
+
+	$klingon_barkeep.headwatch( $munro_bar );
+	globalCoop_dialog_play($klingon_barkeep,"m9l1/bar_prove.mp3", 1, 500, 0); //Ha! You have to prove your worth! You have to beat Korloff.
+
+	wait( .25 );
+
+	//--- start the second shot
+	globalCoop_cin_cuecamera( $cam2 );
+
+	$klingon_barkeep.headwatch( $barBatleth );
+	$klingon_barkeep.walkto ( "$barkeepNode1" );
+	waitfor ( $klingon_barkeep );
+
+	$barBatleth.hide();
+	$klingon_barkeep.giveactorweapon ( "actorweapons/klingon-batleth.tik" );
+	$klingon_barkeep.useactorweapon ( "Batleth" , "left" );
+
+	$klingon_barkeep.headwatch( $munro_bar );
+	$klingon_barkeep.walkto( "$barkeepNode2" );
+	waitfor ( $klingon_barkeep );
+
+	$klingon_barkeep.removeactorweapon ( "Batleth" );
+
+	$barBatleth1.show ();
+
+	wait( .5 );
+	if(!cvar_bool_multiplayer){
+		$barBatleth1.remove();
+	}
+	$munro_bar.giveactorweapon ( "actorweapons/klingon-batleth.tik" );
+	$munro_bar.useactorweapon ( "Batleth" , "left" );
+	$munro_bar.headwatch( $bonesaw );
+	$munro_bar.walkto( "$cage_node1" );
+	
+	$gonzales.turntoangle( 350 );
+
+	wait( .5 );
+
+	//--- start the third shot
+	globalCoop_cin_cuecamera( $cam3 );
+
+	$bonesaw.walkto ( "$doorman_position2" );
+	$gonzales.walkto( "$gonzocagenode");
+
+	wait( 1 );
+
+	$krindo.walkto( "$krindocagenode");
+
+	wait( 3 );
+
+	//--- start the fourth shot
+	globalCoop_cin_follow($cam1, $m9l1a_cage2 );
+	wait( .25 );
+	globalCoop_cin_cuecamera( $cam1 );
+
+    forcemusic ("surprise");
+	// lower the cage
+	if(!cvar_bool_multiplayer){//Singleplayer
+		cageLowered = 1;
+		$cage.playsound( "sound/ships/klingon/kling_cagehit.wav", 5, 1, 800 );
+		globalAccelMove( $cage, '0 0 -320', 1, "rampup", "sound/ships/klingon/kling_cagelower.wav" );
+		waitfor( $cage );
+		//$cage.playsound( "sound/doors/drull_bigdoor_stop_01.wav", 5, 1, 800 );
+	}
+	globalCoop_dialog_play($bonesaw,"m9l1/naus_trifle.mp3", 1, 800, 0); //You dare trifle with me, Federation?  Die!
+	wait( .25 );
+
+	thread cinematic_CageMatch_Skipthread();
+}
+
+//---------------------
+// Bar Fight Cinematic
+// Bar Fight Cinematic Skipthread
+//---------------------
+void cinematic_CageMatch_Skipthread()
+{
+	killthread( "cinematic_CageMatch" );
+	//fade to black
+	globalCoop_main_camFadeOut(1);
+	wait( 1.25 );
+
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematic_CageMatch" );
+
+	// warp all the fools into position
+	$krindo.origin( '-152 -456 16' );
+	$gonzales.origin( '-152 -328 16' );
+
+	$bonesaw.warpto( "$doorman_position2" );
+	$humanMale1.warpto( "$spectateNode1" );
+	$humanFemale1.warpto( "$spectateNode2" );
+	$humanFemale2.warpto( "$spectateNode3" );
+	$andorianMale1.warpto( "$spectateNode4" );
+	$andorianMale3.warpto( "$spectateNode5" );
+
+	$munro_bar.hide();
+	$munro_bar.notsolid();
+	$munro_bar.resethead();
+	$klingon_barkeep.resethead();
+	
+	if(cvar_bool_multiplayer){//Multiplayer
+		$krindo.pushable(0);
+		$gonzales.pushable(0);
+		$barBatleth1.show();
+		$barBatleth1.time(.5);
+		$barBatleth1.rotateZup(90);
+		$barBatleth1.moveup(7);
+		wait(1);
+		$barBatleth1.rotateY(100);
+		thread globalCoop_level_onUse($barBatleth1,"coop_takeBatleth");
+		
+		$krindo.headwatch( $bonesaw );
+		$gonzales.headwatch( $bonesaw );
+		$humanMale1.headwatch( $bonesaw );
+		$humanFemale1.headwatch( $bonesaw );
+		$humanFemale2.headwatch( $bonesaw );
+		$andorianMale1.headwatch( $bonesaw );
+		$andorianMale3.headwatch( $bonesaw );
+	}else{
+		$krindo.headwatch( $player );
+		$gonzales.headwatch( $player );
+		$humanMale1.headwatch( $player );
+		$humanFemale1.headwatch( $player );
+		$humanFemale2.headwatch( $player );
+		$andorianMale1.headwatch( $player );
+		$andorianMale3.headwatch( $player );
+	}
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		// lower the cage if its not already lowered
+		if( cageLowered == 0 )
+		{
+			$cage.time( .1 );
+			$cage.moveDown( 320 );
+			waitfor( $cage );
+		}
+	}
+
+	$munro_bar.stopdialog();
+	$gonzales.stopdialog();
+	$bonesaw.stopdialog();
+	$klingon_barkeep.stopdialog();
+
+	thread cinematic_CageMatch_End();
+}
+
+//---------------------
+// Bar Fight Cinematic
+// Bar Fight Cinematic End
+//---------------------
+void cinematic_CageMatch_End()
+{
+	if(!cvar_bool_multiplayer){//Multiplayer
+		$munro_bar.remove();
+		$player.origin( '0 -448 0' );
+		$player.playerviewangles( '-5 -1439 0' );
+		$player.solid();
+	}
+
+	$humanMale1.anim( "idle_cheer" );
+	$humanFemale1.anim( "idle_cheer" );
+	$humanFemale2.anim( "idle_cheer" );
+	$andorianMale1.anim( "idle_cheer" );
+	$krindo.anim( "idle_cheer" );
+	$gonzales.anim( "idle_cheer" );
+
+	$bonesaw.addcustomthread ( "meleehit" , "npcCheer" );
+	//$bonesaw.killthread ( "endBarFightSequence");
+
+	if(!cvar_bool_multiplayer){//singleplayer
+		$player.giveweapon ( "models/weapons/worldmodel-Batleth.tik" );
+		$player.disableuseweapon( 0 );
+		wait( .35 );
+		$player.use ( "Batleth" );
+		wait( .35 );
+		$player.disableuseweapon( 1 );
+	}
+
+	wait( 1 );
+
+	$krindo.angle( 0 );
+	$gonzales.angle( 0 );
+
+	globalCoop_cin_end();
+
+        //--- music cue
+	music( "action");
+
+	wait( .25 );
+
+	//fade in
+	globalCoop_main_camFadeIn(1);
+
+	thread globalCoop_dialog_play($gonzales,"m9l1/gonz_gethim.mp3", 1, 1000, 0); //Get him, Munro!
+	$bonesaw.actortype ( "enemy" );
+	wait( .25 );
+	if(!cvar_bool_multiplayer){//singleplayer
+		$bonesaw.health( 300 );
+		$bonesaw.ai_on ();
+		$bonesaw.attackplayer();
+	}
+}
+
+//---------------------
+// NPC Cheers
+// Bar patrons cheer when nausican hits player with batleth
+//---------------------
+void npcCheer()
+{
+	$humanMale1.playsound( "sound/ships/klingon/kling_cheer.wav", 5, 1, 800 );
+	$andorianMale1.playsound( "sound/ships/klingon/kling_cheer2.wav", 6, 1, 800 );
+	$andorianMale3.playsound( "sound/ships/klingon/kling_cheer3.wav", 7, 1, 800 );
+	
+	$humanMale1.anim( "cheer" );
+	$humanFemale1.anim( "boo" );
+	$humanFemale2.anim( "cheer" );
+	$andorianMale1.anim( "boo" );
+	$andorianMale3.anim( "boo" );
+	$krindo.anim( "boo" );
+	$gonzales.anim( "boo" );
+	wait( 1 );
+	$humanMale1.anim( "idle_cheer" );
+	$humanFemale1.anim( "idle_cheer" );
+	$humanFemale2.anim( "idle_cheer" );
+	$andorianMale1.anim( "idle_cheer" );
+	$andorianMale3.anim( "idle_cheer" );
+	$krindo.anim( "idle_cheer" );
+	$gonzales.anim( "idle_cheer" );
+}
+
+//---------------------
+// NPC Boos
+// Bar patrons boo when player hits nausican with batleth
+//---------------------
+void npcBoo()
+{
+	$humanMale1.playsound( "sound/ships/klingon/kling_boo1.wav", 8, 1, 800 );
+	$andorianMale1.playsound( "sound/ships/klingon/kling_boo2.wav", 9, 1, 800 );
+	$andorianMale3.playsound( "sound/ships/klingon/kling_boo3.wav", 10, 1, 800 );
+
+	$humanMale1.anim( "boo" );
+	$humanFemale1.anim( "cheer" );
+	$humanFemale2.anim( "boo" );
+	$andorianMale1.anim( "cheer" );
+	$andorianMale3.anim( "cheer" );
+	$krindo.anim( "cheer" );
+	$gonzales.anim( "cheer" );
+
+	wait( 1 );
+
+	$humanMale1.anim( "idle_cheer" );
+	$humanFemale1.anim( "idle_cheer" );
+	$humanFemale2.anim( "idle_cheer" );
+	$andorianMale1.anim( "idle_cheer" );
+	$andorianMale3.anim( "idle_cheer" );
+	$krindo.anim( "idle_cheer" );
+	$gonzales.anim( "idle_cheer" );
+}
+
+//---------------------
+// endBarFightSequence
+// after defeating the nausican (BONESAW), screen fades and bar is returned to normal
+//---------------------
+void endBarFightSequence()
+{
+	//fade out
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.3);
+	wait( .3 );
+	level_ai(0);//fix ai going hostile bug
+	$bonesaw.ai_off();
+	$bonesaw.anim( "idle" );
+	$bonesaw.warp( '140 -480 0' );
+	$bonesaw.angle( 180 );
+	$cam7.origin( '-56.07 -453.37 81.52' );
+	wait( .25 );
+	globalCoop_cin_watch($cam1,$bonesaw);
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( .5 );
+	$bonesaw.anim( "death" );
+
+	//fade in
+	globalCoop_main_camFadeIn(.5);
+	wait( .5 );
+
+	forcemusic( "success","aux3");
+
+        //--- sound cue
+	$humanMale1.playsound( "sound/ships/klingon/kling_boo1.wav", 8, 1, 800 );
+	wait( .1 );
+	$andorianMale1.playsound( "sound/ships/klingon/kling_boo2.wav", 9, 1, 800 );
+	wait( .25 );
+	$andorianMale3.playsound( "sound/ships/klingon/kling_boo3.wav", 10, 1, 800 );
+	wait( .25 );
+	$humanMale1.playsound( "sound/ships/klingon/kling_boo1.wav", 8, 1, 800 );
+
+	wait( 1 );
+
+	allowmusicducking ( 1 );
+	music( "suspense");
+
+	wait( 4 );
+
+	//fade out
+	globalCoop_main_camFadeOut(1);
+	wait( 1 );
+
+	$bonesaw.anim( "idle" );
+	$bonesaw.pushable( 0 );
+	$bonesaw.warp( '400 -240 0' );
+	$bonesaw.angle( 270 );
+
+	if(!cvar_bool_multiplayer){
+		$player.deactivateweapon ( "dual" );	//hide batleth viewmodel from player
+		$player.take( "batleth" );
+		wait( .25 );
+		$player.disableuseweapon( 1 );
+	}else{
+//end fight sequence control-thread
+		$barBatleth1.remove();
+		killthread("coop_checkBatlethPlayer");
+		if(globalCoop_check_existingLivingEntity(ePlayerBatleth)){
+			ePlayerBatleth.health(100);
+		}
+//Take Bat'leth from player
+		globalCoop_player_takeAll("models/weapons/worldmodel-Batleth.tik");
+	}
+	$krindo.resethead();
+	$gonzales.resethead();
+	$humanMale1.resethead();
+	$humanFemale1.resethead();
+	$humanFemale2.resethead();
+	$andorianMale1.resethead();
+	$andorianMale3.resethead();
+
+	// hack this to make sure gonzo doesnt yell when his AI gets turned back on
+	$gonzales.forgetenemies();
+	$bonesaw.actortype( "friend" );
+	wait ( .05 );
+	$bonesaw.forgetenemies();
+
+	$humanMale1.warpto( "$krindoNode1" );
+	$humanMale1.angle( 135 );
+
+	$humanFemale2.warpto( "$bar_origin3" );
+	$humanFemale2.angle( 190 );
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$cage.time( .05 );
+		$cage.moveUp( 320 );
+		waitfor( $cage );
+		$cageWallTriggers.remove();
+	}
+	wait( .25 );
+	$barBatleth.show();
+
+	globalCoop_cin_end();
+	thread bartender_lookbusy();
+	wait( 1 );
+	//fade in
+	cam_fadein( 1, 0, 0, 0, 1, 0 );
+
+	// turn on everyones AI again
+	$gonzales.ai_on();
+	$krindo.ai_on();
+	$humanMale1.ai_on();
+	$humanFemale1.ai_on();
+	$humanFemale2.ai_on();
+	$andorianMale1.ai_on();
+	$andorianMale3.ai_on();
+	
+	level_ai(1);//fix ai going hostile bug
+
+	wait( 1 );
+
+	globalCoop_dialog_play($klingon_barkeep,"m9l1/bar_nice.mp3", 1, 500, 1); //Nice job. Here's the code to the VIP room. Come back when you want a job as bouncer.
+
+	$world.light_lightstyle( "doorLight_red1" , "baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" , 0 ); //turn on green light entity above door to VIP lounge (red off)
+	$world.light_lightstyle( "doorLight_green1" , "yzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz" , 0 );
+	barDoorLocked = 0;
+
+	$innerBarDoor.unlock();	//unlock door to VIP room
+	$innerBarDoor.noise( "sound/ships/klingon/kling_beepyes.wav" );
+	$barDoorLight_red.hide(); //hide red light script object above door
+	$barDoorLight_green.show(); //show green light script object above door
+	
+	if( doesEntityExist ( $barStarWarsConversation_Trigger ) )
+	{
+		$barStarWarsConversation_Trigger.triggerable();
+	}
+}
+
+void bartender_lookbusy()
+{
+	$klingon_barkeep.attachmodel( "models/enviro/klingon_bottle1.tik" , "tag_Rhand" , 1 , "" , 0 , 0 , 1.0 );
+
+	while(doesEntityExist($klingon_barkeep))
+	{
+		$klingon_barkeep.anim( "bar_idle" );
+		waitforanimation( $klingon_barkeep , "bar_idle" );
+
+		$klingon_barkeep.anim( "bar_shake" );
+		waitforanimation( $klingon_barkeep , "bar_shake" );
+
+		$klingon_barkeep.anim( "bar_idle" );
+		waitforanimation( $klingon_barkeep , "bar_idle" );
+
+		$klingon_barkeep.anim( "bar_spin" );
+		waitforanimation( $klingon_barkeep , "bar_spin" );
+	}
+}
+
+//-----------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------
+// OMAG CHASE SEQUENCES
+//-----------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------
+
+//---------------------
+// omagFollowPath01
+// omags follows first path out of bar
+//---------------------
+void omagFollowPath01()
+{
+//SPAWN CLASSES
+	if(cvar_bool_multiplayer){//Multiplayer
+		thread globalCoop_class_setup("Medic",'1354 169 10');
+		thread globalCoop_class_setup("HeavyWeapons",'1454 169 10');
+		thread globalCoop_class_setup("Technician",'1554 169 10');
+	}
+	wait ( .5 );
+	$omag.blindlyfollowpath ( "run", 0 , "omagPath01" );
+	waitfor ( $omag );
+	// warp omag to second area in hallway
+	$omag.warpTo ( "$omagWarptoPosition02" );
+}
+
+//---------------------
+// omagFollowPath02
+// omags follows second path through hallway
+//---------------------
+void omagFollowPath02()
+{
+	$omag.blindlyfollowpath ( "run", 0 , "omagPath02" );
+	waitfor ( $omag );
+	// warp omag to upper-walkway in small warehouse
+	$omag.warpTo ( "$omagWarptoPosition03" );
+}
+
+//---------------------
+// omagFollowPath03
+// omags follows path along upper walkway
+//---------------------
+void omagFollowPath03()
+{
+	thread klingonTaunts();
+
+	$omag.blindlyfollowpath ( "run", 0 , "omagPath03" );
+	waitfor ( $omag );
+	// warp omag to upper-walkway in small warehouse
+	//$omag.warpTo ( "$omagWarptoPosition03" );
+	$omag.remove();
+}
+
+//---------------------
+// Barrels
+// Omag knocks over some barrels in a hallway
+//---------------------
+void barrelPuzzle()
+{
+	$barrel1.playsound( "sound/environment/metal/bigcreak_impact.wav", 4, 1, 550 );
+	$barrel1.time( 2 );
+	$barrel1.rotateZup( 90 );
+	$barrel2.rotateXup( 5 );
+
+	wait( .25 );
+
+	$barrel1.time( 3 );
+	$barrel2.rotateZup( 90 );
+	$barrel2.rotateXup( 25 );
+
+	wait( 1 );
+
+	$panelExplode1.playsound( "sound/impact/explosion/explo_shuttleint.wav", 6, 2, 550 );
+	trigger( "$panelExplode1" );
+}
+
+//-----------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------
+// IN-GAME DIALOG SEQUENCES
+//-----------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------
+
+//---------------------
+// Team Dialog In Hallway
+//---------------------
+void teamDialog1()
+{
+	if(!cvar_bool_multiplayer){//single-player
+		wait( 4 );
+		globalCoop_dialog_play($gonzales,"m9l1/gonz_betterday.mp3", 1, 500, 1); //This old Starbase has seen better days.
+	}
+}
+
+//---------------------
+// Team Dialog In Bar
+// Krindo voices that he doesnt see omag in the bar
+//---------------------
+void dialogInBar1()
+{
+	//$player.setobjectivecomplete ( "TakeKrindo" , 1 );
+	thread globalCoop_objectives_update("complete",1,1);
+	globalCoop_dialog_play($krindo,"m9l1/krindo_dontsee.mp3", 1, 500, 1); //I don't see him.
+}
+
+//---------------------
+// Klingon Taunts
+// Klingons taunt Munro and he makes some lame ass remark
+//---------------------
+void klingonTaunts()
+{
+	globalCoop_dialog_play($omag,"m9l1/omag_stopthem.mp3", 1, 500, 0); //Federation scum right behind me! They’re here to arrest everyone! Stop them, and I’ll pay you well!
+}
+
+
+//---------------------
+// Bar Conversation Dialog
+// Start up some conversation in the cantina
+//---------------------
+void barStarWarsConversation()
+{
+	if( hallwayConversation1Complete != 1 )
+	{
+		killthread( "hallwayConversation1" );
+		hallwayConversation1Complete = 1;
+
+		$hallwayConversation1_male1.stopdialog();
+		$hallwayConversation1_klingon1.stopdialog();
+
+		$hallwayConversation1_male1.dialog( "hallway1_male2Dialog" );
+		$hallwayConversation1_klingon1.dialog( "hallway1_klingon1Dialog" );
+	}
+
+	if( hallwayConversation2Complete != 1 )
+	{
+		killthread( "hallwayConversation2" );
+		hallwayConversation2Complete = 1;
+
+		$hallwayConversation2_male1.stopdialog();
+		$hallwayConversation2_female1.stopdialog();
+
+		$hallwayConversation2_female1.dialog( "hallway2_female1Dialog" );
+		$hallwayConversation2_male1.dialog( "hallway2_male1Dialog" );
+	}
+
+	$HanSolo.headwatch( $ObiWanKenobi );
+	$ObiWanKenobi.headwatch( $HanSolo );
+	$LukeSkywalker.headwatch( $HanSolo );
+
+	globalCoop_dialog_play($HanSolo,"m9l1/merc9_zane.mp3", 1, 250, 0 ); // I'm the commander of the transport vessel Kytan.  My friend here tells me you're looking for transportation?
+	globalCoop_dialog_play($ObiWanKenobi,"m9l1/merc10_indeed.mp3", 1, 250, 0 ); // Yes, indeed, if it's a big vessel.
+	globalCoop_dialog_play($HanSolo,"m9l1/merc9_neverheard.mp3", 1, 250, 0 ); //  Big vessel? The Kytan is a Wudan-class transport vessel.
+	globalCoop_dialog_play($ObiWanKenobi,"m9l1/merc10_should.mp3", 1, 250, 0 ); // Should I know what that means?
+	globalCoop_dialog_play($HanSolo,"m9l1/merc9_shipmade.mp3", 1, 250, 0 ); // Let's just say it's big
+	wait( .25 );
+	globalCoop_dialog_play($HanSolo,"m9l1/merc9_outh.mp3", 1, 250, 0 ); // ... I've outhauled Romulan starships, not just the D-cruisers, either.  I can carry more cargo then even the big D'deridex-class ships.  What's the cargo?
+	globalCoop_dialog_play($ObiWanKenobi,"m9l1/merc10_only.mp3", 1, 250, 0 ); // Only myself, ten transport containers of domesticated Targ, and no questions asked.
+	globalCoop_dialog_play($HanSolo,"m9l1/merc9_trouble.mp3", 1, 250, 0 ); // What's your destination?
+	globalCoop_dialog_play($ObiWanKenobi,"m9l1/merc10_noq.mp3", 1, 250, 0 ); // Didn't I just say no questions asked?  I'll provide you with the coordinates after we depart the station.
+	globalCoop_dialog_play($HanSolo,"m9l1/merc9_tricky.mp3", 1, 250, 0 ); // Three thousand Latinum in advance, or no deal
+
+	$HanSolo.headwatch( $LukeSkywalker );
+
+	globalCoop_dialog_play($LukeSkywalker,"m9l1/merc11_bird.mp3", 1, 250, 0 ); // Three thousand?  We could almost buy a Klingon Bird of Prey for that!
+	globalCoop_dialog_play($HanSolo,"m9l1/merc9_warpcore.mp3", 1, 250, 0 ); // That's obvious, but I think where you're going you'll need an experienced pilot.
+
+	$ObiWanKenobi.headwatch( $LukeSkywalker );
+	
+	globalCoop_dialog_play($LukeSkywalker,"m9l1/merc11_youbet.mp3", 1, 250, 0 ); // I'm sure for that money  we could buy a pilot too.
+
+	$ObiWanKenobi.headwatch( $HanSolo );
+	$HanSolo.headwatch( $ObiWanKenobi );
+
+	globalCoop_dialog_play($ObiWanKenobi,"m9l1/merc10_muchon.mp3", 1, 250, 0 ); // How about we give you two thousand now, and another two thousand when we reach our destination.
+	globalCoop_dialog_play($HanSolo,"m9l1/merc9_sevent.mp3", 1, 250, 0 ); // Four thousand total?  Hmm...I could do that.  My ship is at your disposal, friend.
+	globalCoop_dialog_play($ObiWanKenobi,"m9l1/merc10_twent.mp3", 1, 250, 0 ); // We will have our cargo ready for transport in one hour.
+
+	$LukeSkywalker.headwatch( $ObiWanKenobi );
+	$ObiWanKenobi.headwatch( $LukeSkywalker );
+
+	globalCoop_dialog_play($LukeSkywalker,"m9l1/merc11_calc.mp3", 1, 250, 0 ); // Let's see if we can get a drink before we leave.  It might be hard to get Romulan Ale where we are going.
+	globalCoop_dialog_play($ObiWanKenobi,"m9l1/merc10_findanoth.mp3", 1, 250, 0 ); // Make mine a double.
+
+
+	$ObiWanKenobi.headwatch( $HanSolo );
+	$LukeSkywalker.headwatch( $HanSolo );
+
+	barStarWarsConversationComplete = 1;
+
+	$HanSolo.dialog( "HanSoloDialog" );
+	$LukeSkywalker.dialog( "LukeSkywalkerDialog" );
+	$ObiWanKenobi.dialog( "ObiWanKenobiDialog" );
+}
+
+//---------------------
+// Bar Conversation Dialog
+// Start up some conversation in the cantina
+//---------------------
+void barRomulanAleConversation()
+{
+	$humanMale1.headwatch( $andorianMale3 );
+	$andorianMale3.headwatch( $humanMale1 );
+
+	if(!cvar_bool_multiplayer){//singleplayer
+		globalCoop_dialog_play($andorianMale3,"m9l1/merc1_aged.mp3", 1, 250, 0 ); // You know, this aged Romulan ale is just the standard Romulan ale they don't sell right away. Every couple of years they pump a bunch of it out of storage, they change the label on the bottle, and they sell it for twice the price.
+		globalCoop_dialog_play($humanMale1,"m9l1/merc2_reallyter.mp3", 1, 250, 0 ); // Really?  That's terrible!
+		globalCoop_dialog_play($andorianMale3,"m9l1/merc1_truemore.mp3", 1, 250, 0 ); // It's true.  And what's more, it's not all a century old.  Some of it's from 150 year old batches and others from 50 year old batches.  They just mix it all together and kind of average it out.
+		globalCoop_dialog_play($humanMale1,"m9l1/merc2_ripoff.mp3", 1, 250, 0 ); // What a rip-off!
+		wait( 3 );
+		$humanMale1.headwatch( $klingon_barkeep );
+		globalCoop_dialog_play($humanMale1,"m9l1/merc2_round.mp3", 1, 250, 0 ); // We need another round of Romulan Century.
+		barRomulanAleConversationComplete = 1;
+		$humanMale1.dialog( "male1Dialog" );
+		$andorianMale3.dialog( "andorian3Dialog" );		
+	}
+}
+
+//---------------------
+// Bar Conversation Dialog
+// Start up some conversation in the cantina
+//---------------------
+void barMusicianConversation()
+{
+	if(cvar_bool_multiplayer){//do not play in multiplayer!
+		$omag.origin('824 860 14');//'763 822 18'
+		$omag.anim("sit_elbows");
+		$omag.notsolid();
+		wait(.05);
+		$omag.stopanimating();
+		$omag.angles('0 281 0');
+		return;
+	}
+	$humanMale3.headwatch( $klingonFemale1 );
+	$klingonFemale1.headwatch( $humanMale3 );
+
+	globalCoop_dialog_play($klingonFemale1,"m9l1/merc3_tellingyou.mp3", 1, 250, 0 ); // I'm telling you, that guy is Ardrek L'Xor
+	globalCoop_dialog_play($humanMale3,"m9l1/merc4_nowwhy.mp3", 1, 250, 0 ); // Now why would a famous Risan musician be here?
+	globalCoop_dialog_play($klingonFemale1,"m9l1/merc3_search.mp3", 1, 250, 0 ); // I don't know... maybe he's searching for his next bold new look.
+	globalCoop_dialog_play($humanMale3,"m9l1/merc4_onbase.mp3", 1, 250, 0 ); // Here?  On a Klingon starbase?  Right, I'll bet he's planning to launch a new fashion trend… Mercenary-chic.
+	globalCoop_dialog_play($klingonFemale1,"m9l1/merc3_fine.mp3", 1, 250, 0 ); // Fine.  I'll bet you 50 latinum that that guy over there is Ardrek L'Xor.
+	globalCoop_dialog_play($humanMale3,"m9l1/merc4_yourname.mp3", 1, 250, 0 ); // 50 latinum!  You don't have 50 latinum to your name.  If you did, you'd be in the gaming hall right now.
+	globalCoop_dialog_play($klingonFemale1,"m9l1/merc3_ship.mp3", 1, 250, 0 ); // Look, I've got a shipment of Tholian figurines coming in tomorrow.  That's worth at least 50 latinum.
+	globalCoop_dialog_play($humanMale3,"m9l1/merc4_figur.mp3", 1, 250, 0 ); // Figurines!?  What am I going to do with 50 latinum worth of Tholian Figurines?
+	globalCoop_dialog_play($klingonFemale1,"m9l1/merc3_selland.mp3", 1, 250, 0 ); // I'm going to sell them to the Andorians.  Then I'll have well more than 50 latinum.
+	globalCoop_dialog_play($humanMale3,"m9l1/merc4_buyfig.mp3", 1, 250, 0 ); // Why would an Andorian mercenary want to buy Tholian Figurines?
+	globalCoop_dialog_play($klingonFemale1,"m9l1/merc3_wives.mp3", 1, 250, 0 ); // They don't get them for themselves.  They get them as gifts for their wives.  They like to display them in cases in their family communal area.
+	globalCoop_dialog_play($humanMale3,"m9l1/merc4_once.mp3", 1, 250, 0 ); // I think I've been inside one of those dwellings.  It was truly repulsive.
+	globalCoop_dialog_play($klingonFemale1,"m9l1/merc3_addict.mp3", 1, 250, 0 ); // Their women are almost addicted to these things.  No matter how many they possess, every time a new type comes out they immediately desire to obtain it to add to their menagerie.
+	globalCoop_dialog_play($humanMale3,"m9l1/merc4_notpay.mp3", 1, 250, 0 ); // Fine, I'll wager you 50 latinum that this is not Ardrek L'Xor.  And you'd better not try to pay it off with those hideous figurines.
+	globalCoop_dialog_play($klingonFemale1,"m9l1/merc3_deal.mp3", 1, 250, 0 ); // Deal.  Now let's go ask him
+	globalCoop_dialog_play($humanMale3,"m9l1/merc4_wherehe.mp3", 1, 250, 0 ); // Ok, where is he?
+	globalCoop_dialog_play($klingonFemale1,"m9l1/merc3_wherego.mp3", 1, 250, 0 ); // Over there... Where'd he go?
+	globalCoop_dialog_play($humanMale3,"m9l1/merc4_left.mp3", 1, 250, 0 ); // I think he left.
+	globalCoop_dialog_play($klingonFemale1,"m9l1/merc3_buysome.mp3", 1, 250, 0 ); // That's too bad.  I was going to see if he wanted to buy some Tholian figurines.
+
+	barMusicianConversationComplete = 1;
+
+	$humanMale3.dialog( "humanMale3Dialog" );
+	$klingonFemale1.dialog( "klingonFemale1Dialog" );
+}
+
+//---------------------
+// Shuttlebay Conversation 1 Dialog
+// Start up some conversation in the shuttlebay
+//---------------------
+void shuttlebayConversation1()
+{
+	$shuttlebayConversation1_andorian1.headwatch( $shuttlebayConversation1_andorian2 );
+	$shuttlebayConversation1_andorian2.headwatch( $shuttlebayConversation1_andorian1 );
+
+	globalCoop_dialog_play($shuttlebayConversation1_andorian1,"m9l1/merc1_sofindingw.mp3", 1, 250, 0 ); // So I'm having trouble finding work, and this old trader I know says he's got a job. Toys for the colony on Regula Five.
+	globalCoop_dialog_play($shuttlebayConversation1_andorian2,"m9l1/merc2_degrad.mp3", 1, 250, 0 ); // How degrading.
+	globalCoop_dialog_play($shuttlebayConversation1_andorian1,"m9l1/merc1_getbetter.mp3", 1, 250, 0 ); // Wait, it gets better.  So he says they're in boxes, but under no circumstances should I inspect them.
+	globalCoop_dialog_play($shuttlebayConversation1_andorian2,"m9l1/merc2_strange.mp3", 1, 250, 0 ); // That's strange.
+	globalCoop_dialog_play($shuttlebayConversation1_andorian1,"m9l1/merc1_openup.mp3", 1, 250, 0 ); // Yes, so of course I open them up, and what do I find?  Tribbles.
+	globalCoop_dialog_play($shuttlebayConversation1_andorian2,"m9l1/merc2_tribkid.mp3", 1, 250, 0 ); // Tribbles, you're kidding.
+	globalCoop_dialog_play($shuttlebayConversation1_andorian1,"m9l1/merc1_sothink.mp3", 1, 250, 0 ); // So I'm thinking, I can't deliver these, but I need the latinum, you know?
+	globalCoop_dialog_play($shuttlebayConversation1_andorian2,"m9l1/merc2_whatdo.mp3", 1, 250, 0 ); // So what'd you do?
+	globalCoop_dialog_play($shuttlebayConversation1_andorian1,"m9l1/merc1_tribstew.mp3", 1, 250, 0 ); // Tribble stew.
+	globalCoop_dialog_play($shuttlebayConversation1_andorian2,"m9l1/merc2_no.mp3", 1, 250, 0 ); // No!
+	globalCoop_dialog_play($shuttlebayConversation1_andorian1,"m9l1/merc1_yepchick.mp3", 1, 250, 0 ); // Yes. Tastes almost like chicken.  I sold the muck to refugees on Ferrius Prime.
+	globalCoop_dialog_play($shuttlebayConversation1_andorian2,"m9l1/merc2_gotta.mp3", 1, 250, 0 ); // I gotta remember that one.
+	globalCoop_dialog_play($shuttlebayConversation1_andorian1,"m9l1/merc1_ton.mp3", 1, 250, 0 ); // Only problem is, I got about 10 metric tons of Tribble hair to get rid of.
+	globalCoop_dialog_play($shuttlebayConversation1_andorian2,"m9l1/merc2_coats.mp3", 1, 250, 0 ); // Hmm... Tribble-hair coats?
+	globalCoop_dialog_play($shuttlebayConversation1_andorian1,"m9l1/merc1_hats.mp3", 1, 250, 0 ); // Maybe, right now I'm leaning toward Tribble-felt hats.  There's a market for those to some of the Romulan merchants that operate near the neutral zone.
+	globalCoop_dialog_play($shuttlebayConversation1_andorian2,"m9l1/merc2_anti.mp3", 1, 250, 0 ); // Then again, transfer of Tribbles in any form is forbidden in Klingon space.
+	globalCoop_dialog_play($shuttlebayConversation1_andorian1,"m9l1/merc1_goodp.mp3", 1, 250, 0 ); // Good point.
+	shuttlebayConversation1Complete = 1;
+
+	$shuttlebayConversation1_andorian1.dialog( "shuttlebay1_andorian1Dialog" );
+	$shuttlebayConversation1_andorian2.dialog( "shuttlebay1_andorian2Dialog" );
+}
+
+//---------------------
+// Shuttlebay Conversation 2 Dialog
+// Start up some conversation in the shuttlebay
+//---------------------
+void shuttlebayConversation2()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$shuttlebayConversation2_male1.headwatch( $shuttlebayConversation2_male2 );
+		$shuttlebayConversation2_male2.headwatch( $shuttlebayConversation2_male1 );
+
+		globalCoop_dialog_play($shuttlebayConversation2_male1,"m9l1/merc3_lizard.mp3", 1, 250, 0 ); // Yesterday, this big lizard man comes into my store.  I say, What can I do for ya?  And all he does is hiss.
+		globalCoop_dialog_play($shuttlebayConversation2_male2,"m9l1/merc4_hiss.mp3", 1, 250, 0 ); // Hiss?
+		globalCoop_dialog_play($shuttlebayConversation2_male1,"m9l1/merc3_artic.mp3", 1, 250, 0 ); // Well, sort of an articulated hissing, like hsshsshhhhsss.
+		globalCoop_dialog_play($shuttlebayConversation2_male2,"m9l1/merc4_weird.mp3", 1, 250, 0 ); // Weird.
+		globalCoop_dialog_play($shuttlebayConversation2_male1,"m9l1/merc3_gorn.mp3", 1, 250, 0 ); // Then he hands me a card, and all it says is "Gorn."
+		globalCoop_dialog_play($shuttlebayConversation2_male2,"m9l1/merc4_famil.mp3", 1, 250, 0 ); // Gorn... that sounds familiar.
+		globalCoop_dialog_play($shuttlebayConversation2_male1,"m9l1/merc3_disrupt.mp3", 1, 250, 0 ); // Anyway, he keeps pointing to the disruptors like he wants one.
+		globalCoop_dialog_play($shuttlebayConversation2_male2,"m9l1/merc4_freak.mp3", 1, 250, 0 ); // I wouldn't give a freak like that any kind of weapon.
+		globalCoop_dialog_play($shuttlebayConversation2_male1,"m9l1/merc3_sulfur.mp3", 1, 250, 0 ); // No kidding. I told him to go somewhere else.  I won't deal with his kind.
+		globalCoop_dialog_play($shuttlebayConversation2_male2,"m9l1/merc4_brother.mp3", 1, 250, 0 ); // I hear you.
+		shuttlebayConversation2Complete = 1;
+
+		$shuttlebayConversation2_male1.dialog( "shuttlebay2_male1Dialog" );
+		$shuttlebayConversation2_male2.dialog( "shuttlebay2_male2Dialog" );
+	}
+}
+
+//---------------------
+// Hallway Conversation 1 Dialog
+// Start up some conversation in the hallway
+//---------------------
+void hallwayConversation1()
+{
+	if( shuttlebayConversation1Complete != 1 )
+	{
+		killthread( "shuttlebayConversation1" );
+		shuttlebayConversation1Complete = 1;
+
+		$shuttlebayConversation1_andorian1.stopdialog();
+		$shuttlebayConversation1_andorian2.stopdialog();
+
+		$shuttlebayConversation1_andorian1.dialog( "shuttlebay1_andorian1Dialog" );
+		$shuttlebayConversation1_andorian2.dialog( "shuttlebay1_andorian2Dialog" );
+	}
+
+	if( shuttlebayConversation2Complete != 1 )
+	{
+		killthread( "shuttlebayConversation2" );
+		shuttlebayConversation2Complete = 1;
+
+		$shuttlebayConversation2_male1.stopdialog();
+		$shuttlebayConversation2_male2.stopdialog();
+
+		$shuttlebayConversation2_male1.dialog( "shuttlebay2_male1Dialog" );
+		$shuttlebayConversation2_male2.dialog( "shuttlebay2_male2Dialog" );
+	}
+
+	$hallwayConversation1_male1.headwatch( $hallwayConversation1_klingon1 );
+	$hallwayConversation1_klingon1.headwatch( $hallwayConversation1_male1 );
+
+	globalCoop_dialog_play($hallwayConversation1_male1,"m9l1/merc5_hearfer.mp3", 1, 250, 0 ); // I hear that the Ferengi Omag is looking for new clients.  I wonder if he's in the VIP room?
+	globalCoop_dialog_play($hallwayConversation1_klingon1,"m9l1/merc6_without.mp3", 1, 250, 0 ); // The Ferengi are without honor, I will not trade with them.
+	globalCoop_dialog_play($hallwayConversation1_male1,"m9l1/merc5_yeah.mp3", 1, 250, 0 ); // Some of my best deals have been with Ferengi.
+	globalCoop_dialog_play($hallwayConversation1_klingon1,"m9l1/merc6_deal.mp3", 1, 250, 0 ); // Like the deal for the irradiated Plasma Regulators?
+	globalCoop_dialog_play($hallwayConversation1_male1,"m9l1/merc5_nottyp.mp3", 1, 250, 0 ); // How was he to know they came from a damaged Pakled frieghter?
+	globalCoop_dialog_play($hallwayConversation1_klingon1,"m9l1/merc6_orthe.mp3", 1, 250, 0 ); // Or the time Omag sold you the Ferenginar Bridge?
+	globalCoop_dialog_play($hallwayConversation1_male1,"m9l1/merc5_youright.mp3", 1, 250, 0 ); // I guess you're right, I never really thought about it that way.
+	globalCoop_dialog_play($hallwayConversation1_klingon1,"m9l1/merc6_ofcourse.mp3", 1, 250, 0 ); // Of course I am right.  You are an ignorant k'pekt.
+	
+	hallwayConversation1Complete = 1;
+
+	$hallwayConversation1_male1.dialog( "hallway1_male2Dialog" );
+	$hallwayConversation1_klingon1.dialog( "hallway1_klingon1Dialog" );
+}
+
+//---------------------
+// Hallway Conversation 2 Dialog
+// Start up some conversation in the hallway
+//---------------------
+void hallwayConversation2()
+{
+	if(!cvar_bool_multiplayer){
+		$hallwayConversation2_female1.headwatch( $hallwayConversation2_male1 );
+		$hallwayConversation2_male1.headwatch( $hallwayConversation2_female1 );
+
+		globalCoop_dialog_play($hallwayConversation2_female1,"m9l1/merc7_barband.mp3", 1, 250, 0 ); // I'm thinking about starting a band.
+		globalCoop_dialog_play($hallwayConversation2_male1,"m9l1/merc8_kidding.mp3", 1, 250, 0 ); // You're kidding, right?
+		globalCoop_dialog_play($hallwayConversation2_female1,"m9l1/merc7_noser.mp3", 1, 250, 0 ); // No, I'm serious.  Vorlock and I have been practicing together for a few weeks.
+		globalCoop_dialog_play($hallwayConversation2_male1,"m9l1/merc8_klingst.mp3", 1, 250, 0 ); // So what kind of music?
+		globalCoop_dialog_play($hallwayConversation2_female1,"m9l1/merc7_happ.mp3", 1, 250, 0 ); // To be successful in a place like this we are leaning towards a mix of Klingon opera and classical Human and Andorian styles.
+		globalCoop_dialog_play($hallwayConversation2_male1,"m9l1/merc8_in.mp3", 1, 250, 0 ); // That sounds terrible.  I'm in.
+		globalCoop_dialog_play($hallwayConversation2_female1,"m9l1/merc7_excellent.mp3", 1, 250, 0 ); // Excellent.  There's just one thing… we need a practice space.
+		globalCoop_dialog_play($hallwayConversation2_male1,"m9l1/merc8_preactice.mp3", 1, 250, 0 ); // A practice space... wait a minute, you're not thinking of my cargo bay.
+		globalCoop_dialog_play($hallwayConversation2_female1,"m9l1/merc7_acoust.mp3", 1, 250, 0 ); // The acoustics are great in there.
+		globalCoop_dialog_play($hallwayConversation2_male1,"m9l1/merc8_noway.mp3", 1, 250, 0 ); // No way.
+		globalCoop_dialog_play($hallwayConversation2_female1,"m9l1/merc7_groupies.mp3", 1, 250, 0 ); // Aw, come on, think of the latinum we will make.
+
+		hallwayConversation2Complete = 1;
+
+		$hallwayConversation2_female1.dialog( "hallway2_female1Dialog" );
+		$hallwayConversation2_male1.dialog( "hallway2_male1Dialog" );
+	}
+	else{
+		globalCoop_level_remove($hallwayConversation2_female1);
+		globalCoop_level_remove($hallwayConversation2_male1);
+	//allow now krindo to say "I don't see him"
+		$triggerDialogInBar.triggerable();
+	}
+}
+
+//-----------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------
+// BATTLE SEQUENCES
+//-----------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------
+
+//---------------------
+// Hallway Battle Sequence 01
+//---------------------
+void hallway_seq01()
+{
+	globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq01_knife1);
+	globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq01_knife2);
+	globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq01_batleth1);
+
+	$hallway_seq01_knife2.setactivationdelay( 2 ); 		//was 5
+	$hallway_seq01_knife1.setactivationdelay( 0 );	//was 1
+	$hallway_seq01_batleth1.setactivationdelay( .25 );
+}
+
+//---------------------
+// Hallway Battle Sequence 02
+//---------------------
+void hallway_seq02()
+{
+	globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq02_batleth1);
+	globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq02_knife1);
+	$hallway_seq02_batleth1.ai_on();
+	$hallway_seq02_knife1.ai_on();
+}
+
+//---------------------
+// Hallway Battle Sequence 03
+//---------------------
+void hallway_seq03()
+{
+	$hallway_seq03_knife1.setactivationdelay( 2 );
+	$hallway_seq03_batleth1.setactivationdelay( 3 );
+
+	wait( .25 );
+
+	globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq03_knife1);
+	globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq03_batleth1);
+	globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq03_rifle1);
+	globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq03_rifle2);
+	
+	$hallway_seq03_knife1.ai_on();
+	$hallway_seq03_batleth1.ai_on();
+	$hallway_seq03_rifle1.ai_on();
+	$hallway_seq03_rifle2.ai_on();
+}
+
+//---------------------
+// Hallway Battle Sequence 04
+//---------------------
+void hallway_seq04()
+{
+	globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq04_grenade1);
+	$hallway_seq04_grenade1.ai_on();
+}
+
+//---------------------
+// Hallway Battle Sequence 05
+//---------------------
+void hallway_seq05()
+{
+	globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq05_knife1);
+	globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq05_batleth1);
+	$hallway_seq05_knife1.setactivationdelay( .25 );
+	$hallway_seq05_batleth1.setactivationdelay( 4 );
+}
+
+//---------------------
+// Hallway Battle Sequence 05 - Catwalk Ambush Grenade Guy
+//---------------------
+void hallway_seq05_catwalk_ambush1()
+{
+	globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq05_grenade1);
+	$hallway_seq05_grenade1.walkto( "$grenade_guy_node1", "run" );
+	waitfor( $hallway_seq05_grenade1 );
+	$hallway_seq05_grenade1.ai_on();
+}
+
+//---------------------
+// Hallway Battle Sequence 05 - Catwalk Ambush Batleth Guy
+//---------------------
+void hallway_seq05_catwalk_ambush2()
+{
+	$hallway_seq05_batleth2.ai_on();
+}
+
+//---------------------
+// Hallway Battle Sequence 06
+//---------------------
+void hallway_seq06()
+{
+	$hallway_seq06_batleth1.walkto( "$batleth_guy_node1", "run" );
+	wait ( .75 );
+	$hallway_seq06_knife1.walkto( "$knife_guy_node1", "run" );
+
+	wait ( 1 );
+
+	$hallway_seq06_batleth1.ai_on();
+
+	wait( .5 );
+
+	$hallway_seq06_knife1.ai_on();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////COOP////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+void setUpTeam(entity e)
+{
+	if(doesEntityExist(e)){
+		globalCoop_teammate_register(e);
+		e.immortal( 1 );
+		e.allowfall( 1 );
+		if(!cvar_bool_multiplayer){//Singleplayer
+			e.followrange( 320 );		//---384 default
+			e.followrangemin( 192 );		//---256
+			e.followcombatrange( 384 );	//---512
+			e.followcombatrangemin( 192 );	//---256
+		}
+	}
+}
+
+void coop_vipAttackPlayer(entity e)
+{
+	if(cvar_bool_multiplayer){//Multi
+		if(doesEntityExist(e)){
+			if(e.getHealth() > 0 && e.getHealth() < 60){
+				e.health(60);
+			}
+			e.anim("idle");
+			thread globalCoop_actor_healthMultiplicatePerPlayer(e);
+			e.actortype("enemy");
+			e.immortal(0);
+			e.ai_on();
+		}
+	}
+}
+
+void coop_checkBatlethPlayer(entity ePlayer)
+{
+	while(doesEntityExist($barBatleth1)){
+		wait(2);
+		if(doesEntityExist(ePlayer)){
+			if(ePlayer.getActiveWeaponName() != "Batleth"){
+				thread coop_resetBatleth();
+				return;
+			}
+		}
+		else{
+			thread coop_resetBatleth();
+			return;
+		}
+	}
+}
+
+void coop_takeBatleth()
+{
+entity eB,ePlayer;
+	eB = getCurrentEntity();
+	if(!doesEntityExist(eB)){
+		thread coop_resetBatleth();
+		return;
+	}
+	ePlayer = eB.getLastActivatingEntity();
+	if(!doesEntityExist(ePlayer)){
+		thread coop_resetBatleth();
+		return;
+	}
+	ePlayerBatleth = ePlayer;
+	thread coop_checkBatlethPlayer(ePlayer);
+	ePlayer.giveweapon("models/weapons/worldmodel-Batleth.tik");
+	ePlayer.use("models/weapons/worldmodel-Batleth.tik");
+	$barBatleth1.hide();
+	$barBatleth1.notsolid();
+	float fBoneHeadHealth;
+	fBoneHeadHealth = 1700;
+	$bonesaw.maxbosshealth(fBoneHeadHealth);
+	$bonesaw.health(fBoneHeadHealth);
+	$bonesaw.ai_on();
+	$bonesaw.attack(ePlayer);
+}
+
+void coop_resetBatleth()
+{
+	globalCoop_player_takeAll("models/weapons/worldmodel-Batleth.tik");
+	$bonesaw.ai_off();
+	$bonesaw.walkto("$doorman_position2");
+	if(doesEntityExist($barBatleth1)){
+		$barBatleth1.show();
+		thread globalCoop_level_onUse($barBatleth1,"coop_takeBatleth");
+	}
+}
+
+void coop_endCinematic(entity e)
+{
+	if(doesEntityExist(e)){
+		e.endCinematic(0);
+	}
+}
+
+
+void coop_waitForTeam()
+//------------------------------------------------------------------------------
+//waitForPlayers beeing close, end then the Level
+//------------------------------------------------------------------------------
+{
+	if(cvar_bool_multiplayer)
+	{
+		globalCoop_main_waitForTeam('1545 3249 349','-300 -700 -200','600 700 400');
+		coop_endLevel();
+	}
+}
+
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed("m9l1b-klingon_base");
+}
+

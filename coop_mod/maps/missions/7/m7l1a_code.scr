@@ -1,0 +1,216 @@
+//This script contains the code for the codepannel, use as you please
+//This script contains the code for the codepannel, use as you please
+//This script contains the code for the codepannel, use as you please
+
+
+//Global Variables, can be accessed by all Functions/scriptfiles
+//if definied outside a function, just like this
+////////////////////////////////////////////////////////////////////////////////
+float 	float_codepanelCurrentNumber,
+		float_codepanelLastUsed;
+
+//declaration
+////////////////////////////////////////////////////////////////////////////////
+void	codepanel_noMenu();
+void	codepanel();
+void	codepanel_One();
+void	codepanel_Two();
+void	codepanel_Three();
+void	codepanel_Four();
+void	codepanel_Five();
+void	codepanel_Six();
+void	codepanel_Seven();
+void	codepanel_Eight();
+void	codepanel_Nine();
+void	codepanel_Zero();
+
+void codepanel_noMenu()
+{
+	entity ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+	thread globalCoop_player_transmitter(ePlayer,"globalwidgetcommand OkDialogTitle title ^8Needs^0_^5Coop^8Mod^0_^8above^0_^8Build^5#14");
+	thread globalCoop_player_transmitter(ePlayer,"forcemenu okdialog");
+}
+
+
+void codepanel()
+//this function is started once the trigger is used
+{
+//create internal variables, used only inside this function
+	float	fcodepanelLastUsed,
+			fCombinationIndex,
+			fCurrentCorrectNumber,
+			fError;
+			
+	entity	eTrigger,ePlayer;
+	eTrigger = getCurrentEntity();
+	if(doesEntityExist(eTrigger))
+	{
+		ePlayer = eTrigger.getLastActivatingEntity();
+	}
+	
+//set equal here, below it will respond to change
+	fcodepanelLastUsed		= float_codepanelLastUsed;
+	
+//repeat this procedure the whole time
+	while(doesEntityExist(eTrigger))
+	{
+	//check if a function has been called since the last time
+		if(float_codepanelLastUsed != fcodepanelLastUsed)
+		{
+		//set next index number
+			fCombinationIndex++;
+			
+		//remember the last time a function has been used
+			fcodepanelLastUsed = float_codepanelLastUsed;
+			
+		//see where we are at the current Index
+		//and grab the numnber that would be correct
+		//to input in order to crack the code combination
+			if(fCombinationIndex==1)
+			{
+				fCurrentCorrectNumber 		= 7;
+			}
+			else if(fCombinationIndex==2)
+			{
+				fCurrentCorrectNumber 		= 1;
+			}
+			else if(fCombinationIndex==3)
+			{
+				fCurrentCorrectNumber 		= 5;
+			}
+			else if(fCombinationIndex==4)
+			{
+				fCurrentCorrectNumber 		= 1;
+			}
+			else if(fCombinationIndex==5)
+			{
+				fCurrentCorrectNumber 		= 5;
+			}
+			else if(fCombinationIndex==6)
+			{
+				fCurrentCorrectNumber 		= 1;
+			}
+			else if(fCombinationIndex==7)
+			{
+				fCurrentCorrectNumber 		= 3;
+			}
+			else if(fCombinationIndex==8)
+			{
+				fCurrentCorrectNumber 		= 3;
+			}
+			else
+			{
+				fCurrentCorrectNumber 		= 7;
+			}	
+		//compare the nuber from the user input to the correct number
+		//if the number is wrong, mark the error
+			if(float_codepanelCurrentNumber != fCurrentCorrectNumber)
+			{
+				fError=1;
+			}
+			
+			//$player1.hudprint("index: "+fCombinationIndex+" - error: "+fError+"\n");
+			
+		//once all numbers have been entred,
+		//check if the combination is correct
+			if(fCombinationIndex == 9)
+			{
+			//remove the Menu from the player again
+				thread mom_exitMenuPlayer(ePlayer);
+				
+			//code incorrect
+				if(fError == 1)
+				{					
+				//exit this fnction now				
+					return;
+				}
+			//code correct
+				else
+				{
+				//puzzle solved, sucess!
+					thread secretWall1_door1Puzzle_solve();
+					$secretWallPuzzle.remove();
+					
+				//exit this fnction now
+					return;	
+				}
+			}
+		}
+	//pause a moment or you will get a run away loop error
+		wait(0.02);
+	}
+}
+
+void codepanel_One()
+//this function is called when option 1 is used
+{
+	float_codepanelLastUsed = getLevelTime();
+	float_codepanelCurrentNumber=1;
+	//centerprint("used one\n");
+}
+void codepanel_Two()
+//this function is called when option 2 is used
+{
+	float_codepanelLastUsed = getLevelTime();
+	float_codepanelCurrentNumber=2;
+	//centerprint("used two\n");
+}
+void codepanel_Three()
+//this function is called when option 3 is used
+{
+	float_codepanelLastUsed = getLevelTime();
+	float_codepanelCurrentNumber=3;
+	//centerprint("used three\n");
+}
+void codepanel_Four()
+//this function is called when option 4 is used
+{
+	float_codepanelLastUsed = getLevelTime();
+	float_codepanelCurrentNumber=4;
+	//centerprint("used four\n");
+}
+void codepanel_Five()
+//this function is called when option 5 is used
+{
+	float_codepanelLastUsed = getLevelTime();
+	float_codepanelCurrentNumber=5;
+	//centerprint("used five\n");
+}
+void codepanel_Six()
+//this function is called when option 6 is used
+{
+	float_codepanelLastUsed = getLevelTime();
+	float_codepanelCurrentNumber=6;
+	//centerprint("used six\n");
+}
+void codepanel_Seven()
+//this function is called when option 7 is used
+{
+	float_codepanelLastUsed = getLevelTime();
+	float_codepanelCurrentNumber=7;
+	//centerprint("used seven\n");
+}
+void codepanel_Eight()
+//this function is called when option 8 is used
+{
+	float_codepanelLastUsed = getLevelTime();
+	float_codepanelCurrentNumber=8;
+	//centerprint("used eight\n");
+}
+void codepanel_Nine()
+//this function is called when option 9 is used
+{
+	float_codepanelLastUsed = getLevelTime();
+	float_codepanelCurrentNumber=9;
+	//centerprint("used nine\n");
+}
+//this function is called when option 10 is used
+void codepanel_Zero()
+{
+	float_codepanelLastUsed = getLevelTime();
+	float_codepanelCurrentNumber=0;
+	//centerprint("used zero\n");
+}
+
+

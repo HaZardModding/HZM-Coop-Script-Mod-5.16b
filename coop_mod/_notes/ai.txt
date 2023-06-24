@@ -1,0 +1,322 @@
+simplepathfinding
+    Makes the actor use simplier path finding. 
+	
+	entrycommands
+		{
+		resetmovedir
+		}
+		
+setnotifyflag "on_damage" 1
+		
+// setTargetType( Integer set_target_type )
+// setvalidtarget( Boolean valid_target )
+// targetable( Boolean should_target )
+// turnspeed( Float turnspeed )
+// addcustomthread( String threadType, String threadName )
+//	death_pain : CHECK_VAR ( "special_death" , "true" )
+// followrange 384
+// followrangemin 256
+// followcombatrange 512
+// followcombatrangemin 384
+//ACTOR TYPES///////////////////////////////////////////////////////////////////
+//$x.actortype("");
+	
+// Inanimates are special... be sure to clear the 
+// monster flag, don't let them move, bleed, or 
+// gib. They are stationary
+	inanimate
+//actortype = IS_MONSTER (enemy) can damage same type
+	monster
+//actortype = IS_ENEMY (enemy) 
+	enemy
+//actortype = IS_CIVILIAN (FRIEND) can damage same type
+	civilian
+//actortype = IS_FRIEND (FRIEND)
+	friend
+//actortype = IS_ANIMAL (FRIEND) can damage same type
+	animal
+//actortype = IS_TEAMMATE (FRIEND)
+	teammate
+//damage dealing
+	damagemodifier actortype enemy 1
+	damagemodifier actortype teammate .01
+	damagemodifier actortype friend .01
+
+//DISTANCE//////////////////////////////////////////////////////////////////////
+	//sets the preferred minimum range the actor would like to be from an entity
+	setpreferredminrange( Float preferred_min_range )
+//handle multiple enemies///////////////////////////////////////////////////////
+	forgetenemies
+	evaluateenemies
+	selectclosestenemy
+	turntowardsenemy
+	startactivationtimer //Sets the activationStart time to the current level time 
+//tendencies////////////////////////////////////////////////////////////////////
+	settendency	"pullalarm"	
+	settendency	"ambush"
+	settendency	"snipeenemy"
+	settendency	"work"
+	settendency	"patrol"
+	settendency	"wander"
+	settendency	"follow"
+	settendency	"getoutoftheway"
+	settendency	"handlecallvolume"
+	settendency	"changepositions"
+	settendency	"seekenemyfromposition"
+//flags/////////////////////////////////////////////////////////////////////////
+	setactorflag "attackingenemy" 0	
+	SetActorFlag ( "updatehatebasedonattackers", 1 )
+//entry-exit commands///////////////////////////////////////////////////////////
+	headwatchtarget "enemy"
+	cleartorsoanim
+	runthread string_thread_name
+	attackplayer
+	groupattack
+	turntowardsplayer
+	visiondistance 1024
+	sendeventtogroup aggressive 1.0
+	usebehaviorpackage ( "romulan_m10_soldier_pistol_core" )
+	incontext "pullalarm"
+	printmessage ""//enable: developer,com_printwarnings
+	setvartime ( "playerattacked" )	
+	setvar ( "pulledAlarm" , "true" )
+//check vars////////////////////////////////////////////////////////////////////
+	CHECK_VAR ( "pulledAlarm" , "true" )
+	CHECK_VAR ( "manual_state" , "combat" )
+//print message when entering this state////////////////////////////////////////
+	entrycommands
+	{
+		printmessage ""
+	}
+//print message when exiting this state/////////////////////////////////////////
+	exitcommands
+	{
+		printmessage ""
+	}
+//set animation to use (repeat until change)////////////////////////////////////
+	legs
+	{
+		crouch_idle : default
+	}
+//BEHAVIOURS////////////////////////////////////////////////////////////////////
+	Behavior Patrol ( "walk" )
+	Behavior Work ( "walk" )
+	Behavior UseAlarm ( "run" )
+	Behavior MoveRandomDirection ( "walk" , 128 , 96 )
+	Behavior HoldPosition
+	Behavior Investigate ( "walk" , 5 , 0 , "patrol_search" , 3 )
+	Behavior CloseInOnEnemy ( "run" , 333 )
+	TorsoBehavior torsoAimAndFireWeapon ( 0 , 1 )
+	TorsoBehavior torsoAimAndFireWeapon ( 0 )
+	Behavior WatchEntity ( 1 , 15 , "shuffle" , 0 , "idle_weapon_legs" )
+	Behavior DoAttack ( "" , 15 , 1 , "shuffle" )
+	Behavior DoAttack ( "attack_photonblast" )
+	Behavior BackAwayFromEnemy ( "swat_backpedal_run" , 96.0 , 64.0 )
+	behavior GotoCurrentHelperNode ( "run" )
+	Behavior DoBeamAttack ( "tag_L_arm" , "borgbeam" , "fx/fx-borgdrone-beamimpact.tik" , "fx/fx-borgdrone-plasmarelease.tik", "attack_disruptor" , 1 , .5 , 30 , 0 )   
+//wait//////////////////////////////////////////////////////////////////////////
+	time ( 0.5 )
+	time ( 0.5 , 1 )
+//OTHER/////////////////////////////////////////////////////////////////////////
+	damaged		//?? -> $guard1.addcustomthread ( "damaged" , "killConversation1" );
+	PATROL		: SHOULD_DO_ACTION ( "patrol" ) VALID_PATROL_NODE_IN_RANGE ( $RANGE_PATROL$ )
+	WORK 		: SHOULD_DO_ACTION ( "work" ) VALID_WORK_NODE_IN_RANGE ( $RANGE_WORK$ )
+	WANDER		: SHOULD_DO_ACTION ( "wander" )
+	LEFT_CLEAR ( $DISTANCE_STRAFE$ )
+	RIGHT_CLEAR ( $DISTANCE_STRAFE$ )
+	CHANCE ( $CHANCE_DIVE$ )
+	RANGE ( $RANGE_SPARRING$ )
+	SHOW_PAIN
+	PAIN
+	ANIM_DONE
+	TIME_DONE
+	HAVE_PATH_TO_ENEMY
+	TORSO_BEHAVIOR_DONE
+	HAVE_ENEMY
+	BEHAVIOR_SUCCESS
+	BEHAVIOR_FAILED
+	OTHER_DIED
+	ATTACKED
+	MOD ( "explosion" )
+	MOD ( "imod_primary" )
+	MOD ( "plasmashotgun" )
+	MOD ( "small_explosion" )
+	
+	
+//CONDISTIONS///////////////////////////////////////////////////////////////////
+		default
+		INACTIVE
+		ANIM_DONE
+		TORSO_ANIM_DONE
+		DEAD
+		ACTOR_FLAG
+		HAVE_ENEMY
+		ENEMY_DEAD //seams not to work in MP
+		ENEMY_NOCLIP //seams not to work in MP
+		CAN_ATTACK_ENEMY
+		CAN_SEE_ENEMY
+		CAN_SEE_PLAYER
+		ENEMY_IN_FOV
+		ENEMY_RELATIVE_YAW
+		CHECK_ENEMY_YAW_RANGE
+		CAN_SHOOT_ANY_ENEMY
+		ENEMY_ON_GROUND
+		CAN_JUMP_TO_ENEMY",					&Actor::checkcanjumptoenemy						},
+		CAN_FLY_TO_ENEMY",					&Actor::checkcanflytoenemy						},
+		PAIN",								&Actor::checkinpain								},
+		SMALL_PAIN",							&Actor::checksmallpain							},		
+		PAIN_YAW",							&Actor::checkpainyaw							},
+		PAIN_PITCH",							&Actor::checkpainpitch							},
+		SHOW_PAIN",							&Actor::checkShowPain							},
+		STUNNED",							&Actor::checkstunned							},
+		FINISHED",							&Actor::checkfinished							},
+		MELEE_HIT",							&Actor::checkmeleehit							},
+		HIT_WORLD",							&Actor::checkMeleeHitWorld						},
+		BLOCKED_HIT",						&Actor::checkblockedhit							},
+		BLOCKED",							&Actor::checkblocked							},
+		OTHER_DIED",							&Actor::checkotherdied							},
+		STUCK //stuck inside the world
+		NO_PATH
+		STEERING_FAILED
+		HAVE_PATH_TO_ENEMY //does not work in MP
+		ON_FIRE",							&Actor::checkonfire								},
+		BEHAVIOR_DONE",						&Actor::checkbehaviordone						},
+		BEHAVIOR_SUCCESS",					&Actor::checkbehaviorsuccess					},
+		BEHAVIOR_FAILED",					&Actor::checkbehaviorfailed						},
+		HEAD_BEHAVIOR_DONE",					&Actor::checkheadbehaviordone					},
+		EYE_BEHAVIOR_DONE",					&Actor::checkeyebehaviordone					},
+		TORSO_BEHAVIOR_DONE",				&Actor::checktorsobehaviordone					},
+		TORSO_BEHAVIOR_FAILED",				&Actor::checktorsobehaviorfailed				},
+		TORSO_BEHAVIOR_SUCCESS",				&Actor::checktorsobehaviorsuccess				},
+		TIME_DONE",							&Actor::checktimedone							},
+		DONE",								&Actor::checkdone								},
+		RANGE",								&Actor::checkenemyrange							},
+		ENEMY_WITHIN_RANGE",					&Actor::checkEnemyWithinRange					},
+		ENEMY_ATTACHED",						&Actor::checkEnemyAttached						},
+		PLAYER_RANGE",						&Actor::checkplayerrange						},
+		PARENT_RANGE",						&Actor::checkparentrange						},
+		CHANCE",								&Actor::checkchance								},
+		MOVING_ACTOR_RANGE",					&Actor::checkmovingactorrange					},
+		STATE_TIME",							&Actor::checkstatetime							},
+		TIMES_DONE",							&Actor::checktimesdone							},
+		MOD",								&Actor::checkmeansofdeath						},
+		NOISE_HEARD",						&Actor::checknoiseheard							},
+		PART_STATE",							&Actor::checkpartstate							},
+		PART_DEAD",							&Actor::checkpartdead							},
+		PART_FLAG",							&Actor::checkpartflag							},
+		NUM_SPAWNS",							&Actor::checknumspawns							},
+		COMMAND",							&Actor::checkcommand							},
+		TOUCHED",							&Actor::checktouched							},
+		TOUCHED_BY_PLAYER",					&Actor::checktouchedbyplayer					},
+		ACTIVATED",							&Actor::checkactivated							},
+		USED",								&Actor::checkused								},
+		TWITCH",								&Actor::checktwitch								},
+		HEALTH",								&Actor::checkhealth								},
+		HEALTH_PERCENT_LESS_THAN",			&Actor::checkhealthpercent						},
+		HEALTH_PERCENT_IN_RANGE",			&Actor::checkhealthpercentinrange				},
+		ON_GROUND",							&Actor::checkonground							},
+		IN_WATER",							&Actor::checkinwater							},
+		INCOMING_MELEE_ATTACK",				&Actor::checkincomingmeleeattack				},
+		INCOMING_RANGED_ATTACK",				&Actor::checkincomingrangedattack				},
+		INCOMING_PROJECTILE",				&Actor::checkincomingprojectile					},
+		ENEMY_STUNNED",						&Actor::checkenemystunned						},
+		ENEMY_IN_PATH",						&Actor::checkenemyinpath						},
+		STAGE",								&Actor::checkstage								},
+		HELD",								&Actor::checkheld								},
+		ENEMY_HAS_MELEE",					&Actor::checkenemymelee							},
+		ENEMY_HAS_RANGED",					&Actor::checkenemyranged						},
+		PLAYER_HAS_WEAPON",					&Actor::checkplayerranged						},
+		HAS_THING",							&Actor::checkhasthing							},
+		AT_COVER_NODE",						&Actor::checkatcovernode						},
+		ALLOW_HANGBACK",						&Actor::checkallowhangback						},
+		NAME",								&Actor::checkname								},
+		ANIM_NAME",							&Actor::checkanimname							},
+		CHECK_VAR",							&Actor::checkVar								},
+		CHECK_VAR_TIME_DIFFERENCE",			&Actor::checkVarTimeDifference					},
+		NODE_EXISTS",						&Actor::checkNodeExists							},
+		COVER_NODES",						&Actor::checkCoverNodes							},
+		SURFACE_DAMAGED",					&Actor::checkSurfaceDamaged						},
+		BONE_DAMAGED",						&Actor::checkBoneDamaged						},
+		REGION_DAMAGED",						&Actor::checkRegionDamaged						},
+		CAPTURED",							&Actor::checkCaptured							},
+		CAN_WALK_FORWARD (TRUE/FALSE)
+		HAS_THROWOBJECT
+		ENEMY_IS_THROWOBJECT
+		TURRET_MODE
+		WEAPON_READY
+		PLAYER_VALID
+		IN_PREFERRED_RANGE
+		IN_ABSOLUTE_RANGE
+		IN_AI_MODE
+		DISABLED
+		CRIPPLED
+		IN_ALCOVE
+		PLAYER_IN_CALL_VOLUME //chrash in mp
+		IN_CALL_VOLUME
+		IS_AGGRESSIVE
+		IN_CONE_OF_FIRE
+		IN_PLAYER_CONE_OF_FIRE
+		PATROL_NODE_IN_DISTANCE",			&Actor::checkPatrolWaypointNodeInDistance		},
+		PATH_NODE_IN_DISTANCE",				&Actor::checkPathNodeTypeInDistance				},
+		WEAPON_NAMED",						&Actor::checkUsingWeaponNamed					},
+		OUT_OF_TORSO_RANGE",					&Actor::checkOutOfTorsoRange					},
+		WANTS_TO_EXECUTE_PACKAGE",			&Actor::checkWantsToExecutePackage				},
+		EXECUTED_IN_LAST",					&Actor::checkExecutedPackageInLastTimeFrame		},
+		FORWARD_CLEAR",						&Actor::checkForwardDirectionClear				},
+		REAR_CLEAR",							&Actor::checkRearDirectionClear					},
+		LEFT_CLEAR",							&Actor::checkLeftDirectionClear					},
+		RIGHT_CLEAR",						&Actor::checkRightDirectionClear				},
+		LAST_STATE",							&Actor::checkLastState							},
+		GROUP_MEMBER_IN_RANGE",				&Actor::checkGroupMememberRange					},
+		ACTORTYPE",							&Actor::checkActorType							},
+		IS_TEAMMATE",						&Actor::checkIsTeammate							},
+		HAVE_ACTIVE_WEAPON",					&Actor::checkHaveActiveWeapon					},
+		WEAPON_IS_MELEE",					&Actor::checkWeaponIsMelee						},
+		WEAPON_CHANGED",						&Actor::checkWeaponChanged						},
+		GROUP_HAS_THIS_NAME_LESS_THAN",		&Actor::checkCountOfIdenticalNamesInGroup		},
+		REQUESTED_POSTURE",					&Actor::checkRequestedPosture					},
+		POSTURE_ANIM_DONE",					&Actor::checkPostureAnimDone					},
+		DAMAGE_THRESHOLD_EXCEEDED",			&Actor::checkDamageThresholdExceeded			},
+		ATTACKED",							&Actor::checkAttacked							},
+		ATTACKED_BY_PLAYER",					&Actor::checkAttackedByPlayer					},
+		HELPERNODE_FLAGGED_IN_RANGED" ,		&Actor::checkHelperNodeWithFlagInRange			},
+		ENEMY_USING_WEAPON_NAMED",			&Actor::checkEnemyWeaponNamed					},
+		PLAYER_USING_WEAPON_NAMED",			&Actor::checkPlayerWeaponNamed					},
+		GROUP_HAS_NUMATTACKERS_LESS_THAN",	&Actor::checkGroupAttackerCount					},
+		CURRENT_ENEMY_HAS_NUMATTACKERS_LESS_THAN",	&Actor::checkCurrentEnemyGroupAttackerCount		},
+		HAVE_BEST_WEAPON" ,					&Actor::checkHaveBestWeapon						},
+		POSTURE",							&Actor::checkPosture							},
+		ANY_ENEMY_IN_RANGE ( int range ) //works in mp
+		VALID_COVER_NODE_IN_RANGE",			&Actor::checkValidCoverNodeInRange				},
+		VALID_COMBAT_NODE_IN_RANGE",			&Actor::checkValidCombatNodeInRange				},
+		VALID_WORK_NODE_IN_RANGE",			&Actor::checkValidWorkNodeInRange				},
+		VALID_HIBERNATE_NODE_IN_RANGE",		&Actor::checkValidHibernateNodeInRange			},
+		VALID_PATROL_NODE_IN_RANGE",			&Actor::checkValidPatrolNodeInRange				},
+		VALID_CUSTOM_NODE_IN_RANGE",			&Actor::checkValidCustomNodeInRange				},
+		VALID_SNIPER_NODE_IN_RANGE",			&Actor::checkValidSniperNodeInRange				},
+		ENEMY_CAN_SEE_CURRENT_NODE",			&Actor::checkEnemyCanSeeCurrentNode				},
+		FOLLOW_TARGET_OUT_OF_RANGE",			&Actor::checkSpecifiedFollowTargetOutOfRange	},
+		WITHIN_FOLLOW_TARGET_MIN_RANGE",		&Actor::checkWithinFollowRangeMin				},
+		IN_THE_WAY",							&Actor::checkInTheWay							},
+		SHOULD_DO_ACTION",					&Actor::checkShouldDoAction						},
+		HAVE_ARMOR",							&Actor::checkHaveArmor							},
+		ALLOWED_TO_MELEE_ENEMY",				&Actor::checkAllowedToMeleeEnemy				},
+		CURRENT_NODE_COVERTYPE",				&Actor::checkCurrentNodeHasThisCoverType		},
+		BLOCKED_BY_ENEMY",					&Actor::checkBlockedByEnemy						},
+		ENEMY_PROJECTILE_CLOSE",				&Actor::checkEnemyProjectileClose				},
+		ACTIVATION_DELAY_DONE",				&Actor::checkActivationDelayTime				},
+		TALKING",							&Actor::checkTalking							},
+		ANY_ENEMIES_NEARBY",					&Actor::checkEnemiesNearby						},
+
+
+
+		//
+		// Property Conditionals for snagging data from the GPD
+		//
+		PROP_EXISTS",						&Actor::checkPropExists							},
+		PROP_CHANCE",						&Actor::checkPropChance							},		
+		PROP_ENEMY_RANGE",					&Actor::checkPropEnemyRange						},
+
+
+		// Depreciated Conditionals -- Need to be removed as soon as possible
+		CAN_SHOOT_ENEMY",					&Actor::checkcanshootenemy						},

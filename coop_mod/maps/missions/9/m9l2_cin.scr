@@ -1,0 +1,947 @@
+//--- cinematic functions
+void cinematicArm_Intro_Start();
+void cinematicArm_Intro_ArmEnd();
+void cinematicArm_Intro_OmagAirlock();
+
+void cinematicStageChange_Start();
+void cinematicStageChange_Skipthread();
+void cinematicStageChange_1To2();
+void cinematicStageChange_2To3();
+void cinematicStageChange_3To4();
+void cinematicStageChange_LurokGetup();
+void cinematicStageChange_LurokActivate();
+
+void cinematicArm_End_Start();
+void cinematicArm_End_ArmEnd();
+
+void cinematicDeathAirlock();
+void cinematicDeathAirlock_Skipthread();
+void cinematicDeathAirlock_LaunchMunro();
+
+
+//---------------------
+// cinematicArm_Intro_Start
+// intro cinematic with omag, the merc, and munro
+//---------------------
+void cinematicArm_Intro_Start()
+{
+	//--- the intro armature
+	cinematicArm_Intro = createCinematic( "m9l2_klingboss" );
+	cinematicArm_Intro.setendthread( "cinematicArm_Intro_ArmEnd" );
+	
+	globalCoop_cin_start();
+	//--- setup the cinematic
+	globalCommon_AiDummyHide( $cinematicMerc );
+	globalCommon_AiDummyHide( $munro );
+	wait(.1);
+	
+	
+	//--- start the armature
+	cinematicArm_Intro.beginCinematic( "m9l2_klingboss" );
+	wait( .2 );
+	
+	//--- fade in
+	globalCoop_main_camFadeIn(.5);
+
+	//--- set the skipthread
+	globalCoop_cin_skipThread( "cinematicArm_Intro_ArmEnd" );
+	wait( 40 );
+	
+	//--- retract the rig
+	thread arenaBossDock_CinematicRetract();
+	thread cinematicArm_Intro_OmagAirlock();
+}
+
+
+//---------------------
+// cinematicArm_Intro_ArmEnd
+// skipthread for cinematic
+//---------------------
+void cinematicArm_Intro_ArmEnd()
+{
+	//--- set the skipthread and kill the cinematic
+	skipthread( "null" );
+		
+	//fade to black
+	globalCoop_main_camFadeOut(.5);
+	wait( .5 );
+
+	//--- end the armature cinematics, FALSE means don't launch the end thread
+	cinematicArm_Intro.endCinematic( FALSE );
+
+	killthread( "cinematicArm_Intro_Start" );
+
+	//--- show and solidify the top and rig
+	$boss_rig.show(); //TEST WITH NOTSOLID AND VISIBLE
+	$boss_rig.solid();
+	$boss_rig_top.show();
+	$boss_rig_top.solid();
+	//move inside the level
+	coop_showRig();
+	
+	//--- release the cinematic
+	globalCoop_cin_end();
+	wait( .5 );
+	
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+	wait( .5 );
+	
+	//--- set the stage one music
+	music( "aux1" );
+	
+	//--- set objective
+	//$player.setobjectiveshow( "DefeatKlingonBoss", 1 );
+	thread globalCoop_objectives_update("inComplete",1,1);
+	$boss_rig.missionobjective( 1 );
+	
+	if(cvar_bool_multiplayer)
+	{//2400
+		float fHealth;
+		fHealth = (3500 * globalCoop_return_integerPlayersQuantity(0));
+		$boss_rig.maxbosshealth(fHealth);
+		$boss_rig.health(fHealth);
+	}
+	
+	//--- initally retract the dock
+	thread arenaBossDock_CinematicRetract();
+	wait( .5 );
+
+	//--- activate the boss
+	$boss_rig.ai_on();
+	float_bossInVehicle=1;
+	thread coop_rigBossAttackClosest();
+	
+	//--- start his master think loop
+	thread bossThink_StateEvalLoop();
+	thread bossThink_AttackEvalLoop();
+}
+
+//---------------------
+// cinematicArm_Intro_OmagAirlock
+// open and close the airlock doors for omags shuttle
+//---------------------
+void cinematicArm_Intro_OmagAirlock()
+{
+	//--- activate the airlock attack warning indicators
+	//--- turn off the normal lights and turn on the flashing red lights
+	$doorAirlock4_RimLights_On.show();
+	$doorAirlock4_RimLights_Off.hide();
+	
+	$world.light_lightstyle( "doorAirlock4_RimLights_LightNormal", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab", 0 );
+	$world.light_lightstyle( "doorAirlock4_RimLights_LightRed", "zzzzzzzzzzzzzzzzzzzzaaaaaaaaaaaaaaaaaaaa", 0 );
+	
+	//--- activate the warning beacons
+	thread globalAccelMove_RelativeY( $doorAirlock4_AlertBeacon1_Base, 24, 1, "rampup", "" );
+	globalAccelMove_RelativeY( $doorAirlock4_AlertBeacon2_Base, 24, 1, "rampup", "" );
+	wait( .25 );
+
+	$doorAirlock4_AlertBeacon1_LightCone.show();
+	$doorAirlock4_AlertBeacon2_LightCone.show();
+	
+	//--- rotate the beacons based on the stored axis value in uservar1
+	if( $doorAirlock4_AlertBeacon1_LightCone.getStringVar( "uservar1" ) == "x" )
+	{
+		$doorAirlock4_AlertBeacon1_LightCone.rotateX( 360 );
+	}
+	else
+	{
+		$doorAirlock4_AlertBeacon1_LightCone.rotateZ( 360 );
+	}
+
+	if( $doorAirlock4_AlertBeacon2_LightCone.getStringVar( "uservar1" ) == "x" )
+	{
+		$doorAirlock4_AlertBeacon2_LightCone.rotateX( 360 );
+	}
+	else
+	{
+		$doorAirlock4_AlertBeacon2_LightCone.rotateZ( 360 );
+	}
+
+	//--- open airlock door
+	thread globalAccelMove_RelativeY( $doorAirlock4_A, 1024, 5, "rampupdown", "" );
+	globalAccelMove_RelativeY( $doorAirlock4_B, 1024, 5, "rampupdown", "" );
+	wait( 4 );
+	
+	//--- close airlock door
+	thread globalAccelMove_RelativeY( $doorAirlock4_A, -1024, 5, "rampupdown", "" );
+	globalAccelMove_RelativeY( $doorAirlock4_B, -1024, 5, "rampupdown", "" );
+	
+	//--- stop the rotation
+	$doorAirlock4_AlertBeacon1_LightCone.rotateX( 0 );
+	$doorAirlock4_AlertBeacon1_LightCone.rotateZ( 0 );
+	$doorAirlock4_AlertBeacon2_LightCone.rotateX( 0 );
+	$doorAirlock4_AlertBeacon2_LightCone.rotateZ( 0 );
+	
+	//--- hide the lightcones
+	$doorAirlock4_AlertBeacon1_LightCone.hide();
+	$doorAirlock4_AlertBeacon2_LightCone.hide();
+	
+	//--- retract the warning beacons
+	thread globalAccelMove_RelativeY( $doorAirlock4_AlertBeacon1_Base, -24, 1, "rampup", "" );
+	globalAccelMove_RelativeY( $doorAirlock4_AlertBeacon2_Base, -24, 1, "rampup", "" );
+
+	//--- turn off the red lights and turn on the normal lights
+	$doorAirlock4_RimLights_On.hide();
+	$doorAirlock4_RimLights_Off.show();
+	
+	$world.light_lightstyle( "doorAirlock4_RimLights_LightNormal", "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzy", 0 );
+	$world.light_lightstyle( "doorAirlock4_RimLights_LightRed", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab", 0 );
+}
+
+//---------------------
+//	cinematicStageChange_Start
+//	called when the boss enters a stage change
+//	sets up the common stuff for the stage change cinematics then calls the right cinematic
+//---------------------
+void cinematicStageChange_Start()
+{
+	//--- spawn a cinematic cameras
+	if(!doesEntityExist($cam1))
+		spawn( "Camera", "targetname", "cam1" );
+	if(!doesEntityExist($cam1))
+		spawn( "Camera", "targetname", "cam2" );
+
+	//--- start cinematic commands
+	globalCoop_cin_start();
+	cam_fadeout( .2, 1, 1, 1, 1);
+	wait( .2 );
+	coop_bool_cameraFadedOut=1;
+
+	//--- change the music
+	//music( "suspense", "mystery" );
+
+	//--- reset munro's and lurok's stage cinematic node
+	$nodeMunro_StageCinematic.origin( vecCinematicMunroNodeOrigin );
+	$nodeLurok_StageCinematic.origin( vecCinematicLurokNodeOrigin );
+	wait( .05 );
+
+	//--- get the angular distance from where the boss is now, to the base reference for stage cinematics
+	fltCinematicStageChange_AngularDistanceFromBase = globalMath_GetXYAngleForPointAboutCenter( $boss_rig.getOrigin(), $boss_rig_mover.getOrigin() );
+
+	//--- transform and position munro's and lurok's on the ground point
+	globalCineFX_CameraPathRotate( $nodeMunro_StageCinematic, fltCinematicStageChange_AngularDistanceFromBase, $boss_rig_mover.getOrigin(), $boss_rig_mover.getOrigin() );
+	globalCineFX_CameraPathRotate( $nodeLurok_StageCinematic, fltCinematicStageChange_AngularDistanceFromBase, $boss_rig_mover.getOrigin(), $boss_rig_mover.getOrigin() );
+	wait( .1 );
+	
+	//--- place munro at his node and show him
+	globalCommon_AiDummy( $munro, "idle" );
+	globalCommon_AiDummyHide( $boss_merc );
+	$munro.origin( $nodeMunro_StageCinematic.getOrigin() );
+	$boss_merc.origin( $nodeLurok_StageCinematic.getOrigin() );
+	wait( .1 );
+	
+	//--- set the lurok's angles
+	$boss_merc.angles( $nodeLurok_StageCinematic.getAngles() );
+	
+	if ( intBoss_CurrentPhase != 4 )
+	{
+    	//--- hide the real rig and place the cinematic rig
+    	globalCommon_AiDummyHide( $boss_rig );
+    	globalCommon_AiDummy( $boss_rig_cinematic, "idle" );
+    	$boss_rig_cinematic.origin( $boss_rig.getOrigin() );
+    	wait( .1 );
+    	
+    	//--- make the boss and munro look at each other
+		$boss_rig_cinematic.turnTowardsEntity( $munro );
+		$munro.turnTowardsEntity( $boss_rig_cinematic );
+		$munro.headwatch( $boss_rig_watch );
+    	wait( .5 );
+
+    	//--- set the boss rig to it's idle animation
+    	$boss_rig_cinematic.anim( "idle" );
+    }
+	
+	//--- call the dialog sequence based on the stage transition
+	if( intBoss_CurrentPhase == 2 )
+	{
+		thread cinematicStageChange_1To2();
+	}
+	else if( intBoss_CurrentPhase == 3 )
+	{
+		thread cinematicStageChange_2To3();
+	}
+	else if( intBoss_CurrentPhase == 4 )
+	{
+		thread cinematicStageChange_3To4();
+	}
+}
+
+
+
+
+
+//---------------------
+//	cinematicStageChange_1To2
+//	1 to 2 stage change cinematic
+//---------------------
+void cinematicStageChange_1To2()
+{
+	//--- load the camera paths
+	cam.load( "m9l2_Stage1To2_Shot1" );
+	cam.load( "m9l2_Stage1To2_Shot2" );
+	cam.load( "m9l2_Stage1To2_Shot3" );
+	cam.load( "m9l2_Stage1To2_Shot4" );
+	cam.load( "m9l2_Stage1To2_Shot5" );
+	cam.load( "m9l2_Stage1To2_Shot6" );
+	wait( .1 );
+	
+	//--- orient the paths and position them relative to the bosses location
+	globalCineFX_CameraPathRotate( $m9l2_Stage1To2_Shot1, fltCinematicStageChange_AngularDistanceFromBase, $boss_rig_mover.getOrigin(), $boss_rig_mover.getOrigin() );
+	globalCineFX_CameraPathRotate( $m9l2_Stage1To2_Shot2, fltCinematicStageChange_AngularDistanceFromBase, $boss_rig_mover.getOrigin(), $boss_rig_mover.getOrigin() );
+	globalCineFX_CameraPathRotate( $m9l2_Stage1To2_Shot3, fltCinematicStageChange_AngularDistanceFromBase, $boss_rig_mover.getOrigin(), $boss_rig_mover.getOrigin() );
+	globalCineFX_CameraPathRotate( $m9l2_Stage1To2_Shot4, fltCinematicStageChange_AngularDistanceFromBase, $boss_rig_mover.getOrigin(), $boss_rig_mover.getOrigin() );
+	globalCineFX_CameraPathRotate( $m9l2_Stage1To2_Shot5, fltCinematicStageChange_AngularDistanceFromBase, $boss_rig_mover.getOrigin(), $boss_rig_mover.getOrigin() );
+	globalCineFX_CameraPathRotate( $m9l2_Stage1To2_Shot6, fltCinematicStageChange_AngularDistanceFromBase, $boss_rig_mover.getOrigin(), $boss_rig_mover.getOrigin() );
+
+	//--- set the skipthread
+	globalCoop_cin_skipThread( "cinematicStageChange_Skipthread" );
+
+	//--------------------------------------------------------
+	//shot 1 - dolly right around boss as he beats on the rig
+	
+	//--- next paths
+	globalCoop_cin_fov($cam1, 80 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_follow($cam1, $m9l2_Stage1To2_Shot1 );
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam1 );
+	cam_fadein( .5, 1, 1, 1, 1, 0 );
+	wait( .5 );
+
+	//--- zoom the camera in
+	thread globalCineFX_CameraFOVLerp( $cam1, 80, 50, 3, "rampupdown" );
+	
+    globalCoop_dialog_play($boss_rig_cinematic,"m9l2/klingcomm_wrong.mp3", 1, 20000, 0 ); //Hu’tegh! What’s wrong with this piece of baktag?
+
+	//--------------------------------------------------------
+	//shot 2 - dolly right from behind the boss to show munro
+	
+	//--- next paths
+	globalCoop_cin_fov($cam2, 50 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_follow($cam2, $m9l2_Stage1To2_Shot2 );
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam2 );
+	wait( 2 );
+
+    globalCoop_dialog_play($boss_rig_cinematic,"m9l2/klingcomm_aarg.mp3", 1, 20000, 0 ); //Aaargh!
+    wait( .2 );
+
+	//--------------------------------------------------------
+	//shot 3 - slow push in on munro
+	
+	//--- next paths
+	globalCoop_cin_fov($cam1, 50 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_follow($cam1, $m9l2_Stage1To2_Shot3 );
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam1 );
+
+    globalCoop_dialog_play($munro,"m9l2/munro_ferengi.mp3", 1, 20000, 0 ); //Why are you protecting that honorless Ferengi k'pekt?
+    wait( .2 );
+
+	//--------------------------------------------------------
+	//shot 4 - slight push on merc
+	
+	//--- next paths
+	globalCoop_cin_fov($cam2, 50 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_follow($cam2, $m9l2_Stage1To2_Shot4 );
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam2 );
+
+    globalCoop_dialog_play($boss_rig_cinematic,"m9l2/klingcomm_mybus.mp3", 1, 20000, 0 ); //That’s my business.
+    wait( .2 );
+
+	//--------------------------------------------------------
+	//shot 5 - slow dolly left behind munro, up at boss
+	
+	//--- next paths
+	globalCoop_cin_fov($cam1, 30 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_follow($cam1, $m9l2_Stage1To2_Shot5 );
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam1 );
+
+    globalCoop_dialog_play($munro,"m9l2/munro_business.mp3", 1, 20000, 0 ); //Business is right! Klingon’s aren’t supposed to fight for latinum!
+    wait( .2 );
+
+	//--------------------------------------------------------
+	//shot 6 - fast pullout on boss as he screams
+	
+	//--- next paths
+	globalCoop_cin_fov($cam2, 10 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_follow($cam2, $m9l2_Stage1To2_Shot6 );
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam2 );
+
+	//--- zoom the camera out
+	thread globalCineFX_CameraFOVLerp( $cam2, 10, 180, 1.5, "rampup" );
+	
+    thread globalCoop_dialog_play($boss_rig_cinematic,"m9l2/klingcomm_die.mp3", 1, 20000, 0 ); //Die!
+	wait( 1 );
+	
+	thread cinematicStageChange_Skipthread();
+}
+
+
+//---------------------
+//	cinematicStageChange_2To3
+//	2 to 3 stage change cinematic
+//---------------------
+void cinematicStageChange_2To3()
+{
+	//--- load the camera paths
+	cam.load( "m9l2_Stage2To3_Shot1" );
+	cam.load( "m9l2_Stage2To3_Shot2" );
+	cam.load( "m9l2_Stage2To3_Shot3" );
+	cam.load( "m9l2_Stage2To3_Shot4" );
+	cam.load( "m9l2_Stage2To3_Shot5" );
+	wait( .1 );
+	
+	//--- orient the paths and position them relative to the bosses location
+	globalCineFX_CameraPathRotate( $m9l2_Stage2To3_Shot1, fltCinematicStageChange_AngularDistanceFromBase, $boss_rig_mover.getOrigin(), $boss_rig_mover.getOrigin() );
+	globalCineFX_CameraPathRotate( $m9l2_Stage2To3_Shot2, fltCinematicStageChange_AngularDistanceFromBase, $boss_rig_mover.getOrigin(), $boss_rig_mover.getOrigin() );
+	globalCineFX_CameraPathRotate( $m9l2_Stage2To3_Shot3, fltCinematicStageChange_AngularDistanceFromBase, $boss_rig_mover.getOrigin(), $boss_rig_mover.getOrigin() );
+	globalCineFX_CameraPathRotate( $m9l2_Stage2To3_Shot4, fltCinematicStageChange_AngularDistanceFromBase, $boss_rig_mover.getOrigin(), $boss_rig_mover.getOrigin() );
+	globalCineFX_CameraPathRotate( $m9l2_Stage2To3_Shot5, fltCinematicStageChange_AngularDistanceFromBase, $boss_rig_mover.getOrigin(), $boss_rig_mover.getOrigin() );
+
+	//--- set the skipthread
+	globalCoop_cin_skipThread( "cinematicStageChange_Skipthread" );
+
+	//--------------------------------------------------------
+	//shot 1 - whip around on the rig
+	
+	//--- next paths
+	globalCoop_cin_fov($cam1, 50 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_follow($cam1, $m9l2_Stage2To3_Shot1 );
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam1 );
+	cam_fadein( .5, 1, 1, 1, 1, 0 );
+	wait( .5 );
+
+    globalCoop_dialog_play($boss_rig_cinematic,"m9l2/klingcomm_workprop.mp3", 1, 20000, 0 ); //Guy’cha! Work properly!
+    wait( .2 );
+
+	//--------------------------------------------------------
+	//shot 2 - dolly in on munro
+	
+	//--- next paths
+	globalCoop_cin_fov($cam2, 40 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_follow($cam2, $m9l2_Stage2To3_Shot2 );
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam2 );
+
+    globalCoop_dialog_play($munro,"m9l2/munro_latinum.mp3", 1, 20000, 0 ); //Klingons don't fight for latinum!
+    wait( .2 );
+
+	//--------------------------------------------------------
+	//shot 3 - dolly up onto boss
+	
+	//--- next paths
+	globalCoop_cin_fov($cam1, 40 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_follow($cam1, $m9l2_Stage2To3_Shot3 );
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam1 );
+
+    globalCoop_dialog_play($boss_rig_cinematic,"m9l2/klingcomm_latinum.mp3", 1, 20000, 0 ); //You dare insult my honor?
+    wait( .2 );
+
+	//--------------------------------------------------------
+	//shot 4 - over the shoulder at munro
+	
+	//--- next paths
+	globalCoop_cin_fov($cam2, 40 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_follow($cam2, $m9l2_Stage2To3_Shot4 );
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam2 );
+
+    thread globalCoop_dialog_play($munro,"m9l2/munro_lie.mp3", 1, 20000, 0 ); //What honor? You’re a lying k’pekt.
+    wait( .75 );
+ 
+ 	//--------------------------------------------------------
+	//shot 5 - push in on munro
+	
+	//--- next paths
+	globalCoop_cin_fov($cam1, 40 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_follow($cam1, $m9l2_Stage2To3_Shot2 );
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam1 );
+	 
+	//--- wait for munro to finish speaking
+	globalCoop_dialog_waitForDialog( $munro );
+    wait( .2 );
+
+	//--------------------------------------------------------
+	//shot 6 - zoom in on the merc
+	
+	//--- next paths
+	globalCoop_cin_fov($cam2, 90 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_follow($cam2, $m9l2_Stage2To3_Shot5 );
+	wait( .2 );
+
+	globalCoop_cin_cuecamera( $cam2 );
+
+    thread globalCoop_dialog_play($boss_rig_cinematic,"m9l2/klingcomm_arr.mp3", 1, 20000, 0 ); //Arrr!
+	
+	//--- zoom the camera
+	thread globalCineFX_CameraFOVLerp( $cam2, 90, 10, .8, "rampup" );
+	wait( .5 );
+	
+	thread cinematicStageChange_Skipthread();
+}
+
+
+//---------------------
+//	cinematicStageChange_3To4
+//	3 to 4 stage change cinematic
+//---------------------
+void cinematicStageChange_3To4()
+{
+	//--- load the camera paths
+	cam.load( "m9l2_Stage3To4_Shot1a" );
+	wait( .1 );
+	
+	//--- orient the paths and position them relative to the bosses location
+	globalCineFX_CameraPathRotate( $m9l2_Stage3To4_Shot1a, fltCinematicStageChange_AngularDistanceFromBase, $boss_rig_mover.getOrigin(), $boss_rig_mover.getOrigin() );
+
+	//--- set the skipthread
+	globalCoop_cin_skipThread( "cinematicStageChange_Skipthread" );
+
+	//--------------------------------------------------------
+	//shot 1 - whip around on the rig
+	
+	//--- next paths
+	globalCoop_cin_fov($cam1, 40 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_follow($cam1, $m9l2_Stage3To4_Shot1a );
+	wait( .2 );
+
+	thread cinematicStageChange_LurokGetup();
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam1 );
+	cam_fadein( .5, 1, 1, 1, 1, 0 );
+	wait( 5.75 );
+
+	//--- end the cinematic	
+	thread cinematicStageChange_Skipthread();
+}
+
+//---------------------
+//	cinematicStageChange_LurokGetup
+//	lurok getting up
+//---------------------
+void cinematicStageChange_LurokGetup()
+{
+	//--- show and setup the boss
+	$boss_merc.show();
+	$boss_merc.anim( "boss_getup" );
+	waitForAnimation( $boss_merc, "boss_getup" );
+	
+	$boss_merc.anim( "boss_getup_idle" );
+	if(!cvar_bool_multiplayer)//Singleplayer
+	{
+		$boss_merc.attack($player);
+	}
+	//$boss_merc.setFrame( 80, "boss_getup" );
+}
+
+//---------------------
+//	cinematicStageChange_Skipthread
+//	skipthread for stagechange cinematics
+//---------------------
+void cinematicStageChange_Skipthread()
+{
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematicStageChange_1To2" );
+	killthread( "cinematicStageChange_2To3" );
+	killthread( "cinematicStageChange_3To4" );
+	
+	//--- fade to black
+	cam_fadeout( .5, 1, 1, 1, 1);
+	wait( .6 );
+	
+	thread globalCoop_level_removePath($m9l2_Stage1To2_Shot1);
+	thread globalCoop_level_removePath($m9l2_Stage1To2_Shot2);
+	thread globalCoop_level_removePath($m9l2_Stage1To2_Shot3);
+	thread globalCoop_level_removePath($m9l2_Stage1To2_Shot4);
+	thread globalCoop_level_removePath($m9l2_Stage1To2_Shot5);
+	thread globalCoop_level_removePath($m9l2_Stage1To2_Shot6);
+	thread globalCoop_level_removePath($m9l2_Stage2To3_Shot1);
+	thread globalCoop_level_removePath($m9l2_Stage2To3_Shot2);
+	thread globalCoop_level_removePath($m9l2_Stage2To3_Shot3);
+	thread globalCoop_level_removePath($m9l2_Stage2To3_Shot4);
+	thread globalCoop_level_removePath($m9l2_Stage2To3_Shot5);
+	thread globalCoop_level_removePath($m9l2_Stage3To4_Shot1a);
+
+	//--- stop all dialog
+	$boss_rig_cinematic.stopdialog();
+	$munro.stopdialog();
+	
+	//--- hide munro
+	globalCommon_AiDummyHide( $munro );
+	$munro.resetHead();
+	
+	//--- return the cinematic boss rig
+	globalCommon_AiDummyHide( $boss_rig_cinematic );
+	$boss_rig_cinematic.origin( $nodeRig_CinematicAway.getOrigin() );
+	
+	//--- show the real rig
+	globalCommon_AiDummyShow( $boss_rig );
+	
+	//--- position and set the player
+	//$player.origin( $munro.getOrigin() );
+	//wait( .05 );
+	
+	//$player.turnTowardsEntity( $boss_rig );
+	
+	$boss_merc.notSolid();
+	
+	//--- end the cinematic
+	globalCoop_cin_end();
+	wait( .5 );
+
+
+	if ( intBoss_CurrentPhase == 2 )
+	{
+		//SK -- Open 2 airlocks
+		string strDialog;
+		strDialog = "m9l2/klingcomm_breathe.mp3";	//Can you breathe in a vacuum, taHqeq!?		
+		bossAction_TauntSay( strDialog );
+				
+		thread arenaAirlock_OpenAirlock( 1 );
+		thread arenaAirlock_OpenAirlock( 3 );
+	}
+
+	if ( intBoss_CurrentPhase == 3 )	
+	{
+		//SK -- Open 2 airlocks
+		string strDialog;		
+		strDialog = "m9l2/klingcomm_cold.mp3";	//Space is cold, Starfleet qoH!
+		bossAction_TauntSay( strDialog );
+				
+		thread arenaAirlock_OpenAirlock( 2 );
+		thread arenaAirlock_OpenAirlock( 4 );
+	}
+
+	if( intBoss_CurrentPhase == 4 )
+	{
+		//--- but the rig in it's busted state
+		$boss_rig.anim( "stage4_idle" );
+	
+    	//--- wake up the merc boss on the ground
+    	//$boss_merc.solid();
+    	//$boss_merc.show();
+    	//$boss_merc.ai_on();
+    	
+		if(!cvar_bool_multiplayer)
+		{
+			$boss_merc.turnTowardsEntity( $player );
+		}
+    	
+    	thread cinematicStageChange_LurokActivate();
+    			
+    	$boss_rig.missionobjective( 0 );
+    	$boss_merc.missionobjective( 1 );
+    	wait( .5 );
+    }
+	
+	//--- fade in
+	cam_fadein( .5, 1, 1, 1, 1, 0 );
+	wait( .3 );
+	
+	//--- release the cinematic
+	boolPhaseCinematic_Active = FALSE;
+
+	//--- set the phase 2 music
+	music( "aux2" );
+}
+
+
+
+//---------------------
+//	cinematicStageChange_LurokActivate
+//	waits for the player to move far enough away from lurok and will then activate him
+//---------------------
+void cinematicStageChange_LurokActivate()
+{
+	float fltDistance = 0;
+	wait( 1 );
+	
+	while( globalMath_GetXYDistance( eBossHatesMe.getOrigin(), $boss_merc.getOrigin() ) <= PHASE_CHANGE_BOSS_ACTIVATION_DISTANCE )
+	{
+		wait( .1 );
+	}
+	
+	//--- activate the boss
+	$boss_merc.solid();
+	$boss_merc.ai_on();
+}
+
+
+//===================================================================================================================================================
+//===================================================================================================================================================
+//--- END CINEMATIC
+
+//---------------------
+// cinematicArm_End_Start
+// entering End cinematic
+//---------------------
+void cinematicArm_End_Start()
+{
+	//--- check if the player's alive 
+	if(coop_checkPlayerIsDeath()){return;}//SP
+	
+	cinematicArm_End = createCinematic( "m9l2_munro" );
+	cinematicArm_End.setendthread( "cinematicArm_End_ArmEnd" );
+	
+	//--- start cinematic commands
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	//--- setup the cinematic
+	globalCommon_AiDummyHide( $boss_merc );
+	globalCommon_AiDummyHide( $munro );
+	globalCommon_AiDummyHide( $boss_rig );
+
+	//--- show the tetryon gun
+	$cinematicWeaponTetryon.show();
+		
+	//--- start the armature
+	cinematicArm_End.beginCinematic( "m9l2_munro" );
+	wait( .2 );
+	
+	//--- set the music
+	music ("aux4");
+	
+	//--- fade in
+	globalCoop_main_camFadeIn(.5);
+	wait( .5 );
+
+	//--- set the skipthread
+	globalCoop_cin_skipThread( "cinematicArm_End_ArmEnd" );
+	wait( 3 );
+	
+	//--- hide the tetryon gun
+	$cinematicWeaponTetryon.hide();
+	wait( 6 );
+	
+	$doorAirlockPortal.hide();
+	$doorAirlockPortal.notSolid();
+	$doorAirlockPortal.openPortal();
+	thread globalAccelMoveZ( $doorAirlockTop, 160, 1.5, "rampupdown", "" );
+	thread globalAccelMoveZ( $doorAirlockBottom, -40, 1.5, "rampupdown", "" );
+	
+}
+
+//---------------------
+// cinematicArm_End_ArmEnd
+// entering End cinematic skipthread
+//---------------------
+void cinematicArm_End_ArmEnd()
+{
+	//kill the cinematic
+	skipthread( "null" );
+
+	//--level transition
+	
+	//--fade to black
+	cam_fadeout( .5, 0, 0, 0, 1, 0 );
+	wait ( .5 );
+
+	//--- tell the game to not translate the player's orientation
+	dontSaveOrientation();
+
+	//--- release the cinematic
+	globalCoop_cin_end();
+	
+	//--send player to IGM 7  
+	if(cvar_bool_multiplayer){
+		coop_endLevel();
+		setfloatvar ( "game.globalMissionEnterprise", 7 );
+	}else{
+		//--send player to IGM 7  
+		spawn ( "trigger_changelevel", "targetname", "trigger_endlevel", "map", "ent-deck1_bridge" );
+		setfloatvar ( "game.globalMissionEnterprise", 7 );
+		wait ( 1 );
+		trigger ( "$trigger_endlevel" );
+	}
+}
+
+
+//===================================================================================================================================================
+//===================================================================================================================================================
+
+//---------------------
+// cinematicDeathAirlock
+// player falls into an airlock and dies
+//---------------------
+void cinematicDeathAirlock()
+{
+//do not play this cin in multiplayer
+	if(cvar_bool_multiplayer)
+	{
+		entity e;
+		e = getCurrentEntity();
+		if(doesEntityExist(e)){
+			e = e.getLastActivatingEntity();
+			if(doesEntityExist(e)){
+				thread globalCoop_armory_putAwayWeapon(e);
+				e.scale(.1);
+				e.gravity(0);
+				e.notsolid();
+				e.playerviewangles('180 0 0');
+				e.warp('4575 738 -122');
+				globalCoop_level_triggerEntity($poopyIce);
+				e.setVelocity('0 0 -25');
+				e.playerviewangles('180 0 0');
+				wait(.2);
+				if(doesEntityExist(e)){
+					e.killAttach();
+					e.addHud("coop_iceing");
+				}
+				wait(4);
+				if(doesEntityExist(e)){
+					e.removeHud("coop_iceing");
+					e.kill();
+					wait(.2);
+					if(doesEntityExist(e)){
+						e.scale(1);
+						e.gravity(1);
+					}
+				}
+			}
+		}
+		return;
+	}
+
+    //--- set the death state to kill the rig's think threads
+    bossSet_State( BOSS_STATE_DEATH );
+
+	//--- start cinematic commands
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+	
+	cam.load( "m9l2_DeathAirlock_Shot1" );
+	cam.load( "m9l2_DeathAirlock_Shot2" );
+	wait( .1 );
+
+	//--------------------------------------------------------
+	//shot1 inside airlock opening
+	
+	//--- set the camera on the first path
+	globalCoop_cin_follow($cam1, $m9l2_DeathAirlock_Shot2 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_fov($cam1, 80 );
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam1 );
+
+    //--- fade in
+    cam_fadein( 1, 0, 0, 0, 1, 0 );
+    
+    //--- open airlock doors
+    thread globalAccelMove_RelativeY( $doorCinematic_AirlockSouth, 1024, 5, "rampup", "sound/ships/klingon/kling_dockmove.wav" );
+    thread globalAccelMove_RelativeY( $doorCinematic_AirlockWest, 1024, 5, "rampup", "" );
+    wait( 2.5 );
+
+	//--------------------------------------------------------
+	//shot2 murno.......in.......spaaaaaaaace.....
+	
+	//--- set the camera on the first path
+	globalCoop_cin_follow($cam2, $m9l2_DeathAirlock_Shot1 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_fov($cam2, 75 );
+	wait( .3 );
+	
+	globalCoop_cin_cuecamera( $cam2 );
+	wait( 2 );
+	    
+    //--- munro gets launched into space
+    thread cinematicDeathAirlock_LaunchMunro();
+    wait( 1 );
+	
+	$deathMunro.anim( "m6-death" );
+	wait( 2 );
+	
+	thread cinematicDeathAirlock_Skipthread();
+}
+
+
+//---------------------
+// cinematicDeathAirlock_Skipthread
+// skipthread
+//---------------------
+void cinematicDeathAirlock_Skipthread()
+{
+//DO not play in MP
+	if(cvar_bool_multiplayer)
+	{
+		return;
+	}
+	//kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematicDeathAirlock" );
+
+	//--- fade to black
+	cam_fadeout( .2, 0, 0, 0, 1, 0 );
+	wait( .2 );
+
+	//--- fail the mission
+	$player.missionfailed();
+}
+
+//---------------------
+// munro gets launched into space
+void cinematicDeathAirlock_LaunchMunro()
+{
+//DO not play in MP
+	if(cvar_bool_multiplayer)
+	{
+		return;
+	}
+	//--- spawn an ice effect for the airlock
+	spawn( "func_spawn", "targetname", "poopyIce" );
+	wait( .1 );
+	
+	$poopyIce.origin( $deathMunro.getOrigin() );
+	$poopyIce.modelName( "fx/fx-explosion-ice-gas-large.tik" );
+	$poopyIce.angles( '90 0 0' );
+	$poopyIce.scale( .08 );
+	wait( .1 );
+	
+	triggerEntity( $poopyIce );
+	
+	//--- animate the death munro
+	$deathMunro.anim( "m6_death" );
+	
+	//--- move the death munro
+    $deathMunro.time( 10 );
+    $deathMunro.moveDown( 512 );
+    $deathMunro.moveSouth( 128 );
+    $deathMunro.moveWest( 64 );
+    waitFor( $deathMunro );
+}
+

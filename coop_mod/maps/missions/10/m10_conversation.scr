@@ -1,0 +1,139 @@
+void conversation_New ( string name )
+{
+	entity newConversation;
+
+	newConversation = getentity ( "_conversation_" + name );
+	if ( doesEntityExist ( newConversation ))
+	{
+		print ( "Conversation of name " + name + " already exists\n" );
+		return;
+	}
+
+	newConversation = spawn ( "script_origin" , "targetname " , "_conversation_" + name );
+
+	wait ( .1 );
+
+	globalCommon_AssertEntity ( newConversation , "Could not create a new conversation\n" );
+
+	newConversation.setfloatvar ( "count" , 0 );
+}
+
+void conversation_AddDialog ( string conversation , string actor , string dialogType , string lookAt , string dialog  , float volume , float minDist , float head)
+{
+	entity convo;
+	float c;
+	string prefix;
+
+	convo = getentity ( "_conversation_" + conversation );
+
+	if ( doesEntityExist ( convo ))
+	{
+		c = convo.getfloatvar ( "count" );
+		c++;
+
+		if ( dialogType == "interrupted" )
+			prefix = "interrupted_";
+		else if ( dialogType == "resumed" )
+			prefix = "resumed_";
+		else if ( dialogType == "normal" )
+			prefix = "normal_";
+
+		convo.setstringvar ( prefix + "actor"   + c , actor );
+		convo.setstringvar ( prefix + "dialog"  + c , dialog );
+		convo.setstringvar ( prefix + "lookat"  + c , lookAt );
+		convo.setfloatvar  ( prefix + "volume"  + c , volume );
+		convo.setfloatvar  ( prefix + "minDist" + c , minDist );
+		convo.setfloatvar  ( prefix + "head"    + c , head );
+
+		convo.setfloatvar  ( "count" , c );
+
+	}
+	else
+		print ( "conversation_AddDialog(): conversation named " + conversation + " does not exist\n" );
+}
+
+entity _currentActor;
+string _currentActorTargetName;
+float  _currentDialogComplete = 0;
+string _currentConversation;
+float  _inDialogMode = 0;
+
+void conversation_Play ( string conversation )
+{
+	entity convo;
+	float total,currentDialog;
+
+	string actor,dialog;
+	float volume,minDist,head;
+
+	convo = getentity ( "_conversation_" + conversation );
+
+	if ( doesEntityExist ( convo ))
+	{
+		total = convo.getfloatvar ( "count" );
+		current = 1;
+		prefix = "_normal";
+		while ( current <= total )
+		{
+			_inDialogMode = 1;
+			actor =	convo.getstringvar   ( prefix + "actor"   + c );
+			dialog = convo.getstringvar  ( prefix + "dialog"  + c );
+			volume = convo.getfloatvar   ( prefix + "volume"  + c );
+			minDist = convo.getfloatvar  ( prefix + "minDist" + c );
+			head = convo.getfloatvar     ( prefix + "head"    + c );
+
+			_currentActor = getentity ( actor );
+			_currentActorTargetName = actor;
+			_currentDialogComplete = 1;
+			_currentActor.stopDialog();
+			if(!cvar_bool_multiplayer){//Singleplayer
+				_currentActor.playDialog ( dialog, volume, minDist, head );
+				waitForDialog(_currentActor);
+			}
+			else{
+			//English dialogs are much shorter, so we put some extra wait time in it
+				if(cvar_string_localLanguage == "Deu"){
+				//play dialog for english players
+					_currentActor.simplePlayDialog("loc/eng/sound/dialog/"+dialogToPlay, dialogVolume, dialogMinRange);
+				//Play dialog for german players
+					_currentActor.playDialog("loc/deu/sound/dialog/"+dialogToPlay, dialogVolume, dialogMinRange,0);
+				}
+				else{
+				//Play dialog for german players
+					_currentActor.simpleplayDialog("loc/deu/sound/dialog/"+dialogToPlay, dialogVolume, dialogMinRange);
+				//play dialog for english players
+					_currentActor.PlayDialog("loc/eng/sound/dialog/"+dialogToPlay, dialogVolume, dialogMinRange,0);
+				}
+			//Wait for the dialogLength
+				waitDialogLength("loc/"+cvar_string_localLanguage+"/sound/dialog/"+dialogToPlay);
+			}
+			waitfordialog (_currentActor);
+			if ( _currentDialogComplete == 1 )
+				current++;
+			while ( _canContinueDialog == 0 )
+				wait ( .25 );
+		}
+		_inDialogMode = 0;
+	}
+	else
+		print ( "conversation_Play(): conversation named " + conversation + " does not exist\n" );
+}
+
+void conversation_Interrupt ()
+{
+	entity caller;
+	caller = getcurrententity ();
+	caller.nouse ();
+
+	if ( doesEntityExist ( _currentActor ) && (_inDialogMode == 1))
+	{
+		_currentActor.stopDialog ();
+		_currentDialogComplete = 0;
+		_canContinueDialog = 0;
+
+		wait ( 3 );
+		_canContinueDialog = 1;
+	}
+
+	thread globalCommon_OnUse ( "conversation_Interrupt" );
+}

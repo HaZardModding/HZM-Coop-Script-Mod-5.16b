@@ -1,0 +1,288 @@
+//-----------------------------------------------
+// Cinematic Name: c:\projects\ef2\ef2\base\cins\m1l1b_chang-temp.cin
+// Export Version: 1
+// Export Date:    Thu Mar 27 16:45:28 2003
+//-----------------------------------------------
+
+Origins
+{
+    Origin
+    {
+          name          "m1l1b_chang"
+          origin         0.000000 0.000000 0.000000
+          yaw            0.000000
+    }
+}
+////DO NOT CHANGE THE ORIGIN NUMBERS!!!!!!!!!!!! they had to be tweaked to line up right.
+
+Actors
+{
+    Actor
+    {
+        name          "armBorg"
+        tiki          "char/borg_drone-female.tik"
+        anim          "cin-m1l1b_chang_borg"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         3420.021484 85.767372 62.770187
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "armChang"
+        tiki          "char/hazardteam_chang-voyager.tik"
+        anim          "cin-m1l1b_chang_chang"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         3250.660400 -59.836632 70.770187
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "armChell"
+        tiki          "char/hazardteam_chell-voyager.tik"
+        anim          "cin-m1l1b_chang_chell"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         3219.812500 -8.160988 70.770187
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "armMunro"
+        tiki          "char/hazardteam_munro-voyager.tik"
+        anim          "cin-m1l1b_chang_Munro"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         3278.846924 -7.912794 70.770187
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "borg_1_4_hibernate"
+        tiki          "char/borg_drone-male2.tik"
+        anim          "cin-m1l1b-chang-borgfunk"
+        moveanim      "walk"
+        alwaysSpawn    false
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  LEAVE
+        origin         3158.718750 -427.872192 155.124435
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "borg_1_3_hibernate"
+        tiki          "char/borg_drone-male.tik"
+        anim          "cin-m1l1b-chang-borghell"
+        moveanim      "walk"
+        alwaysSpawn    false
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  LEAVE
+        origin         3672.647705 -594.370850 80.124435
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "borg_1_1_hibernate"
+        tiki          "char/borg_drone-male3.tik"
+        anim          "cin-m1l1b-chang-borglimp"
+        moveanim      "walk"
+        alwaysSpawn    false
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  LEAVE
+        origin         3881.197021 -600.075684 80.124435
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "borg_1_2_hibernate"
+        tiki          "char/borg_drone-female.tik"
+        anim          "cin-m1l1b-chang-borgpink"
+        moveanim      "walk"
+        alwaysSpawn    false
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  LEAVE
+        origin         3366.541016 -425.865356 155.124435
+        yaw            -90.000000
+    }
+}
+
+
+Cameras
+{
+	//ResetCamera	   	 false
+    Camera
+    {
+        name         "cam02-m1l1b-chang"
+        camfile      "cam02-m1l1b-chang"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+		selfRemoving false
+    }
+	//ResetCamera	   	 false
+    Camera
+    {
+        name         "cam03-m1l1b-chang"
+        camfile      "cam03-m1l1b-chang"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+		selfRemoving false
+    }
+    Cut
+    {
+        toCamera     "cam02-m1l1b-chang"
+        frame         10
+        fadeout       0
+        fadein        20
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam03-m1l1b-chang"
+        frame         98
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam02-m1l1b-chang"
+        frame         164
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam03-m1l1b-chang"
+        frame         271
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam02-m1l1b-chang"
+        frame         351
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam03-m1l1b-chang"
+        frame         405
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam02-m1l1b-chang"
+        frame         493
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam03-m1l1b-chang"
+        frame         525
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam02-m1l1b-chang"
+        frame         581
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam03-m1l1b-chang"
+        frame         640
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam02-m1l1b-chang"
+        frame         660
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam03-m1l1b-chang"
+        frame         700
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam02-m1l1b-chang"
+        frame         741
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam03-m1l1b-chang"
+        frame         808
+        fadeout       20
+        fadein        0
+        lerp          false
+    }
+}
+

@@ -1,0 +1,63 @@
+//enable developer modus
+developer 1; //1,2
+
+//print warnings
+developer 1;com_printwarnings 1;
+
+//enable mini console
+developer 1;ui_minicon 1;
+
+//show mouse coordinates
+ui_drawcoords 1
+
+//Print funnction calls to console
+scr_printfunccalls 1
+
+//Print event calls to console
+scr_printeventcalls 1			
+
+//show info
+dedicated 0;developer 1;sv_showininfo 1;
+
+//show all events
+developer 1;g_showevents 1;
+
+//show game console on desktop
+developer 1;viewlog 1;
+
+//change timescale
+developer 1;timescale <flt>
+
+//record logfile to base folder
+logfile 1;
+
+
+//lists
+levelvars
+gamevars
+configstrings
+modelist
+modellist
+skinlist
+shaderlist
+imagelist
+cmdlist
+cvalist
+tikilist
+maplist
+listmenus
+soundlist
+skinlist
+shaderlist
+
+//
+sv_precache 1
+g_needpass 0
+nomonsters 0
+sv_currentGravity
+sv_showdamagecolors 1
+sv_groundtracelength 0.25
+sv_useanimmovespeed 0
+g_rankedserver 0
+g_allowActionMusic 1
+

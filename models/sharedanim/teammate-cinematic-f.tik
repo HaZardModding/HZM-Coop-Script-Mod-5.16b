@@ -1,0 +1,639 @@
+init
+{
+	server
+		{
+		classname Actor
+		}
+}
+
+animations models/char/base-female2
+	{
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m1-cin-telsia
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+cin-m1-beamout-T-idle		cin-m1-beamout-T-idle.ska
+cin-m1-beamout-T-draw		cin-m1-beamout-T-draw.ska
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m12-end-2nd
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m12-end-2nd-jurot				cin-m12-end-2nd-jurot.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m12-end
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m12-end-jurot				cin-m12-end-jurot.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+		}
+	}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////             end_telsia
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-end_telsia_telsia cin-end_telsia_telsia.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			80 playDialog "loc/eng/sound/dialog/m11l3/telsia_himunro3.mp3" 1, 10000, 0
+			80 simpleplayDialog "loc/deu/sound/dialog/m11l3/telsia_himunro3.mp3" 1, 10000, 0
+			
+			148 playDialog "loc/eng/sound/dialog/m11l3/telsia_dinner.mp3" 1, 10000, 0
+			148 simpleplayDialog "loc/deu/sound/dialog/m11l3/telsia_dinner.mp3" 1, 10000, 0
+			
+			205 playDialog "loc/eng/sound/dialog/m11l3/telsia_youwere.mp3" 1, 10000, 0
+			205 simpleplayDialog "loc/deu/sound/dialog/m11l3/telsia_youwere.mp3" 1, 10000, 0
+			
+			263 playDialog "loc/eng/sound/dialog/m11l3/telsia_shotdown.mp3" 1, 10000, 0
+			263 simpleplayDialog "loc/deu/sound/dialog/m11l3/telsia_shotdown.mp3" 1, 10000, 0
+			
+			438 playDialog "loc/eng/sound/dialog/m11l3/telsia_coward.mp3" 1, 10000, 0
+			438 simpleplayDialog "loc/deu/sound/dialog/m11l3/telsia_coward.mp3" 1, 10000, 0
+			
+			604 playDialog "loc/eng/sound/dialog/m11l3/telsia_ohalex.mp3" 1, 10000, 0
+			604 simpleplayDialog "loc/deu/sound/dialog/m11l3/telsia_ohalex.mp3" 1, 10000, 0
+			
+			682 playDialog "loc/eng/sound/dialog/m11l3/telsia_hear.mp3" 1, 10000, 0
+			682 simpleplayDialog "loc/deu/sound/dialog/m11l3/telsia_hear.mp3" 1, 10000, 0
+			
+			829 playDialog "loc/eng/sound/dialog/m11l3/telsia_kindsir.mp3" 1, 10000, 0
+			829 simpleplayDialog "loc/deu/sound/dialog/m11l3/telsia_kindsir.mp3" 1, 10000, 0
+			
+			1036 playDialog "loc/eng/sound/dialog/m11l3/telsia_itcomes.mp3" 1, 10000, 0
+			1036 simpleplayDialog "loc/deu/sound/dialog/m11l3/telsia_itcomes.mp3" 1, 10000, 0
+			
+			1116 playDialog "loc/eng/sound/dialog/m11l3/telsia_findout.mp3" 1, 10000, 0
+			1116 simpleplayDialog "loc/deu/sound/dialog/m11l3/telsia_findout.mp3" 1, 10000, 0
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////             m11l1a_chell
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m11l1a_chell_Telsia cin-m11l1a_chell_Telsia.ska
+	{
+		server
+		{
+			177 playDialog "loc/eng/sound/dialog/m11l1/telsia_comp.mp3" 1, 10000, 1
+			177 simpleplayDialog "loc/deu/sound/dialog/m11l1/telsia_comp.mp3" 1, 10000, 1
+			
+			75 playDialog "sound/player/CommunicatorBeep.wav" 1, 10000, 1
+			533 playDialog "sound/weapons/burstrifle/burst_fire.wav" 1, 10000, 1
+			537 playDialog "sound/weapons/burstrifle/burst_fire.wav" 1, 10000, 1
+			541 playDialog "sound/weapons/burstrifle/burst_fire.wav" 1, 10000, 1
+			545 playDialog "sound/weapons/burstrifle/burst_fire.wav" 1, 10000, 1
+			549 playDialog "sound/weapons/burstrifle/burst_fire.wav" 1, 10000, 1
+			552 playDialog "sound/weapons/burstrifle/burst_fire.wav" 1, 10000, 1
+			556 playDialog "sound/weapons/burstrifle/burst_fire.wav" 1, 10000, 1
+			563 playDialog "sound/weapons/burstrifle/burst_fire.wav" 1, 10000, 1
+			567 playDialog "sound/weapons/burstrifle/burst_fire.wav" 1, 10000, 1
+			571 playDialog "sound/weapons/burstrifle/burst_fire.wav" .5, 10000, 1
+			574 playDialog "sound/weapons/burstrifle/burst_fire.wav" .5, 10000, 1
+			578 playDialog "sound/weapons/burstrifle/burst_fire.wav" .5, 10000, 1
+			581 playDialog "sound/weapons/burstrifle/burst_fire.wav" .5, 10000, 1
+			585 playDialog "sound/weapons/burstrifle/burst_fire.wav" .5, 10000, 1
+			589 playDialog "sound/weapons/burstrifle/burst_fire.wav" .5, 10000, 1
+			593 playDialog "sound/weapons/burstrifle/burst_fire.wav" .5, 10000, 1
+			596 playDialog "sound/weapons/burstrifle/burst_fire.wav" .5, 10000, 1
+			600 playDialog "sound/weapons/burstrifle/burst_fire.wav" .5, 10000, 1
+			603 playDialog "sound/weapons/burstrifle/burst_fire.wav" .5, 10000, 1
+			607 playDialog "sound/weapons/burstrifle/burst_fire.wav" .5, 10000, 1
+			611 playDialog "sound/weapons/burstrifle/burst_fire.wav" .5, 10000, 1
+			615 playDialog "sound/weapons/burstrifle/burst_fire.wav" .5, 10000, 1
+			618 playDialog "sound/weapons/burstrifle/burst_fire.wav" .5, 10000, 1
+			618 playDialog "sound/environment/transport/transport_romulan.wav" 1, 10000, 1
+			673 playDialog "sound/player/CommunicatorBeep.wav" 1, 10000, 1
+		}
+	}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m7-end
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m7-end-sydney cin-m7-end-sydney.ska
+	{
+		server
+		{
+			entry useactorweapon "none"
+		}
+	}
+	cin-m7-end-jurot cin-m7-end-jurot.ska
+	{
+		server
+		{
+			entry useactorweapon "none"
+			57 playDialog "loc/eng/sound/dialog/m7l2/jurot_nolife2.mp3" 1, 10000, 0
+			57 simpleplayDialog "loc/deu/sound/dialog/m7l2/jurot_nolife2.mp3" 1, 10000, 0
+			
+			105 playDialog "loc/eng/sound/dialog/m7l2/jurot_youron.mp3" 1, 10000, 0
+			105 simpleplayDialog "loc/deu/sound/dialog/m7l2/jurot_youron.mp3" 1, 10000, 0
+			
+			623 playDialog "sound/player/CommunicatorBeep.wav" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m8-shuttlecrash lighting
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m8-shuttlecrash-sydney cin-m8-shuttlecrash-sydney.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			73 playDialog "loc/eng/sound/dialog/m8l1/syd_storm.mp3" 1, 10000, 0
+			73 simpleplayDialog "loc/deu/sound/dialog/m8l1/syd_storm.mp3" 1, 10000, 0
+			
+			161 playDialog "loc/eng/sound/dialog/m8l1/syd_werehit.mp3" 1, 10000, 0
+			161 simpleplayDialog "loc/deu/sound/dialog/m8l1/syd_werehit.mp3" 1, 10000, 0
+			
+			176 playDialog "loc/eng/sound/dialog/m8l1/syd_crash.mp3" 1, 10000, 0
+			176 simpleplayDialog "loc/deu/sound/dialog/m8l1/syd_crash.mp3" 1, 10000, 0
+		}
+	}
+	cin-m8-shuttlecrash-jurot  cin-m8-shuttlecrash-jurot.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m9l1a_k7intro
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin_m9l1a_k7intro_sydney cin_m9l1a_k7intro_sydney.ska
+{
+		server
+		{
+			122 playDialog "loc/eng/sound/dialog/m9l1/syd_yougotit.mp3" 1, 10000, 1
+			122 simpleplayDialog "loc/deu/sound/dialog/m9l1/syd_yougotit.mp3" 1, 10000, 1
+
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m6l0-attack
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m6l0-jurot cin-m6l0-jurot.ska
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              igm6_telsia
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-igm6_telsia_Telsia cin-igm6_telsia_Telsia.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			162 playDialog "loc/eng/sound/dialog/ent_m6/telsia_madeit.mp3" 1, 10000, 0
+			162 simpleplayDialog "loc/deu/sound/dialog/ent_m6/telsia_madeit.mp3" 1, 10000, 0
+			
+			267 playDialog "loc/eng/sound/dialog/ent_m6/telsia_withthe.mp3" 1, 10000, 0
+			267 simpleplayDialog "loc/deu/sound/dialog/ent_m6/telsia_withthe.mp3" 1, 10000, 0
+			
+			329 playDialog "loc/eng/sound/dialog/ent_m6/telsia_afraid.mp3" 1, 10000, 0
+			329 simpleplayDialog "loc/deu/sound/dialog/ent_m6/telsia_afraid.mp3" 1, 10000, 0
+			
+			406 playDialog "loc/eng/sound/dialog/ent_m6/telsia_ofus.mp3" 1, 10000, 0
+			406 simpleplayDialog "loc/deu/sound/dialog/ent_m6/telsia_ofus.mp3" 1, 10000, 0
+			
+			596 playDialog "loc/eng/sound/dialog/ent_m6/telsia_thedal.mp3" 1, 10000, 0
+			596 simpleplayDialog "loc/deu/sound/dialog/ent_m6/telsia_thedal.mp3" 1, 10000, 0
+			
+			753 playDialog "loc/eng/sound/dialog/ent_m6/telsia_what.mp3" 1, 10000, 0
+			753 simpleplayDialog "loc/deu/sound/dialog/ent_m6/telsia_what.mp3" 1, 10000, 0
+			
+			819 playDialog "loc/eng/sound/dialog/ent_m6/telsia_risked.mp3" 1, 10000, 0
+			819 simpleplayDialog "loc/deu/sound/dialog/ent_m6/telsia_risked.mp3" 1, 10000, 0
+			
+			932 playDialog "loc/eng/sound/dialog/ent_m6/telsia_appear.mp3" 1, 10000, 0
+			932 simpleplayDialog "loc/deu/sound/dialog/ent_m6/telsia_appear.mp3" 1, 10000, 0
+			
+			1047 playDialog "loc/eng/sound/dialog/ent_m6/telsia_explain.mp3" 1, 10000, 0
+			1047 simpleplayDialog "loc/deu/sound/dialog/ent_m6/telsia_explain.mp3" 1, 10000, 0
+			
+			1193 playDialog "loc/eng/sound/dialog/ent_m6/telsia_ohh.mp3" 1, 10000, 0
+			1193 simpleplayDialog "loc/deu/sound/dialog/ent_m6/telsia_ohh.mp3" 1, 10000, 0
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m7m8_crash
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m7m8_crash_Jurot cin-m7m8_crash_Jurot.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			40 playDialog "loc/eng/sound/dialog/m8l1/jurot_whoninj.mp3" 1, 10000, 0
+			40 simpleplayDialog "loc/deu/sound/dialog/m8l1/jurot_whoninj.mp3" 1, 10000, 0
+			
+			386 playDialog "loc/eng/sound/dialog/m8l1/jurot_medemer.mp3" 1, 10000, 0
+			386 simpleplayDialog "loc/deu/sound/dialog/m8l1/jurot_medemer.mp3" 1, 10000, 0
+		}
+	}
+
+cin-m7m8_crash_Sydney cin-m7m8_crash_Sydney.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			76 playDialog "NoDialog" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m5l2-bioscan
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m5l2-bio-telsia cin-m5l2-bio-telsia.ska
+	{
+		server
+		{
+			0 rendereffects +shadowFromBip01
+			410 playDialog "loc/eng/sound/dialog/m5l2/telsia_exploded.mp3" 1, 10000, 0
+			410 simpleplayDialog "loc/deu/sound/dialog/m5l2/telsia_exploded.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m5l1a intro
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m5l1a_intro_Telsia cin-m5l1a_intro_Telsia.ska
+	{
+		server
+		{
+			0 useactorweapon "tricorder"
+			0 forcealpha
+			0 alpha 0
+			
+			entry morph morph_lid-lshut 100 0.5
+			entry morph morph_lid-rshut 100 0.5
+			entry surface material3 +nodraw
+			entry blink 0			
+			20 displayEffect TransportIn FederationNoAnim
+			
+			//186 playDialog "loc/eng/sound/dialog/m5l1/telsia_tracking.mp3" 1, 10000,
+			186 playDialog "loc/eng/sound/dialog/m5l1/telsia_tracking.mp3" 1, 10000,0
+			186 simpleplayDialog "loc/deu/sound/dialog/m5l1/telsia_tracking.mp3" 1, 10000,0
+			
+			//271 playDialog "loc/eng/sound/dialog/m5l1/telsia_no.mp3" 1, 10000,
+			271 playDialog "loc/eng/sound/dialog/m5l1/telsia_no.mp3" 1, 10000,0
+			271 simpleplayDialog "loc/deu/sound/dialog/m5l1/telsia_no.mp3" 1, 10000,0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               igm2 DeBrief
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-igm2_debrief_Telsia cin-igm2_debrief_Telsia.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			268 playDialog "loc/eng/sound/dialog/ent_m2/telsia_assault.mp3" 1, 10000,0
+			268 simpleplayDialog "loc/deu/sound/dialog/ent_m2/telsia_assault.mp3" 1, 10000,0
+			
+			
+			481 playDialog "loc/eng/sound/dialog/ent_m2/telsia_personal.mp3" 1, 10000,0
+			481 simpleplayDialog "loc/deu/sound/dialog/ent_m2/telsia_personal.mp3" 1, 10000,0
+			
+			616 playDialog "loc/eng/sound/dialog/ent_m2/telsia_chewed.mp3" 1, 10000,0
+			616 simpleplayDialog "loc/deu/sound/dialog/ent_m2/telsia_chewed.mp3" 1, 10000,0
+			
+			824 playDialog "loc/eng/sound/dialog/ent_m2/telsia_raced.mp3" 1, 10000,0
+			824 simpleplayDialog "loc/deu/sound/dialog/ent_m2/telsia_raced.mp3" 1, 10000,0
+			
+			1154 playDialog "loc/eng/sound/dialog/ent_m2/telsia_dontknow.mp3" 1, 10000,0
+			1154 simpleplayDialog "loc/deu/sound/dialog/ent_m2/telsia_dontknow.mp3" 1, 10000,0
+			
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               m7l1b quadintro
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m7l1a_quadintro_Jurot cin-m7l1a_quadintro_Jurot.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			0 playDialog "loc/eng/sound/dialog/m7l1/" 1, 10000,0
+			0 simpleplayDialog "loc/deu/sound/dialog/m7l1/" 1, 10000,0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               m7l1b rescue
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m7l1b_rescue_Jurot cin-m7l1b_rescue_Jurot.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			411 playDialog "loc/eng/sound/dialog/m7l1/jurot_whywould.mp3" 1, 10000,0
+			411 simpleplayDialog "loc/deu/sound/dialog/m7l1/jurot_whywould.mp3" 1, 10000,0
+		}
+
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               m7l1a Sewer Entrance
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m7l1b_sewerenter_Jurot cin-m7l1b_sewerenter_Jurot.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			170 playDialog "loc/eng/sound/dialog/m7l1/jurot_linkup.mp3" 1, 10000,0
+			170 simpleplayDialog "loc/deu/sound/dialog/m7l1/jurot_linkup.mp3" 1, 10000,0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               m7l1a_injuredattrex
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m7l1a-jurot cin-m7l1a-jurot.ska
+	{
+		server
+		{
+			0 useactorweapon "tricorder"
+			46 playDialog "loc/eng/sound/dialog/m7l1/jurot_holdstill.mp3" 1, 10000,0
+			46 simpleplayDialog "loc/deu/sound/dialog/m7l1/jurot_holdstill.mp3" 1, 10000,0
+			
+			596 playDialog "loc/eng/sound/dialog/m7l1/jurot_whereent.mp3" 1, 10000,0
+			596 simpleplayDialog "loc/deu/sound/dialog/m7l1/jurot_whereent.mp3" 1, 10000,0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               igm8 Telsia
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-igm8_telsia_Telsia cin-igm8_telsia_Telsia.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			129 playDialog "loc/eng/sound/dialog/ent_m8/telsia_missg.mp3" 1, 10000, 0
+			129 simpleplayDialog "loc/deu/sound/dialog/ent_m8/telsia_missg.mp3" 1, 10000, 0
+			
+			179 playDialog "loc/eng/sound/dialog/ent_m8/telsia_horrible.mp3" 1, 10000, 0
+			179 simpleplayDialog "loc/deu/sound/dialog/ent_m8/telsia_horrible.mp3" 1, 10000, 0
+			
+			296 playDialog "loc/eng/sound/dialog/ent_m8/telsia_scum.mp3" 1, 10000, 0
+			296 simpleplayDialog "loc/deu/sound/dialog/ent_m8/telsia_scum.mp3" 1, 10000, 0
+			
+			329 playDialog "loc/eng/sound/dialog/ent_m8/telsia_glad.mp3" 1, 10000, 0
+			329 simpleplayDialog "loc/deu/sound/dialog/ent_m8/telsia_glad.mp3" 1, 10000, 0
+			
+			570 playDialog "loc/eng/sound/dialog/ent_m8/telsia_goodtobe.mp3" 1, 10000, 0
+			570 simpleplayDialog "loc/deu/sound/dialog/ent_m8/telsia_goodtobe.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               igm3 Brief
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-igm3_brief_Telsia cin-igm3_brief_Telsia.ska
+	{
+		server
+		{
+			458 playDialog "loc/eng/sound/dialog/ent_m3/telsia_getfifth.mp3" 1, 10000, 0
+			458 simpleplayDialog "loc/deu/sound/dialog/ent_m3/telsia_getfifth.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m2l1-telsia
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m2l1-t-telsia cin-m2l1-t-telsia.ska
+	{
+		server
+		{
+			38 playDialog "loc/eng/sound/dialog/m2l1/telsia_declined.mp3" 1, 10000, 0
+			38 simpleplayDialog "loc/deu/sound/dialog/m2l1/telsia_declined.mp3" 1, 10000, 0
+			
+			114 playDialog "loc/eng/sound/dialog/m2l1/telsia_whatdo.mp3" 1, 10000, 0
+			114 simpleplayDialog "loc/deu/sound/dialog/m2l1/telsia_whatdo.mp3" 1, 10000, 0
+			
+			167 playDialog "loc/eng/sound/dialog/m2l1/telsia_resign.mp3" 1, 10000, 0
+			167 simpleplayDialog "loc/deu/sound/dialog/m2l1/telsia_resign.mp3" 1, 10000, 0
+			
+			224 playDialog "loc/eng/sound/dialog/m2l1/telsia_price.mp3" 1, 10000, 0
+			224 simpleplayDialog "loc/deu/sound/dialog/m2l1/telsia_price.mp3" 1, 10000, 0
+			
+			406 playDialog "loc/eng/sound/dialog/m2l1/telsia_untilborg.mp3" 1, 10000, 0
+			406 simpleplayDialog "loc/deu/sound/dialog/m2l1/telsia_untilborg.mp3" 1, 10000, 0
+			
+			549 playDialog "loc/eng/sound/dialog/m2l1/telsia_ifaccept.mp3" 1, 10000, 0
+			549 simpleplayDialog "loc/deu/sound/dialog/m2l1/telsia_ifaccept.mp3" 1, 10000, 0
+		}
+	}
+
+	cin-m2l1-t-2telsia cin-m2l1-t-telsia2.ska
+	{
+		server
+		{
+			111 playDialog "loc/eng/sound/dialog/m2l1/telsia_maybe.mp3" 1, 10000, 0
+			111 simpleplayDialog "loc/deu/sound/dialog/m2l1/telsia_maybe.mp3" 1, 10000, 0
+			
+			149 playDialog "loc/eng/sound/dialog/m2l1/telsia_missyou.mp3" 1, 10000, 0
+			149 simpleplayDialog "loc/deu/sound/dialog/m2l1/telsia_missyou.mp3" 1, 10000, 0
+		}
+	}
+
+	cin-m2l1-t-1telsia cin-m2l1-t-telsia1.ska
+	{
+		server
+		{
+			54 playDialog "loc/eng/sound/dialog/m2l1/telsia_throw.mp3" 1, 10000, 0
+			54 simpleplayDialog "loc/deu/sound/dialog/m2l1/telsia_throw.mp3" 1, 10000, 0
+		}
+	}
+
+	cin-m2l1-t-3telsia cin-m2l1-t-telsia3.ska
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                igm4_brief
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-igm4_brief_Telsia cin-igm4_brief_Telsia.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			197 playDialog "loc/eng/sound/dialog/ent_m4/telsia_killed.mp3" 1, 10000, 0
+			197 simpleplayDialog "loc/deu/sound/dialog/ent_m4/telsia_killed.mp3" 1, 10000, 0
+			
+			878 playDialog "loc/eng/sound/dialog/ent_m4/telsia_allies.mp3" 1, 10000, 0
+			878 simpleplayDialog "loc/deu/sound/dialog/ent_m4/telsia_allies.mp3" 1, 10000, 0
+			
+			1335 playDialog "loc/eng/sound/dialog/ent_m4/telsia_help.mp3" 1, 10000, 0
+			1335 simpleplayDialog "loc/deu/sound/dialog/ent_m4/telsia_help.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m3l2 - Chell
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m3l2-c-jurot cin-m3l2-c-jurot.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			86 playDialog "loc/eng/sound/dialog/dallas02/jurot_commstat.mp3" 1, 10000, 1
+			86 simpleplayDialog "loc/deu/sound/dialog/dallas02/jurot_commstat.mp3" 1, 10000, 1
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m3l2 - Transporter Room
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		cin-m3l2-trans-jurot cin-m3l2-trans-jurot.ska
+	{
+		server
+		{
+			0 useactorweapon "tricorder"
+			25 playDialog "loc/eng/sound/dialog/dallas02/jurot_pattweak.mp3" 1, 10000, 0
+			25 simpleplayDialog "loc/deu/sound/dialog/dallas02/jurot_pattweak.mp3" 1, 10000, 0
+			
+			162 playDialog "loc/eng/sound/dialog/dallas02/jurot_sick.mp3" 1, 10000, 0
+			162 simpleplayDialog "loc/deu/sound/dialog/dallas02/jurot_sick.mp3" 1, 10000, 0
+		}
+	}
+	
+		cin-m3l2-trans-telsia cin-m3l2-trans-telsia.ska
+	{
+		server
+		{
+			0 forcealpha
+			0 alpha 0
+			0 useactorweapon "none"
+			
+			entry morph morph_lid-lshut 100 0.5
+			entry morph morph_lid-rshut 100 0.5
+			entry surface material3 +nodraw
+			entry blink 0
+			120 displayEffect TransportIn FederationNoAnim
+			
+			122 playDialog "loc/eng/sound/dialog/dallas02/telsia_ooo.mp3" 1, 10000, 0
+			122 simpleplayDialog "loc/deu/sound/dialog/dallas02/telsia_ooo.mp3" 1, 10000, 0
+			
+			309 playDialog "loc/eng/sound/dialog/dallas02/telsia_late.mp3" 1, 10000, 0
+			309 simpleplayDialog "loc/deu/sound/dialog/dallas02/telsia_late.mp3" 1, 10000, 0
+			
+			420 playDialog "loc/eng/sound/dialog/dallas02/telsia_thanks.mp3" 1, 10000, 0
+			420 simpleplayDialog "loc/deu/sound/dialog/dallas02/telsia_thanks.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m5l2c - Scientist
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m5l2csci_telsia cin-m5l2csci_telsia.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			455 playDialog "loc/eng/sound/dialog/m5l2/telsia_killmach.mp3" 1, 10000, 0
+			455 simpleplayDialog "loc/deu/sound/dialog/m5l2/telsia_killmach.mp3" 1, 10000, 0
+			
+			946 playDialog "loc/eng/sound/dialog/m5l2/telsia_crank.mp3" 1, 10000, 0
+			946 simpleplayDialog "loc/deu/sound/dialog/m5l2/telsia_crank.mp3" 1, 10000, 0
+			
+			1095 playDialog "loc/eng/sound/dialog/m5l2/telsia_saveson.mp3" 1, 10000, 0
+			1095 simpleplayDialog "loc/deu/sound/dialog/m5l2/telsia_saveson.mp3" 1, 10000, 0
+			
+			1179 playDialog "loc/eng/sound/dialog/m5l2/telsia_killson.mp3" 1, 10000, 0
+			1179 simpleplayDialog "loc/deu/sound/dialog/m5l2/telsia_killson.mp3" 1, 10000, 0
+		}
+	}
+	
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                SFA-Academy
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	cin-m2_telsia 	cin-m2_telsia.ska
+	{
+		server
+		{
+			152 playDialog "loc/eng/sound/dialog/m2l1/telsia_reason.mp3" 1, 10000, 0
+			152 simpleplayDialog "loc/deu/sound/dialog/m2l1/telsia_reason.mp3" 1, 10000, 0
+			
+			363 playDialog "loc/eng/sound/dialog/m2l1/telsia_wait.mp3" 1, 10000, 0
+			363 simpleplayDialog "loc/deu/sound/dialog/m2l1/telsia_wait.mp3" 1, 10000, 0
+			
+			764 playDialog "loc/eng/sound/dialog/m2l1/telsia_nurse.mp3" 1, 10000, 0
+			764 simpleplayDialog "loc/deu/sound/dialog/m2l1/telsia_nurse.mp3" 1, 10000, 0
+			
+			924 playDialog "loc/eng/sound/dialog/m2l1/telsia_janeway.mp3" 1, 10000, 0
+			924 simpleplayDialog "loc/deu/sound/dialog/m2l1/telsia_janeway.mp3" 1, 10000, 0
+		}
+	}
+	cin-m2_2telsia	cin-m2_2telsia.ska
+	{
+		server
+		{
+			0 playDialog "loc/eng/sound/dialog/m2l1/telsia_starbase.mp3" 1, 10000, 0
+			0 simpleplayDialog "loc/deu/sound/dialog/m2l1/telsia_starbase.mp3" 1, 10000, 0
+		}
+	}
+			
+			
+		cin-m3_lean		cin-m3_lean.ska
+		cin-m3_hunch		cin-m3_hunch.ska
+		cin-m3_tohunch          cin-m3_tohunch.ska
+		cin-m3_fromhunch        cin-m3_fromhunch.ska
+		cin-m3_drop		cin-m3_drop.ska
+		{
+			server
+			{
+			entry immortal 1 // To Turn On
+			}
+		}
+		cin-m3_scan		cin-m3_scan.ska
+		cin-m3_toscan		cin-m3_toscan.ska
+		cin-m3_fromscan		cin-m3_fromscan.ska
+		cin-m3_late		cin-m3_late.ska
+		cin-m3_greet		cin-m3_greet.ska
+		cin-m3_staying		cin-m3_staying.ska		
+		cin-m8_back   		cin-m8_back.ska
+		cin-m8_lean   		cin-m8_lean.ska
+		cin-m8_foward 		cin-m8_foward.ska
+		cin-m8_legup  		cin-m8_legup.ska
+		cin-m8_situp  		cin-m8_situp.ska
+	}

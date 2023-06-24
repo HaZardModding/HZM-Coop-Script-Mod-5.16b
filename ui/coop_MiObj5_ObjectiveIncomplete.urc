@@ -1,0 +1,7 @@
+menu "coop_MiObj5_ObjectiveIncomplete" 1 1 NONE 0
+bgcolor 0 0 0 0
+borderstyle NONE
+fullscreen 0
+fadedelay 2
+//Co-Op Related, set state to active
+showcommand	"seta coop_five_s 1\n"

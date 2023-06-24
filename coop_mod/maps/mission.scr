@@ -1,0 +1,201 @@
+//-----------------------------------------------------------------------------------
+// Script By:	Christian Sebastian Strahl (Chrissstrahl)
+// Created on:	2007.09.29
+// E-Mail:		chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+// CONTAININS ALL MISSION RUTINES USED BY THE CO-OP MOD
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2012 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////Functions
+////////////////////////////////////////////////////////////////////////////////
+void globalCoop_mission_accomplished()
+//----------------------------------------------------------------------
+// Mission can now end sucessfully, even if time runs out
+//----------------------------------------------------------------------
+{
+	coop_vector_linuxForcerebootTransporting_y=1;
+}
+
+
+void globalCoop_mission_completed(string coop_nextmap)
+//----------------------------------------------------------------------
+// do this stuff at levelend
+//----------------------------------------------------------------------
+{
+//do not allow multiplePlayercalls on this thread
+	if(coop_vector_mainisactiveLevelcompleteLmslevelend_y != 1)
+	{
+		coop_vector_mainisactiveLevelcompleteLmslevelend_y=1;
+		coop_vector_svnextmaporrebootDoloadnextmimapWaitingForTeam_y=1;//allow loading next mission on timeranout
+//have letterbox gone away, or else players will not see HUD text!
+		globalCoop_cin_clearletterbox();
+//Do Multiplayer End Rutine
+////////////////////////////////////////////////////////////////////////////////
+		if(cvar_bool_multiplayer){
+//CHECK FOR REBOOT ON MAPS(CURRENT + NEXT)
+			if((globalCoop_server_checkRebootByMap(coop_nextmap) + getCvarInt("coop_lvlL")) > 4){
+				coop_vector_linuxForcerebootTransporting_y=1;//use a real var, it is more relaiable
+			}
+//Set next map to be loadad, FAILSAVE!!!
+			globalCoop_main_wait1DotZero();
+//If we don't have faild the Mission, show success
+			if(coop_nextmap != "failure"){
+				coop_vector_mainisactiveLevelcompleteLmslevelend_y = 1;
+				coop_bool_nextMapIsSet=1;
+				stuffCMD("seta coop_sv_startcmd \"map "+coop_nextmap+"\"\n");
+//Do LevelEnd Rutine(pause script,nodamage,immobilize)
+				globalCoop_level_endProcedur();				
+//Notifie Observer
+				globalCoop_main_print("================ MISSION Complete ====================");
+				globalCoop_main_print("LOADING NEXT MAP: "+coop_nextmap);
+//REMOVE OBJECTIVE NOTIFIE HUD
+				globalCoop_huds_RemoveAll("coop_notify");
+//ADD MISSION SUCESS HUD
+				if(coop_bool_showMissionSucessHud){
+					globalCoop_main_camFadeOut(1);
+					globalCoop_player_transmittToAll("exec coop_mod/cfg/removeformission.cfg");
+					globalCoop_huds_AddAll("missionsuccess");
+					globalCoop_main_wait2DotZero();
+					globalCoop_huds_RemoveAll("missionsuccess");
+				}
+//INFORM PLAYERS
+//REMOVE HUDS, ADD LOADING HUD
+				thread globalCoop_huds_AddAll("sublevelLoading");
+				thread globalCoop_huds_AddAll("coop_serverLoading");
+			}
+//REBOOT SERVER, PAUSE THIS THREAD - EXIT HERE ON REBOOT
+			if(globalCoop_server_reboot() == 1 && cvar_float_dedicated >= 1)
+			{
+				return;
+			}
+//Wait a moment
+			globalCoop_main_wait2DotZero();			
+		}
+//LOADING A EMPTY MAP CAN LEAD INTO A CRASH, SO DON'T DO IT
+		if(coop_nextmap == "")
+		{
+			stuffCMD("restart");
+		}
+//spawn level end trigger, required for sp to keep the game./level. vars and weapons
+		spawn("trigger_changelevel","targetname","gloablCoop_tEndLvl","map",coop_nextmap);
+		globalCoop_main_waitAFrame();
+//load map directly in multiplayer,
+//the games does create a savegame for sublevel in base/config/save
+//trigger_changelevel -> linux servers crash or players loose connection
+		if(cvar_bool_multiplayer)
+		{
+			triggerEntity($gloablCoop_tEndLvl);
+			globalCoop_main_waitAFrame();
+			//wait(0.04);//0.04 seams to be the best //0.045 PING RANGE:50-150
+			globalCoop_server_loadGivenMapNow(coop_nextmap);
+		}
+		else
+		{
+			nextmap(coop_nextmap);//overwrite callvote nextmap
+			noIntermission();//for multiplayer, so the map changes instantly and not after 30 sec or so
+			triggerEntity($gloablCoop_tEndLvl);
+		}
+	}
+}
+
+
+void globalCoop_mission_fail()
+//----------------------------------------------------------------------
+// Do simple mission failure
+//----------------------------------------------------------------------
+{
+	thread globalCoop_mission_failWithReason("default");
+}
+
+
+void globalCoop_mission_failCivilianKilled()
+//----------------------------------------------------------------------
+// Do mission failure with reason "CivilianKilled"
+//----------------------------------------------------------------------
+{
+	thread globalCoop_mission_failWithReason("CivilianKilled");
+}
+
+
+void globalCoop_mission_failWithReason(string sReason)
+//----------------------------------------------------------------------
+// do this on mission FailurePlayer//setobjectivefailed(String namePlayer, Boolean failed)
+// This function need more attention later
+//----------------------------------------------------------------------
+{
+//Do not call this thread Multiple Times!
+	if($world.getFloatVar("globalCoop_mission_failWithReason_isRunning") != 1){
+		$world.setFloatVar("globalCoop_mission_failWithReason_isRunning",1);
+	
+//Set empty string for sp and mp
+		if(sReason == "default" || sReason == ""){
+			sReason = "DefaultFailure";
+		}
+		
+//Singeplayer - EXIT
+////////////////////////////////////////////////////////////////////////////////	
+////////////////////////////////////////////////////////////////////////////////
+		if(!cvar_bool_multiplayer){
+			globalCoop_main_wait2DotZero();
+			$player.missionfailed( sReason );
+			return;
+		}
+//Multiplayer - CONTINUE
+////////////////////////////////////////////////////////////////////////////////	
+////////////////////////////////////////////////////////////////////////////////
+//have letterbox gone away, or else players will not see HUD text!
+		globalCoop_cin_clearletterbox();
+//Check for dialog
+		if(sReason == "CivilianKilled"){
+			thread globalCoop_dialog_playSimple($world,"combat/picard_court.mp3",3,444444);
+		}
+		
+		float fNoLocalString;
+		fNoLocalString = $world.getFloatVar("globalCoop_missionFailedUserString");
+		
+//Add Hud; ui_failureReason
+		if(fNoLocalString != 1){
+			sReason = "$$"+sReason+"$$";
+		}
+		
+		globalCoop_main_print("============ Co-Op = Mission Failure =================");
+		globalCoop_main_print(sReason);
+		centerPrint("^3$$DefaultFailure$$^1 -> ^8"+sReason+"\n");
+		globalCoop_player_transmittToAll("set ui_failureReason "+sReason);
+		
+//Add failure hud
+		if(sReason != "$$TimeRanOut$$")
+		{
+			globalCoop_huds_AddAll("coop_failure");
+		}
+//Do LevelEnd Rutine
+		thread globalCoop_level_endProcedur();
+		globalCoop_main_wait2DotZero();
+//Remove failure hud
+		globalCoop_huds_RemoveAll("coop_failure");
+//End Game
+		
+		if(cvar_float_dedicated != 0){
+			globalCoop_level_triggerLevelChange();
+		}
+		if(!globalCoop_server_reboot()){
+			wait(10);
+		}
+		stuffCMD("restart\n");
+	}
+}
+

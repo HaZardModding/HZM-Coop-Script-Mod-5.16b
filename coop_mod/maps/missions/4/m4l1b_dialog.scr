@@ -1,0 +1,68 @@
+
+//--------------------------------------------------------------------------------------
+// Dialog Script
+// 	Contains all dialog setup code for one specific BSP.  That map's script should
+//	#include this file and call the function "initDialog" somewhere in it's main function.
+//--------------------------------------------------------------------------------------
+void initDialog()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		print( "Initializing dialog\n" );
+
+		// setup attrexian 1 onuse dialog
+		$chaser1.setdialogmode("normal");
+		$chaser1.settalkwatchmode ( "turnto" );
+		$chaser1.alias( "attrexian1Dialog1", "localization/sound/dialog/m4l1/attrex_help.mp3");
+		$chaser1.alias( "attrexian1Dialog1", "localization/sound/dialog/m4l1/attrex_repel.mp3");
+		$chaser1.dialog( "attrexian1Dialog" );
+
+		// setup attrexian 2 onuse dialog
+		$chaser2.setdialogmode("normal");
+		$chaser2.settalkwatchmode ( "turnto" );
+		$chaser2.alias( "attrexian2Dialog1", "localization/sound/dialog/m4l1/attrex_didthings.mp3");
+		$chaser2.alias( "attrexian2Dialog2", "localization/sound/dialog/m4l1/attrex_giveyou.mp3");
+		$chaser2.dialog( "attrexian2Dialog" );
+
+		// setup attrexian 3 onuse dialog
+		$controlRoom_seq02_attrexian2.setdialogmode("normal");
+		$controlRoom_seq02_attrexian2.settalkwatchmode ( "turnto" );
+		
+		$controlRoom_seq02_attrexian2.alias( "attrexian3DialogPhaseOne1", "localization/sound/dialog/m4l1/attrex5_dontjust.mp3");
+		$controlRoom_seq02_attrexian2.alias( "attrexian3DialogPhaseTwo1", "localization/sound/dialog/m4l1/att5_byfates.mp3");
+		$controlRoom_seq02_attrexian2.alias( "attrexian3DialogPhaseThree1", "localization/sound/dialog/m4l1/att5_out.mp3");
+		
+		$controlRoom_seq02_attrexian2.dialog( "attrexian3DialogPhaseOne", "depends", "level.PodNotLaunched" );
+		$controlRoom_seq02_attrexian2.dialog( "attrexian3DialogPhaseTwo", "depends", "level.PodLaunched" );
+		$controlRoom_seq02_attrexian2.dialog( "attrexian3DialogPhaseThree", "depends", "level.BasherLoose" );
+
+		// setup attrexian 4 onuse dialog
+		$controlRoom_seq02_attrexian.setdialogmode("normal");
+		$controlRoom_seq02_attrexian.settalkwatchmode ( "turnto" );
+		
+		$controlRoom_seq02_attrexian.alias( "attrexian4PhaseOneDialog1", "localization/sound/dialog/m4l1/attrex4_hurryde.mp3");
+		$controlRoom_seq02_attrexian.alias( "attrexian4PhaseTwoDialog1", "localization/sound/dialog/m4l1/attrex4_thankfa.mp3");
+		$controlRoom_seq02_attrexian.alias( "attrexian4PhaseThreeDialog1", "localization/sound/dialog/m4l1/att4_help3.mp3");
+		
+		$controlRoom_seq02_attrexian.dialog( "attrexian4PhaseOneDialog", "depends", "level.PodNotLaunched" );
+		$controlRoom_seq02_attrexian.dialog( "attrexian4PhaseTwoDialog", "depends", "level.PodLaunched" );
+		$controlRoom_seq02_attrexian.dialog( "attrexian4PhaseThreeDialog", "depends", "level.BasherLoose" );
+
+		// setup attrexian command official 1 onuse dialog
+		$commandOfficial01.setdialogmode("normal");
+		$commandOfficial01.settalkwatchmode ( "turnto" );
+		$commandOfficial01.alias( "attrexian5Dialog1", "localization/sound/dialog/m4l1/attrex_stopinv.mp3");
+		$commandOfficial01.dialog( "attrexian5Dialog" );
+
+		// setup attrexian command official 1 onuse dialog
+		$commandOfficial02.setdialogmode("normal");
+		$commandOfficial02.settalkwatchmode ( "turnto" );
+		$commandOfficial02.alias( "attrexian6Dialog1", "localization/sound/dialog/m4l1/attrex_repel.mp3");
+		$commandOfficial02.dialog( "attrexian6Dialog" );
+
+		// setup attrexian command official 1 onuse dialog
+		$commandOfficial03.setdialogmode("normal");
+		$commandOfficial03.settalkwatchmode ( "turnto" );
+		$commandOfficial03.alias( "attrexian7Dialog1", "localization/sound/dialog/m4l1/attrex1_going.mp3");
+		$commandOfficial03.dialog( "attrexian7Dialog" );
+	}
+}

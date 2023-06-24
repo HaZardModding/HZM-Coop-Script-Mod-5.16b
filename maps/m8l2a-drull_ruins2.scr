@@ -1,0 +1,924 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	  m8l2-drull_ruins2
+//  Script By:   J. Keehan, A. Bellefeuil, J. Hefty
+//  Geometry By:  J. Keehan, A. Bellefeuil, J. Hefty
+//  Created on:   2/8/2002
+//
+//-----------------------------------------------------------------
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  DEFINE SCRIPT
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+
+void main();
+
+//--- setup
+void setupWorld();
+void setupAI();
+void setupPlayer();
+void controlChewerSet1();
+void ambientDamageLoop();
+
+//void basherAttackCheck();
+void basherAttackSequence1();
+//void walkwayDestroyCheck2();
+void walkwayDestroySequence2();
+//void door1_unlock_sequence();
+void randomAlienLaunch( entity alien );
+//restvoid triggerExplosionSequence();
+
+void seqtunneldropshieldblink();
+void seqtunneldrop();
+void inaccessible_sound();
+
+//--- sequences
+void liftDown1();
+void liftDoor1OpenLeft();
+void liftDoor1OpenRight();
+void liftDoor1CloseLeft();
+void liftDoor1CloseRight();
+void missionFail();
+void circuitbroke();
+
+//-----------------------------
+//--- variables
+
+//autosave
+void autosave();
+
+//--- float variables
+float idryll_ready = 0;
+float encounter_attacker_counter	= 0;
+float canExplodeWalkway				= 0;
+float canExplodeWalkway2			= 0;
+
+//--- armature variables
+entity cinematicArm_InigorDeath1;
+entity cinematicArm_InigorDeath2;
+void coop_liftDown1();
+void coop_liftUp1();
+void coop_lift1Activate();
+void coop_waitForTeam();
+void coop_endLevel();
+
+float hack = 0;//the JJ hack-O-rama....which should be removed....but it'll probably ship with this hack.....*cough* *hack* *cough*....//FIX ME
+float float_liftState = 2;
+
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  INCLUDES
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/global/global_common.scr"
+#include "maps/global_scripts/global_math.scr"
+#include "maps/global_scripts/global_acceleratedMovement.scr"
+#include "coop_mod/maps/global/global_cinematicFX.scr"
+#include "maps/global_scripts/global_debugUtils.scr"
+#include "coop_mod/maps/global/global_flyin.scr"
+#include "coop_mod/maps/missions/8/m8_drullDoors.scr"
+#include "coop_mod/maps/missions/8/m8_alienCombat.scr"
+#include "coop_mod/maps/missions/8/m8_forcefields.scr"
+#include "coop_mod/maps/missions/8/m8l2a_cin.scr"
+
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  MAIN THREAD
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//---------------------
+void main()
+//---------------------
+{
+	globalCoop_server_precacheSingleplayer();
+	globalCoop_main_camFadeOut(.1);
+	
+	if(getCvarInt("g_gametype") == 1)
+	{
+		$munro.remove();
+	}
+	else
+	{
+		$munro.ai_off();
+	}
+	
+	soundtrack( "music/m8l2a.mus" );
+//--farplane
+	$world.entity_fade_dist( 8000 );
+	$world.farplane_color( '0.158 0.142 0.159' );
+	$world.farplane( 6000 );
+	$world.farplane_cull( 1 );
+	
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_string_nextMapToCheck			= "m8l2b-drull_ruins2";//set the map we gona load next while we are in testmode
+//Set spawnangles for this level
+	coop_float_spawnAngle0 				= 270;
+	coop_float_spawnAngle1 				= 290;
+//spawnorigins, Spawn Players on those locations, at map start
+	coop_vector_spawnOrigin1 			= '-3185 5069 776';
+	//coop_vector_spawnOrigin1 			= '-2714 5281 870';
+	coop_vector_spawnOrigin2 			= '-2606 5291 873';
+	coop_vector_spawnOrigin3 			= '-2532 5217 868';
+	coop_vector_spawnOrigin4 			= '-2451 5215 868';
+	coop_vector_spawnOrigin5 			= '-2369 5240 868';
+	coop_vector_spawnOrigin6 			= '-2293 5210 867';
+	coop_vector_spawnOrigin7 			= '-2215 5115 870';
+	coop_vector_spawnOrigin8 			= '-2154 4965 890';
+//Definie Objective
+	coop_string_objectiveItem1			= "ProtectKrindo";
+//Give each player a Item/weapon, the integer stands for the player-ID
+	coop_string_weapon1 				= "models/weapons/worldmodel-attrex-rifle.tik";
+	coop_string_weapon2					= "models/weapons/worldmodel-BurstRifle.tik";
+	coop_string_weapon3 				= "models/weapons/worldmodel-Phaser-stx.tik";
+	coop_string_weapon4 				= "models/weapons/worldmodel-sniperrifle.tik";
+	coop_string_weapon5 				= "models/weapons/worldmodel-Tricorder-stx.tik";
+	coop_string_weapon6 				= "models/weapons/worldmodel-FieldAssaultRifle.tik";
+
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	//--- fade the world out
+	//cam_fadeout( .1, 0, 0, 0, 1, 0 );
+
+	//--- setup the world
+	thread setupWorld();
+	setupAI();
+	
+	//--- start the intro cinematic
+	thread introCinematic();
+	thread setupPlayer();
+}
+
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  SETUP FUNCTIONS
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+
+void setupWorld()
+{
+	//--hide stuff
+	$walkway_debris.hide();
+	$walkway_debris.notsolid();
+	$basherClipBrush.notsolid();
+	$walkway_debris1.hide();
+	$walkway_debris1.notsolid();
+	$walkway_debris2.hide();
+	$walkway_debris2.notsolid();
+	$steam1.hide();
+	$launch1.hide();
+	$launch2.hide();
+	$launch3.hide();
+//	$launch4.hide();
+	$tunneldrop_debris.hide();
+//	$basherAttackCheck.nottriggerable();
+	
+	$basherAttack_1.setfloatvar ( "dontAllowDeathInTransit" , 1.0 );
+	
+	//--bind doors to lift
+	$liftDoorSide1a.bind( $drull_lift1 );
+	$liftDoorSide1b.bind( $drull_lift1 );
+	$liftDoorSide2a.bind( $drull_lift1 );
+	$liftDoorSide2b.bind( $drull_lift1 );
+	
+	//--playing forcefield sounds
+	$forcefieldSound.loopsound( "sound/ships/drull/drull_forcefield3.wav", 1, 128);
+	$forcefieldSound_remove1.loopsound( "sound/ships/drull/drull_forcefield3.wav", 1, 128);
+	$forcefieldSound_remove2.loopsound( "sound/ships/drull/drull_forcefield3.wav", 1, 128);
+	$forcefieldSound_remove3.loopsound( "sound/ships/drull/drull_forcefield3.wav", 1, 128);
+		
+	globalAccelMove_Rotate( $liftDoorSide1a, '0 -90 0', .05, "rampupdown", "" );
+	globalAccelMove_Rotate( $liftDoorSide1b, '0 90 0', .05, "rampupdown", "" );
+	
+	//--setup our plasma jets for the explosion sequence
+	float i;
+	for ( i = 1 ; i <= 25 ; i++ )
+	{
+		entity e;
+		e=getentity	( "plasma"+i );
+		if(doesEntityExist(e))
+		{
+			e.hide();
+		}
+	}
+	
+	if(cvar_bool_multiplayer){//Multiplayer
+		$liftClip.notsolid();
+		$drull_lift1.setfloatvar("coop_liftState",2);
+		spawn("trigger_once","thread","coop_waitForTeam","targetname","coop_levelEndTrigger","origin","-9299 2757 30");
+		wait(.1);
+		$coop_levelEndTrigger.setsize('-256 -256 0','256 256 128');
+	//spawn Class Selection
+		thread globalCoop_class_setup("Medic",'-2649 4776 85');
+		thread globalCoop_class_setup("HeavyWeapons",'-2749 4776 85');
+		thread globalCoop_class_setup("Technician",'-2849 4776 85');
+	}
+}
+
+
+void setupAI()
+{
+	//--- krindo
+	$krindo.health ( 300 );
+	$krindo.allowfall ( 1 );
+	$krindo.not_allowed_to_kill();
+	$krindo.killthread ( "missionFail" );
+	$krindo.ai_off();
+	$krindo.pushable(0);
+	$krindo.mass(99999);
+	$krindo.nodamage();
+	$dead_idryll_1.ai_off();
+	$dead_idryll_2.ai_off();
+	$dead_idryll_3.ai_off();
+	$dead_idryll_4.ai_off();
+	$dead_idryll_5.ai_off();
+	
+	$dead_idryll_1.notsolid();
+	$dead_idryll_2.notsolid();
+	$dead_idryll_3.notsolid();
+	$dead_idryll_4.notsolid();
+	$dead_idryll_5.notsolid();
+
+	$dead_idryll_1.anim( "hunched_dead2" );
+	$dead_idryll_2.anim( "hunched_dead4" );
+	$dead_idryll_3.anim( "hunched_dead4" );
+	$dead_idryll_4.anim( "hunched_dead1" );
+	$dead_idryll_5.anim( "hunched_dead3" );
+	
+	//start our randomly launching aliens
+	float i;
+	for ( i = 1 ; i <= 12 ; i++ )
+	{
+		entity alien;
+		alien = getentity ( "launchAlien"+i );
+		thread randomAlienLaunch ( alien );
+	}
+}
+
+
+void setupPlayer()
+{
+	//--- setup objectives
+	if(!cvar_bool_multiplayer){//Singleplayer
+		waitforplayer ();
+		$player.turnTowardsEntity( $krindo );
+		$player.loadobjectives( "m8l2-drull_ruins2" );
+	}
+}
+
+void controlChewerSet1()
+{
+	wait( .25 );
+	$chewer1.ai_off();
+	$chewer2.ai_off();
+	//--set angle of spawned chewers
+	$chewer1.angle( 240 );
+	$chewer2.angle( 290 );
+	$chewer1.settendency ( "fakeattack" , 1.0 );
+	$chewer2.settendency ( "fakeattack" , 1.0 );
+	globalCoop_actor_healthMultiplicatePerPlayer($chewer1);
+	globalCoop_actor_healthMultiplicatePerPlayer($chewer2);
+	wait( .25 );
+	$chewer1.ai_on();
+	$chewer2.ai_on();
+}
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  GAME FUNCTIONS
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+void liftDown1()
+{
+	$liftClip.solid();
+	$drull_lift1.playsound( "sound/environment/machine/lift4.wav", 8, 1.1, 1500 );
+	globalAccelMove( $drull_lift1, '0 0 -744', 7, "rampupdown", "" );
+	$drull_lift1.playsound( "sound/environment/machine/lift4stop.wav", 8, 1.1, 1500 );
+	wait( .5 );
+	thread liftDoor1OpenLeft();
+	thread liftDoor1OpenRight();
+	$liftClip.notsolid();
+}
+
+
+void coop_lift1Activate()
+{
+entity eTrigger;
+	eTrigger = getCurrentEntity();
+	if(doesEntityExist(eTrigger))
+	{
+		entity eCaller;
+		eCaller = eTrigger.getLastActivatingEntity();
+		
+		$coop_tM_lift1_Call.nottriggerable();
+		if(globalCoop_check_entityValidPlayerTargetname(eCaller) == 1)
+		{
+			if(float_liftState == 1)
+			{
+				float_liftState = 3;
+				coop_liftUp1();
+				float_liftState = 2;
+			}
+			else if(float_liftState == 2)
+			{
+				float_liftState = 3;
+				coop_liftDown1();
+				float_liftState = 1;
+			}
+		}
+		$coop_tM_lift1_Call.triggerable();
+	}
+
+}
+
+void coop_liftDown1()
+{
+	if(cvar_bool_multiplayer){//Multiplayer
+	//doors close
+		thread liftDoor1CloseLeft();
+		thread liftDoor1CloseRight();
+	//wait for doors to close
+		wait( 2 );
+	//Movelift
+		$drull_lift1.playsound( "sound/environment/machine/lift4.wav", 8, 1.1, 1500 );
+		globalAccelMove( $drull_lift1, '0 0 -744', 7, "rampupdown", "" );
+		$drull_lift1.playsound( "sound/environment/machine/lift4stop.wav", 8, 1.1, 1500 );
+		wait( .5 );
+	//Open doors
+		thread liftDoor1OpenLeft();
+		thread liftDoor1OpenRight();
+		wait(10);
+	}
+}
+
+
+void coop_liftUp1()
+{
+	if(cvar_bool_multiplayer){//Multiplayer
+		thread liftDoor1CloseLeft();
+		thread liftDoor1CloseRight();
+		wait( 2 );//wait for doors to close
+
+		//wait( .5 ); 
+		$drull_lift1.playsound( "sound/environment/machine/lift4.wav", 8, 1.1, 1500 );
+		globalAccelMove( $drull_lift1, '0 0 744', 7, "rampupdown", "" );
+		$drull_lift1.playsound( "sound/environment/machine/lift4stop.wav", 8, 1.1, 1500 );
+		wait( .5 );
+		thread liftDoor1OpenLeft();
+		thread liftDoor1OpenRight();
+		wait(10);
+	}
+}
+
+
+void liftDoor1OpenLeft()
+{
+	$liftDoorSide1a.playsound( "sound/environment/machine/mech_move1.wav", 8, 1.1, 1500 );
+	globalAccelMove_Rotate( $liftDoorSide1a, '0 -90 0', 2, "rampupdown", "" );
+	$liftDoorSide1a.playsound( "sound/environment/machine/mech_stop1.wav", 8, 1.1, 1500 );
+}
+
+void liftDoor1OpenRight()
+{
+	$liftDoorSide1b.playsound( "sound/environment/machine/mech_move1.wav", 8, 1.1, 1500 );
+	globalAccelMove_Rotate( $liftDoorSide1b, '0 90 0', 2, "rampupdown", "" );
+	$liftDoorSide1b.playsound( "sound/environment/machine/mech_stop1.wav", 8, 1.1, 1500 );
+}
+void liftDoor1CloseLeft()
+{
+	$liftDoorSide1a.playsound( "sound/environment/machine/mech_move1.wav", 8, 1.1, 1500 );
+	globalAccelMove_Rotate( $liftDoorSide1a, '0 90 0', 2, "rampupdown", "" );
+	$liftDoorSide1a.playsound( "sound/environment/machine/mech_stop1.wav", 8, 1.1, 1500 );
+}
+
+void liftDoor1CloseRight()
+{
+	$liftDoorSide1b.playsound( "sound/environment/machine/mech_move1.wav", 8, 1.1, 1500 );
+	globalAccelMove_Rotate( $liftDoorSide1b, '0 -90 0', 2, "rampupdown", "" );
+	$liftDoorSide1b.playsound( "sound/environment/machine/mech_stop1.wav", 8, 1.1, 1500 );
+}
+
+
+void door1_unlock_sequence( )
+{
+//	$krindo.ai_off();
+//	$krindo.walkto ( "$door1_encounter_node" , "run" );
+//	centerprint ( "dialog about needing to unlock the door" );
+
+	while( leftToKill > 0 ) 
+	{
+		wait ( .5 );
+	}
+
+	//allow the player to progress once everything is dead...DEAD!
+	$drull_smalldoor1_trigger.triggerable();
+	$drull_smalldoor2_trigger.triggerable();
+//	$drull_smalldoor3_trigger.triggerable();
+	globalCoop_level_triggerEntity($drull_smalldoor1_trigger);
+	globalCoop_level_triggerEntity($drull_smalldoor2_trigger);
+//	globalCoop_level_triggerEntity($drull_smalldoor3_trigger);
+
+//	wait ( 2.0 );
+//	$krindo.ai_on();
+}
+
+
+//-----------------------------------------------------------------------------------------------
+// Function			: randomAlienLaunch
+// Parameters		: the alien to be launched
+// Returns			: none
+// Comments
+//	In the map there are tubes that eject aliens at random intervals.  This function will
+// 	do that.  Set it up in the map by creating a script_model, set the model to whatever
+//	alien it is, then create a splinepath of where it's supposed to go, then target-chain
+// 	the script_model to the start of the path, then target-chain the path together and
+// 	leave the last node with no target.  Then at the beginning of the map thread this function
+//	with the script_model's targetname.
+//
+//	You can tweak the times by changing the following globals:
+//		ALIEN_LAUNCH_MIN and ALIEN_LAUNCH_MAX
+//-----------------------------------------------------------------------------------------------
+float ALIEN_LAUNCH_MIN = 1;
+float ALIEN_LAUNCH_MAX = 10;
+
+void randomAlienLaunch( entity alien )
+{
+//	entity pathstart;
+//	pathstart = getentity ( alien.gettarget ());
+	vector v;
+	v = alien.getorigin ();
+	while( 1 )
+	{
+//		alien.origin( pathstart.getorigin() );
+//		alien.notsolid();
+		alien.origin ( v );
+		alien.hide();
+
+		wait( ALIEN_LAUNCH_MIN + randomfloat( ALIEN_LAUNCH_MAX - ALIEN_LAUNCH_MIN ) );
+
+		alien.show();
+//		alien.solid();
+//		alien.followpath( pathstart );
+		alien.time ( 1 );
+		alien.moveup ( 2048 );
+		waitfor( alien );
+
+	}
+}
+
+
+void missionFail()
+{
+	thread globalCoop_mission_fail();
+}
+
+
+
+//-----------------------------------------------------------
+//-----------------------------------------------------------
+// Sequences
+//-----------------------------------------------------------
+//-----------------------------------------------------------
+
+
+
+/*
+//------------------------------
+// basherAttackCheck
+// check to make sure krindo and player have both passed trigger before exploding bridge
+//------------------------------
+void basherAttackCheck()
+{
+	entity caller, activator;
+	string tname;
+	caller = getcurrententity();
+	activator = caller.getlastactivatingentity();
+	tname = activator.getrawtargetname();
+	caller.nottriggerable();
+	if ((tname == "player")) //|| (tname == "krindo"))
+		{
+			canExplodeWalkway ++;
+		}
+	else
+		{
+			caller.triggerable();
+		}
+		
+	//--random quaking w/sounds
+	thread ambientDamageLoop();	
+
+}
+*/
+
+//------------------------------
+// basherAttackSequence1
+// after player and krindo pass trigger, explode bridge & basher fly-in
+//------------------------------
+void basherAttackSequence1()
+{
+	//while ( canExplodeWalkway < 1 )//( canExplodeWalkway < 2 )
+	//{
+	//	wait( .25 );
+	//}	
+	forcemusic ("aux4");	
+
+	globalCoop_level_triggerEntity($walkwayQuake_1);
+	globalCoop_level_triggerEntity($walkwayExplodeFx);
+	
+	$walkway_solid.remove();
+	$walkway_debris.show();
+	$walkway_debris.notsolid();
+	wait( .5 );
+	globalFlyin_SpawnLaunch ( $basherAttack_1 , "models/char/alien-type1c-basher.tik" , 0, "" , "" , 0 );
+	$basherAttack_1.spawntargetname( "basher_1" );
+	
+	$walkway_debris.solid();
+	wait( 1 );
+	globalCoop_actor_healthMultiplicatePerPlayer($basher_1);
+	$basher_1.ai_off();
+	$basher_1.settendency ( "twitch_on_start" , 1.0  );
+	wait( 1 );
+	$basher_1.ai_on();
+	wait( 5 );
+	
+	//$basherClipBrush.solid();
+	
+	//--random quaking w/sounds
+	thread ambientDamageLoop();	
+}
+
+/*
+//------------------------------
+// walkwayDestroyCheck1
+// check to make sure krindo and player have both passed trigger before exploding bridge
+//------------------------------
+void walkwayDestroyCheck2()
+{
+	entity caller, activator;
+	string tname;
+	caller = getcurrententity();
+	activator = caller.getlastactivatingentity();
+	tname = activator.getrawtargetname();
+	caller.nottriggerable();
+	if ((tname == "player")) //|| (tname == "krindo"))
+		{
+			canExplodeWalkway2 ++;
+		}
+	else
+		{
+			caller.triggerable();
+		}	
+}
+*/
+
+//------------------------------
+// walkwayDestroySequence2
+// after player and krindo pass trigger, explode bridge & detonate gas sequence
+//------------------------------
+void walkwayDestroySequence2()
+{
+	//centerprint( "walkwayDestroySequence2 running" );
+	
+	//while ( canExplodeWalkway2 < 1 )//( canExplodeWalkway2 < 2 )
+	//{
+	//	wait( .25 );
+	//}	
+	forcemusic ("aux4");	
+	globalCoop_level_triggerEntity($walkwayExplodeFx2);
+	//globalCoop_level_triggerEntity($walkwayQuake_2);
+		
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$walkwaySection2.remove();
+	}
+	else{
+		coop_float_spawnAngle1 				= 275;
+		coop_float_spawnAngle2 				= 275;
+		coop_float_spawnAngle3 				= 275;
+		coop_float_spawnAngle4 				= 275;
+		coop_float_spawnAngle5 				= 275;
+		coop_float_spawnAngle6 				= 275;
+		coop_float_spawnAngle7 				= 275;
+		coop_float_spawnAngle8 				= 275;
+	//spawnorigins, Spawn Players on those locations, at map start
+		coop_vector_spawnOrigin1 			= '-5334 1288 140';
+		coop_vector_spawnOrigin2 			= '-5404 1288 140';
+		coop_vector_spawnOrigin3 			= '-5474 1200 140';
+		coop_vector_spawnOrigin4 			= '-5334 1200 140';
+		coop_vector_spawnOrigin5 			= '-5404 1200 140';
+		coop_vector_spawnOrigin6 			= '-5474 1200 140';
+		coop_vector_spawnOrigin7 			= '-5334 1130 140';
+		coop_vector_spawnOrigin8 			= '-5404 1130 140';
+	//Relocate class selection
+		thread globalCoop_level_warpDroptofloor($coop_class_HeavyWeaponsModel	,'-5317 -644 10');
+		thread globalCoop_level_warpDroptofloor($coop_class_TechnicianModel	,'-5317 -744 10');
+		thread globalCoop_level_warpDroptofloor($coop_class_MedicModel	,'-5317 -844 10');
+	//applay this coords to the respawn locations too
+		thread globalCoop_applaySpawnOriginOnReSpwanOrigin();
+		$walkwaySection2.time(.2);
+		$walkwaySection2.movedown(30);
+		wait(.15);
+	}
+	$walkway_debris2.show();
+	wait( 2 );
+	//thread triggerExplosionSequence();
+	
+	$forcefieldSound_remove1.stoploopsound();
+	$forcefieldSound_remove2.stoploopsound();
+	$forcefieldSound_remove1.remove();
+	$forcefieldSound_remove2.remove();
+	
+	$forcefield_1.playsound ( "sound/ships/drull/drull_forcetrapstop.wav", 6, 1, 1024 );
+		
+	$forcefield_1.hide();
+	wait( .1 );
+	
+	$forcefield_1.show();
+	wait( .1 );
+	
+	$forcefield_1.hide();
+	wait( .1 );
+		
+	$forcefield_1.show();
+	wait( .1 );
+	
+	$forcefield_1.hide();
+	wait( .1 );
+		
+	$forcefield_1.show();
+	wait( .1 );
+		
+	$forcefield_1.hide();
+	wait( .1 );
+			
+	$forcefield_1.show();
+	wait( .1 );
+	
+	$forcefield_1.hide();
+	wait( .1 );
+		
+	$forcefield_1.show();
+	wait( .1 );
+		
+	$forcefield_1.hide();
+	wait( .1 );
+			
+	$forcefield_1.show();
+	wait( .1 );
+	
+	$forcefield_1.remove();
+}
+
+
+//-------------------------------
+// seqTunnelDrop
+// Tunnel is destroyed and falls into the abyss
+//-------------------------------
+void seqtunneldrop()
+{
+	forcemusic ("aux5");
+	globalCoop_level_triggerEntity($tunneldrop_quake1);
+	globalCoop_level_triggerEntity($tunneldrop_explode);
+	$tunneldrop_debris.show();
+	wait( 1 );
+	
+	
+	// bind objects to each other and then wait
+	$tunneldropshield.bind( $tunneldrop );
+	$tunneldrop.bind( $tunneldrop_origin1 );
+	wait( 0.1 );
+	
+	// cause the shield to start blinking
+	thread seqtunneldropshieldblink();
+	
+	// causes the tunnel to move downwards and collide with the root
+	$tunneldrop_origin1.rotateZup( 15 );
+	$tunneldrop_origin1.rotateXdown( 5 );
+	$tunneldrop_origin1.movenorth( 128 );
+	$tunneldrop_origin1.time( 1 );
+	wait( 1 );
+	
+	// this is where the tunnel actually collides with the root
+	$tunneldrop.earthquake( 1.15 , 1 );
+	
+	wait( .1 );
+	
+	thread circuitbroke();
+	
+	// this is where the tunnel bounces back off the root slightly and then lands back on it again
+	$tunneldrop_origin1.rotateZdown( 7 );
+	$tunneldrop_origin1.rotateXdown( 1 );
+	$tunneldrop_origin1.time( 1 );
+	wait( .1 );
+	
+	$tunneldrop_origin1.rotateZup( 7 );
+	$tunneldrop_origin1.rotateXdown( 10 );
+	$tunneldrop_origin2.movewest( 32 );
+	$tunneldrop_origin1.time( 1 );
+	wait( .1 );
+	
+	// here we unbind the tunnel and bind it to the new origin on the root	
+	$tunneldrop.unbind();
+	$tunneldrop.bind( $tunneldrop_origin2 );
+	wait( 0.1 );
+	
+	
+	// this is for when the tunnel travels down the first leg of the root
+	$tunneldrop.earthquake( .25 , 2.4 );
+		
+	$tunneldrop_origin2.rotateXdown( 55 );
+	$tunneldrop_origin2.time( 1.35 );
+	$tunneldrop_origin2.movedown( 128 );
+	$tunneldrop_origin2.movewest( 280 );
+	wait( 1.25 );
+	
+	// this is for when the tunnel travels down the second leg of the root
+	$tunneldrop_origin2.rotateXdown( 60 );
+	$tunneldrop_origin2.time( 1.25 );
+	$tunneldrop_origin2.movedown( 600 );
+	$tunneldrop_origin2.movewest( 450 );
+	wait( 1.15 );
+	
+	// this is for when the tunnel falls off into the void
+	$tunneldrop_origin2.rotateXdown( 75 );
+	$tunneldrop_origin2.time( 3 );
+	$tunneldrop_origin2.movedown( 2048 );
+	$tunneldrop_origin2.movewest( 128 );
+	waitfor( $tunneldrop_origin2 );
+	
+	// now we remove everything as its not needed anymore``
+	$tunneldrop.remove();
+	$tunneldrop_origin1.remove();
+	$tunneldrop_origin1.remove();
+	wait( .5 );
+	
+	//thread circuitbroke();
+	
+}
+
+void seqtunneldropshieldblink()
+{
+	$tunneldropshield.hide();
+	wait( .1 );
+	
+	$tunneldropshield.show();
+	wait( .1 );
+
+	$tunneldropshield.hide();
+	wait( .1 );
+	
+	$tunneldropshield.show();
+	wait( .1 );
+
+	$tunneldropshield.hide();
+	wait( .1 );
+	
+	$tunneldropshield.show();
+	wait( .1 );
+
+	$tunneldropshield.hide();
+	wait( .1 );
+	
+	$tunneldropshield.show();
+	wait( .1 );
+
+	$tunneldropshield.hide();
+	wait( .1 );
+	
+	$tunneldropshield.remove();
+}
+
+//-- Circuit is broke in the tunnel chain... and power fails in the tunnel
+
+void circuitbroke()
+{
+
+	$forcefieldSound_remove3.stoploopsound();
+	$forcefieldSound_remove3.remove();
+			
+	$forcefield_2.playsound ( "sound/ships/drull/drull_forcetrapstop.wav", 6, 1, 512 );
+			
+	$forcefield_2.hide();
+	wait( .1 );
+		
+	$forcefield_2.show();
+	wait( .1 );
+		
+	$forcefield_2.hide();
+	wait( .1 );
+			
+	$forcefield_2.show();
+	wait( .1 );
+		
+	$forcefield_2.hide();
+	wait( .1 );
+			
+	$forcefield_2.show();
+	wait( .1 );
+			
+	$forcefield_2.hide();
+	wait( .1 );
+				
+	$forcefield_2.show();
+	wait( .1 );
+		
+	$forcefield_2.hide();
+	wait( .1 );
+			
+	$forcefield_2.show();
+	wait( .1 );
+			
+	$forcefield_2.hide();
+	wait( .1 );
+				
+	$forcefield_2.show();
+	wait( .1 );
+		
+	$forcefield_2.remove();
+	
+	$forcefield_clip.remove();
+}
+
+
+//autosave
+void autosave()
+{
+	globalCommon_Autosave();
+}
+
+//----------------------------------------------------------------------------------------------
+void ambientDamageLoop()
+{
+	string basesoundname1;
+	string basesoundname2;
+	string fullsoundname;
+	float mag;
+	basesoundname1 = "sound/impact/explosion/expl_rockdebr1.wav";
+	basesoundname2 = "sound/impact/explosion/expl_lowfreq.wav";
+	
+	spawn( "func_earthquake", "targetname", "atmosphereQuake");
+	wait( 0.05 );
+	while( 1 )
+	{
+		mag = randomfloat( 0.4 ) + 0.6;
+		$atmosphereQuake.duration( randomfloat( 1.0 ) + 0.5 );
+		$atmosphereQuake.magnitude( mag );
+	
+		if( randomint( 2 ) == 0 )
+			fullsoundname = basesoundname1;
+		else
+			fullsoundname = basesoundname2;
+		//fullsoundname = fullsoundname + (1 + randomint( 3 )) + ".wav";
+		
+
+		wait( randomint( 15 ) + 1 );
+		$atmosphereQuake.playsound( fullsoundname, 1, 1, 10000 );
+		globalCoop_level_triggerEntity($atmosphereQuake);
+		wait( 0.05 );
+	}
+}
+
+void growl()
+{
+	$player.playsound( "sound/chars/basher/bash_amb1.wav" , 3 , 1 , 4384 );
+}
+
+//--inaccesable doors
+void inaccessible_sound()
+{
+	entity e;
+	e = getcurrententity();
+	e.playsound( "sound/doors/door_locked.wav", 1, .7, 90 );
+}
+
+
+void coop_waitForTeam()
+//------------------------------------------------------------------------------
+//waitForPlayers beeing close, end then the Level
+//------------------------------------------------------------------------------
+{
+	globalCoop_main_waitForTeam('-9299 2757 30','-600 -600 -200','600 600 400');
+	coop_endLevel();
+}
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed("m8l2b-drull_ruins2");
+}
+

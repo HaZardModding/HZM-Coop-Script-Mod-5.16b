@@ -1,0 +1,310 @@
+float NUM_ENEMIES = 9;
+
+void main();
+void setupAI();
+void justLoadedDeckThreadIGM7();
+void IGM7IsOver();
+void adaptAI();
+void holoDeckSetup();
+void holoDeckFadeOut();
+void holoDeckFadeIn();
+void givePlayerAmmo();
+void coop_endLevel();
+
+
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/global/global_common.scr"
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "maps/global_scripts/global_math.scr"
+
+//------------------------
+// this sets up Holo Mission IGM1
+//------------------------
+void main()
+{
+//Set Soundtrack for this level
+	soundtrack( "music/training_weapon.mus" );
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_vector_lmsStartedPausedWarmuptime_z = 10;//set lms warmuptime to 10 no matter what else is setup
+	coop_string_nextMapToCheck			= "ent-training1";//set the map we gona load next while we are in testmode
+//Set spawnangles for this level
+	coop_float_spawnAngle0 				= 90;
+	//coop_vector_spawnOrigin12			= '3480 -1339 320';
+	//coop_vector_spawnOrigin11			= '3540 -1339 320';
+	//coop_vector_spawnOrigin10			= '3600 -1339 320';
+	//coop_vector_spawnOrigin9			= '3660 -1339 320';
+	coop_vector_spawnOrigin8			= '3720 -1339 320';
+	coop_vector_spawnOrigin7			= '3480 -1250 320';
+	coop_vector_spawnOrigin6			= '3540 -1250 320';
+	coop_vector_spawnOrigin5			= '3600 -1250 320';
+	coop_vector_spawnOrigin4			= '3660 -1250 320';
+	coop_vector_spawnOrigin3			= '3720 -1250 320';
+	coop_vector_spawnOrigin2			= '3480 -1170 320';
+	coop_vector_spawnOrigin1			= '3540 -1170 320';
+//Definie Objective
+	coop_string_objectiveItem1			= "IGM7HoloDeck";
+/* 	coop_string_objectiveItem1			= "IGM1VisitArmory";
+	coop_string_objectiveItem2			= "IGM1VisitBreifing";
+	coop_string_objectiveItem3			= "IGM1VisitLockers";
+	coop_string_objectiveItem4			= "IGM1HoloDeck";
+	coop_string_objectiveItem5			= "IGM1GoToBridge"; */
+//definie weapons
+	coop_string_weapon1 = "models/weapons/worldmodel-tetryon.tik";
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	spawn("script_model","model","sky/sky_stardome-nebula.tik","origin","-448.00 -256.00 640.00","scale",".25");
+	thread holoDeckSetup();
+	setupAI();
+	waitforplayer();
+	justLoadedDeckThreadIGM7();
+	holoDeckFadeOut();
+}
+
+
+void setupAI()
+{
+	entity e;
+	float i;
+
+	for( i = 1; i <= NUM_ENEMIES; i++ )
+	{
+		e = getentity( "enemy" + i );
+		if( doesEntityExist( e ) )
+		{
+			// group them together and set a groupdeaththread that transitions back to IGM after
+			// they are all killed
+			e.setgroupid( 123 );
+			e.groupdeaththread( "IGM7IsOver" );
+			e.setFloatVar("coop_defaultHealth",e.getHealth());
+			// set their wander tendency to 0 so they don't move around
+			e.settendency( "wander", 0.0 );
+		}
+	}
+}
+
+
+void coop_newPlayerEntered()
+//----------------------------------------------------------------------
+//Welcome Player to this map
+//----------------------------------------------------------------------
+{
+	thread adaptAI();
+}
+
+void adaptAI()
+{
+entity e;
+float i;
+
+	for( i = 1; i <= NUM_ENEMIES; i++ )
+	{
+		e = getentity( "enemy" + i );
+		if( doesEntityExist( e ) )
+		{
+		//Update health per player
+			e.health(e.getFloatVar("coop_defaultHealth"));
+			globalCoop_actor_healthMultiplicatePerPlayer(e);
+		}
+	}
+}
+
+
+//---------------------
+// justLoadedDeckThreadIGM1
+// Triggered and check to see if A cinematic should happen.
+//------------------------
+void justLoadedDeckThreadIGM7()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.loadobjectives( "IGM7" );
+		wait( .05 );
+
+		if( getfloatvar( "game.IGM7GoToBrig" ) >= 1 )
+		{
+			$player.setobjectiveshow( "IGM7GoToBrig", 1 );
+		}
+		if( getfloatvar( "game.IGM7GoToBrig" ) == 2 )
+		{
+			$player.setobjectivecomplete( "IGM7GoToBrig", 1 );
+		}
+
+		if( getfloatvar( "game.IGM7GoToArmory" ) >= 1 )
+		{
+			$player.setobjectiveshow( "IGM7GoToArmory", 1 );
+		}
+		if( getfloatvar( "game.IGM7GoToArmory" ) == 2 )
+		{
+			$player.setobjectivecomplete( "IGM7GoToArmory", 1 );
+		}
+
+		if( getfloatvar( "game.IGM7HoloDeck" ) >= 1 )
+		{
+			$player.setobjectiveshow( "IGM7HoloDeck", 1 );
+		}
+		if( getfloatvar( "game.IGM7HoloDeck" ) == 2 )
+		{
+			$player.setobjectivecomplete( "IGM7HoloDeck", 1 );
+		}
+
+		if( getfloatvar( "game.IGM7GoToBreifingRoom" ) >= 1 )
+		{
+			$player.setobjectiveshow( "IGM7GoToBreifingRoom", 1 );
+		}
+		if( getfloatvar( "game.IGM7GoToBreifingRoom" ) == 2 )
+		{
+			$player.setobjectivecomplete( "IGM7GoToBreifingRoom", 1 );
+		}
+
+		if( getfloatvar( "game.IGM7GoToSickBay" ) >= 1 )
+		{
+			$player.setobjectiveshow( "IGM7GoToSickBay", 1 );
+		}
+		if( getfloatvar( "game.IGM7GoToSickBay" ) == 2 )
+		{
+			$player.setobjectivecomplete( "IGM7GoToSickBay", 1 );
+		}
+	}
+	else{
+		globalCoop_objectives_update("incomplete",1,1);
+	}
+}
+
+//------------------------
+// called when bug is Dead to end level
+//------------------------
+void IGM7IsOver()
+{
+	holoDeckFadeIn();
+	
+	$teleportTrigger.remove();
+	
+	//centerprint( "level is over" );
+	wait( 2 );
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		cam_fadeout( .5, 0, 0, 0, 1, 0 );
+		wait( .6 );
+		spawn ( "trigger_changelevel", "targetname", "trigger_endTraining", "map", "ent-deck8" );
+		wait( .05 );
+		$trigger_endTraining.spawnspot( "spawnSpotHoloDeck" );
+	}
+
+	// Setup Level Vars
+	setfloatvar( "game.IGM7HoloDeck", 2 );
+	justLoadedDeckThreadIGM7();
+
+	setfloatvar( "game.checkEntMission7RoomsVisited", 3 );
+
+	wait ( .55 );
+	if(!cvar_bool_multiplayer){//Singleplayer
+		trigger ( "$trigger_endTraining" );
+		return;
+	}	
+	thread coop_endLevel();
+}
+
+//------------------------
+// this thread sets up the Holo Deck And Player
+//------------------------
+void holoDeckSetup()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		cam_fadeout( .05, 0, 0, 0, 1, 0 );
+		justLoadedDeckThreadIGM7();
+	}
+	level_ai ( 0 );
+	$holoDeck.notsolid();
+	$holoDeck.rendereffects( "+depthhack" );
+	$holoDeck.forcealpha( 1 );
+	if(cvar_bool_multiplayer){//Multiplayer
+		$holoDeck.warp('3582 -1080 318');
+	}
+	else{
+		waitForPlayer();
+		$player.immobilize( 1 );
+		$holoDeck.warp($player.getOrigin());
+	}
+}
+
+//------------------------
+// this thread makes the Holo Deck Fade Out
+//------------------------
+void holoDeckFadeOut()
+{
+	waitForPlayer();
+	if(!cvar_bool_multiplayer){//Singleplayer
+		cam_fadeIn( .5, 0, 0, 0, 1, 0 );
+	}
+	globalCoop_main_waitForWarmupTime();
+	wait( 1 );
+	$holoDeck.fade( 2, 0 );
+	wait( 2 );
+	$holoDeck.hide();
+	$holoDeck.alpha( 0 );
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.immobilize( 0 );
+	}
+	thread givePlayerAmmo();
+	level_ai ( 1 );
+}
+
+//------------------------
+// this thread makes the Holo Deck Fade Out
+//------------------------
+void holoDeckFadeIn()
+{
+	$lift01.wait( -1 );
+	//$lift01.targetName( "0" );	//this will crash the engine...don't change targetnames on func_ objects :)
+	$lift01_Trigger.nottriggerable ();
+	
+	if(cvar_bool_multiplayer){//Multiplayer
+		globalCoop_objectives_update("complete",1,1);
+	}
+	else{
+		$player.setobjectivecomplete("IGM7HoloDeck",1);
+	}
+	
+	wait( 3 );
+
+	$player.gravity( 0 );
+	$player.immobilize( 1 );
+
+	$holoDeck.origin( $player.getorigin() );
+
+	$holoDeck.show();
+	$holoDeck.fadein( 2, 1 );
+	wait( 2 );
+	//$holoDeck.alpha( 1 );
+}
+
+void givePlayerAmmo()
+{
+	while( 1 )
+	{
+		globalCoop_main_globalCommand("ammo");
+		wait( 5 );
+	}
+}
+
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	stuffcmd("seta coop_igm 7\n");
+	stuffcmd("seta coop_igmH 1\n");
+	stuffcmd("seta coop_igmR 3\n");
+	thread globalCoop_mission_completed("ent-deck8");
+}
+
+

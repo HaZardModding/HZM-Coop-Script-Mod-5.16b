@@ -1,0 +1,505 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	      ent-deck1_bridge - Enterprise Deck 1 - Bridge
+//  Script By:    Luke W.Kenny T
+//  Geometry By:  Benson R.Kenny T
+//  Created on:   07/10/2002
+//	Last Edited:  09/22/2002 - Benson R
+//-----------------------------------------------------------------
+
+void main();
+void init();
+
+void checkMissionNumber();
+
+void lockReadyRoomDoor();
+void unlockReadyRoomDoor();
+
+void killAllTalking();
+
+void viewscreenShowImage( entity entImage );
+void viewscreenShowBackground( entity entBackground );
+void viewscreenShowActor( entity entActor );
+void viewscreenHideAll( entity entArray );
+void viewscreenAddImage( entity entImage );
+void viewscreenAddBackground( entity entBackground );
+void viewscreenAddActor( entity entActor );
+void viewscreenSetupPortal( entity entCamera );
+
+void coop_endLevel();
+
+//-----------------------------------------------------------
+//-----------------------------------------------------------
+//--- variables
+
+float developerMode = 0; //--- Ship with 0
+float currentDeck = 1;
+float missionEnterprise = 0;
+float readyRoomDoorIsLocked;
+string sNextLevelToLoadForCoop;
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  INCLUDES
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/igm_main.scr"
+#include "coop_mod/maps/global/global_common.scr"
+#include "coop_mod/maps/global/igm_dialog.scr"
+#include "coop_mod/maps/missions/igm_common/igm_turbolift.scr"
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "maps/global_scripts/global_debugUtils.scr"
+#include "maps/global_scripts/global_math.scr"
+#include "maps/global_scripts/global_archetype.scr"
+#include "maps/global_scripts/global_acceleratedmovement.scr"
+#include "maps/global_scripts/global_cinematicFX.scr"
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/missions/igm_common/ent_cin_igm247.scr"
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/missions/igm1/ent-deck1_bridge-mission1.scr"
+#include "coop_mod/maps/missions/igm2/ent-deck1_bridge-mission2.scr"
+#include "coop_mod/maps/missions/igm4/ent-deck1_bridge-mission4.scr"
+#include "coop_mod/maps/missions/igm7/ent-deck1_bridge-mission7.scr"
+#include "coop_mod/maps/missions/igm8/ent-deck1_bridge-mission8.scr"
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "maps/igm3/ent-deck1_bridge-mission3.scr"
+#include "maps/igm5/ent-deck1_bridge-mission5.scr"
+#include "maps/igm6/ent-deck1_bridge-mission6.scr"
+
+//===================================================================================================================
+// Main Stuff 
+//===================================================================================================================
+
+void main()
+{
+//--- set the sky portal
+	$sky.rendereffects( "+skyorigin" );
+	$world.entity_fade_dist( 800000 );
+
+//extrapolate mission
+	missionEnterprise = getCvarInt("coop_igm");
+	if(getCvarInt("g_gametype") != 1){
+		missionEnterprise=getfloatvar("game.globalMissionEnterprise");
+	}
+	if(missionEnterprise < 1){
+		missionEnterprise=1;
+		setfloatvar("game.globalMissionEnterprise",1);
+	}	
+//Coop
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_string_playerModelResetTiki = "models/char/munro_sf.tik";
+	coop_string_nextMapToCheck	= "ent-deck7a";//set the map we gona load next while we are in testmode
+//Set spawnangles for this level
+	coop_float_spawnAngle0		= 280;//SpawnOrigin0 Angle
+//spawnorigins, Spawn Players on those locations, at map start
+	coop_vector_spawnOrigin1	= '1735 -4484 -10';
+	coop_vector_spawnOrigin2	= '1675 -4514 -10';
+	coop_vector_spawnOrigin3	= '1595 -4546 -10';
+	coop_vector_spawnOrigin4	= '1608 -4594 -10';
+	coop_vector_spawnOrigin5	= '1684 -4572 -10';
+	coop_vector_spawnOrigin6	= '1729 -4643 -10';
+	coop_vector_spawnOrigin7	= '1665 -4661 -10';
+	coop_vector_spawnOrigin8	= '2432 -4728 0';	
+//Setup the Set of Weapons for the players
+	coop_string_weapon1			= "models/weapons/worldmodel-Tricorder-stx.tik";
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	checkMissionNumber();
+	dontSaveOrientation();
+	init();
+	
+	//Archetypes
+	globalArchetype_Setup ( $elevatorButtonArchetype, "TurboLiftControls" );
+	globalArchetype_Setup ( $elevatorButtonArchetype0, "TurboLiftControls" );
+	
+	globalArchetype_Setup ( $readyRoomDoorPanelArchetype, "DoorPanel" );
+	
+	lockReadyRoomDoor();
+	
+	//Hide this model.
+	//$turretIGM4.hide();
+	//$turretIGM4.notsolid();
+
+	$enterprise01.origin( '-768 -4880 -1320' );
+	$enterprise02.origin( '-768 -4880 -1320' );
+	$enterprise03.origin( '-768 -4880 -1320' );
+	wait( .05 );
+	
+	//Nonsolid ActorClips in Doorways
+	$TurboLiftClip1.notsolid();
+	$TurboLiftClip2.notsolid();
+	
+	$enterprise01.origin( $enterpriseOrigin.getorigin() );
+	$enterprise02.origin( $enterpriseOrigin.getorigin() );
+	$enterprise03.origin( $enterpriseOrigin.getorigin() );
+
+	$enterprise01.bind( $enterpriseOrigin );
+	$enterprise02.bind( $enterpriseOrigin );
+	$enterprise03.bind( $enterpriseOrigin );
+
+	$cinematicDallas1.origin( $cinematicDallasOrigin.getorigin() );
+	$cinematicDallas2.origin( $cinematicDallasOrigin.getorigin() );
+
+	$cinematicDallas1.bind( $cinematicDallasOrigin );
+	$cinematicDallas2.bind( $cinematicDallasOrigin );
+	
+	//Position Exterior Enterprise
+	$enterpriseOrigin.time( .05 );
+	$enterpriseOrigin.rotateZup( 10 );
+	//$enterpriseOrigin.moveUp( 128 );
+	$enterpriseOrigin.moveUp( 56 );
+	$enterpriseOrigin.moveSouth( 50 );
+	waitfor( $enterpriseOrigin );
+	
+	waitforplayer();
+	
+	$world.clearAvailableViewModes();
+	$world.addAvailableViewMode( "none" );
+	
+	if(!cvar_bool_multiplayer)
+	{
+		$player.health( 100 );
+		
+		thread entTurboLiftCheck();
+		
+		if(!cvar_bool_multiplayer){//singleplayer
+			if( missionEnterprise == 4 )
+			{
+			
+				if( getfloatvar( "game.IGM4GoToTelsia" ) >= 1 )
+				{
+					$player.loadobjectives("IGM4alt");		
+				}
+				else
+				{
+					$player.loadobjectives("IGM4");
+				}
+			}
+			else if( missionEnterprise == 6 )
+			{
+				if( getfloatvar( "game.IGM6MeetTelsia" ) >= 1 )
+				{
+					$player.loadobjectives("IGM6alt");
+				}
+				else
+				{
+					$player.loadobjectives("IGM6");
+				}
+			}
+			else 
+			{
+				$player.loadobjectives( "IGM" + missionEnterprise );
+			}
+		}
+		wait(1);
+		if( missionEnterprise == 1 ) thread justLoadedDeckThreadIGM1();
+		//if( missionEnterprise == 2 ) thread justLoadedDeckThreadIGM2();
+		//if( missionEnterprise == 3 ) thread justLoadedDeckThreadIGM3();
+		if( missionEnterprise == 4 ) thread justLoadedDeckThreadIGM4();
+		//if( missionEnterprise == 5 ) thread justLoadedDeckThreadIGM5();
+		//if( missionEnterprise == 6 ) thread justLoadedDeckThreadIGM6();
+		if( missionEnterprise == 7 ) thread justLoadedDeckThreadIGM7();
+		if( missionEnterprise == 8 ) thread justLoadedDeckThreadIGM8();
+	}
+}
+
+//---------------------
+// init	
+// init stuff 
+//---------------------
+void init()
+{
+	//Turn Exit Triggers Off
+	$triggerExit.nottriggerable();
+		
+	entTurboLiftSetup();
+	//ent_turboliftInit();
+	
+	$readyRoomDoor.lock();
+	
+	//--- setup viewscreen stuff
+	// initialize the arrays
+	$viewscreenImage_Array.setFloatVar( "count", 0 );
+	$viewscreenBackground_Array.setFloatVar( "count", 0 );
+	$viewscreenActor_Array.setFloatVar( "count", 0 );
+	
+	// bridge portal stuff
+	viewscreenAddImage( $viewscreenImage_Portal );
+	viewscreenAddImage( $viewscreenImage_LCARS );
+	
+	// actor background stuff
+	viewscreenAddBackground( $viewscreenBackground_IdryllBridge );
+	viewscreenAddBackground( $viewscreenBackground_AttrexianCommand );
+	
+	// actor stuff
+	viewscreenAddActor( $viewscreenActor_Krindo );
+	
+	//--- for default, show the LCARS screen
+	$viewscreenImage_LCARS.show();
+}
+
+//---------------------
+// checkMissionNumber	
+// checks to see mission number runs approprite script 
+//---------------------
+void checkMissionNumber()
+{
+//SETUP THE MISSION
+	thread globalCoop_level_callReliably("setupMission"+missionEnterprise+"Deck1");	
+//--- set the soundtrack
+ 	soundtrack("music/igm"+missionEnterprise+".mus");
+}
+
+//---------------------
+// Locks / Unlocks ReadyRoomDoor
+//------------------------
+void lockReadyRoomDoor()
+{
+	readyRoomDoorIsLocked = 1;
+	
+	$readyRoomDoor.lock();
+	$readyRoomDoorPanelRed.show();
+	$readyRoomDoorPanelGreen.hide();
+}
+void unlockReadyRoomDoor()
+{
+	readyRoomDoorIsLocked = 0;
+
+	$readyRoomDoor.unlock();
+	$readyRoomDoorPanelRed.hide();
+	$readyRoomDoorPanelGreen.show();
+}
+
+//---------------------
+// killAllTalking
+// This stops all talking on the level
+//------------------------
+void killAllTalking()
+{
+	globalCoop_dialog_stopAll();
+}
+
+//---------------------
+// viewscreenShowImage
+// hide all the images and display the desired one
+//------------------------
+void viewscreenShowImage( entity entImage )
+{
+	//--- hide all the view screen images
+	viewscreenHideAll( $viewscreenImage_Array );
+	wait( .1 );
+	
+	//--- check if the entity exists, if not, disconnect and show an error message
+	globalCommon_AssertEntity( entImage, "VIEWSCREEN SHOW ERROR: Image entity doesn't exist!!!" );
+
+	//--- play on-screen sound
+	entImage.playsound( "sound/environment/computer/view_off.wav", 0, 1, 512 );
+
+	//--- show the image
+	entImage.show();
+}
+
+//---------------------
+// viewscreenShowBackground
+// hide all the images and display the desired one
+//------------------------
+void viewscreenShowBackground( entity entBackground )
+{
+	//--- hide all the view screen images
+	viewscreenHideAll( $viewscreenBackground_Array );
+	
+	//--- check if the entity exists, if not, disconnect and show an error message
+	globalCommon_AssertEntity( entBackground, "VIEWSCREEN SHOW BACKGROUND ERROR: Background entity doesn't exist!!!" );
+
+	//--- show the image
+	entBackground.show();
+}
+
+//---------------------
+// viewscreenShowActor
+// hide all the images and display the desired one
+//------------------------
+void viewscreenShowActor( entity entActor )
+{
+	//--- hide all the view screen images
+	viewscreenHideAll( $viewscreenActor_Array );
+	
+	//--- check if the entity exists, if not, disconnect and show an error message
+	globalCommon_AssertEntity( entActor, "VIEWSCREEN SHOW ACTOR ERROR: Background entity doesn't exist!!!" );
+
+	//--- show the image
+	entActor.show();
+}
+
+//---------------------
+// viewscreenHideAll
+// goes through all the objects stored on the passed in array and hides them all
+//------------------------
+void viewscreenHideAll( entity entArray )
+{
+	float fltCount, i;
+	
+	entity entObject;
+	
+	string strTargetname;
+	
+	fltCount = entArray.getFloatVar( "count" );
+	
+	for( i = 1 ; i <= fltCount ; i++ )
+	{
+		//print( "HIDE: hiding object: " + i + "\n" );
+		
+		strTargetname = "object" + i;
+		entObject = getEntity( entArray.getStringVar( strTargetname ) );
+		
+		//print( "HIDE: entObject: " + entObject.getTargetname() + "\n" );
+		
+		if( doesEntityExist( entObject ) )
+		{
+			entObject.hide();
+			//print( "HIDE: " + entObject.getTargetname() + " is now hidden\n" );
+		}
+	}
+}
+
+//---------------------
+// viewscreenAddImage
+// stores the targetname for the viewscreen image into an array, and then hides it
+//------------------------
+void viewscreenAddImage( entity entImage )
+{
+	float fltCount;
+	
+	string strVarName;
+
+	//--- check if the entity exists, if not, disconnect and show an error message
+	globalCommon_AssertEntity( entImage, "VIEWSCREEN ADD IMAGE ERROR: Image entity doesn't exist!!!" );
+		
+	//--- get the current number of images on the array
+	fltCount = $viewscreenImage_Array.getFloatVar( "count" );
+
+	//--- increment the counter
+	fltCount++;
+
+	//--- create the variable name for the array
+	strVarName = "object" + fltCount;
+	
+	//--- store the targetname on the array
+	$viewscreenImage_Array.setStringVar( strVarName, entImage.getRawTargetname() );
+	
+	//--- store the new count
+	$viewscreenImage_Array.setFloatVar( "count", fltCount );
+	
+	//--- hide the image
+	entImage.hide();
+}
+
+//---------------------
+// viewscreenAddBackground
+// stores the targetname for the viewscreen background into an array, and then hides it
+//------------------------
+void viewscreenAddBackground( entity entBackground )
+{
+	float fltCount;
+	string strVarName;
+
+	//--- check if the entity exists, if not, disconnect and show an error message
+	globalCommon_AssertEntity( entBackground, "VIEWSCREEN ADD BACKGROUND ERROR: Background entity doesn't exist!!!" );
+		
+	//--- get the current number of images on the array
+	fltCount = $viewscreenBackground_Array.getFloatVar( "count" );
+
+	//--- increment the counter
+	fltCount++;
+
+	//--- create the variable name for the array
+	strVarName = "object" + fltCount;
+	
+	//--- store the targetname on the array
+	$viewscreenBackground_Array.setStringVar( strVarName, entBackground.getRawTargetname() );
+	
+	//--- store the new count
+	$viewscreenBackground_Array.setFloatVar( "count", fltCount );
+	
+	//--- hide the image
+	entBackground.hide();
+}
+
+//---------------------
+// viewscreenAddActor
+// stores the targetname for the viewscreen actor into an array, and then hides them
+//------------------------
+void viewscreenAddActor( entity entActor )
+{
+	float fltCount;
+	
+	string strVarName;
+
+	//--- check if the entity exists, if not, disconnect and show an error message
+	globalCommon_AssertEntity( entActor, "VIEWSCREEN ADD ACTOR ERROR: Actor entity doesn't exist!!!" );
+		
+	//--- get the current number of images on the array
+	fltCount = $viewscreenActor_Array.getFloatVar( "count" );
+
+	//--- increment the counter
+	fltCount++;
+
+	//--- create the variable name for the array
+	strVarName = "object" + fltCount;
+	
+	//--- store the targetname on the array
+	$viewscreenActor_Array.setStringVar( strVarName, entActor.getRawTargetname() );
+	
+	//--- store the new count
+	$viewscreenActor_Array.setFloatVar( "count", fltCount );
+	
+	//--- hide the image
+	globalCommon_AiDummyHide( entActor );
+}
+
+//---------------------
+// 	viewscreenSetupPortal
+// 	points the viewscreen portal image to the passed camera and activates it
+//	if no entity is passed, this defaults to the actor portal
+//------------------------
+void viewscreenSetupPortal( entity entCamera )
+{
+	if( doesEntityExist( entCamera ) )
+	{
+		$portalViewscreen.target( entCamera.getRawTargetname() );
+	}
+	else
+	{
+		$portalViewscreen.target( "portalViewscreenCam_Actor" );
+	}
+	
+	//--- activate the portal camera
+	$portalViewscreen.locatecamera();
+}
+
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed(sNextLevelToLoadForCoop);
+}
+

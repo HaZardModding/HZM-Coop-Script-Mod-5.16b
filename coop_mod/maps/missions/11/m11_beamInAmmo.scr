@@ -1,0 +1,55 @@
+
+void beamInFedAmmo ()
+{
+//m11l1a is to heavy allready
+	if(cvar_bool_multiplayer == 1 && getCvar("mapname") == "m11l1a-drull_ruins3")
+		return;
+	entity caller,t;
+	caller = getCurrentEntity ();
+
+	t = caller.gettargetentity ();
+
+	globalCommon_AssertEntity  ( t , "beamInFedAmmo(): no target ent specified!" );
+	while ( doesEntityExist ( t ) )
+	{
+		t.spawnEffectName ( "TransportIn" , "Federation" );
+		t.setspawnkeyvalue ( "hide" , "1" );
+		t.setspawnkeyvalue ( "forcealpha" , "1" );
+		if ( t.getstringvar ( "uservar1" ) == "small" )
+			t.modelname ( "item/ammo_fed_small.tik" );
+		else
+			t.modelname ( "item/ammo_fed_large.tik" );
+
+		t.wait ( .05 );
+		triggerentity ( t );
+		wait ( .05 );
+		t.fadein ( 1 );
+		wait ( .5 );
+		t.remove ();
+		t = getNextEntity ( t );
+	}
+}
+
+void beamInFedAmmoRegen ()
+{
+//m11l1a is to heavy allready
+	if(cvar_bool_multiplayer == 1 && getCvar("mapname") == "m11l1a-drull_ruins3")
+		return;
+	entity caller,t;
+	caller = getCurrentEntity ();
+
+	t = caller.gettargetentity ();
+
+	globalCommon_AssertEntity  ( t , "beamInFedAmmo(): no target ent specified!" );
+	t.spawnEffectName ( "TransportIn" , "Federation" );
+	if ( t.getstringvar ( "uservar1" ) == "small" )
+		t.modelname ( "item/ammo_fed_small.tik" );
+	else
+		t.modelname ( "item/ammo_fed_large.tik" );
+
+	t.wait ( .05 );
+	triggerentity ( t );
+	t.hide ();
+	wait ( 10 );
+	t.show ();
+}

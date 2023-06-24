@@ -1,0 +1,639 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	      m8l1b-drull_ruins2 (Swamp World)
+//  Script By:    J. Keehan, J. Hefty
+//  Geometry By:  Adam 'Senn' Bellefeuil, J. 'Powzer' Keehan
+//  Created on:   06/27/2002
+//	Last Edited:  09/26/2002 - JK
+//-----------------------------------------------------------------
+void main();
+void setupWorld();
+void setupArchetypes();
+void initCombatRebels();
+
+void changeRebelState1();
+void changeRebelState2();
+
+void tricorderPuzzle();
+void resetTricorderPuzzle();
+
+//void ambientLeviathanSwimmer();
+
+void mortarColumnSequence();
+void setupBridgeCollapseSequence();
+void bridgeColumnDestroy();
+void bridgeCollapse();
+
+void leviathanKillThread_check();
+
+//--- armature cinematics
+void cutsceneCaptureEnable();
+
+void levelTransition();
+void spawnStairWave();
+
+void mortarBridgeSequence();
+void setupBridgeSequence();
+void bridgeDestroy();
+
+void bridgeSwitchOn();
+void bridgeMoveToPosition();
+void bridgeMoveToFinalPos();
+
+void shuttleDoorsOpen();
+void idryllRejectSound();
+void coop_endLevel();
+
+//--------------------------------------
+//--variables
+
+float leviathanKillThread_counter = 0;
+
+entity cinematicArm_MunroCaptured;
+
+
+
+
+//=============================================================================
+// Includes
+//=============================================================================
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/optional_modules/puzzles.scr"
+#include "coop_mod/maps/global/global_common.scr"
+#include "maps/global_scripts/global_debugutils.scr"
+#include "maps/global_scripts/global_tricorderbase.scr"
+#include "maps/global_scripts/global_tricordermod.scr"
+#include "maps/global_scripts/global_math.scr"
+#include "maps/global_scripts/global_acceleratedMovement.scr"
+#include "coop_mod/maps/missions/8/m8l1b_cin.scr"
+
+
+//==============================================================================
+// Main Stuff
+//==============================================================================
+
+//---------------------
+// main
+// do start up stuff
+//---------------------
+void main()
+{
+//remove useless chars
+	$cinematicMunro1.remove();//useless
+	$munro.remove();//useless
+	$idryll.remove();//useless
+	$guard1.remove();//useless
+	$guard2.remove();//useless
+	$guard3.remove();//useless
+	$triggerCheckForEndingCinematic.remove();//useless
+	
+	globalCoop_server_precacheSingleplayer();
+	
+	soundtrack( "music/m8l1b.mus" );
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_string_nextMapToCheck			= "m8l2a-drull_ruins2";//set the map we gona load next while we are in testmode
+//Set spawnangles for this level
+	coop_float_spawnAngle0 				= 90;
+//Definie Objective
+	coop_string_objectiveItem1			= "FindEntrance";
+//Give each player a Item/weapon, the integer stands for the player-ID
+	coop_string_weapon1 				= "models/weapons/worldmodel-attrex-rifle.tik";
+	coop_string_weapon2					= "models/weapons/worldmodel-BurstRifle.tik";
+	coop_string_weapon3 				= "models/weapons/worldmodel-Phaser-stx.tik";
+	coop_string_weapon4 				= "models/weapons/worldmodel-sniperrifle.tik";
+	coop_string_weapon5 				= "models/weapons/worldmodel-Tricorder-stx.tik";
+	coop_string_weapon6 				= "models/weapons/worldmodel-FieldAssaultRifle.tik";
+//spawnorigins, Spawn Players on those locations, at map start
+	coop_vector_spawnOrigin1 			= '280 -6218 70';
+	coop_vector_spawnOrigin2 			= '130 -6218 70';
+	coop_vector_spawnOrigin3 			= '320 -6368 70';
+	coop_vector_spawnOrigin4 			= '210 -6368 70';
+	coop_vector_spawnOrigin5 			= '130 -6368 70';
+	coop_vector_spawnOrigin6 			= '320 -6500 70';
+	coop_vector_spawnOrigin7 			= '210 -6500 70';
+	coop_vector_spawnOrigin8 			= '130 -6500 70';
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	$sky.rendereffects( "+skyorigin" );
+	$world.weather( "rain", 400 );
+	$world.entity_fade_dist( 10000 );
+	$world.farplane_color ( '0.1 0.12 0.1' );
+	$world.farplane ( 3200 );
+	
+	setupWorld();
+	thread setupArchetypes();
+	thread initCombatRebels();
+}
+
+
+//----------------------
+// setupWorld
+// initialize world items
+//----------------------
+void setupWorld()
+{
+	//--set specific ai_off at beginning of level
+	$leviathan1.ai_off();
+	$leviathan1.immortal( 1 );
+	$leviathan1.nodamage();
+	$leviathan2.ai_off();
+	$leviathan3.ai_off();
+
+	$leviathan2.killthread( "leviathanKillThread_check" );
+	$leviathan3.killthread( "leviathanKillThread_check" );
+
+	$leviathan1.killthread( "cutsceneLeviathan2" );
+
+	$leviathan1.anim( "sleeping" );
+	$leviathan2.anim( "sleeping" );
+	$leviathan3.anim( "sleeping" );
+
+	$leviathan2.setgroupid( 1 );
+	$leviathan3.setgroupid( 1 );
+	$leviathan2.groupdeaththread( "cutsceneCaptureEnable" );
+
+	//---idryll rebel guards for cinematic end
+	$guard1.ai_off();
+	$guard1.hide();
+	$guard2.ai_off();
+	$guard2.hide();
+	$guard3.ai_off();
+	$guard3.hide();
+
+	$cutsceneCapture_trigger.nottriggerable();
+
+	$branchFall.hide();
+	$bridgeDebris.hide();
+
+	//--open bridge at level start
+	$bridge1.moveTo( $bridgeStartPos );
+
+	//--bridge over leviathan pit
+	thread setupBridgeCollapseSequence();
+
+	//--small bridge near entrance to level
+	thread setupBridgeSequence();
+
+	//--trigger waits til power is restorted
+	$bridgeSwitch.nottriggerable();
+
+	//--hide power on panels
+	$power_on.hide();
+	$power_on_shuttle.hide();
+
+	if(cvar_bool_multiplayer){//Multiplayer
+	//spawn Class Selection
+		thread globalCoop_class_setup("Medic",'-190 -5510 200');
+		thread globalCoop_class_setup("HeavyWeapons",'-190 -5610 200');
+		thread globalCoop_class_setup("Technician",'-190 -5710 200');
+	//Replace Puzzles
+		thread globalCoop_puzzle_replace($bridgePower,"bridgeSwitchOn",20);
+		thread globalCoop_puzzle_replace($shuttlepuzzle,"shuttleDoorsOpen",15);
+	}
+	else{
+	//--puzzle stuff --setup
+		$bridgePower.puzzleobject_solvedthread( "bridgeSwitchOn" );
+		$bridgePower.puzzleobject_canceledthread( "resetTricorderPuzzle" );
+		$bridgePower.puzzleobject_itemusedthread( "tricorderPuzzle" );
+		
+		$shuttlepuzzle.puzzleobject_timeToUse( 5 );
+		$shuttlepuzzle.puzzleobject_itemtouse( "Tricorder" );
+		$shuttlepuzzle.puzzleobject_solvedthread( "shuttleDoorsOpen" );
+		$pit_door1.missionobjective( 1 );
+		waitForPlayer();
+		$player.loadobjectives( "m8l1-drull_ruins2" );
+		wait( .1 );
+	}
+	thread globalCoop_objectives_update("incomplete",1,1);
+	wait( 2 );
+	//--move stairs to close position
+	trigger( "$staircase1" );
+
+}
+
+//---------------------
+// tricorderPuzzle
+// tricorder puzzle stuff
+//---------------------
+void tricorderPuzzle()
+{
+	globalTricorderMod_SetNumWaves ( 2 );
+	globalTricorderMod_SetAllRandomParms();
+	globalTricorderMod_Run( $bridgePower, 0 );
+}
+
+void resetTricorderPuzzle()
+{
+	$bridgePower.puzzleobject_reset();
+}
+
+//---------------------
+// setupArchetypes
+// setting up the archetypes
+//---------------------
+void setupArchetypes()
+{
+	$archetypeBridgeSwitch.contents( "targetable" );
+	$archetypeBridgeSwitch.archetype( "IdryllBridgeSwitch" );
+
+	$archetypeBridgePower.contents( "targetable" );
+	$archetypeBridgePower.archetype( "IdryllPowerRegulator" );
+}
+
+//---------------------
+// initMortarCombatRebels
+// initialize status of Idryll Rebels
+//---------------------
+void initCombatRebels()
+{
+	//--Mortar Soldiers
+	$idryll_mortar1.visiondistance ( 2048 );
+	$idryll_mortar2.visiondistance ( 2048 );
+	$idryll_mortar3.visiondistance ( 2048 );
+	$idryll_mortar4.visiondistance ( 2048 );
+
+	//--Regular Soldiers
+	$idryll_soldier1.visiondistance( 512 );
+	$idryll_soldier2.visiondistance( 512 );
+	$idryll_soldier3.visiondistance( 768 );
+	$idryll_soldier4.visiondistance( 512 );
+	$idryll_soldier5.visiondistance( 1024 );
+	$idryll_soldier6.visiondistance( 1024 );
+
+	//--Elite Soldiers
+	$idryll_sniper1.fov( 360 );
+	$idryll_sniper2.fov( 360 );
+	
+	$idryll_sniper1.settendency ( "snipeenemy" , 1 );
+	$idryll_sniper2.settendency ( "snipeenemy" , 1 );
+}
+
+//---------------------
+// changeRebelState1
+// change the status of Mortar Combat Rebels from turreted only position
+//---------------------
+void changeRebelState1()
+{
+	if(doesEntityExist($idryll_mortar3))
+	{
+		$idryll_mortar3.setturretmode( 0 );
+		thread globalCoop_actor_healthMultiplicatePerPlayer($idryll_mortar3);
+	}
+}
+
+//---------------------
+// changeRebelState2
+// when triggered turn specifice idryll ai on
+//---------------------
+void changeRebelState2()
+{
+	$idryll_soldier1.show();
+	$idryll_soldier1.solid();
+	$idryll_soldier1.ai_on();
+
+	$idryll_soldier2.show();
+	$idryll_soldier2.solid();
+	$idryll_soldier2.ai_on();
+	$idryll_soldier4.ai_on();
+	$idryll_soldier5.ai_on();
+	$idryll_soldier6.ai_on();
+	$idryll_sniper1.ai_on();
+	$idryll_sniper2.ai_on();
+	$idryll_mortar1.ai_on();
+	$idryll_mortar2.ai_on();
+	$idryll_mortar4.ai_on();
+	thread globalCoop_actor_healthMultiplicatePerPlayer($idryll_soldier1);
+	thread globalCoop_actor_healthMultiplicatePerPlayer($idryll_soldier2);
+	thread globalCoop_actor_healthMultiplicatePerPlayer($idryll_soldier4);
+	thread globalCoop_actor_healthMultiplicatePerPlayer($idryll_soldier6);
+	thread globalCoop_actor_healthMultiplicatePerPlayer($idryll_sniper1);
+	thread globalCoop_actor_healthMultiplicatePerPlayer($idryll_sniper2);
+	thread globalCoop_actor_healthMultiplicatePerPlayer($idryll_mortar1);
+	thread globalCoop_actor_healthMultiplicatePerPlayer($idryll_mortar2);
+	thread globalCoop_actor_healthMultiplicatePerPlayer($idryll_mortar4);
+	
+	
+	if(cvar_bool_multiplayer){//Multiplayer
+		coop_float_spawnAngle1 				= 86;
+		coop_float_spawnAngle2 				= 86;
+		coop_float_spawnAngle3 				= 86;
+		coop_float_spawnAngle4 				= 86;
+		coop_float_spawnAngle5 				= 86;
+		coop_float_spawnAngle6 				= 86;
+		coop_float_spawnAngle7 				= 86;
+		coop_float_spawnAngle8 				= 86;
+	//spawnorigins, Spawn Players on those locations, at map start :86
+		coop_vector_spawnOrigin8 			= '120 520 140';
+		coop_vector_spawnOrigin7 			= '120 450 140';
+		coop_vector_spawnOrigin6 			= '50 520 140';
+		coop_vector_spawnOrigin5 			= '50 450 140';
+		coop_vector_spawnOrigin4 			= '-20 520 140';
+		coop_vector_spawnOrigin3 			= '-20 450 140';
+		coop_vector_spawnOrigin2 			= '-90 520 140';
+		coop_vector_spawnOrigin1 			= '-90 450 140';
+		thread globalCoop_applaySpawnOriginOnReSpwanOrigin();
+	//Relocate class selection
+		thread globalCoop_level_moveToPos($coop_class_HeavyWeaponsModel,'231 -913 -61');
+		thread globalCoop_level_moveToPos($coop_class_TechnicianModel,'331 -913 -61');
+		thread globalCoop_level_moveToPos($coop_class_MedicModel,'431 -913 -61');
+	}
+}
+
+
+//---------------------
+// leviathanKillThread_check
+// kill thread for the leviathans
+//---------------------
+void leviathanKillThread_check()
+{
+	leviathanKillThread_counter++;
+	if( leviathanKillThread_counter >= 2 )
+	{
+		trigger( "$staircase1" );
+		$cutsceneCapture_trigger.triggerable();
+	}
+}
+
+//---------------------
+// cutsceneCaptureEnable
+// enable trigger for capture cutscene when all leviathan are dead
+//---------------------
+void cutsceneCaptureEnable()
+{
+	$cutsceneCapture_trigger.triggerable();
+}
+
+
+//=============================================================================
+// Level Sequences
+//=============================================================================
+void mortarColumnSequence()
+{
+	$mortarLaunchPos2.projectileattackentity( "projectile/projectile_idryll_mortar.tik" , "$bridgeColumn" );
+}
+
+void setupBridgeCollapseSequence()
+{
+	$bridgeColumn.onDamage( "bridgeColumnDestroy" );
+	pause();
+}
+
+void bridgeColumnDestroy()
+{
+	if(cvar_bool_multiplayer){//Multiplayer
+		coop_float_spawnAngle0 				= 90;
+		coop_vector_spawnOrigin1 			= '530 3580 -700';
+		coop_vector_spawnOrigin2 			= '630 3580 -700';
+		coop_vector_spawnOrigin3 			= '430 3580 -700';
+		coop_vector_spawnOrigin4 			= '330 3580 -700';
+		coop_vector_spawnOrigin5 			= '230 3580 -700';
+		coop_vector_spawnOrigin6 			= '730 3580 -700';
+		coop_vector_spawnOrigin7 			= '830 3580 -700';
+		coop_vector_spawnOrigin8 			= '130 3580 -700';
+		thread globalCoop_applaySpawnOriginOnReSpwanOrigin();
+	//Relocate class selection
+		thread globalCoop_level_moveToPos($coop_class_MedicModel,'1123 4071 -850');
+		thread globalCoop_level_moveToPos($coop_class_HeavyWeaponsModel,'1123 3988 -850');
+		thread globalCoop_level_moveToPos($coop_class_TechnicianModel,'1123 3900 -850');
+	//make players falling resistance, so they can jump down there
+		entity ePlayer;
+		float fPlayerIdInUse;
+		for(fPlayerIdInUse=1;fPlayerIdInUse<=coop_integer_maxPlayers;fPlayerIdInUse++){
+			ePlayer = getentity("player"+ fPlayerIdInUse);
+			if(doesEntityExist(ePlayer)){
+				ePlayer.resistance("falling",100);//fall damage
+			}
+		}
+	}
+	
+	$bridgeColumn.remove();
+	//waitfor( $bridgeColumn );
+	thread bridgeCollapse();
+}
+
+//----------------------
+// bridgeCollapse
+// collapse bridge to leviathan battle
+//----------------------
+void bridgeCollapse()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$bridge_clip.solid();
+		$player.nodamage();
+	}
+	globalCoop_level_triggerEntity($bridgeExplosion);
+	globalCoop_level_triggerEntity($bridgeFallQuake);
+
+	forcemusic ("aux4","normal");
+	$bridgeSection01.playsound ( "sound/impact/explosion/explo_towerfall.wav", 8, 1, 1500 );
+	$bridgeSection01.time ( 1.5 );
+	$bridgeSection01.rotateZup ( 40 );
+	$bridgeSection01.rotateYdown ( 40 );
+	waitfor( $bridgeSection01 );
+
+	$bridgeSection01.time ( 1.5 );
+	$bridgeSection01.moveWest ( 64 );
+	$bridgeSection01.moveDown ( 1376 );
+	$bridgeSection01.rotateZdown ( 40 );
+	waitfor( $bridgeSection01 );
+    $bridgeSection01.playsound ( "sound/impact/explosion/explo_wall1.wav", 8, 1, 1500 );
+	globalCoop_level_triggerEntity($bridgeSection01_debris);
+	wait( .1 );
+	$bridgeSection01.remove();
+	wait( 2.5 );
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.takedamage();
+	}
+	$idryll_soldier7.remove();
+}
+
+//---------------------
+// levelTransition
+// transition to M8L2A
+//---------------------
+void levelTransition()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.setobjectivecomplete ( "FindEntrance", 1 );
+		$pit_door1.missionobjective( 0 );
+
+	//--send player to M8L2A
+		spawn ( "trigger_changelevel", "targetname", "trigger_endlevel", "map", "m8l2a-drull_ruins2" );
+		wait ( 1 );
+		globalCoop_level_triggerEntity($trigger_endlevel);
+	}
+	else{
+		thread coop_endLevel();
+	}
+}
+
+//---------------------
+// ambientLeviathanSwimmer
+// when triggered, show leviathan swimming in water
+//---------------------
+/*void ambientLeviathanSwimmer()
+{
+	$ambientLeviathan1.blindlyfollowpath ( "swim", 0 , "leviathan_swimPath1" );
+	waitfor( $ambientLeviathan1 );
+	$ambientLeviathan1.remove();
+}
+*/
+
+//---------------------
+// spawnStairWave
+// when triggered, spawn idryll rebels down stairs in waves
+//---------------------
+void spawnStairWave()
+{
+	trigger( "$stairSpawn1" );
+	wait ( .33 );
+	thread globalCoop_actor_healthMultiplicatePerPlayer($stairidryll_1west);
+	thread globalCoop_actor_healthMultiplicatePerPlayer($stairidryll_1east);
+	$stairidryll_1west.attack(globalCoop_return_playerClosestPreferActive($stairidryll_1west),1);
+	$stairidryll_1east.attack(globalCoop_return_playerClosestPreferActive($stairidryll_1east),1);
+	//wait( 10 );
+/*
+	trigger( "$stairSpawn2" );
+	wait ( .33 );
+	$stairidryll_2west.attack( $player, 1 );
+	$stairidryll_2east.attack( $player, 1 );
+	wait( 10 );
+
+	trigger( "$stairSpawn3" );
+	wait ( .33 );
+	$stairidryll_3west.attack( $player, 1 );
+	$stairidryll_3east.attack( $player, 1 );
+	wait( 2 );
+*/
+
+}
+
+//---------------------
+// mortarBridgeSequence
+// destroy first bridge with mortar attack
+//---------------------
+void mortarBridgeSequence()
+{
+	$mortarLaunchPos1.projectileattackentity( "projectile/projectile_idryll_mortar.tik" , "$bridgeSection" );
+}
+
+void setupBridgeSequence()
+{
+	$bridgeSection.onDamage( "bridgeDestroy" );
+	pause();
+}
+
+void bridgeDestroy()
+{
+	$bridgeSection.remove();
+	$bridgeDebris.show();
+	trigger( "$bridgeQuake" );
+	trigger( "$bridgeCollapseEffect" );
+}
+
+void bridgeSwitchOn()
+{
+	$archetypeBridgePower.remove();
+	//$archetypeBridgePower.archetype( "IdryllPowerRegulatorUsed" );
+	$bridgeSwitchReject.nottriggerable();
+	$bridgeSwitch.triggerable();
+	$bridgeSwitch.playsound( "sound/ships/drull/drull-beepaccept.wav", 5, 1, 1600 );
+	$bridgeSwitch.playsound( "sound/ships/attrexian/att-powerup.wav", 6, 1, 1600 );
+	$power_off.hide();
+	$power_on.show();
+}
+
+void bridgeMoveToPosition()
+{
+
+	$bridgeSwitch.playsound( "sound/ships/drull/drull-beepaccept.wav", 5, 1, 1600 );
+
+	//--shake screen on initial start of bridge movement
+	trigger( "$bridge1_quake_start" );
+
+	$bridge1.time( 15 );
+	$bridge1.moveTo( $bridgePos1 );
+
+	//--small shake while bridge extends
+	trigger( "$bridge1_quake_open" );
+
+	$bridge1.loopsound( "sound/environment/machine/bridge_move.wav", 1, 1600 );
+
+	//waitfor( $bridge1 );
+	wait( 15 );
+
+	thread bridgeMoveToFinalPos();
+}
+
+void bridgeMoveToFinalPos()
+{
+
+
+	$bridge1.playsound( "sound/environment/machine/bridge_stop.wav", 8, 1, 1500 );
+
+	$bridge1.time( 4 );
+	$bridge1.moveTo( $bridgePos2 );
+
+
+	waitfor( $bridge1 );
+	$bridge1.stoploopsound();
+	$bridge1.playsound( "sound/environment/machine/bridge_stop.wav", 8, 1, 1500 );
+	wait( .5 );
+	//--shake screen on bridge stop
+	trigger( "$bridge1_quake_end" );
+}
+
+//---------------------
+// Function: shuttleDoorsOpen
+// Comments:
+// opens the doors on the shuttle when the player solves the tricorder puzzle
+//---------------------
+void shuttleDoorsOpen()
+{
+	$power_on_shuttle.playsound( "sound/ships/drull/drull-beepaccept.wav", 5, 1, 1600 );
+	$power_off_shuttle.remove();
+	$power_on_shuttle.show();
+	
+	$shuttleDoors1.anim( "opening" );
+	waitForAnimation( $shuttleDoors1 , "opening" );
+	
+	$shuttleDoors1.anim( "open_idle" );
+
+	$drullShuttleDoorOpen1.solid();
+	$drullShuttleDoorClosed1.notsolid();
+}
+
+//---------------------
+// Function: idryllRejectSound
+// Comments:
+// sound used when something is rejected
+//---------------------
+void idryllRejectSound()
+{
+	$bridgeSwitch.playsound( "sound/ships/drull/drull-beepreject.wav", 5, 1, 1600 );
+	wait( 3 );
+}
+
+
+void idryllShuttleRejectSound()
+{
+	entity e;
+	e = getCurrentEntity();
+	e.playsound( "sound/ships/drull/drull-beepreject.wav", 5, 1, 1600 );
+	wait( 2 );
+}
+
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed("m8l2a-drull_ruins2");
+}

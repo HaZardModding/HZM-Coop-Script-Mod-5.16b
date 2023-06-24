@@ -1,0 +1,26 @@
+void shutdownForcefield ( entity forcefield )
+{
+		globalCommon_AssertEntity ( forcefield , "m8/shutdownForcefield () : forcefield doesn't exist!" );
+
+		forcefield.stoploopsound ();
+		forcefield.playsound ( "sound/ships/borg/borg_forcefield2_down.wav", 6, 1, 200 );
+		forcefield.hide ();
+
+    	wait ( .1 );
+    	forcefield.show ();
+    	wait ( .1 );
+    	forcefield.hide ();
+    	wait ( .15 );
+    	forcefield.show ();
+    	wait ( .15 );
+    	forcefield.hide ();
+    	wait ( .15 );
+    	forcefield.show ();
+    	wait ( .1 );
+    	forcefield.hide ();
+    	wait ( .1 );
+    	forcefield.show ();
+    	wait ( .15 );
+    	forcefield.hide ();
+    	forcefield.notsolid ();
+}

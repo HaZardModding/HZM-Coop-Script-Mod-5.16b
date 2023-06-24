@@ -1,0 +1,86 @@
+menu "coop_head_scriptmunro" 480 128 NONE 0.1
+align  top left 
+bgcolor 0 0 0 0
+borderstyle NONE
+noresize
+depth 0.25
+
+//fadedelay 20
+hidecommand "ui_removehud coop_head_scriptmunro"
+
+resource
+Widget
+{
+name "coop_head1_scriptmunro"
+rect 0 0 128 128
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+ordernumber 0
+shader comm-bkg
+}
+
+resource
+widget
+{
+name "coop_head2_scriptmunro"
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 1.00 1.00 0.00
+rect 12 10 102 106
+borderstyle "none"
+ordernumber 1
+}
+
+resource
+Widget
+{
+name "coop_head3_scriptmunro"
+rect 0 0 128 128
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+ordernumber 3
+shader comm-frame
+}
+
+//animations
+// idle
+// conv-scratchingchin-thinking
+// conv-talk-handsonhips
+// conv-wtf
+// idle_breathing 172
+// swat_calm_idle1 (1 to 9)
+// nolerp_idle
+resource 
+RenderModel
+{
+    name "coop_head4_scriptmunro"
+    rect  11 11 104 104
+    fgcolor 0 0 0 0
+    bgcolor 0 0 0 0
+	ordernumber 3
+    borderstyle "NONE"
+	bordercolor 0 0 0 0
+	
+	rendermodelyaw 183
+    rendermodelfov 4 4
+	rendermodelroll 0;
+	rendermodeloffset "200 -1 -90";
+	rendermodelanimation "idle";
+	rendermodel "models/char/munro.tik"
+}
+
+resource
+Widget
+{
+name "coop_head5_scriptmunro"
+rect 0 0 128 128
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 1.00 1.00 1.00 0.00
+borderstyle "none"
+ordernumber 3
+shader comm-frame
+}
+
+
+end.

@@ -1,0 +1,615 @@
+//-----------------------------------------------------------------
+//  EF2 Level Script File
+//
+//  Level:	      ent-training1
+//  Script By:    Richard "Charon" H.
+//  Geometry By:  Richard "Charon" H.
+//  Created on:   09/16/2002
+//
+//	Last Edited:  Richard "Charon" H.
+//-----------------------------------------------------------------
+
+void main();
+void init();
+
+void area4Start();
+void area4PhaserShoot1();
+void spawnWave1();
+void queTargetAtRandomLocation( float whichPathType, float randomTargetLocation );
+void waitForSkeetToDie( entity entityCurrentTargetName, float waitTime );
+void skeetKilled();
+void area4PhaserShoot1Complete();
+void spawnWave2();
+void area4End();
+
+void giveMoreAmmo();
+void area4Confirm();
+void coop_endLevel();
+
+float numberOfTargetsShot = 0;
+float numberOfTargetsLaunched = 0;
+float lastRandomTargetLocation = 0;
+float nextTargetNumber = 0;
+
+float numberToShootWave1 = 3;
+float numberToShootWave2 = 3;
+float numberToShootWave3 = 3;
+float numberToShootWave4 = 3;
+
+float firstWaveMovementSpeed = 2;
+float secondWaveMovementSpeed = 4;
+
+//==========================================================================================
+// Includes
+//==========================================================================================
+
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/missions/training/tuvok.scr"
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "maps/global_scripts/global_common.scr"
+
+//================================================================================
+// Main
+//================================================================================
+
+void coop_enttrain4_holywarp()
+{
+entity eTrigger;
+entity ePlayer;
+
+	eTrigger	= getCurrentEntity();
+	ePlayer		= eTrigger.getLastActivatingEntity();
+	
+	ePlayer.setVelocity('0 0 0');
+	ePlayer.droptofloor( 888 );
+}
+
+
+//---------------------
+// Function: main
+// Comments:
+// the main thread run at the start of the level
+//---------------------
+void main()
+{
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_string_nextMapToCheck		= "m1l1a-borg_sphere";//set the map we gona load next while we are in testmode
+//Set spawnangles for this level
+	coop_float_spawnAngle0 			= 100;//SpawnOrigin0 Angle
+	coop_float_spawnAngle1 			= 100;//SpawnOrigin0 Angle
+	coop_float_spawnAngle2 			= 100;//SpawnOrigin0 Angle
+	coop_float_spawnAngle3 			= 100;//SpawnOrigin0 Angle
+	coop_float_spawnAngle4 			= 100;//SpawnOrigin0 Angle
+	coop_float_spawnAngle5 			= 80;//SpawnOrigin0 Angle
+	coop_float_spawnAngle6 			= 80;//SpawnOrigin0 Angle
+	coop_float_spawnAngle7 			= 80;//SpawnOrigin0 Angle
+	coop_float_spawnAngle8 			= 80;//SpawnOrigin0 Angle
+//Definie Objective
+	coop_string_objectiveItem1			= "phaserT4";
+	coop_string_objectiveItem2			= "rifleT4";
+//spawnorigins, Spawn Players on those locations, at map start
+	coop_vector_spawnOrigin1 			= '-1248 3151 200';
+	coop_vector_spawnOrigin2 			= '-1180 3070 200';
+	coop_vector_spawnOrigin3 			= '-1180 3140 200';
+	coop_vector_spawnOrigin4 			= '-1180 3210 200';
+	coop_vector_spawnOrigin5 			= '-1648 3151 200';
+	coop_vector_spawnOrigin6 			= '-1720 3070 200';
+	coop_vector_spawnOrigin7 			= '-1720 3140 200';
+	coop_vector_spawnOrigin8 			= '-1720 3210 200';
+//start the main thread
+	globalCoop_main();
+
+	$sky.rendereffects( "+skyorigin" );
+	$world.entity_fade_dist( 10000 );
+//Set viewModes
+	$world.clearAvailableViewModes();
+	$world.addAvailableViewMode( "structuralintegrity" );
+	
+	waitForPlayer();
+	soundtrack( "music/training4.mus" );	
+	thread init();
+	thread globalCoop_main_camFadeIn(1);
+}
+
+
+//---------------------
+// Function: init
+// Comments:
+// the initilization thread called at the start of the level via main
+//---------------------
+void init()
+{
+vector temp_vector = '-1704 3152 10';
+float temp_float;
+//Do only in Single Player Mode
+	if(cvar_bool_multiplayer){
+		$holoDeck.remove();
+	}
+	else{
+		$holoDeck.notsolid();
+		$holoDeck.rendereffects( "+depthhack" );
+		$holoDeck.forcealpha( 1 );
+		$holoDeck.alpha( 1 );
+	}
+	
+	
+	thread globalCoop_player_imobilizeAll( 1 );
+	if(cvar_bool_multiplayer){
+		temp_vector = '-1440 3600 0';
+		temp_float = -90;
+	}
+	globalCommon_SpawnActor( "char/starfleet_tuvok-training.tik", "tuvok", temp_vector, temp_float );
+	wait(.1);
+	if(cvar_bool_multiplayer){
+	//Chek if entity exists
+		if(doesEntityExist($tuvok)){
+			$tuvok.gravity(0);
+			$tuvok.setvelocity('0 0 0');
+			$tuvok.origin(temp_vector);
+		}
+		//Teleport func_dest chage origin in order to prevent stupid killing
+		$t1336.origin('-1192 3152 800');
+		$playerHoloWarp.thread("coop_enttrain4_holywarp");
+	}
+	
+
+	
+	
+	//Inizial tuvok
+	initTuvok();
+	waitforplayer();
+	//Do only in Single Player Mode
+	if(!cvar_bool_multiplayer){
+		$player.model("models/char/munro_voyager.tik");
+		$player.freeinventory();
+		$player.loadobjectives( "ent-training4" );
+	}
+//Set viewModes
+	$world.clearAvailableViewModes();
+	$world.addAvailableViewMode( "structuralintegrity" );
+	
+	thread area4Start();
+	while(1){
+		numberToShootWave1	= globalCoop_return_floatMultiplicatedPlayerQuantity(3);//3
+		numberToShootWave2	= globalCoop_return_floatMultiplicatedPlayerQuantity(3);//3
+		numberToShootWave3	= globalCoop_return_floatMultiplicatedPlayerQuantity(3);//3
+		numberToShootWave4	= globalCoop_return_floatMultiplicatedPlayerQuantity(3);//3
+		wait(2);
+	}
+}
+
+
+//================================================================================
+// Area 4
+//================================================================================
+
+void watchPlasmaAmmo()
+{
+//Do only in Single Player Mode
+	if(cvar_bool_multiplayer){	return;}
+	while( 1 )
+	{
+		wait( 1 );
+		if( getfloatvar( "level.playerammo_Plasma" ) <= 120 )
+		{
+			$player.ammo( "Plasma" , 200 );
+		}
+	}
+}
+
+//---------------------
+// Function: area4Start
+// Comments:
+// very beginning of the level where player is introduced to the training mission
+//---------------------
+void area4Start()
+{
+	wait( 4 );
+	//$world.playsound( "sound/environment/computer/holo_change.wav", 3 ,1.2 ,10000 );
+//check if entity exist
+	if(doesEntityExist($holoDeck)){
+		$holoDeck.fade( 1 , 0 );
+		wait( 1 );
+		$holoDeck.hide();
+	}
+//Wait until the warmup time is gone
+	wait( ( getCvarInt("mp_warmUpTime") - getlevelTime()) );
+//Fade tuvi in
+	fadeTuvokIn();
+	if(cvar_bool_multiplayer){
+	//Chek if entity exists
+		if(doesEntityExist($tuvok)){
+			$tuvok.notsolid();
+		}
+	}
+	wait( 2 );
+
+	//Play Dialog
+//	globalCoop_dialog_play($tuvok,"train2/tuvok_yourrec.mp3",2, 20000,0);//vol,dist,time,head
+	//Now Lieutenant, your records indicate that you need to re-certify on both the
+	//standard federation phaser and the compression rifle.  We'll begin with the phaser.
+	
+	thread globalCoop_player_imobilizeAll( 0 );
+	
+	wait( 1 );
+//Equip
+
+	globalCoop_player_giveAll("models/weapons/worldmodel-Phaser.tik",1);
+	if(!cvar_bool_multiplayer){$player.ammo( "Plasma" , 200 );}
+
+	area4PhaserShoot1();
+	
+	thread watchPlasmaAmmo();
+}
+
+//---------------------
+// Function: area4PhaserShoot1
+// Comments:
+// player learns how to shoot the phaser at objects
+//---------------------
+void area4PhaserShoot1()
+{
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_prepaim.mp3",2, 20000,0);//vol,dist,time,head
+	//For this exercise, use your phaser to destroy as many practice targets as you can. 
+	//You may use either your primary or alternate fire, but you must continue the exercise
+	//until you destroy enough targets to qualify for re-certification.
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_gluck.mp3",2, 20000,0);//vol,dist,time,head
+	//Good luck.
+	
+//Set new Objectives	
+	thread globalCoop_objectives_update("incomplete",1,1);//State,Item,ShowIt
+//Start spawnwave 1
+	thread spawnWave1();
+}
+
+//---------------------
+// Function: spawnWave1
+// Comments:
+// controls all spawning for wave 1
+//---------------------
+void spawnWave1()
+{
+	float locationToUse;
+	float tempFloat;
+	float decrementNumber;
+	
+	while( numberOfTargetsShot <= numberToShootWave1 )
+	{
+		numberOfTargetsLaunched++;
+		
+		thread queTargetAtRandomLocation( 1, 0 );
+		wait( 1 );
+	}
+	
+	$world.playsound( "sound/environment/computer/holo_change.wav", 3 ,1.2 ,10000 );
+	
+	locationToUse = 1;
+	decrementNumber = 1;
+	tempFloat = 0;
+	
+	while( numberOfTargetsShot <= ( numberToShootWave1 + numberToShootWave2 ) )
+	{
+		numberOfTargetsLaunched++;
+		
+		if( locationToUse <= 9 )
+		{
+			thread queTargetAtRandomLocation( 1, locationToUse );
+			wait( 1 );
+			
+			locationToUse++;
+		}
+		else if( locationToUse <= 18 )
+		{
+			tempFloat = locationToUse - decrementNumber;
+			
+			thread queTargetAtRandomLocation( 1, tempFloat );
+			wait( 1 );
+			
+			locationToUse++;
+			decrementNumber = decrementNumber + 2; 
+		}
+		else
+		{
+			locationToUse = 1;
+			decrementNumber = 1;
+			tempFloat = 0;
+		}
+	}
+	
+	$world.playsound( "sound/environment/computer/holo_yes.wav", 3 ,1.5 ,10000 );
+	wait( 2 );
+
+//Set Objectives Complete
+	thread globalCoop_objectives_update("complete",1,1);//State,Item,ShowIt
+	
+	area4PhaserShoot1Complete();
+}
+
+//---------------------
+// Function: area4PhaserShoot1
+// Comments:
+// player learns how to shoot the phaser at objects
+//---------------------
+void area4PhaserShoot1Complete()
+{
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_yoursatrep.mp3",2, 20000,0);//vol,dist,time,head
+	//Excellent.  We will now repeat the exercise for the compression rifle.
+	//As with your phaser, you may use either your primary or secondary fire,
+	//however you must continue until you destroy enough targets to qualify for re-certification.
+	
+//Give compression riffle, use it
+	coop_string_mp_waponToTakeAwayFromPlayer1	= "models/weapons/worldmodel-Phaser.tik";
+	coop_string_weapon1	= "models/weapons/worldmodel-CompressionRifle.tik";
+//Take Phaser away
+	globalCoop_player_takeAll("models/weapons/worldmodel-Phaser.tik");
+	wait(.1);
+	globalCoop_player_giveAll("models/weapons/worldmodel-CompressionRifle.tik", 0);
+
+
+	//
+	//Give the stupid gun again, because once, every freaking 10,000 times
+	//the player won't "get" the stupid thing
+	//
+
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_exabt.mp3",2, 20000,0);//vol,dist,time,head
+	// Prepare yourself, Lieutenant, we are about to begin
+	
+//Clear first mission objective to make it dissapear
+	//coop_string_objectiveItem1 = "";
+//Set new Objectives	
+	thread globalCoop_objectives_update("incomplete",2,1);//State,Item,ShowIt
+
+//Spawn for compressionriffle
+	spawnWave2();
+}
+
+//---------------------
+// Function: spawnWave2
+// Comments:
+// controls all spawning for wave 2
+//---------------------
+void spawnWave2()
+{
+	float locationToUse;
+	float tempFloat;
+	float decrementNumber;
+	
+	while( numberOfTargetsShot <= ( numberToShootWave1 + numberToShootWave2 + numberToShootWave3 ) )
+	{
+		numberOfTargetsLaunched++;
+		
+		thread queTargetAtRandomLocation( 1, 0 );
+		wait( 1 );
+	}
+	
+	$world.playsound( "sound/environment/computer/holo_change.wav", 3 ,1.2 ,10000 );
+	
+	locationToUse = 1;
+	decrementNumber = 1;
+	tempFloat = 0;
+	
+	while( numberOfTargetsShot <= ( numberToShootWave1 + numberToShootWave2 + numberToShootWave3 + numberToShootWave4 ) )
+	{
+		numberOfTargetsLaunched++;
+		
+		if( locationToUse <= 5 )
+		{
+			thread queTargetAtRandomLocation( 2, locationToUse );
+			wait( 1 );
+			
+			locationToUse++;
+		}
+		else if( locationToUse <= 10 )
+		{
+			tempFloat = locationToUse - decrementNumber;
+			
+			thread queTargetAtRandomLocation( 2, tempFloat );
+			wait( 1 );
+			
+			locationToUse++;
+			decrementNumber = decrementNumber + 2; 
+		}
+		else
+		{
+			locationToUse = 1;
+			decrementNumber = 1;
+			tempFloat = 0;
+		}
+	}
+	
+	$world.playsound( "sound/environment/computer/holo_yes.wav", 3 ,1.5 ,10000 );
+	wait( 2 );
+
+//Set new Objectives	
+	thread globalCoop_objectives_update("complete",2,1);//State,Item,ShowIt
+	
+//End Training
+	area4End();
+}
+
+//---------------------
+// Function: area1End
+// Comments:
+// player completes area 1 and is transported to area 2
+//---------------------
+void area4End()
+{
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_exempl.mp3",2, 20000,0);//vol,dist,time,head	
+	//Exemplary work, Lieutenant...  You have now satisfactorily completed all regulatory
+	//fitness and weapon certifications.  Thank you for your compliance. 
+
+	if(cvar_bool_multiplayer){//Multi Player Mode
+		wait(2);
+		coop_endLevel();
+	//Exit
+		return;
+	}
+//End Level
+	spawn ( "trigger_changelevel", "targetname", "endLevel_trigger", "map", "m0-intro" );
+	wait ( 1 );
+	trigger ( "$endLevel_trigger" );
+}
+
+void queTargetAtRandomLocation( float whichPathType, float randomTargetLocation )
+{
+	nextTargetNumber = mod( nextTargetNumber, 10 ) + 1;
+	
+	if( whichPathType == 1 )
+	{
+		nextTargetNumber++;
+		numberOfTargetsLaunched++;
+	
+		entity entityTargetLocation;
+	
+		string stringCurrentTargetName;
+		entity entityCurrentTargetName;
+		
+		
+		// If this target is meant to be random
+		if( randomTargetLocation == 0 )
+		{
+			do
+			{
+				//To spawn a specific location, set randomTargetLocation before you call this
+				randomTargetLocation = randomint( 9 ) + 1;
+			} while( lastRandomTargetLocation == randomTargetLocation );
+		}
+		
+		lastRandomTargetLocation = randomTargetLocation;
+		
+		entityTargetLocation = getentity( "targetLocation" + randomTargetLocation );
+		
+		stringCurrentTargetName = "target" + nextTargetNumber;
+		
+		globalCommon_SpawnScriptModel( "efx/training_target.tik", stringCurrentTargetName, entityTargetLocation.getorigin(), 270 );
+		
+		entityCurrentTargetName = getentity( stringCurrentTargetName );
+		
+		thread waitForSkeetToDie( entityCurrentTargetName, firstWaveMovementSpeed );
+		
+		wait( .05 );
+		entityCurrentTargetName.time( firstWaveMovementSpeed );
+		entityCurrentTargetName.moveUp( 320 );
+		waitfor( entityCurrentTargetName );
+		
+		entityCurrentTargetName.remove();
+	}
+	
+	if( whichPathType == 2 )
+	{
+		nextTargetNumber++;
+		numberOfTargetsLaunched++;
+	
+		entity entityTargetPath;
+	
+		string stringCurrentTargetName;
+		entity entityCurrentTargetName;
+		
+		
+		// If this target is meant to be random
+		if( randomTargetLocation == 0 )
+		{
+			do
+			{
+				//To spawn a specific location, set randomTargetLocation before you call this
+				randomTargetLocation = randomint( 5 ) + 1;
+			} while( lastRandomTargetLocation == randomTargetLocation );
+		}		
+		lastRandomTargetLocation = randomTargetLocation;
+		
+		entityTargetPath = getentity( "splineArch" + randomTargetLocation );
+		
+		stringCurrentTargetName = "target" + nextTargetNumber;
+		
+		globalCommon_SpawnScriptModel( "efx/training_target.tik", stringCurrentTargetName, entityTargetPath.getorigin(), 270 );
+		
+		entityCurrentTargetName = getentity( stringCurrentTargetName );
+		
+		thread waitForSkeetToDie( entityCurrentTargetName, secondWaveMovementSpeed );
+		
+		wait( .05 );
+		
+		entityCurrentTargetName.followpath( entityTargetPath );
+		wait( secondWaveMovementSpeed );
+		
+		
+		entityCurrentTargetName = getentity( stringCurrentTargetName );
+		
+		//Needed else it removes inapproiate models if this one has been shot
+		if( doesEntityExist( entityCurrentTargetName ) )
+		{
+			entityCurrentTargetName.remove();
+			//centerprint( "nextTargetNumber " + nextTargetNumber );
+		}
+	}
+}
+
+void waitForSkeetToDie( entity entityCurrentTargetName, float waitTime )
+{
+	entityCurrentTargetName.ondamage( "skeetKilled" );
+	wait( waitTime );
+}
+
+void skeetKilled()
+{
+	entity entityTarget;
+	entityTarget = getcurrententity();
+	
+	spawn( "func_spawn", "targetName", "explosionSpawner", "origin", vectorToString( entityTarget.getOrigin() ) );
+	wait( .05 );
+	$explosionSpawner.modelName( "fx/fx-explosion-fire-small.tik" );
+	if(doesEntityExist($explosionSpawner)){trigger( "$explosionSpawner" );}
+	
+	entityTarget.remove();
+	$explosionSpawner.remove();
+	numberOfTargetsShot++;
+	
+	entityTarget.playsound( "sound/environment/computer/lcars_hit.wav", 3, 1.6, 10000 );	
+}
+
+////////////////////
+// giveMoreAmmo
+// Give Player More Ammo
+////////////////////
+void giveMoreAmmo()
+{
+if(cvar_bool_multiplayer){
+	return;
+}
+	$triggerGiveMoreAmmo.nottriggerable();
+	
+	$player.ammo( "Plasma", 200 );
+	
+	wait( 1 );
+	$triggerGiveMoreAmmo.triggerable();
+}
+
+//---------------------
+// Function: area4Confirm
+// Comments:
+// plays a confirmation sound each time the player completes a task
+//---------------------
+void area4Confirm()
+{
+	$world.playsound ( "sound/ships/enterprise/ent_beep_confirm.wav" , 3 , 1 , 20000000 );
+}
+
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed("m1l1a-borg_sphere");
+}

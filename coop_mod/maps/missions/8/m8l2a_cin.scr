@@ -1,0 +1,369 @@
+//--- cinematics
+void introCinematic();
+void cinematicArm_InigorDeath_Start();
+void cinematicArm_InigorDeath_Skipthread();
+void cinematicArm_InigorDeath1_ArmEnd();
+void cinematicArm_InigorDeath2_ArmEnd();
+void cinematicArm_InigorDeath_ViewscreenStatic();
+void cinematicArm_InigorDeath_ViewscreenStatic2();
+
+/*
+	cam.load ( "m8l2a_krindocam" );
+	cam.load ( "m8l2a_munrocam" );
+	
+	spawn ( "Camera" , "targetname" , "krindoCam" );
+	spawn ( "Camera" , "targetname" , "munroCam" );
+	
+	wait ( .1 );
+	$krindoCam.follow ( $m8l2a_krindocam );
+	$munroCam.follow ( $m8l2a_munrocam );
+*/
+
+
+void introCinematic()
+{
+
+	spawn ( "Camera" , "targetname" , "cam1","origin","-3173 5072 862");//-3173 5072 777
+    music ("aux1");
+//Start cinematic
+	globalCoop_cin_start();
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.putawayweapon( "dual" );
+		wait( .25 );
+		$player.disableuseweapon( 1 );
+	}
+	wait( .33 );
+	$krindo.warpto( "$krindoIntroStartPos1" );
+	wait( .05 );
+	globalCoop_cin_watch($cam1,$krindo);
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera($cam1);
+	$krindo.walkTo( "$krindoIntroStartPos2", "walk" );
+	wait( .05 );
+	
+	//--- fade in
+	globalCoop_main_camFadeIn(1);
+	wait( 1.0 );
+	
+	globalCoop_dialog_play($krindo,"m8l2/munro_unhh.mp3", 1, 8000, 0); //Unnh...
+	wait( 1.0 );
+	
+	$krindo.turntowardsentity(globalCoop_return_playerClosestPreferActive($krindo));
+	wait( .5 );
+	$krindo.anim( "conv-crossarms" );
+	waitforanimation( $krindo, "conv-crossarms" );
+	//$krindo.anim( "ent-guard-idle" );
+	$krindo.anim( "sfa_hands_back" );
+	
+	globalCoop_dialog_play($krindo,"m8l2/krindo_hostage.mp3", 1, 8000, 0); //You are my hostage. If your Captain won't trade you for Kleeya, you'll die.
+	
+	if(!cvar_bool_multiplayer){
+		$krindo.branchdialog ( "m8l2bHostageChoice" );
+	}
+	else{
+		thread cinematicArm_InigorDeath_Start();
+	}
+}
+
+void failedBranch ()
+{
+	//--- fade out
+	globalCoop_main_camFadeOut(.5);
+	wait( .5 );
+    music ("aux2");
+	spawn ( "Camera" , "targetname" , "cam2" );
+
+	//--- load the camera paths
+	cam.load( "m8l2a_Death_Shot1" );
+	cam.load( "m8l2a_Death_Shot2" );
+	cam.load( "m8l2a_Death_Shot3" );
+	cam.load( "m8l2a_Death_Shot4" );
+
+	//--- setup the scene
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.notSolid();
+		$player.hide();
+	}
+	
+	$munro.useActorWeapon( "none" );
+	$munro.show();
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$munro.origin( $player.getOrigin() );
+	}
+	wait( .1 );
+	
+	$munro.turnTowardsEntity( $krindo );	
+	
+	//$krindo.warpto( "$krindoIntroStartPos2" );
+	$krindo.warpto( "$t691" );
+	wait( .1 );
+	$krindo.turnTowardsEntity( $munro );
+	wait( .25 );
+	$krindo.anim( "sfa_hands_back" );
+	wait( .25 );
+	
+	//--------------------------------------------------------
+	//--- shot 1 - slow dolly in on munro
+	
+	globalCoop_cin_follow($cam1, $m8l2a_Death_Shot1 );
+	globalCoop_cin_fov($cam1, 40 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( .25 );
+
+	//--- fade in
+	globalCoop_main_camFadeIn(.75);
+	wait( .6 );
+	
+	thread globalCoop_dialog_play($munro,"m8l2/munro_picarr.mp3", 1, 8000, 0); //I'm sure Picard can arrange that. She's not a vital member of the crew.
+	wait( 2 );
+
+	//--------------------------------------------------------
+	//--- shot 2 - over shoulder from munro to krindo
+	
+	globalCoop_cin_follow($cam2, $m8l2a_Death_Shot2 );
+	globalCoop_cin_fov($cam2, 40 );
+	globalCoop_cin_cut($cam2);
+	wait( .1 );
+
+	globalCoop_cin_cuecamera( $cam2 );
+	
+	//--- wait for Munro to finish speaking
+	globalCoop_dialog_waitForDialog( $munro );	
+	wait( .2 );
+	
+	thread globalCoop_dialog_play($krindo,"m8l2/krindo_empire.mp3", 1, 8000, 0); //Good. Now I no longer have time for you. I have an Empire to restore.
+	wait( 1 );
+
+	//--------------------------------------------------------
+	//--- shot 3 - slow dolly in on krindo
+	
+	globalCoop_cin_follow($cam1, $m8l2a_Death_Shot3 );
+	globalCoop_cin_fov($cam1, 40 );
+	globalCoop_cin_cut($cam1);
+	wait( .1 );
+
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( 3 );	
+
+	//--------------------------------------------------------
+	//--- shot 2 - over shoulder from munro to krindo
+	
+	globalCoop_cin_follow($cam2, $m8l2a_Death_Shot4 );
+	globalCoop_cin_fov($cam2, 40 );
+	globalCoop_cin_cut($cam2);
+	wait( .1 );
+
+	globalCoop_cin_cuecamera( $cam2 );
+	
+	$munro.headWatchTarget( "krindo", 7 );
+	$krindo.turnTowardsEntity( $nodeKrindo_FailWalkTo );
+	wait( 2 );
+	
+	$krindo.walkTo( "$nodeKrindo_FailWalkTo", "walk" );
+	
+	//--- zoom the camera in
+	thread globalCineFX_CameraFOVLerp( $cam2, 40, 20, 2, "rampupdown" );
+	wait( 3.5 );
+	
+	globalCoop_mission_failWithReason("ChoseWrong" );
+}
+
+
+//---------------------
+// cinematicArm_InigorDeath_Start
+// dialog with krindo, inigor dies on the attrexian colony planet
+// this is the success branch for the opening dialog choice sequence
+//------------------------
+void cinematicArm_InigorDeath_Start()
+{
+	//--- starting cinematic commands
+	globalCoop_cin_start();
+    music ("aux3");
+	
+	cinematicArm_InigorDeath1 = createCinematic( "m8l2-fatherintro" );
+	cinematicArm_InigorDeath1.setendthread( "cinematicArm_InigorDeath1_ArmEnd" );
+	cinematicArm_InigorDeath2 = createCinematic( "m8l2-father" );
+	cinematicArm_InigorDeath2.setendthread( "cinematicArm_InigorDeath2_ArmEnd" );
+	
+	//--- fade out
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	//---HIDE AI
+	globalCommon_AiDummyHide( $krindo );
+	
+	//--- start the armature
+	cinematicArm_InigorDeath1.beginCinematic( "m8l2-fatherintro" );
+	wait( .2 );
+	
+	//--- fade in
+	globalCoop_main_camFadeIn(1);
+	
+	//--- set the skipthread
+	globalCoop_cin_skipThread( "cinematicArm_InigorDeath_Skipthread" );
+}
+
+//---------------------
+// cinematicArm_InigorDeath_ArmEnd
+// calls when the first armature cinematic ends
+//------------------------
+void cinematicArm_InigorDeath1_ArmEnd()
+{
+	//--- start the second armature
+	cinematicArm_InigorDeath2.beginCinematic( "m8l2-father" );
+	
+	$armInigor.scale( 5 );
+	wait( .1 );
+	
+	//--- fade the camera back in
+	globalCoop_main_camFadeIn(1);
+	
+	//--- cinematic viewscreen
+	thread cinematicArm_InigorDeath_ViewscreenStatic();
+	wait( 34 );
+	
+	thread cinematicArm_InigorDeath_ViewscreenStatic2();
+	wait( 34.5 );
+	
+	//--turn off the forcefield
+	thread shutdownForcefield( $forcefieldIntroCell );
+}
+
+//---------------------
+// cinematicArm_InigorDeath_ArmEnd
+// calls when the second armature cinematic ends
+//------------------------
+void cinematicArm_InigorDeath2_ArmEnd()
+{
+	//--- end the cinematic
+	thread cinematicArm_InigorDeath_Skipthread();
+}
+
+//----------------------------------------------
+//--- flash static on the viewscreen
+void cinematicArm_InigorDeath_ViewscreenStatic()
+{
+	wait( 2.5 );
+	
+	$viewscreenStatic.show();
+	wait( .2 );
+	
+	$viewscreenStatic.hide();
+	wait( .3 );
+	
+	$viewscreenStatic.show();
+	wait( .1 );
+	
+	$viewscreenStatic.hide();
+}
+
+//----------------------------------------------
+//--- flash to static as inigor dies
+void cinematicArm_InigorDeath_ViewscreenStatic2()
+{
+	$viewscreenStatic.show();
+	wait( .2 );
+	
+	$viewscreenStatic.hide();
+	wait( .3 );
+	
+	$viewscreenStatic.show();
+	wait( .1 );
+	
+	$viewscreenStatic.hide();
+	wait( .3 );
+	
+	$viewscreenStatic.show();
+	$viewscreenPortal.hide();
+}
+
+//---------------------
+// cinematicArm_InigorDeath_Skipthread
+// skipthread for cinematic
+//------------------------
+void cinematicArm_InigorDeath_Skipthread()
+{
+	//kill the cinematic
+	skipthread( "null" );
+
+	//fade to black
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	//--- end the armature cinematics, FALSE means don't launch the end thread
+	cinematicArm_InigorDeath1.endCinematic();
+	cinematicArm_InigorDeath2.endCinematic( FALSE );
+
+	killthread( "cinematicArm_InigorDeath_Start" );
+	killthread( "cinematicArm_InigorDeath1_ArmEnd" );
+	killthread( "cinematicArm_InigorDeath2_ArmEnd" );
+
+	//--- krindo
+	//globalCommon_AiDummy( $krindo, "idle" );
+	$krindo.warp( $nodeKrindo_PostIntroCinematic.getOrigin() );
+	$krindo.turntowardsentity( $viewscreenBorder );
+	//globalCineFX_PositionObject( $krindo, $nodeKrindo_PostIntroCinematic );
+	wait( 1 );
+	globalCommon_AiDummy( $krindo, "ent-curvedconsole-gesture" );
+	
+	//--- set the player
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.warp( $nodePlayer_PostIntroCinematic.getOrigin() );
+		wait( .1 );
+		$player.turnTowardsEntity( $krindo );
+		$player.disableuseweapon( 0 );
+	}
+
+	globalCoop_cin_end();
+	wait( .5 );
+	thread globalCoop_player_warpToSpawnOriginAll();
+	
+	if(!cvar_bool_multiplayer)
+	{
+		$player.loopsound( "sound/ships/drull/drull_destruct.wav", 1.2, 512);
+	}
+	else
+	{
+		$krindo.loopsound( "sound/ships/drull/drull_destruct.wav",.5,99999);
+	}
+	
+	if ( doesentityexist( $forcefieldIntroCell ))
+	{
+		$forcefieldIntroCell.remove();
+	}
+	
+	
+	thread globalCoop_level_removePath($m8l2a_Death_Shot1);
+	thread globalCoop_level_removePath($m8l2a_Death_Shot2);
+	thread globalCoop_level_removePath($m8l2a_Death_Shot3);
+	thread globalCoop_level_removePath($m8l2a_Death_Shot4);
+	
+	globalCoop_main_camFadeIn(.5);
+	wait( .5 );
+	if(!cvar_bool_multiplayer)
+	{
+		thread liftDoor1CloseLeft();
+		thread liftDoor1CloseRight();
+		$player.use("AttrexianRifle");
+		wait( 2 );
+		liftDown1();
+		$krindo.warpto( "$krindoObjectivePos" );
+		$krindo.anim("idle");
+		$krindo.missionobjective( 1 );
+	}
+	else
+	{
+	//Spawn lift call triggers
+		spawn("trigger_multiple","targetname","coop_tM_lift1_Call","origin","-2447 4570 35");
+		wait(.2);
+		$coop_tM_lift1_Call.setsize('-128 -128 0','128 128 764');
+		$coop_tM_lift1_Call.thread("coop_lift1Activate");
+	}
+	wait( .05 );
+	//--- set the first objective
+	//$player.setobjectiveshow ( "ProtectKrindo", 1 );
+	thread globalCoop_objectives_update("incomplete",1,1);
+}
+

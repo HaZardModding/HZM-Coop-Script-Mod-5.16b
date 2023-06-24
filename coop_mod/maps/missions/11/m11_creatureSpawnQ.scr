@@ -1,0 +1,245 @@
+//--------------------------------------------------------------
+// THE SPAWNQ is a faked array (via setstringvar) that is used to implement a FIFO queue that
+// keeps track of which entities to spawn next time one dies.
+// The queue holds function names that are called with stuffcmd.
+float spawnQfront, spawnQback;
+
+// triggers in the map call threads that change the area via enterAreaSetup
+float currentArea = 0;
+
+// max number of queued spawns; value is per-area since the queue is cleared
+// on entry to each area.
+float SPAWNQ_MAX = 8;
+
+// max number of area-spawned entities that can be alive at once; can be
+// changed per area for tweaking
+float numAliveMax = 2;
+
+// number of spawned fly-ins that are currently alive
+float numAlive = 0;
+
+// seconds to wait after death before trying to spawn the next; for difficulty tweaking
+float DELAY_SPAWNCHAIN = 2;
+
+//--------------------------------------------------------------
+void spawnQ_printDebug( string label )
+{
+	float i;
+	string s;
+
+	// prints the contents of the spawn queue with indicators of front and back
+	print( "SPAWNQ DEBUG ------------------- " + label + "\n" );
+	for( i = 0; i < SPAWNQ_MAX; i++ )
+	{
+		print( "  " );
+		if( spawnQfront == i && spawnQback == i ) print( "FB->" );
+		else if( spawnQfront == i ) print( " F->" );
+		else if( spawnQback == i ) print( " B->" );
+		print( "[" + i + "] " );
+		s = getstringvar( "level.spawnq" + i );
+		print( "\"" + s + "\"\n" );
+	}
+}
+
+//--------------------------------------------------------------
+// Function:	spawnQ_init
+// Desc:		Initialize and clear the spawnQ "array"
+//--------------------------------------------------------------
+void spawnQ_init()
+{
+	float i;
+
+	spawnQfront = 0;
+	spawnQback = 0;
+//	numAlive = 0;
+	for( i = 0; i < SPAWNQ_MAX; i++ )
+	{
+		setstringvar( "level.spawnq" + i, "" );
+	}
+}
+
+//--------------------------------------------------------------
+// Function: 	spawnQ_pushfront
+// Desc:		Add a string to the front of the queue.
+//--------------------------------------------------------------
+void spawnQ_pushfront( string funcName )
+{
+	string qvarname;
+
+	if( (spawnQfront + 1) == spawnQback )
+	{
+		globalDebug_Disconnect( "spawnQ FULL!\n" );
+	}
+
+	qvarname = "level.spawnq" + spawnQfront;
+	setstringvar( qvarname, funcName );
+
+	spawnQfront++;
+	if( spawnQfront == SPAWNQ_MAX )
+	{
+		spawnQfront = 0;
+	}
+}
+
+//--------------------------------------------------------------
+// Function:	spawnQ_isEmpty
+// Desc:		Returns 1 if there is nothing in the queue, 0 otherwise.
+//--------------------------------------------------------------
+float spawnQ_isEmpty() { return (spawnQback == spawnQfront); }
+
+//--------------------------------------------------------------
+// Function:	spawnQ_popback
+// Desc:		Removes a string from the back of the queue.
+// 	!NOTE!
+//	For some reason, the scripting language doesn't work correctly when returning
+//	a local string variable from a function.  Seems to be a scope issue, but I
+//  just worked around it by using a setstringvar( "level.returnStringHack" )...
+//--------------------------------------------------------------
+string spawnQ_popback()
+{
+	string stringToReturn, qvarname;
+
+	if( spawnQfront == spawnQback )
+	{
+		print( "spawnQ EMPTY!\n" );
+		setstringvar( "level.returnStringHack", "" );
+		return "";
+	}
+
+ 	qvarname = "level.spawnq" + spawnQback;
+	stringToReturn = getstringvar( qvarname );
+	setstringvar( qvarname, "" );
+
+	spawnQback++;
+	if( spawnQback == SPAWNQ_MAX )
+	{
+		spawnQback = 0;
+	}
+
+	setstringvar( "level.returnStringHack", stringToReturn );
+}
+
+//--------------------------------------------------------------
+// Function:	spawnQ_process
+// Desc:		The queue holds function names that are called with stuffcmd.
+//				This function keeps popping function names from the back of the queue and calling
+//				them until either A) there are none left, or B) there are too many enemies alive.
+//--------------------------------------------------------------
+void spawnQ_process()
+{
+	string funcName;
+	while( (numAlive < numAliveMax) && (!spawnQ_isEmpty()) )
+	{
+		spawnQ_popback();
+		funcName = getstringvar( "level.returnStringHack" );
+
+		stuffcmd( "script thread " + funcName + "\n" );
+		print ( "^3" + funcName + "^7\n" );
+		// give the stuffcmd time to execute
+		wait( 0.5 );
+	}
+
+	print ( "^2numAlive==" + numAlive + "^7\n");
+//	spawnQ_printDebug( "x" );
+}
+
+//--------------------------------------------------------------
+// Function: 	globalKillThread
+// Desc:		This is the killthread assigned to each flyin entity.  It handles spawning successors.
+//--------------------------------------------------------------
+void globalKillThread()
+{
+	entity e;
+	string deathChain;
+	float myArea;
+
+	// note that there is one less enemy in existence
+	numAlive--;
+
+	// who died?
+	e = getcurrententity();
+
+	// Each entity keeps track of which area it belongs to and which function to call on death.
+	deathChain = e.getstringvar( "qod" );
+	myArea = e.getfloatvar( "myarea" );
+
+	// pause for a bit; difficulty tweaking; equates to the relentlessness of the attack
+	wait( DELAY_SPAWNCHAIN );
+
+	// if the player is in the area that belongs to this enemy, and the enemy
+	// is set up to spawn someone else when it dies, then do it
+	if( (currentArea == myArea) && (deathChain != "") )
+	{
+		spawnQ_pushfront( deathChain );
+	}
+
+	// allow anybody who wants to spawn to do it
+	spawnQ_process();
+}
+
+//--------------------------------------------------------------
+// Function:	enterAreaSetup
+// Desc:		Normalized functionality that must be executed on entry to each area (called from trigger)
+//--------------------------------------------------------------
+float enterAreaSetup( float num )
+{
+	// ignore redundant entry
+	if( currentArea == num ) return 0;
+
+	// clear the spawn queue; everyone else left will just have to deal...
+	spawnQ_init();
+	wait( 0.05 );
+
+	// remember which area is current
+	currentArea = num;
+
+	print( "ENTERING AREA " + num + "\n" );
+	return 1;
+}
+
+//--------------------------------------------------------------
+// Function:	doflyin
+// Desc:		Wrapper function for globalFlyin_SpawnLaunch that updates the global variables
+//				for this level and stores in each entity which area and successor it has.
+//--------------------------------------------------------------
+entity doFlyin( entity spawner, string spawnModelName, float spawnGroup, string spawnMasterState, string queueOnDeath )
+{
+	entity e;
+
+	// have to store off currentArea now because the value isn't used for a while and might change
+	// while this thread is taking it's sweet time
+
+	float saveCurrentArea;
+	saveCurrentArea = currentArea;
+
+	// note that there is one more enemy in existence
+	numAlive++;
+
+	// do the launch; doesn't return until the real monster is released into the world
+	e = globalFlyin_SpawnLaunch( spawner, spawnModelName, spawnGroup, spawnMasterState, "creatureTouched", 1 );
+
+	//We now have to handle the case that the monster never spawned because it was shot down mid-air
+	if ( e.getfloatvar ( "killed" ))
+	{
+		numAlive--;
+		e.remove();
+//		print ( "^6EXPLODED!\n" );
+		// if the player is in the area that belongs to this enemy, and the enemy
+		// is set up to spawn someone else when it dies, then do it
+		if( (currentArea == saveCurrentArea) && (queueOnDeath != "") )
+		{
+			spawnQ_pushfront( queueOnDeath );
+		}
+
+		// allow anybody who wants to spawn to do it
+		spawnQ_process();
+	}
+	else
+	{
+		// setup the enemy to call it's successor on death
+		e.setstringvar( "qod", queueOnDeath );
+		e.setfloatvar( "myarea", saveCurrentArea );
+		e.killthread( "globalKillThread" );
+	}
+	return e;
+}

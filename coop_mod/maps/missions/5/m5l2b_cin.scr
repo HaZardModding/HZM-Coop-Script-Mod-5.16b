@@ -1,0 +1,119 @@
+void tripwiresKillAliens();
+void tripwiresKillAliens_skipThread();
+
+void tripwiresKillAliens()
+{
+	cinBioscan = createcinematic( "m5l2-bioscan" );
+	$Kourban.stopdialog();
+	$Chell.stopdialog();
+	$Telsia.stopdialog();
+	$fakemunro.stopdialog();
+
+	//begin cinematic
+	globalCoop_main_camFadeOut(1);	
+	globalCoop_cin_start();
+
+    allowmusicducking (0);
+	music ("aux1");
+
+	$Chell.ai_off();
+	$Telsia.ai_off();
+	$Kourban.ai_off();
+	$Chell.hide();
+	$Telsia.hide();
+	$Kourban.hide();
+
+	wait ( 1 );
+
+	//set the skipthread
+	globalCoop_cin_skipThread( "tripwiresKillAliens_skipThread" );
+	
+	cinBioscan.setendthread( "tripwiresKillAliens_skipThread" );
+	cinBioscan.beginCinematic( "m5l2-bioscan" ) ;
+	
+	$tripwireAlien1.modelname( "char/alien-type1a-lurker.tik" );
+	$tripwireAlien1.spawntargetname( "tripwireAlien1Spawned" );
+	
+	trigger( "$tripwireAlien1" );
+	wait( .1 );
+	
+	$tripwireAlien1Spawned.ai_off();
+	$tripwireAlien1Spawned.turntowardsplayer();
+	wait( 4 );
+	
+	$tripwireAlien1Spawned.anim( "walk" );
+	wait( 4 );
+
+	$tripwireAlien1Spawned.anim( "idle" );
+	wait( 3 );
+
+	$tripwireAlien1Spawned.anim( "walk" );
+	wait( 1.5 );
+	
+	$tripwireAlien1Spawned.kill();
+}
+
+//---------------------
+// Function: tripwiresKillAliens_skipThread
+// Comments:
+// spawns aliens that die in the trip wires
+//---------------------
+void tripwiresKillAliens_skipThread()
+{
+	//kill the cinematic
+	skipthread( "null" );
+	music ("normal");
+	killthread( "tripwiresKillAliens" );
+	
+	cinBioscan.endCinematic(FALSE);
+	globalCoop_main_camFadeOut(.1);
+	wait(.1);
+	
+	$Chell.show();
+	$Telsia.show();
+	$Kourban.show();
+
+	$tripwireAlien1Spawned.remove();
+	globalCoop_cin_end();
+	
+	if(cvar_bool_multiplayer){//Singleplayer
+		coop_float_spawnAngle0 			= 1;
+		coop_float_spawnAngle1 			= 1;
+		coop_float_spawnAngle2 			= 1;
+		coop_float_spawnAngle3 			= 1;
+		coop_float_spawnAngle4 			= 1;
+		coop_float_spawnAngle5 			= 1;
+		coop_float_spawnAngle6 			= 1;
+		coop_float_spawnAngle7 			= 1;
+		coop_float_spawnAngle8 			= 1;
+		coop_vector_spawnOrigin8 		= '8032 777 3';
+		coop_vector_spawnOrigin7 		= '8032 840 3';
+		coop_vector_spawnOrigin6 		= '8032 900 3';
+		coop_vector_spawnOrigin5 		= '8032 960 3';
+		coop_vector_spawnOrigin4 		= '8032 1020 3';
+		coop_vector_spawnOrigin3 		= '8100 1020 3';
+		coop_vector_spawnOrigin2 		= '8100 960 3';
+		coop_vector_spawnOrigin1 		= '8100 840 3';
+//Make the FF solid in mp, avoid players getting trapped with the AI-Team
+		$biofactoryTripHalls1_field1.solid();
+		
+		thread globalCoop_applaySpawnOriginOnReSpwanOrigin();
+		globalCoop_player_warpToSpawnOriginAll();
+	}
+	
+	//--- Action
+	globalCoop_main_camFadeIn(1);
+
+	//$player.setobjectiveshow( "DeactivateTripWires", 1 );
+	thread globalCoop_objectives_update("incomplete",4,0);
+	$tripwireAliensButton1_green.missionobjective( 1 );
+
+	//$Kourban.walkto( "$tripwireTrapTeam_node1" , "run" );
+	//$Chell.walkto( "$tripwireTrapTeam_node2" , "run" );
+	//$Telsia.walkto( "$tripwireTrapTeam_node3" , "run" );
+	
+	$Kourban.warpto("$tripwireTrapTeam_node1");
+	$Chell.warpto("$tripwireTrapTeam_node2");
+	$Telsia.warpto("$tripwireTrapTeam_node3");
+}
+

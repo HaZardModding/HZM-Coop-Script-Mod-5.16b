@@ -1,0 +1,46 @@
+//Hack Hack! ;)
+//Contains Configuration files with swaped script code!
+//This code can only be executed in Singleplayer or Multiplayer with cheats activated!
+//I use this to store tonns of singleplayer code, in that way I don't need to fear the
+//max statments exceeded message :)
+
+//The code stored in the config files will be only executed when ever a
+//config file gets executed, this saves us statments and maps can be compiled faster
+
+//IMPORTANT!
+//The Files can only be executed after the player is ready otherwise
+//the config commands will be handled as server settings only.
+//How to do that (SCRIPT(scr) CODE):
+waitForPlayer();
+stuffCMD("exec folder/filename.cfg");
+
+////////////////////////////////////////////////////////////////////////
+/////////WARNING! THE COMMANDS CAN NOT BE WRITTEN AS IN THE SCRIPTS/////
+////////////////////THE SYNTAX DIFFERS, SEE EXAMPLES BELLOW/////////////
+////////////////////////////////////////////////////////////////////////
+//put vectors and strings into d-qoutes
+
+
+//-- DIRECT ACCESSIBLE//////////////////////////////////////////////////
+cam load <filename>
+cam load m8l1a_Space_FlyIn_Shot1
+
+locationprint <x-integer> <y-integer> "<text-string>" <time-float>
+locationprint 0 70 "Stardate Bla Bla Blub" 14.0
+
+
+//-- SCRIPT PREFIXED////////////////////////////////////////////////////
+script <object> <command1>
+script $Jurot ai_on
+
+script <object> <command1> <parameter1>
+script $player health 100
+
+script <object> <command1> <parameter1> <parameter2>
+script $Jurot displayEffect TransportIn Federation
+
+script <object> <command1> "<parameter1-connect-as-string>"
+script $Jurot origin "100 0 311" 
+
+script <command1> <parameter1-connect-as-string>
+script centerPrint "This is a Test Text"

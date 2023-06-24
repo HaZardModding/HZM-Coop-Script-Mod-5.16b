@@ -1,0 +1,190 @@
+//-----------------------------------------------------------------
+//  EF2 Level Script File
+//
+//  Level:	  training
+//  Script By:    Kenny "Gullie" Thompson
+//  Geometry By:  Kenny "Gullie" Thompson
+//  Created on:   05/07/2003
+//
+//	Last Edited:   Kenny "Gullie" Thompson
+//-----------------------------------------------------------------
+
+
+void initTuvok();
+void fadeTuvokIn();
+void fadeTuvokOut();
+
+void killAllTalking();
+float tuvokOnUseActive;
+
+//Co-OP
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+float tuviHealth = 10000;
+
+void tuvokOnUse()
+{
+	if(tuvokOnUseActive == 1){return;}
+	
+	
+	tuvokOnUseActive = 1;
+	if(doesEntityExist($tuvok)){//Co-Op
+		if(getCvarInt("mp_maxvotes") > 0 && cvar_bool_multiplayer)
+		{
+			globalCoop_main_globalMessage("^8Tuvok: ^5Vote yes^8(F1)^5 to skip the Training...");
+			wait(.25);
+			entity ePlayer;
+			ePlayer = globalCoop_return_playerClosestPreferActive($tuvok);
+			ePlayer.callvote("map","m1l1a-borg_sphere");
+		}
+		else{
+			globalCoop_dialog_play($tuvok,"train1/tuvok_lesson.mp3",2, 128,0);
+		}
+	}
+	tuvokOnUseActive=0;
+	//Co-Op
+	if(doesEntityExist($tuvok)){$tuvok.onUse("tuvokOnUse");}
+}
+
+
+void tuvokOnDamage()
+{
+	if(doesEntityExist($tuvok) && cvar_bool_multiplayer){//Co-Op
+		if($tuvok.getHealth() != tuviHealth){
+			killAllTalking();
+			$tuvok.animateonce("conv-fingerpoint-atyou");
+			$tuvok.targetname("tuvokAngry");
+			wait(.1);
+			if(doesEntityExist($tuvokAngry)){
+				$tuvokAngry.emotion("exp-anger");
+				globalCoop_dialog_play($tuvokAngry,"train1/tuvok_contact.mp3",4,700,0);
+				
+			}
+			thread globalCoop_mission_fail();
+			return;
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+void initTuvok()
+{
+//Spawn Tuvi, if he does not allready exist
+	if(!doesEntityExist($tuvok)){
+		spawn ("actor","model","char/starfleet_tuvok-training.tik","targetname","tuvok","origin",vectortostring( '-11111 -11111 -11111' ));
+		wait( .1 );
+		$tuvok.ai_off();
+		$tuvok.angle( 0 );
+	}
+	
+	//Wait	
+	wait( .1 );
+	
+	//make them to dummys
+	if(doesEntityExist($munro)){
+	//Make vis,solid,notpushable,make stupid
+		$munro.show();
+		$munro.solid();
+		$munro.pushable ( 0 );
+		$munro.ai_off();		
+	}
+	
+	//Add Tuvi a aggression feature (ritual did prepare all for it but not include...)
+	if(getcvarint( "g_gametype" ) == 1 ){
+		if(doesEntityExist($tuvok)){
+			$tuvok.onUse("tuvokOnUse");
+			$tuvok.health( tuviHealth );
+			$tuvok.actorondamage( "tuvokOnDamage" );
+			globalCoop_level_remove($coop_class_medicModel);
+			globalCoop_level_remove($coop_class_heavyModel);
+			globalCoop_level_remove($coop_class_techModel);
+			//thread tuvokOnDamage();
+		}
+	}
+	
+	//Hide The dummys, ther is no need to see and render them...
+	if(doesEntityExist($munro))
+		{$munro.show();}
+	
+	//Prepare Tuvi...
+	if(doesEntityExist($tuvok)){
+		$tuvok.ai_off();
+		$tuvok.forcealpha( 1 );
+		$tuvok.alpha( 0 );
+		$tuvok.pushable( 0 );
+		$tuvok.immortal( 1 );
+	}
+}
+
+void fadeTuvokIn()
+{
+	if(doesEntityExist($tuvok)){//Co-Op
+		$tuvok.solid();
+		$tuvok.playsound( "sound/environment/computer/holo_changesml1.wav", 3 ,.7 ,10000 );
+		$tuvok.displayeffect( "TransportIn", "FederationNoAnim" );
+	}
+	wait( .5 );
+	if(doesEntityExist($tuvok)){//Co-Op
+		$tuvok.rendereffects( "+shadow" );
+	}
+	wait( 1 );
+	if(doesEntityExist($tuvok)){//Co-Op
+		$tuvok.anim( "sfa_hands_back" );
+	}
+	wait( .5 );
+	if(doesEntityExist($tuvok)){//Co-Op
+	//watch random Player
+		$tuvok.headwatch(globalCoop_return_playerClosestPreferActive($tuvok), 10 );
+		$tuvok.alpha( 1 );
+	}
+	if(getcvarint( "g_gametype" ) == 1 ){//Co-Op
+		thread tuvokOnDamage();
+		if(doesEntityExist($tuvok)){//Co-Op
+			$tuvok.onUse("tuvokOnUse");
+		}
+	}
+}
+
+void fadeTuvokOut()
+{
+	killAllTalking();
+	if(doesEntityExist($tuvok)){//Co-Op
+		$tuvok.headwatchtarget( "none", 10 );
+		$tuvok.playsound( "sound/environment/computer/holo_changesml1.wav", 3 ,.7 ,10000 );
+		$tuvok.displayeffect( "TransportOut", "FederationNoAnim" );	
+	}
+	wait( 1 );
+	if(doesEntityExist($tuvok)){//Co-Op
+		$tuvok.anim( "idle" );
+		$tuvok.rendereffects( "-shadow" );
+	}
+	wait( .5 );
+	if(doesEntityExist($tuvok)){//Co-Op
+		$tuvok.notsolid();
+		$tuvok.alpha( 0 );
+	}
+	if(getcvarint( "g_gametype" ) == 1 ){//Co-Op
+		killThread("tuvokOnDamage");
+		if(doesEntityExist($tuvok)){//Co-Op
+			$tuvok.onUse("");
+		}
+	}
+}
+
+////////////////////////
+// killAllTalking
+// Should be used to stop all actors in the level from talking
+////////////////////////
+void killAllTalking()
+{
+	if(doesEntityExist($tuvok))
+		{$tuvok.stopdialog();}
+	if(doesEntityExist($munro))
+		{$munro.stopdialog();}
+	//Random player (coop_playerTalking) stop talking...
+	if(doesEntityExist(coop_entity_dialogSpeaker))
+		{coop_entity_dialogSpeaker.stopdialog();}
+}

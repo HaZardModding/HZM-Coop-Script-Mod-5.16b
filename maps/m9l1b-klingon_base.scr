@@ -1,0 +1,526 @@
+//-----------------------------------------------------------------
+//klingonShooter01
+//  EF2 Level Script File
+//
+//  Level:	  m9l1b-klingon_base (K7 Starbase) 
+//  Script By:    Adam 'Senn' Bellefeuil
+//  Geometry By:  Adam 'Senn' Bellefeuil
+//  Created on:   07/31/2002
+//  Last Edited:  10/31/2002 - AB
+//-----------------------------------------------------------------
+
+void main();
+void init();
+void setupArchetypes();
+
+// Machine Room Sequences
+void bridgeCollapse();
+
+// Misc Sequences
+void liftPlayerExit_MoveDown();
+
+// Omag Chase Sequences
+void omagFollowPath01();
+void omagFollowPath02();
+void omagFollowPath03();
+
+// Hallway Battle Sequences
+void hallway_seq01();
+void hallway_seq02();
+void hallway_seq03();
+void hallway_seq04();
+void hallway_seq05();
+void hallway_seq06();
+void hallway_seq07();
+void hallway_seq08();
+void coop_waitForTeam();
+void coop_endLevel();
+
+float float_bridgeColapseThreadCounter = 0;
+
+
+//=============================================================================
+// Includes
+//=============================================================================
+ //Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/optional_modules/teammate.scr"
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "maps/global_scripts/global_common.scr"
+#include "maps/global_scripts/global_math.scr"
+#include "maps/global_scripts/global_acceleratedMovement.scr"
+
+//=============================================================================
+// Main 
+//=============================================================================
+
+//---------------------
+// main
+// do startup stuff 
+//---------------------
+void main()
+{
+//--- set the soundtrack
+soundtrack( "music/m9l1b-klingon_base.mus" );
+
+	if(getCvarInt("g_gametype")){
+		thread globalCoop_level_remove($hallway_seq01_shotgun1);
+		thread globalCoop_level_remove($hallway_seq02_shotgun1);
+		thread globalCoop_level_remove($hallway_seq03_shotgun1);
+		thread globalCoop_level_remove($hallway_seq04_shotgun1);
+		thread globalCoop_level_remove($hallway_seq05_knife1);
+		thread globalCoop_level_remove($hallway_seq06_shotgun1);
+		thread globalCoop_level_remove($hallway_seq06_pistol1);
+		thread globalCoop_level_remove($hallway_seq08_shotgun1);
+		$bridge_exploder.thread("bridgeCollapse");
+	}
+	
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_string_nextMapToCheck			= "m9l2-klingon_base";//set the map we gona load next while we are in testmode
+//Set spawnangles for this level
+	coop_float_spawnAngle0 				= 90;//SpawnOrigin0 Angle
+	
+//spawnorigins, Spawn Players on those locations, at map start
+	coop_vector_spawnOrigin1 			= '2370 475 267';
+	coop_vector_spawnOrigin2 			= '2300 475 267';
+	coop_vector_spawnOrigin3 			= '2230 475 267';
+	coop_vector_spawnOrigin4 			= '2160 475 267';
+	coop_vector_spawnOrigin5 			= '2370 375 267';
+	coop_vector_spawnOrigin6 			= '2300 375 267';
+	coop_vector_spawnOrigin7 			= '2230 375 267';
+	coop_vector_spawnOrigin8 			= '2160 375 267';
+	
+//Definie Objective
+	coop_string_objectiveItem1			= "FollowOmag";
+	
+//Set Weapons Manualy untill we found a work arround this max statement limit excended :-/
+	coop_string_mp_waponToTakeAwayFromPlayer2 = "";
+	coop_string_weapon7				= "models/weapons/worldmodel-GrenadeLauncher.tik";
+	coop_string_weapon6 			= "models/weapons/worldmodel-Tricorder-stx.tik";
+	coop_string_weapon5 			= "models/weapons/worldmodel-Batleth.tik";
+	coop_string_weapon4 			= "models/weapons/worldmodel-Phaser-stx.tik";
+	coop_string_weapon3				= "models/weapons/worldmodel-BurstRifle.tik";
+	coop_string_weapon2 			= "models/weapons/worldmodel-photon.tik";
+	coop_string_weapon1 			= "models/weapons/worldmodel-FieldAssaultRifle.tik";
+	
+//Start the coop mod before everything else!!!
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	//--- setup distance fog
+	$world.farplane( 5000 );
+	$world.farplane_color( '.25 .2 .1' );
+
+	$sky.rendereffects( "+skyorigin" );
+	$world.entity_fade_dist( 8000 );
+	
+	thread init();
+
+	waitForPlayer();
+//Fade Cam In (required to be set on singleplayer manually after the implematation of the co-op mod)
+	cam_fadeIn(2, 0, 0, 0, 1);
+}
+
+void setupArchetypeObject( entity e, string theArchetype )
+{
+	e.contents( "targetable" );
+	e.archetype( theArchetype );
+}
+
+void setupCrateArchetypeObject( entity e, string theArchetype )
+{
+	e.contents( "+targetable" );
+	e.archetype( theArchetype );
+}
+
+//-----------------------------------
+void inaccessible_sound()
+{
+	entity e;
+	e = getcurrententity();
+	e.playsound( "sound/doors/door_locked.wav", 1, .7, 90 );
+}
+
+//---------------------
+// init
+// intialization thread
+//---------------------
+void init()
+{
+//spawn Class Selection
+	thread globalCoop_class_setup("Medic",'2420 771 267');
+	thread globalCoop_class_setup("HeavyWeapons",'2420 853 267');
+	thread globalCoop_class_setup("Technician",'2420 969 267');
+	
+	hallway_seq01();
+	hallway_seq03();
+	hallway_seq05();
+
+	$omag.immortal( 1 );
+	$omag.notsolid();
+	$omag.ai_off();
+
+	$clipLiftPlayerExit.notsolid();
+
+	$floater1_model.bind( $floater1 );
+	$floater2_model.bind( $floater2 );
+	
+	$doorDownLiftPlayerExit.time (.1);
+	$doorDownLiftPlayerExit.moveup ( 144 );
+	$doorNorthLiftPlayerExit.time (.1);
+	$doorNorthLiftPlayerExit.moveNorth ( 70 );
+	$doorSouthLiftPlayerExit.time (.1);
+	$doorSouthLiftPlayerExit.moveSouth ( 70 );
+	
+	$doorDownLiftOmagExit.time (.1);
+	$doorDownLiftOmagExit.moveup ( 144 );
+	$doorNorthLiftOmagExit.time (.1);
+	$doorNorthLiftOmagExit.moveNorth ( 70 );
+	$doorSouthLiftOmagExit.time (.1);
+	$doorSouthLiftOmagExit.moveSouth ( 70 );
+	
+	thread globalCommon_OnUse ( $buttonLiftPlayerExit , "liftPlayerExit_MoveDown");	
+		
+	thread setupArchetypes();
+
+	// setup objectives
+	if(!cvar_bool_multiplayer){
+		$player.loadobjectives("m9l1b-klingon_base");
+		wait( .25 );
+		$player.setobjectiveshow ( "FollowOmag", 1 );
+	}
+	thread globalCoop_objectives_update("incomplete",1,1);
+}
+
+//---------------------
+// setupArchetypes
+// setting up the archetypes
+//---------------------
+void setupArchetypes()
+{
+	setupArchetypeObject( $arch_machine, "MaintenancePanel" );
+	setupArchetypeObject( $archetypeDoorPanel, "KlingonDoorPanel" );
+	setupArchetypeObject( $archetypeElevator, "KlingonLiftPanel" );
+
+	setupCrateArchetypeObject( $arch_crate1, "TrilithiumResin" );
+	setupCrateArchetypeObject( $bridge_exploder, "TrilithiumResin" );
+}
+
+//=============================================================================
+// Machine Room Sequences
+//=============================================================================
+
+//---------------------
+// sequenceBridgeWarehouseCollapse
+// bridge in first warehouse collapses when player steps on it
+//---------------------
+void bridgeCollapse()
+{
+	float_bridgeColapseThreadCounter++;
+	if(!cvar_bool_multiplayer || float_bridgeColapseThreadCounter == 2){
+		thread globalCoop_level_triggerEntity($bridge_exploder);
+		thread globalCoop_level_remove($bridge_barrel);
+		thread globalCoop_level_remove($bridge_intact);
+		$bridge_busted.show();
+		$bridgeWarehouseCollapse.show();
+		$hallway_seq03_pistol1.attack(globalCoop_return_playerClosestPreferActive($hallway_seq03_pistol1));
+
+		$bridge_quake.playsound( "sound/impact/explosion/explo_shuttleint.wav", 5, 2, 1550 );
+		thread globalCoop_level_triggerEntity($bridge_explode);
+		//rampup,none
+		globalAccelMove_Rotate( $bridgeWarehouseCollapse, '40 0 0',.15, "none", "sound/environment/metal/bigcreak.wav" );
+		thread globalCoop_level_triggerEntity($bridge_quake);
+
+		//$bridge_explode.playsound( "sound/environment/metal/bigcreak.wav", 6, 2, 1550 );	
+		//waitfor( $bridgeWarehouseCollapse );
+
+		//$bridgeWarehouseCollapse.time( .1 );
+		//$bridgeWarehouseCollapse.rotateXup( 40 );
+		//waitfor( $bridgeWarehouseCollapse );
+
+		$bridgeWarehouseCollapse.playsound( "sound/environment/metal/metal_exlpo3.wav", 6, 3, 1550 );
+	}
+}
+
+//=============================================================================
+// Misc Sequences
+//=============================================================================
+
+//---------------------
+// liftPlayerExit_MoveDown
+// player goes down lift and exits level
+//---------------------
+void liftPlayerExit_MoveDown()
+{
+	$buttonLiftPlayerExit.nouse();
+	$buttonLiftPlayerExit.playsound( "sound/ships/klingon/kling-beepyes.wav", 5, 1, 550 );	
+//If singleplayer only
+	if(!cvar_bool_multiplayer){
+		$clipLiftPlayerExit.solid();
+	}
+	
+//Multiplayer
+	if(cvar_bool_multiplayer){
+		coop_waitForTeam();
+	}
+	
+	$doorDownLiftPlayerExit.playsound( "sound/ships/attrexian/att-elevat_door.wav", 5, 1, 550 );
+	$doorDownLiftPlayerExit.time ( 1.3 );
+	$doorDownLiftPlayerExit.movedown ( 144 );
+	$doorNorthLiftPlayerExit.time ( .9 );
+	$doorNorthLiftPlayerExit.moveSouth ( 70 );
+	$doorSouthLiftPlayerExit.time ( .9 );
+	$doorSouthLiftPlayerExit.moveNorth ( 70 );
+
+	waitfor( $doorDownLiftPlayerExit );
+	$doorDownLiftPlayerExit.playsound( "sound/ships/attrexian/att-elevat_door_stp.wav", 5, 1, 550 );
+
+	$buttonLiftPlayerExit.bind( $liftPlayerExit );
+	$archetypeElevator.bind( $liftPlayerExit );
+	$liftPlayerExit.playsound( "sound/environment/machine/lift4.wav", 4, 1, 550 );
+	$liftPlayerExit.time ( 10 );
+	$liftPlayerExit.movedown ( 2000 );
+}
+
+//===================================================================================================================
+// Omag Chase Sequences
+//===================================================================================================================
+
+// omagFollowPath01
+// omags follows first path into crate room 
+//---------------------
+void omagFollowPath01()
+{	
+	//Federation scum right behind me! They’re here to arrest everyone! Stop them, and I’ll pay you well!
+	//thread globalCoop_dialog_play($omag,"m9l1/omag_stopthem.mp3", 1, 1000, 0);
+	thread globalCoop_dialog_playSimple($omag,"m9l1/omag_stopthem.mp3", 1, 1000);
+	$omag.blindlyfollowpath ( "run", 0 , "omagPath01" );
+	waitfor ( $omag );
+	// warp omag to lower area in first crate room
+	$omag.warpTo ( "$omagWarptoPosition02" );
+}
+
+//---------------------
+// omagFollowPath02
+// omags follows second path into first hallway 
+//---------------------
+void omagFollowPath02()
+{
+	//You know, you Starfleet types make no sense to me.  Where is the profit in chasing me?  Especially when you could die from it!  Rule 23, nothing is more important than your health- except your money!  And you don't even USE money, Federation, so why even bother?  Running around the galaxy, trying to do good, going where no man has gone before, blah blah blah.  I'll say it again, WHERE is the profit?
+	globalCoop_dialog_play($omag,"m9l1/omag_nosense.mp3", 1, 1000, 0);
+
+	$omag.blindlyfollowpath ( "run", 0 , "omagPath02" );
+	waitfor ( $omag );
+	// warp omag to the end of the first hallway
+	$omag.warpTo ( "$omagWarptoPosition03" );
+	
+	if(doesEntityExist($hallway_seq05_knife1)){$hallway_seq05_knife1.ai_on();}
+	if(doesEntityExist($hallway_seq05_batleth1)){$hallway_seq05_batleth1.ai_on();}
+	if(doesEntityExist($hallway_seq05_rifle1)){$hallway_seq05_rifle1.ai_on();}
+	if(doesEntityExist($hallway_seq05_rifle2)){$hallway_seq05_rifle2.ai_on();}
+	if(doesEntityExist($hallway_seq05_rocket1)){$hallway_seq05_rocket1.ai_on();}
+	if(doesEntityExist($hallway_seq05_rifle2)){$hallway_seq05_rifle2.ai_on();}
+}
+
+//---------------------
+// omagFollowPath03
+// omags follows second path into first hallway 
+//---------------------
+void omagFollowPath03()
+{
+	//Can't anyone kill this Federation scum!?  I thought this was supoosed to be a tough starbase!
+	globalCoop_dialog_playSimple($omag,"m9l1/omag_canta.mp3", 1, 800);
+	//thread globalCoop_dialog_play($omag,"m9l1/omag_canta.mp3", 1, 800, 0);
+
+	$omag.blindlyfollowpath ( "run", 0 , "omagPath03" );
+	waitfor ( $omag );
+	// warp omag into large bay room near large door
+	$omag.warpTo ( "$omagWarptoPosition04" );
+}
+
+//---------------------
+// omagFollowPath04
+// omags follows second path to elevator room 
+//---------------------
+void omagFollowPath04()
+{
+	$omag.blindlyfollowpath ( "run", 0 , "omagPath04" );
+	waitfor ( $omag );
+	// warp omag into large bay room near large door
+	$omag.warpTo ( "$omagWarptoLift" );
+}	
+
+//---------------------
+// omagExitLift
+// Omag goes down lift at level exit
+//---------------------
+void omagExitLift()
+{
+	//Going down, Mr. Federation?  Heh heh, see ya!
+	thread globalCoop_dialog_play($omag,"m9l1/omag_goingd.mp3", 1, 800, 0);
+
+	$doorNorthLiftOmagExit.playsound( "sound/ships/attrexian/att-elevat_door.wav", 5, 1, 550 );
+	$doorNorthLiftOmagExit.time (.9);
+	$doorNorthLiftOmagExit.moveSouth ( 70 );
+	$doorSouthLiftOmagExit.time (.9);
+	$doorSouthLiftOmagExit.moveNorth ( 70 );
+	$doorDownLiftOmagExit.time (1.3);
+	$doorDownLiftOmagExit.movedown ( 144 );
+	waitfor ( $doorDownLiftOmagExit );	
+	$doorNorthLiftOmagExit.playsound( "sound/ships/attrexian/att-elevat_door_stp.wav", 5, 1, 550 );
+	wait ( 1 );
+	//centerprint( "omag says something cynical to munro??" );
+	$liftOmagExit.playsound( "sound/environment/machine/lift4.wav", 6, 1, 250 );
+	$liftOmagExit.time ( 10 );
+	$liftOmagExit.movedown ( 2000 );
+}
+
+//---------------------
+// Hallway Battle Sequence 01
+//---------------------
+void hallway_seq01()
+{
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq01_shotgun1);
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq01_shotgun2);
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq01_shotgun3);
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq02_shotgun1);
+	$hallway_seq01_shotgun1.setactivationdelay( 0 ); // Was 1
+	$hallway_seq01_shotgun2.setactivationdelay( 3 ); // Was 6
+	$hallway_seq01_shotgun3.setactivationdelay( 4 );
+	$hallway_seq02_shotgun1.setactivationdelay( 0 );
+}
+
+//---------------------
+// Hallway Battle Sequence 02
+//---------------------
+void hallway_seq02()
+{
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq03_pistol1);
+	$hallway_seq03_pistol1.ai_on();
+	if(!cvar_bool_multiplayer){
+		$hallway_seq03_pistol1.attack( $attackLocation01 );
+	}
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq02_shotgun1);
+	$hallway_seq02_shotgun1.ai_on();
+}
+
+//---------------------
+// Hallway Battle Sequence 03
+//---------------------
+void hallway_seq03()
+{
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq03_shotgun1);
+	$hallway_seq03_shotgun1.setactivationdelay( .5 ); // Was 2
+}
+
+//---------------------
+// Hallway Battle Sequence 04
+//---------------------
+void hallway_seq04()
+{
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq04_pistol1);
+	$hallway_seq04_pistol1.walkto( "$pistol1node", "run" );
+	//waitfor( $hallway_seq04_pistol1 );
+	wait( .25 );
+	$hallway_seq04_pistol1.ai_on();
+		
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq04_pistol2);
+	$hallway_seq04_pistol2.walkto( "$pistol2node", "run" );
+	//waitfor( $hallway_seq04_pistol2 );
+	wait( .25 );
+	$hallway_seq04_pistol2.ai_on();
+
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq04_shotgun1);
+	$hallway_seq04_shotgun1.walkto( "$shotgun1node", "run" );
+	//waitfor( $hallway_seq04_shotgun1 );
+	wait( .25 );
+	$hallway_seq04_shotgun1.ai_on();
+}
+
+//---------------------
+// Hallway Battle Sequence 05
+//---------------------
+void hallway_seq05()
+{
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq05_batleth1);
+	$hallway_seq05_batleth1.setactivationdelay( 4 ); // Was 6
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq05_knife1);
+	$hallway_seq05_knife1.setactivationdelay( 2 );	// Was 3
+}
+
+//---------------------
+// Hallway Battle Sequence 06
+//---------------------
+void hallway_seq06()
+{
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq06_pistol1);
+	$hallway_seq06_pistol1.ai_on();
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq06_shotgun1);
+	$hallway_seq06_shotgun1.ai_on();
+}
+
+//---------------------
+// Hallway Battle Sequence 07
+//---------------------
+void hallway_seq07()
+{
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq07_rifle1);
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq07_rifle2);
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq07_shotgun1);
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq07_pistol1);
+	$hallway_seq07_rifle1.ai_on();
+	$hallway_seq07_rifle2.ai_on();
+	$hallway_seq07_shotgun1.ai_on();
+	$hallway_seq07_pistol1.ai_on();
+}
+
+//---------------------
+// Hallway Battle Sequence 08
+//---------------------
+void hallway_seq08()
+{
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq08_shotgun1);
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq08_batleth1);
+	$hallway_seq08_shotgun1.walkto( "$runnernode1", "run" );
+	$hallway_seq08_batleth1.walkto( "$runnernode2", "run" );
+	waitfor( $hallway_seq08_batleth1 );
+
+	$hallway_seq08_shotgun1.ai_on();
+	$hallway_seq08_batleth1.ai_on();
+
+	wait( 3 );
+
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq08_rocket1);
+	thread globalCoop_actor_healthMultiplicatePerPlayer($hallway_seq08_rocket2);
+	$hallway_seq08_rocket1.walkto( "$runnernode1", "run" );
+	$hallway_seq08_rocket2.walkto( "$runnernode2", "run" );
+	waitfor( $hallway_seq08_rocket2 );
+
+	$hallway_seq08_rocket1.ai_on();
+	$hallway_seq08_rocket2.ai_on();
+}
+
+void coop_waitForTeam()
+//------------------------------------------------------------------------------
+//waitForPlayers beeing close, end then the Level
+//------------------------------------------------------------------------------
+{
+	globalCoop_main_waitForTeam('-1986 1513 83','-300 -500 -4000','300 100 400');
+	coop_endLevel();
+}
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	//DISABLED UNTIL WE FIX THE CHRASH ON THE M10 SERIES
+	//thread globalCoop_mission_completed("m10l1-romulan_installation");
+	thread globalCoop_mission_completed("m9l2-klingon_base");
+}
+

@@ -1,0 +1,172 @@
+//--------------------------------------------------------------------------------------
+//
+//  EF2 Global Level Script File
+//
+//  Function:
+//	Contains the uber-l33t sound panning script object that follows the player around the level
+//
+//
+//	How To Use:
+//	Call globalSoundPan_Init() to start it up
+//  Then call globalSoundPan_AddSound() to add sounds to its list
+//  Finally, start globalSoundPan_Start() as a thread
+//  Call globalSoundPan_Stop() to halt it
+//
+//	External Functions:
+//	See the functions below
+//
+//	Script By:    Jared Hefty
+//  Created on:   10/1/2002
+//
+//  Last Edited:  Chrisstrahl for Coop
+//
+//--------------------------------------------------------------------------------------
+
+//entity _soundArray;
+float	_soundArray_size = 0,
+		_running = 0;
+entity	ePlayerSoundPan,
+		_thePanner;
+
+void globalSoundPan_Init();
+void globalSoundPan_AddSound(string _sound,float _channel,float _volume,float _mindist,float _chance,float _length,float _offset,float _pause);
+void globalSoundPan_Start();
+void globalSoundPan_Stop();
+void _gspPlaySound(float index);
+
+//call this first, usually in main()
+void globalSoundPan_Init()
+{
+	if (!doesEntityExist(_thePanner)){
+		_thePanner = spawn ( "script_origin" , "targetname", "_thePanner" );		//This is what will fly around and play the sounds
+		//_soundArray = spawn ( "script_origin", "targetname", "_soundArray" );	//This holds all of the sounds that _thePanner can choose from
+		wait ( .2 );
+		_thePanner.notsolid();
+	}
+}
+
+//Call this for each sound you want to be chosen from
+// _sound: path of the sound
+// _channel: should be 5 for most cases
+// _volume: 0-1.0 scale of how loud it should play
+// _mindist: distance before it starts to fall off
+// _chance: 0-1.0 chance of the sound playing when chosen, 1.0 means 'always'
+// _length: amount of time the panner should be moving (in general should match the approx length of the sound file
+// _offset: distance for the panner to move
+// _pause: number of seconds to wait before choosing another sound
+
+void globalSoundPan_AddSound ( string _sound ,
+							   float _channel,
+							   float _volume,
+							   float _mindist,
+							   float _chance ,
+							  float _length ,
+							   float _offset ,
+							   float _pause   )
+{
+	if(!doesEntityExist( _thePanner)){
+	//just start it!
+		globalSoundPan_Init();
+	}
+	_soundArray_size++;
+	_thePanner.setstringvar ( "item"         + _soundArray_size , _sound );
+	_thePanner.setfloatvar  ( "item_chance"  + _soundArray_size , _chance );
+	_thePanner.setfloatvar  ( "item_length"  + _soundArray_size , _length );
+	_thePanner.setfloatvar  ( "item_offset"  + _soundArray_size , _offset );
+	_thePanner.setfloatvar  ( "item_pause"   + _soundArray_size , _pause );
+	_thePanner.setfloatvar  ( "item_channel" + _soundArray_size , _channel );
+	_thePanner.setfloatvar  ( "item_volume"  + _soundArray_size , _volume );
+	_thePanner.setfloatvar  ( "item_mindist" + _soundArray_size , _mindist );
+
+	if ( _pause < 0.1 )
+		_thePanner.setfloatvar  ( "item_pause"  + _soundArray_size , .1 );
+	else
+		_thePanner.setfloatvar  ( "item_pause"  + _soundArray_size , _pause );
+}
+
+
+
+//Start the sound loop, make sure to call it as a thread in most cases
+void globalSoundPan_Start ()
+{
+	wait ( 1 );//.5
+
+	if(!doesEntityExist( _thePanner)){
+	//just start it!
+		globalSoundPan_Init();
+	}
+
+	_running = 1;
+
+	float choice;
+	float theChance;
+	float waitLength;
+
+	while ( _running == 1)
+	{
+		if(!coop_bool_scriptIsPaused){
+			choice = randomint ( _soundArray_size ) + 1;
+			//print ( "getting " +choice+" of "+_soundArray_size+"\n" );
+			if(doesEntityExist(_thePanner)){
+				theChance = _thePanner.getfloatvar ( "item_chance" + choice );
+				waitLength = _thePanner.getfloatvar ( "item_pause" + choice );
+			}
+
+			//print ( "theChance " +theChance + "\n" );
+			if ( theChance >= randomfloat ( 1.0 ))
+				_gspPlaySound ( choice );
+		}
+		else{
+			waitLength = 10;
+		}
+
+		//print ( "waiting" + waitLength +"\n");
+		if ( waitLength <= 0 )
+			waitLength = .2 ;
+		wait ( waitLength );
+	}
+}
+
+//stop the sound loop, you can restart it again with globalSoundPan_Sstart
+void globalSoundPan_Stop ()
+{
+	_running = 0;
+}
+
+//Private function that actually plays the sound
+void _gspPlaySound ( float index )
+{
+	string wavFile;
+	float counter,
+		  increment,
+		  length,
+		  _offset,	//avoid name overlaps
+		  _channel,
+		  _volume,
+		  mindist;
+		  
+	if(!doesEntityExist(_thePanner)){return;}
+	
+	wavFile  = _thePanner.getstringvar ( "item" + index);
+	length   = _thePanner.getfloatvar  ( "item_length" + index );
+	_offset  = _thePanner.getfloatvar  ( "item_offset" + index );
+	_channel = _thePanner.getfloatvar  ( "item_volume" + index );
+	_volume  = _thePanner.getfloatvar  ( "item_volume" + index );
+	mindist  = _thePanner.getfloatvar ( "item_mindist" + index );
+
+	if(wavFile!=""){_thePanner.playsound( wavFile, _channel, _volume, mindist );}
+
+	ePlayerSoundPan = globalCoop_return_playerClosestPreferActive(_thePanner);
+	_thePanner.angles( ePlayerSoundPan.getangles() );	//face the direction of the player
+	_thePanner.warp( ePlayerSoundPan.getorigin() );	//move to the player
+
+	_thePanner.time ( .5 );
+	_thePanner.moveBackward ( 10 );
+	_thePanner.moveUp ( 10 );
+	_thePanner.moveRight ( _offset );
+	waitfor( _thePanner );
+
+	_thePanner.time ( length );
+	_thePanner.moveLeft ( _offset * -2.0 );
+	waitfor ( _thePanner );
+}

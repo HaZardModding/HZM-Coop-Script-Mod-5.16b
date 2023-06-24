@@ -1,0 +1,231 @@
+
+//--------------------------------------------------------------------------------------
+// Dialog Script
+// 	Contains all dialog setup code for one specific BSP.  That map's script should
+//	#include this file and call the function "initDialog" somewhere in it's main function.
+//--------------------------------------------------------------------------------------
+
+void initDialog()
+{
+	if(!cvar_bool_multiplayer){//singleplayer
+		print( "Initializing dialog\n" );
+
+		// setup krindo onuse dialog
+		$krindo.setdialogmode("normal");
+		$krindo.settalkwatchmode ( "turnto" );
+		$krindo.alias( "krindoDialog1", "localization/sound/dialog/m9l1/krindo_goodid.mp3");
+		$krindo.alias( "krindoDialog2", "localization/sound/dialog/m9l1/krindo_killedno.mp3");
+		$krindo.alias( "krindoDialog3", "localization/sound/dialog/m9l1/krindo_dealt.mp3");
+		$krindo.alias( "krindoDialog4", "localization/sound/dialog/m9l1/krindo_cross.mp3");
+		$krindo.dialog( "krindoDialog" );	
+
+		// setup gonzales onuse dialog
+		$gonzales.setdialogmode("normal");
+		$gonzales.settalkwatchmode ( "turnto" );
+		$gonzales.alias( "gonzalesDialog1", "localization/sound/dialog/m9l1/gonzalez_letsgo.mp3");
+		$gonzales.alias( "gonzalesDialog2", "localization/sound/dialog/m9l1/gonz_hopeomag.mp3");
+		$gonzales.dialog( "gonzalesDialog" );
+
+		// setup karlov (nausican bouncer aka BONESAW!!!1) onuse dialog
+		$bonesaw.setdialogmode("normal");
+		$bonesaw.settalkwatchmode ( "turnto" );
+		$bonesaw.alias( "bonesawDialog1", "localization/sound/dialog/m9l1/naus_look.mp3");
+		$bonesaw.alias( "bonesawDialog2", "localization/sound/dialog/m9l1/naus_crush.mp3");
+		$bonesaw.alias( "bonesawDialog3", "localization/sound/dialog/m9l1/naus_bounced.mp3");
+		$bonesaw.dialog( "bonesawDialog" );
+
+		// setup hallway actor onuse dialog
+		$hallway_klingon.setdialogmode("normal");
+		$hallway_klingon.settalkwatchmode ( "turnto" );
+		$hallway_klingon.alias( "hallwayKlingonGreeting1", "localization/sound/dialog/m9l1/munro_greetings.mp3");
+		$hallway_klingon.alias( "hallwayKlingonDialog1", "localization/sound/dialog/m9l1/klingon_gagh2.mp3");
+		$hallway_klingon.dialog( "hallwayKlingonDialog" );
+		$hallway_klingon.dialog( "hallwayKlingonGreeting", "greetingDialog" );
+
+		$hallway_ferengi.setdialogmode("normal");
+		$hallway_ferengi.settalkwatchmode ( "turnto" );
+		$hallway_ferengi.alias( "hallwayFerengiGreeting1", "localization/sound/dialog/m9l1/munro_heythere.mp3");
+		$hallway_ferengi.alias( "hallwayFerengiDialog1", "localization/sound/dialog/m9l1/ferengi_lat.mp3");
+		$hallway_ferengi.alias( "hallwayFerengiGreeting2", "localization/sound/dialog/m9l1/munro_deliver.mp3");
+		$hallway_ferengi.alias( "hallwayFerengiDialog2", "localization/sound/dialog/m9l1/ferengi_snip.mp3");
+		$hallway_ferengi.dialog( "hallwayFerengiDialog" );
+		$hallway_ferengi.dialog( "hallwayFerengiGreeting", "greetingDialog" );
+
+		$hallway_andorian.setdialogmode("normal");
+		$hallway_andorian.settalkwatchmode ( "turnto" );
+		$hallway_andorian.alias( "hallwayAndorianGreeting1", "localization/sound/dialog/m9l1/munro_excuse.mp3");
+		$hallway_andorian.alias( "hallwayAndorianDialog2", "localization/sound/dialog/m9l1/alien_getaway.mp3");
+		$hallway_andorian.dialog( "hallwayAndorianDialog" );	
+		$hallway_andorian.dialog( "hallwayAndorianGreeting", "greetingDialog" );
+		
+		// setup bar actor onuse dialog
+		$nausican_doorman.setdialogmode("normal");
+		$nausican_doorman.settalkwatchmode ( "turnto" );
+		$nausican_doorman.alias( "bouncerDialog1", "localization/sound/dialog/m9l1/naus_crush.mp3");
+		$nausican_doorman.alias( "bouncerDialog2", "localization/sound/dialog/m9l1/naus_look.mp3");
+		$nausican_doorman.alias( "bouncerDialog3", "localization/sound/dialog/m9l1/naus_bounced.mp3");
+		$nausican_doorman.dialog( "bouncerDialog" );	
+
+		$klingon_barkeep.setdialogmode("normal");
+		$klingon_barkeep.settalkwatchmode ( "turnto" );
+		$klingon_barkeep.alias( "barkeepDialog1", "localization/sound/dialog/m9l1/bar_salute.mp3");
+		$klingon_barkeep.alias( "barkeepDialog2", "localization/sound/dialog/m9l1/bar_romale.mp3");
+		$klingon_barkeep.alias( "barkeepDialog3", "localization/sound/dialog/m9l1/bar_startr.mp3");
+		$klingon_barkeep.dialog( "barkeepDialog" );
+
+		$vip_barkeep.setdialogmode("normal");
+		$vip_barkeep.settalkwatchmode ( "turnto" );
+		$vip_barkeep.alias( "vipbarkeepDialog1", "localization/sound/dialog/m9l1/bar_sailors.mp3");
+		$vip_barkeep.alias( "vipbarkeepDialog2", "localization/sound/dialog/m9l1/bar_bev.mp3");
+		$vip_barkeep.dialog( "vipbarkeepDialog" );
+		
+		$humanFemale1.setdialogmode("normal");
+		$humanFemale1.settalkwatchmode ( "turnto" );
+		$humanFemale1.alias( "female1Dialog1", "localization/sound/dialog/m9l1/mercf2_offic.mp3");
+		$humanFemale1.alias( "female1Dialog2", "localization/sound/dialog/m9l1/mercf2_rough.mp3");
+		$humanFemale1.dialog( "female1Dialog" );
+
+		$humanFemale2.setdialogmode("normal");
+		$humanFemale2.settalkwatchmode ( "turnto" );
+		$humanFemale2.alias( "female2Dialog1", "localization/sound/dialog/m9l1/mercf2_too.mp3");
+		$humanFemale2.alias( "female2Dialog2", "localization/sound/dialog/m9l1/mercf2_loosen.mp3");
+		$humanFemale2.dialog( "female2Dialog" );
+
+		$humanFemale3.setdialogmode("normal");
+		$humanFemale3.settalkwatchmode ( "turnto" );
+		$humanFemale3.alias( "female3Dialog1", "localization/sound/dialog/m9l1/mercf2_offic.mp3");
+		$humanFemale3.alias( "female3Dialog2", "localization/sound/dialog/m9l1/mercf2_rough.mp3");
+		$humanFemale3.alias( "female3Dialog3", "localization/sound/dialog/m9l1/mercf2_too.mp3");
+		$humanFemale3.alias( "female3Dialog4", "localization/sound/dialog/m9l1/mercf2_loosen.mp3");
+		$humanFemale3.dialog( "female3Dialog" );
+		
+		$humanMale1.setdialogmode("normal");
+		$humanMale1.settalkwatchmode ( "turnto" );
+		$humanMale1.alias( "male1Dialog1", "localization/sound/dialog/m9l1/mercm2_notimp.mp3");
+		$humanMale1.alias( "male1Dialog2", "localization/sound/dialog/m9l1/mercm2_guess.mp3");
+		$humanMale1.alias( "male1Dialog3", "localization/sound/dialog/m9l1/mercm2_meddle.mp3");
+
+		$humanMale2.setdialogmode("normal");
+		$humanMale2.settalkwatchmode ( "turnto" );
+		$humanMale2.alias( "male2Dialog1", "localization/sound/dialog/m9l1/mercm2_notimp.mp3");
+		$humanMale2.alias( "male2Dialog2", "localization/sound/dialog/m9l1/mercm2_guess.mp3");
+		$humanMale2.alias( "male2Dialog3", "localization/sound/dialog/m9l1/mercm2_meddle.mp3");
+		$humanMale2.alias( "male2Dialog4", "localization/sound/dialog/m9l1/mercm2_cares.mp3");
+		$humanMale2.dialog( "male2Dialog" );
+
+		$andorianMale1.setdialogmode("normal");
+		$andorianMale1.settalkwatchmode ( "turnto" );
+		$andorianMale1.alias( "andorian1Dialog1", "localization/sound/dialog/m9l1/andmerc1_blood.mp3");
+		$andorianMale1.alias( "andorian1Dialog2", "localization/sound/dialog/m9l1/andmerc1_demo.mp3");
+		$andorianMale1.alias( "andorian1Dialog3", "localization/sound/dialog/m9l1/andmerc1_regul.mp3");
+		$andorianMale1.dialog( "andorian1Dialog" );
+		
+		$andorianMale2.setdialogmode("normal");
+		$andorianMale2.settalkwatchmode ( "turnto" );
+		$andorianMale2.alias( "andorian2Dialog1", "localization/sound/dialog/m9l1/andmerc2_deneb.mp3");
+		$andorianMale2.alias( "andorian2Dialog2", "localization/sound/dialog/m9l1/andmerc2_tribbait.mp3");
+		$andorianMale2.alias( "andorian2Dialog3", "localization/sound/dialog/m9l1/andmerc2_slime.mp3");
+		$andorianMale2.dialog( "andorian2Dialog" );
+
+		$andorianMale3.setdialogmode("normal");
+		$andorianMale3.settalkwatchmode ( "turnto" );
+		$andorianMale3.alias( "andorian3Dialog1", "localization/sound/dialog/m9l1/andmerc2_deneb.mp3");
+		$andorianMale3.alias( "andorian3Dialog2", "localization/sound/dialog/m9l1/andmerc2_tribbait.mp3");
+		$andorianMale3.alias( "andorian3Dialog3", "localization/sound/dialog/m9l1/andmerc2_slime.mp3");
+
+		$andorianSitting1.setdialogmode("normal");
+		$andorianSitting1.settalkwatchmode ( "headwatchonly", 0 );
+		$andorianSitting1.alias( "andorianSitting1Dialog1", "localization/sound/dialog/m9l1/andmerc2_deneb.mp3");
+		$andorianSitting1.alias( "andorianSitting1Dialog2", "localization/sound/dialog/m9l1/andmerc2_tribbait.mp3");
+		$andorianSitting1.alias( "andorianSitting1Dialog3", "localization/sound/dialog/m9l1/andmerc2_slime.mp3");
+		$andorianSitting1.dialog( "andorianSitting1Dialog" );
+
+		$andorianSitting2.setdialogmode("normal");
+		$andorianSitting2.settalkwatchmode ( "headwatchonly", 0 );
+		$andorianSitting2.alias( "andorianSitting2Dialog1", "localization/sound/dialog/m9l1/andmerc2_deneb.mp3");
+		$andorianSitting2.alias( "andorianSitting2Dialog2", "localization/sound/dialog/m9l1/andmerc2_tribbait.mp3");
+		$andorianSitting2.alias( "andorianSitting2Dialog3", "localization/sound/dialog/m9l1/andmerc2_slime.mp3");
+		$andorianSitting2.dialog( "andorianSitting2Dialog" );
+
+		$andorianSitting3.setdialogmode("normal");
+		$andorianSitting3.settalkwatchmode ( "headwatchonly", 0 );
+		$andorianSitting3.alias( "andorianSitting3Dialog1", "localization/sound/dialog/m9l1/andmerc2_deneb.mp3");
+		$andorianSitting3.alias( "andorianSitting3Dialog2", "localization/sound/dialog/m9l1/andmerc2_tribbait.mp3");
+		$andorianSitting3.alias( "andorianSitting3Dialog3", "localization/sound/dialog/m9l1/andmerc2_slime.mp3");
+		$andorianSitting3.dialog( "andorianSitting3Dialog" );
+
+		$humanFemale_sitting1.setdialogmode("normal");
+		$humanFemale_sitting1.settalkwatchmode ( "headwatchonly", 0 );
+		$humanFemale_sitting1.alias( "femaleSitting1Dialog1", "localization/sound/dialog/m9l1/mercf2_rough.mp3");
+		$humanFemale_sitting1.dialog( "femaleSitting1Dialog" );
+
+		$dancer1.setdialogmode("normal");
+		$dancer1.settalkwatchmode ( "turnto" );
+		$dancer1.alias( "dancer1Dialog1", "localization/sound/dialog/m9l1/mercf2_rough.mp3");
+		$dancer1.dialog( "dancer1Dialog" );
+
+		$dancer2.setdialogmode("normal");
+		$dancer2.settalkwatchmode ( "turnto" );
+		$dancer2.alias( "dancer2Dialog1", "localization/sound/dialog/ent_m3/myamoto_sorry.mp3");
+		$dancer2.dialog( "dancer2Dialog" );
+
+		$shuttlebayConversation2_male1.setdialogmode("normal");
+		$shuttlebayConversation2_male1.settalkwatchmode ( "turnto" );
+		$shuttlebayConversation2_male1.alias( "shuttlebay2_male1Dialog1", "localization/sound/dialog/ent_m4/stratton_stop.mp3");
+
+		$shuttlebayConversation2_male2.setdialogmode("normal");
+		$shuttlebayConversation2_male2.settalkwatchmode ( "turnto" );
+		$shuttlebayConversation2_male2.alias( "shuttlebay2_male2Dialog1", "localization/sound/dialog/m9l1/mercm2_cares.mp3");
+
+		$shuttlebayConversation1_andorian1.setdialogmode("normal");
+		$shuttlebayConversation1_andorian1.settalkwatchmode ( "turnto" );
+		$shuttlebayConversation1_andorian1.alias( "shuttlebay1_andorian1Dialog2", "localization/sound/dialog/m9l1/andmerc1_blood.mp3");
+
+		$shuttlebayConversation1_andorian2.setdialogmode("normal");
+		$shuttlebayConversation1_andorian2.settalkwatchmode ( "turnto" );
+		$shuttlebayConversation1_andorian2.alias( "shuttlebay1_andorian2Dialog1", "localization/sound/dialog/m9l1/andmerc2_tribbait.mp3");
+
+		$hallwayConversation1_male1.setdialogmode("normal");
+		$hallwayConversation1_male1.settalkwatchmode ( "turnto" );
+		$hallwayConversation1_male1.alias( "hallway1_male2Dialog1", "localization/sound/dialog/ent_m7/jacobs_chat4.mp3");
+
+		$hallwayConversation1_klingon1.setdialogmode("normal");
+		$hallwayConversation1_klingon1.settalkwatchmode ( "turnto" );
+		$hallwayConversation1_klingon1.alias( "hallway1_klingon1Dialog1", "localization/sound/dialog/m9l1/mercm1_justb.mp3");
+
+		$hallwayConversation2_female1.setdialogmode("normal");
+		$hallwayConversation2_female1.settalkwatchmode ( "turnto" );
+		$hallwayConversation2_female1.alias( "hallway2_female1Dialog1", "localization/sound/dialog/m9l1/mercf2_too.mp3");
+
+		$hallwayConversation2_male1.setdialogmode("normal");
+		$hallwayConversation2_male1.settalkwatchmode ( "turnto" );
+		$hallwayConversation2_male1.alias( "hallway2_male1Dialog1", "localization/sound/dialog/ent_m4/stratton_stop.mp3");
+
+		$humanMaleSitting1.setdialogmode("normal");
+		$humanMaleSitting1.settalkwatchmode ( "headwatchonly", 0 );
+		$humanMaleSitting1.alias( "humanMaleSitting1Dialog1", "localization/sound/dialog/m9l1/mercm2_notimp.mp3");
+		$humanMaleSitting1.alias( "humanMaleSitting1Dialog2", "localization/sound/dialog/m9l1/mercm2_guess.mp3");
+		$humanMaleSitting1.alias( "humanMaleSitting1Dialog3", "localization/sound/dialog/m9l1/mercm2_meddle.mp3");
+		$humanMaleSitting1.dialog( "humanMaleSitting1Dialog" );
+
+		$HanSolo.setdialogmode("normal");
+		$HanSolo.settalkwatchmode ( "headwatchonly", 0 );
+		$HanSolo.alias( "HanSoloDialog1", "localization/sound/dialog/m9l1/mercf2_too.mp3");
+
+		$LukeSkywalker.setdialogmode("normal");
+		$LukeSkywalker.settalkwatchmode ( "headwatchonly", 0 );
+		$LukeSkywalker.alias( "LukeSkywalkerDialog1", "localization/sound/dialog/m9l1/bar_starttr.mp3");
+
+		$ObiWanKenobi.setdialogmode("normal");
+		$ObiWanKenobi.settalkwatchmode ( "headwatchonly", 0 );
+		$ObiWanKenobi.alias( "ObiWanKenobiDialog1", "localization/sound/dialog/m9l1/andmerc2_tribbait.mp3");
+
+		$humanMale3.setdialogmode("normal");
+		$humanMale3.settalkwatchmode ( "turnto" );
+		$humanMale3.alias( "humanMale3Dialog1", "localization/sound/dialog/m9l1/mercm2_cares.mp3");
+
+		$klingonFemale1.setdialogmode("normal");
+		$klingonFemale1.settalkwatchmode ( "turnto" );
+		$klingonFemale1.alias( "klingonFemale1Dialog1", "localization/sound/dialog/m9l1/bar_starttr.mp3");
+	}
+}

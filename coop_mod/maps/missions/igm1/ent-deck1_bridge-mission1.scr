@@ -1,0 +1,397 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	      ent-deck7a - Enterprise Deck 8 - Hazard Ops - MISSION 1
+//  Script By:    Luke W.
+//  Created on:   07/08/2002
+//	Last Edited:  07/08/2002 - LW
+//-----------------------------------------------------------------
+
+// Setup
+void setupMission1Deck1();
+void justLoadedDeckThreadIGM1();
+
+// Dialog and Cinematics
+void cinematicBridgeIGM1();
+void cinematicBridgeIGM1Skipthread();
+void cinematicBridgeIGM1End();
+
+void ambientActorsIGM1();
+
+void jacobs_workIGM1();
+void jacobsDialog1_1();
+
+void manaan_workIGM1();
+void manaanDialog1_1();
+
+void johnson_workIGM1();
+void johnsonDialog1_1();
+
+void stratton_workIGM1();
+void strattonDialog1_1();
+
+void tuvok_workIGM1();
+void tuvokDialog1_1();
+
+//-----------------------------
+//--- variables
+
+entity cinematicArm_IGM1_Bridge;
+
+//===================================================================================================================
+// Setup 
+//===================================================================================================================
+//---------------------
+// setupMission1Deck7a	
+// does all the little setup stuff for the mission
+//---------------------
+void setupMission1Deck1()
+{
+//Set spawnangles for this level
+	coop_float_spawnAngle0	= 280;
+//spawnorigins, Spawn Players on those locations, at map start
+	coop_vector_spawnOrigin1	= '1489 -4792 0';coop_float_spawnAngle1	= 348;
+	coop_vector_spawnOrigin2	= '1526 -4707 0';coop_float_spawnAngle2	= 304;
+	coop_vector_spawnOrigin3	= '2360 -4724 0';coop_float_spawnAngle3	= 251;
+	coop_vector_spawnOrigin4	= '2430 -4778 0';coop_float_spawnAngle4	= 215;
+	//the other spawns are in ent-deck1_bridge.scr
+
+	ambientActorsIGM1();
+	cam.load( "cam_ent_deck1_igm1" );
+	globalCommon_SpawnActor( "char/starfleet_picard.tik", "picard", '1896 -4960 0', 270 );
+	globalCommon_SpawnActor( "char/hazardteam_sf-munro.tik", "scriptmunro", '1612 -4848 16', 315 );	
+	globalCommon_AiActorUseWeapon( $scriptmunro, "none" );
+	globalCoop_level_hideAndNotSolid($scriptmunro);
+	
+	//Thread to spawn cinematic
+	$triggerBridge.thread( "cinematicBridgeIGM1" );
+//enlarge, not using viagra
+	vector vSize;
+	vSize = $triggerBridge.getMaxs();
+	vSize_x += 450;
+	$triggerBridge.setSize($triggerBridge.getMins(),vSize);
+	
+	//Needed For dialog
+	globalCommon_SpawnActor( "char/starfleet_dead-captain.tik", "galloway", '1922.50 -4514.50 -16.00', 275 );
+	globalCoop_level_hideAndNotSolid($galloway);
+		
+	//--- armature setup
+	cinematicArm_IGM1_Bridge = createCinematic( "igm1-picard" );
+	cinematicArm_IGM1_Bridge.setendthread( "cinematicBridgeIGM1End" );
+	globalCoop_main_waitForWarmupTime();
+	globalCoop_main_camFadeIn(.3);
+}
+
+//---------------------
+// justLoadedDeckThreadIGM1
+// Triggered and check to see if A cinematic should happen.
+//------------------------
+void justLoadedDeckThreadIGM1(/* I AM IRONMAN */)
+{
+	if(!cvar_bool_multiplayer){//SP!!!
+		wait(.1);//wait for the objectives to be loadad;
+	//ARMORY
+		if(getFloatVar("game.armoryRoomVisited") >= 1){
+			$player.setobjectiveshow( "IGM1VisitArmory", 1 );
+		}
+		if(getFloatVar( "game.armoryRoomVisited" ) == 2 ){
+			$player.setobjectivecomplete( "IGM1VisitArmory", 1 );
+		}
+	//MEET WITH CHELL
+		if(getFloatVar("game.breifingRoomVisited") >= 1){
+			$player.setobjectiveshow( "IGM1VisitBreifing", 1 );
+		}
+		if(getFloatVar("game.breifingRoomVisited" ) == 2){
+			$player.setobjectivecomplete( "IGM1VisitBreifing", 1 );
+		}
+	//MEET WITH JUROT
+		if(getFloatVar("game.lockerRoomVisited") >= 1){
+			$player.setobjectiveshow( "IGM1VisitLockers", 1 );
+		}
+		if(getFloatVar("game.lockerRoomVisited") == 2){
+			$player.setobjectivecomplete( "IGM1VisitLockers", 1 );
+		}
+	//GO HOLODECK AND TALK WITH KORBAN
+		if(getFloatVar("game.holoMissionVisited") >= 1){
+			$player.setobjectiveshow( "IGM1HoloDeck", 1 );
+		}
+		if(getFloatVar( "game.holoMissionVisited" ) == 2){
+			$player.setobjectivecomplete( "IGM1HoloDeck", 1 );
+		}
+	//GO TO BRIDE AND DRINK TEA WITH PICARD
+		if(getFloatVar("game.goToBridge") >= 1){
+			$player.setobjectiveshow( "IGM1GoToBridge", 1);
+		}
+		if(getFloatVar( "game.goToBridge" ) == 2){
+			$player.setobjectivecomplete( "IGM1GoToBridge", 1);
+		}
+		$player.setobjectiveshow( "IGM1GoToBridge", 1);
+	}
+}
+
+
+
+//===================================================================================================================
+// Dialog and Cinematics
+//===================================================================================================================
+
+
+//---------------------
+// cinematicBridgeIGM1
+// Cinamtic with Picard talking to Munro about
+//---------------------
+void cinematicBridgeIGM1()
+{
+	//--- Lock Doors
+	$observationDoor1.close();
+	$observationDoor2.close();
+	$observationDoor1.lock();
+	$observationDoor2.lock();
+	$triggerBridge.nottriggerable();
+	
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	//--- starting cinematic commands
+	globalCoop_cin_start();
+	
+	//--- IGM Setup
+	setfloatvar( "game.goToBridge", 2 );
+	justLoadedDeckThreadIGM1();
+	
+	//--- hide the player and chell
+	if(!cvar_bool_multiplayer){//SP!!!
+		globalCoop_level_hideAndNotSolid($player);
+		$player.origin( '1876 -4940 8' );
+	}
+	
+	//--- hide all the non-armature actors
+	globalCommon_AiDummyHide( $picard );
+	globalCommon_AiDummyHide( $scriptmunro );
+	globalCommon_AiDummyHide( $jacobs );
+	globalCommon_AiDummyHide( $manaan );
+	globalCommon_AiDummyHide( $johnson );
+	globalCommon_AiDummyHide( $stratton );
+	globalCommon_AiDummyHide( $tuvok );
+	
+	//--- start the armature
+	cinematicArm_IGM1_Bridge.beginCinematic( "igm1-picard" );
+	wait( .2 );
+	
+	//--- fade in
+	globalCoop_main_camFadeIn(.5);
+	
+	//--- set the skipthread
+	globalCoop_cin_skipThread("cinematicBridgeIGM1End");
+	wait( 1 );
+	$turbolift.close();
+	$turbolift.lock();
+}
+
+
+//---------------------
+// cinematicSkipthread
+// skipthread that calls the skipthread routines
+//------------------------
+void cinematicBridgeIGM1Skipthread()
+{
+	//--- kill the cinematic thread
+	skipthread( "Null" );
+	killthread( "cinematicBridgeIGM1" );
+	thread cinematicBridgeIGM1End();
+}
+
+
+//---------------------
+// cinematicEnd
+// wrapup the cinematic
+//------------------------
+void cinematicBridgeIGM1End()
+{
+	//kill the cinematic
+	skipthread( "null" );
+
+	//fade to black
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+
+	//--- end the armature cinematics, FALSE means don't launch the end thread
+	cinematicArm_IGM1_Bridge.endCinematic( FALSE );
+
+	killthread( "cinematicBridgeIGM1" );
+	
+	if(cvar_bool_multiplayer){//MP
+		sNextLevelToLoadForCoop="m3l1a-forever";
+		coop_endLevel();
+	}
+	else{
+		spawn ( "trigger_changelevel", "targetname", "trigger_endlevel", "map", "m3l1a-forever" );
+		setfloatvar ( "game.globalMissionEnterprise", 2 );
+		noIntermission();
+		wait ( .1 );
+		trigger ( "$trigger_endlevel" );		
+	}
+}
+
+
+//===================================================================================================================
+// Ambient Actors
+//===================================================================================================================
+//---------------------
+// ambientActorsIGM1	
+// Set up ambient Actors
+//---------------------
+void ambientActorsIGM1()
+{
+	globalCommon_SpawnActor( "char/starfleet_crew-male.tik", "jacobs", '2190.39 -5209.61  0.00', 210 );
+	thread randomlyAnimateActor( $jacobs, "ent-vchair" );
+	thread jacobs_workIGM1();
+	
+	globalCommon_SpawnActor( "char/starfleet_crew-female.tik", "manaan", '2020.97 -5059.03 -14.00', 225 );
+	thread randomlyAnimateActor( $manaan, "ent-vchair-sm" );
+	thread manaan_workIGM1();
+	
+	globalCommon_SpawnActor( "char/starfleet_crew-male4.tik", "johnson", '1910.00 -5319.00 -32.00', 270 );
+	thread randomlyAnimateActor( $johnson, "ent-frontchair" );
+	thread johnson_workIGM1();
+	
+	globalCommon_SpawnActor( "char/starfleet_crew-male3.tik", "stratton", '1878.97 -5058.03 -16.00', 315 );
+	thread randomlyAnimateActor( $stratton, "ent-vchair-sm" );
+	thread stratton_workIGM1();
+	
+	globalCommon_SpawnActor( "char/starfleet_tuvok.tik", "tuvok", '1757.39 -5013.61  2.00', 330 );
+	thread randomlyAnimateActor( $tuvok, "ent-stand" );
+	thread tuvok_workIGM1();
+}
+
+///////////////////////////
+// jacobsOnUseWaitIGM1
+// Wait for player to talk to actor
+///////////////////////////
+void jacobs_workIGM1()
+{
+	setNextDialog( $jacobs, 1 );
+	setDialogFunction( $jacobs, "jacobsDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $jacobs, "", "", 0 );
+		talkUntilDone( $jacobs );
+	}
+}
+
+///////////////////////////
+// jacobsDialog1_1
+// Player and actor talk
+///////////////////////////
+void jacobsDialog1_1()
+{
+}
+
+///////////////////////////
+// manaanOnUseWaitIGM1
+// Wait for player to talk to actor
+///////////////////////////
+void manaan_workIGM1()
+{
+	setNextDialog( $manaan, 1 );
+	setDialogFunction( $manaan, "manaanDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $manaan, "", "", 0 );
+		talkUntilDone( $manaan );
+	}
+}
+
+///////////////////////////
+// manaanDialog1_1
+// Player and actor talk
+///////////////////////////
+void manaanDialog1_1()
+{
+}
+
+///////////////////////////
+// johnsonOnUseWaitIGM1
+// Wait for player to talk to actor
+///////////////////////////
+void johnson_workIGM1()
+{
+	setNextDialog( $johnson, 1 );
+	setDialogFunction( $johnson, "johnsonDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $johnson, "", "", 0 );
+		talkUntilDone( $johnson );
+	}
+}
+
+///////////////////////////
+// johnsonDialog1_1
+// Player and actor talk
+///////////////////////////
+void johnsonDialog1_1()
+{
+}
+
+
+///////////////////////////
+// strattonOnUseWaitIGM1
+// Wait for player to talk to actor
+///////////////////////////
+void stratton_workIGM1()
+{
+	setNextDialog( $stratton, 1 );
+	setDialogFunction( $stratton, "strattonDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $stratton, "", "", 0 );
+		talkUntilDone( $stratton );
+	}
+}
+
+///////////////////////////
+// strattonDialog1_1
+// Player and actor talk
+///////////////////////////
+void strattonDialog1_1()
+{
+}
+
+///////////////////////////
+// tuvokOnUseWaitIGM1
+// Wait for player to talk to actor
+///////////////////////////
+void tuvok_workIGM1()
+{
+	setNextDialog( $tuvok, 1 );
+	setDialogFunction( $tuvok, "tuvokDialog" );
+	while( 1 )
+	{
+		workUntilUsed( $tuvok, "", "", 0 );
+		talkUntilDone( $tuvok );
+	}
+}
+
+///////////////////////////
+// tuvokDialog1_1
+// Player and actor talk
+///////////////////////////
+void tuvokDialog1_1()
+{
+}
+
+//===================================================================================================================
+// Deck Change Check
+//===================================================================================================================
+//---------------------
+// checkForDeckChangeIGM1	
+//---------------------
+void checkForDeckChangeIGM1()
+{
+	if( getfloatvar( "game.checkEntMission1RoomsVisited" ) == 1 )
+	{
+		setfloatvar(  "level.deckToChangeToIGM", 8 );
+	}
+}
+

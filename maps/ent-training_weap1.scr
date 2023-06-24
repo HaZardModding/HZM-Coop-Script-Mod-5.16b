@@ -1,0 +1,315 @@
+//map ent-training_weap1
+void main();
+void setupAI();
+void adaptAI();
+void justLoadedDeckThreadIGM1();
+void IGM1IsOver();
+
+void holoDeckSetup();
+void holoDeckFadeOut();
+void holoDeckFadeIn();
+void givePlayerAmmo();
+void coop_endLevel();
+
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/global/global_common.scr"
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "maps/global_scripts/global_math.scr"
+
+float NUM_ENEMIES = 6;
+
+//------------------------
+// this sets up Holo Mission IGM1
+//------------------------
+void main()
+{
+//Set Soundtrack for this level
+	soundtrack( "music/training_weapon.mus" );
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_vector_lmsStartedPausedWarmuptime_z = 10;//set lms warmuptime to 10 no matter what else is setup
+	coop_string_nextMapToCheck			= "ent-training_weap2";//set the map we gona load next while we are in testmode
+//Set spawnangles for this level	
+	coop_float_spawnAngle0 				= 90;
+	//coop_vector_spawnOrigin12			= '3480 -1339 320';
+	//coop_vector_spawnOrigin11			= '3540 -1339 320';
+	//coop_vector_spawnOrigin10			= '3600 -1339 320';
+	//coop_vector_spawnOrigin9			= '3660 -1339 320';
+	coop_vector_spawnOrigin8			= '3720 -1339 320';
+	coop_vector_spawnOrigin7			= '3480 -1250 320';
+	coop_vector_spawnOrigin6			= '3540 -1250 320';
+	coop_vector_spawnOrigin5			= '3600 -1250 320';
+	coop_vector_spawnOrigin4			= '3660 -1250 320';
+	coop_vector_spawnOrigin3			= '3720 -1250 320';
+	coop_vector_spawnOrigin2			= '3480 -1170 320';
+	coop_vector_spawnOrigin1			= '3540 -1170 320';
+
+//DO OBJECTIVES
+	coop_string_objectiveItem1			= "IGM1VisitArmory";
+	coop_string_objectiveItem2			= "IGM1HoloDeck";
+	coop_string_objectiveItem3			= "IGM1VisitLockers";
+	coop_string_objectiveItem4			= "IGM1VisitBreifing";
+	coop_string_objectiveItem5			= "IGM1GoToBridge";
+//definie weapons
+	coop_string_weapon1 = "models/weapons/worldmodel-FieldAssaultRifle.tik";	
+//Start the Co-Op Script
+	globalCoop_main();
+//make the players spawn inside the holodeck when map ent-deck8 is being loadad
+	if(cvar_bool_multiplayer){
+		stuffcmd("seta coop_igmH 1\n");
+	}
+	else{
+		setfloatvar("game.holoDeckIGM1Done",1);
+	}
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	spawn("script_model","model","sky/sky_stardome-nebula.tik","origin","-448.00 -256.00 640.00","scale",".25");
+	thread holoDeckSetup();
+	thread setupAI();
+	waitForPlayer();
+	thread holoDeckFadeOut();
+//MULTIPLAYER
+	if(cvar_bool_multiplayer){
+		globalCoop_objectives_update("complete",1,0);//IGM1VisitArmory
+		globalCoop_objectives_update("inComplete",2,0);//IGM1HoloDeck
+		globalCoop_objectives_update("inComplete",3,0);//IGM1VisitLockers
+		thread globalCoop_objectives_update("inComplete",4,1);//IGM1VisitBreifing
+	}
+//YOU ARE ALONE!
+	else{
+	//call ironman
+		thread justLoadedDeckThreadIGM1();
+	}
+}
+
+void setupAI()
+{
+entity e;
+float i;
+
+	for( i = 1; i <= NUM_ENEMIES; i++ )
+	{
+		e = getentity( "enemy" + i );
+		if( doesEntityExist( e ) )
+		{
+			// group them together and set a groupdeaththread that transitions back to IGM after
+			// they are all killed
+			e.setgroupid( 123 );
+			e.groupdeaththread( "IGM1IsOver" );
+			e.setFloatVar("coop_defaultHealth",e.getHealth());
+			// set their wander tendency to 0 so they don't move around
+			e.settendency( "wander", 0.0 );
+		}
+	}
+}
+
+void adaptAI()
+{
+entity e;
+float i;
+
+	for( i = 1; i <= NUM_ENEMIES; i++ )
+	{
+		e = getentity( "enemy" + i );
+		if( doesEntityExist( e ) )
+		{
+		//Update health per player
+			e.health(e.getFloatVar("coop_defaultHealth"));
+			globalCoop_actor_healthMultiplicatePerPlayer(e);
+		}
+	}
+}
+
+
+void coop_newPlayerEntered()
+//----------------------------------------------------------------------
+//Welcome Player to this map
+//----------------------------------------------------------------------
+{
+	thread adaptAI();
+}
+
+
+//---------------------
+// justLoadedDeckThreadIGM1
+// Triggered and check to see if A cinematic should happen.
+//------------------------
+void justLoadedDeckThreadIGM1(/* I AM IRONMAN */)
+{
+	if(!cvar_bool_multiplayer){//SP!!!
+		waitForPlayer();
+		if(getfloatvar("level.loadadObjectives")!= 1){
+			setfloatvar("level.loadadObjectives",1);
+			$player.loadobjectives( "IGM1" );
+			stuffCMD("set g_playerModel char/munro_sf");
+			wait( .05 );//wait for the objectives to be loadad
+		}
+	//ARMORY
+		if(getFloatVar("game.armoryRoomVisited") >= 1){
+			$player.setobjectiveshow( "IGM1VisitArmory", 1 );
+		}
+		if(getFloatVar( "game.armoryRoomVisited" ) == 2 ){
+			$player.setobjectivecomplete( "IGM1VisitArmory", 1 );
+		}
+	//MEET WITH CHELL
+		if(getFloatVar("game.breifingRoomVisited") >= 1){
+			$player.setobjectiveshow( "IGM1VisitBreifing", 1 );
+		}
+		if(getFloatVar("game.breifingRoomVisited" ) == 2){
+			$player.setobjectivecomplete( "IGM1VisitBreifing", 1 );
+		}
+	//MEET WITH JUROT
+		if(getFloatVar("game.lockerRoomVisited") >= 1){
+			$player.setobjectiveshow( "IGM1VisitLockers", 1 );
+		}
+		if(getFloatVar("game.lockerRoomVisited") == 2){
+			$player.setobjectivecomplete( "IGM1VisitLockers", 1 );
+		}
+	//GO HOLODECK AND TALK WITH KORBAN
+		if(getFloatVar("game.holoMissionVisited") >= 1){
+			$player.setobjectiveshow( "IGM1HoloDeck", 1 );
+		}
+		if(getFloatVar( "game.holoMissionVisited" ) == 2){
+			$player.setobjectivecomplete( "IGM1HoloDeck", 1 );
+		}
+	//GO TO BRIDE AND DRINK TEA WITH PICARD
+		if(getFloatVar("game.goToBridge") >= 1){
+			$player.setobjectiveshow( "IGM1GoToBridge", 1);
+		}
+		if(getFloatVar( "game.goToBridge" ) == 2){
+			$player.setobjectivecomplete( "IGM1GoToBridge", 1);
+		}
+	}
+}
+
+//------------------------
+// called when bug is Dead to end level
+//------------------------
+void IGM1IsOver()
+{
+	holoDeckFadeIn();
+	wait( 2 );
+	if(!cvar_bool_multiplayer){//Singleplayer
+		cam_fadeout( .5, 0, 0, 0, 1, 0 );
+		wait( .6 );
+	// Setup Level Vars
+		spawn ( "trigger_changelevel", "targetname", "trigger_endTraining", "map", "ent-deck8" );
+		wait( .05 );
+		$trigger_endTraining.spawnspot( "spawnSpotHoloDeck" );
+		wait ( .05 );
+		trigger ( "$trigger_endTraining" );
+	}
+	else{
+		thread coop_endLevel();
+	}
+}
+
+
+//------------------------
+// this thread sets up the Holo Deck And Player
+//------------------------
+void holoDeckSetup()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		cam_fadeout( .05, 0, 0, 0, 1, 0 );
+	}
+	level_ai ( 0 );
+	$holoDeck.notsolid();
+	$holoDeck.rendereffects( "+depthhack" );
+	$holoDeck.forcealpha( 1 );
+	if(cvar_bool_multiplayer){//Multiplayer
+		$holoDeck.warp('3582 -1080 318');
+	}
+	else{
+		waitForPlayer();
+		$player.immobilize( 1 );
+		$holoDeck.warp($player.getOrigin());
+	}
+}
+
+//------------------------
+// this thread makes the Holo Deck Fade Out
+//------------------------
+void holoDeckFadeOut()
+{
+	waitForPlayer();
+	if(!cvar_bool_multiplayer){//Singleplayer
+		cam_fadeIn( .5, 0, 0, 0, 1, 0 );
+	}
+	globalCoop_main_waitForWarmupTime();
+	wait( 1 );
+	$holoDeck.fade( 2, 0 );
+	wait( 2 );
+	$holoDeck.hide();
+	$holoDeck.alpha( 0 );
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.immobilize( 0 );
+	}
+	thread givePlayerAmmo();
+	level_ai ( 1 );
+}
+
+//------------------------
+// this thread makes the Holo Deck Fade Out
+//------------------------
+void holoDeckFadeIn()
+{
+	$teleportTrigger.remove();
+	
+	$lift01.wait( -1 );
+	//$lift01.targetName( "0" );	//this will crash the engine...don't change targetnames on func_ objects :)
+	$lift01_Trigger.nottriggerable ();
+	
+//no more ammo
+	killthread("givePlayerAmmo");
+
+//MULTIPLAYER
+	if(cvar_bool_multiplayer){
+		globalCoop_objectives_update("complete",2,1);//IGM1HoloDeck
+	}
+//YOU ARE ALONE!
+	else{
+	//call ironman
+		thread justLoadedDeckThreadIGM1();
+	}
+		
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.gravity( 0 );
+		globalCoop_player_imobilizeAll(1);
+		$holoDeck.origin( $player.getorigin() );
+		$holoDeck.show();
+		$holoDeck.fadein( 2, 1 );
+	}
+	wait( 2 );
+}
+
+void givePlayerAmmo()
+{
+	while( 1 )
+	{
+		globalCoop_main_globalCommand("ammo");
+		wait( 5 );
+	}
+}
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	setfloatvar ( "game.globalMissionEnterprise", 1 );
+	if(cvar_bool_multiplayer){
+		stuffCMD("seta coop_igm 1\n");
+		stuffCMD("seta coop_igmH 1\n");
+	}
+	globalCoop_main_camFadeOut(1);
+	wait(.2);
+	thread globalCoop_mission_completed("ent-deck8");
+}
+

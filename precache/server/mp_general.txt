@@ -1,0 +1,72 @@
+// MULTIPLAYER STANDARD MODELS
+//RESTRICTION HAVE BEEN PUT INTO PLACE HERE
+//cache models/char/dm_andorian_merc-male.tik
+//cache models/char/dm_attrexian_command-female.tik
+//cache models/char/dm_attrexian_security-male.tik
+//cache models/char/dm_borg_female.tik
+//cache models/char/dm_borg_male.tik
+//cache models/char/dm_drull_kleeya.tik
+//cache models/char/dm_drull_krindo.tik
+//cache models/char/dm_ferengi_oolpax.tik
+//cache models/char/dm_klingon_merc-boss.tik
+//cache models/char/dm_klingon_merc-female.tik
+//cache models/char/dm_nausicaan_male-merc.tik
+//cache models/char/dm_picard.tik
+//cache models/char/dm_romulan_informant-boss.tik
+//cache models/char/dm_romulan_rebel-commander.tik
+//cache models/char/dm_romulan_rebel-guard-snow.tik
+//cache models/char/dm_romulan_stx-female.tik
+//cache models/char/dm_stalker.tik
+//cache models/char/dm_tuvok.tik
+
+//HAZARD TEAM, USED IN CO-OP
+cache models/char/dm_chang.tik
+cache models/char/dm_chell.tik
+cache models/char/dm_jurot.tik
+cache models/char/dm_kourban.tik
+cache models/char/dm_telsia.tik
+
+// DIALOGS, USED IN CO-OP
+cache localization/sound/dialog/dm/comp_medic.mp3
+cache localization/sound/dialog/dm/comp_tech.mp3
+cache localization/sound/dialog/dm/comp_hw.mp3
+
+//MODELS, USED IN CO-OP
+cache models/item/mp_specialty_heavyweapons.tik
+cache models/item/mp_specialty_medic.tik
+cache models/item/mp_specialty_technician.tik
+
+//ICONS, USED IN CO-OP
+cache sysimg/icons/mp/specialty_medic.img
+cache sysimg/icons/mp/specialty_technician.img
+cache sysimg/icons/mp/specialty_heavyweapons.img
+
+//SOUNDS
+cache sound/environment/computer/lcars_yes.wav
+cache sound/environment/computer/tele_beep1.wav
+
+//GENERAL-DIALOGS
+cache localization/sound/dialog/dm/comp_5mins.mp3
+cache localization/sound/dialog/dm/comp_2mins.mp3
+cache localization/sound/dialog/dm/comp_1min.mp3
+cache localization/sound/dialog/dm/comp_100pointsleft.mp3
+cache localization/sound/dialog/dm/comp_25pointsleft.mp3
+cache localization/sound/dialog/dm/comp_10pointsleft.mp3
+cache localization/sound/dialog/dm/comp_5pointsleft.mp3
+cache localization/sound/dialog/dm/comp_4pointsleft.mp3
+cache localization/sound/dialog/dm/comp_3pointsleft.mp3
+cache localization/sound/dialog/dm/comp_2pointsleft.mp3
+cache localization/sound/dialog/dm/comp_1pointsleft.mp3
+cache localization/sound/dialog/dm/comp_1.mp3
+cache localization/sound/dialog/dm/comp_2.mp3
+cache localization/sound/dialog/dm/comp_3.mp3
+cache localization/sound/dialog/dm/comp_4.mp3
+cache localization/sound/dialog/dm/comp_5.mp3
+cache localization/sound/dialog/dm/comp_mats.mp3
+cache localization/sound/dialog/dm/comp_tiedfirst.mp3 //can also occour doing match
+//at end of match, no one will realize that micro lag, since they are all immobilized and starring on the score-board
+//cache localization/sound/dialog/dm/comp_matover.mp3
+//cache localization/sound/dialog/dm/comp_winn.mp3 
+//cache localization/sound/dialog/dm/comp_second.mp3
+//cache localization/sound/dialog/dm/comp_third.mp3
+//cache localization/sound/dialog/dm/comp_didnotrank.mp3

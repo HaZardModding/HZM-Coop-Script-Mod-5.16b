@@ -1,0 +1,36 @@
+cache sysimg/icons/mp/talking.img
+//cache sysimg/icons/mp/spectator.img
+
+//cache sysimg/icons/mp/elimination_eliminated.img
+//cache sysimg/icons/mp/award_efficiency.img
+//cache sysimg/icons/mp/award_sharpshooter.img
+//cache sysimg/icons/mp/award_untouchable.img
+//cache sysimg/icons/mp/award_logistics.img
+//cache sysimg/icons/mp/award_tactician.img
+//cache sysimg/icons/mp/award_demolitionist.img
+
+//cache sysimg/icons/mp/award_ace.img
+//cache sysimg/icons/mp/award_expert.img
+//cache sysimg/icons/mp/award_master.img
+//cache sysimg/icons/mp/award_champion.img
+//cache sysimg/icons/mp/award_mvp.img
+//cache sysimg/icons/mp/award_defender.img
+//cache sysimg/icons/mp/award_warrior.img
+//cache sysimg/icons/mp/award_carrier.img
+//cache sysimg/icons/mp/award_interceptor.img
+//cache sysimg/icons/mp/award_bravery.img
+
+cache sysimg/icons/mp/award_firstStrike.img
+//cache sysimg/icons/mp/award_denied.img
+//cache sysimg/icons/mp/award_impressive.img
+//cache sysimg/icons/mp/award_excellent.img
+
+//cache localization/sound/dialog/dm/comp_humil.mp3
+cache localization/sound/dialog/dm/comp_firstst.mp3
+//cache localization/sound/dialog/dm/comp_impress.mp3
+//cache localization/sound/dialog/dm/comp_excell.mp3
+//cache localization/sound/dialog/dm/comp_champ.mp3
+//cache localization/sound/dialog/dm/comp_master.mp3
+//cache localization/sound/dialog/dm/comp_expert.mp3
+//cache localization/sound/dialog/dm/comp_ace.mp3
+//cache localization/sound/dialog/dm/comp_denied.mp3

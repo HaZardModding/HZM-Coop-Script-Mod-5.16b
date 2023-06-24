@@ -1,0 +1,41 @@
+//-----------------------------------------------------------------------------------
+// Script By:		Christian Sebastian Strahl (Chrissstrahl)
+// Created on:		2010.02.15
+// E-Mail:			chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+
+//HANDLES THINGS FOR SP AND MP
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+////////////////////////////////////////////////////////////////////////////////
+//DECLARATIONS
+////////////////////////////////////////////////////////////////////////////////
+void singleplayerCompatibilityHudprint(entity ePlayer,string sText)
+{//hudprint does not work in SP, use centerprint instead
+	if(cvar_bool_multiplayer){//MULTIPLAYER
+		ePlayer.hudprint(sText);
+	}else{
+		centerPrint(sText);
+	}
+}
+
+void singleplayerSpawnRealTricorderPuzzle(vector vOrigin,float fTime,string sTargetname,string sBar,string sThread)
+{
+	if(!cvar_bool_multiplayer){//SINGLEPLAYER
+		float_singleplayerPuzzle++;
+		entity ePuzzle;
+		ePuzzle = spawn("puzzle_object","targetname",sTargetname,"origin",""+vOrigin);
+		wait(.1);
+		ePuzzle.puzzleobject_itemtouse("Tricorder");
+		ePuzzle.puzzleobject_solvedthread(sThread);
+		if(sBar == ""){
+			sBar = "timerhud";
+		}
+		ePuzzle.puzzleobject_timerHudName(sBar);
+		ePuzzle.puzzleobject_timeToUse(fTime);
+	}
+}

@@ -1,0 +1,247 @@
+void sewerIntro();
+void sewerIntro_skipThread();
+
+
+//---------------------
+// Function: sewerIntro
+// Comments:
+//
+//---------------------
+void sewerIntro()
+{
+	if(cvar_bool_multiplayer)
+	{
+		globalCoop_main_waitForWarmupTime();
+		
+		}
+	cam.load( "m7l1b_introcam" );
+	cinIntro = createcinematic( "m7l1b_sewerenter" );
+	globalCoop_cin_start();
+	
+	wait(.1);
+	
+	cinIntro.setendthread( "sewerIntro_skipThread" );
+	cinIntro.beginCinematic( "m7l1b_sewerenter" ) ;
+	
+	//set the skipthread
+	globalCoop_cin_skipThread( "sewerIntro_skipThread");
+}
+
+//---------------------
+// Function: sewerIntro_skipThread
+// Comments:
+// skipthread for the sewerIntro cinematic
+//---------------------
+void sewerIntro_skipThread()
+{
+	skipthread( "null" );
+	cinIntro.setendthread( "" );
+	wait( .1 );
+
+	//kill the cinematic
+	killthread( "sewerIntro" );
+
+	//--- Back to Game
+	globalCoop_main_camFadeOut(1);
+	wait( 1 );
+	
+	globalCoop_level_removePath($m7l1b_introcam);
+
+	$munro.hide();
+	$munro.notsolid();
+
+	wait( .1 );
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.playerviewangles( '0 220 0' );
+	}
+	$jurot.show();
+	$korban.show();
+	$chang.show();
+
+	globalCoop_cin_end();
+
+	cinIntro.endCinematic();
+
+	//--- Action
+	globalCoop_main_camFadeIn(1);
+	if(!cvar_bool_multiplayer)
+		wait(2);
+	
+	globalCoop_objectives_update("incomplete",1,0);
+	thread globalCoop_objectives_update("incomplete",2,1);
+
+	$chang.walkto( "$sewerIntro_node1" , "run" );
+	wait( .5 );
+	$jurot.walkto( "$sewerIntro_node2" , "run" );
+	wait( .5 );
+	$korban.walkto( "$sewerIntro_node3" , "run" );
+	waitfor( $korban );
+
+	$jurot.hide();
+	$korban.hide();
+	$chang.hide();
+
+//team gone, no need facing the bars anymore
+	if(cvar_bool_multiplayer)
+	{
+		coop_float_spawnAngle0 			= 270;
+		coop_float_spawnAngle1			= 270;
+		coop_float_spawnAngle2 			= 270;
+		coop_float_spawnAngle3 			= 270;
+		coop_float_spawnAngle4 			= 270;
+		coop_float_spawnAngle5 			= 270;
+		coop_float_spawnAngle6 			= 270;
+		coop_float_spawnAngle7 			= 270;
+		coop_float_spawnAngle8 			= 270;
+	}
+	
+	$jurot.origin( '1212.00 3052.00 136.00' );
+	$korban.origin( '1148.00 3012.00 136.00' );
+	$chang.origin( '1276.00 3012.00 128.00' );
+}
+
+
+
+//---------------------
+// Function: sewer_attrexians_door_down_dialog
+// Comments:
+// cinematic with the attrexians after the door is exploded
+//---------------------
+void sewer_attrexians_door_down_dialog()
+{
+//allow loading next mission on timeranout
+	globalCoop_mission_accomplished();
+	
+	$attrexian_lost1.missionobjective( 0 );
+	globalCoop_main_camFadeOut(.5);
+	globalCoop_cin_start();
+	cinRescue = createcinematic( "m7l1b_rescue" );
+	cam.load( "m7l1b_attrexianrescue" );
+	wait(.6);
+	
+	
+	$jurot.hide();
+	$korban.hide();
+//	$chang.hide();
+
+	$jurot.notsolid();
+	$korban.notsolid();
+	$chang.notsolid();
+
+	$jurot.ai_off();
+	$korban.ai_off();
+	$chang.ai_off();
+
+	$chang.headwatchtarget( "attrexian_lost1" , 3 );
+	$chang.anim( "idle" );
+	$chang.angles( '0 270 0' );
+	$chang.origin( '3732 -290 128' );
+	$chang.show();
+
+	$munro.headwatchtarget( "attrexian_lost1" , 3 );
+	$munro.useactorweapon( "fieldassaultrifle" );
+	$munro.anim( "idle" );
+//	$munro.anim( "fieldassaultrifle_idle" );
+	$munro.angles( '0 270 0' );
+	$munro.origin( '3696 -322 128' );
+	$munro.show();
+
+	//set the skipthread
+	globalCoop_cin_skipThread( "sewer_attrexians_door_down_dialog_SkipThread");
+
+	$attrexian_lost1.ai_off();
+	$attrexian_lost2.ai_off();
+
+	$attrexian_lost1.hide();
+	$attrexian_lost2.hide();
+
+	cinRescue.setendthread( "sewer_attrexians_door_down_dialog_SkipThread" );
+	cinRescue.beginCinematic( "m7l1b_rescue" ) ;
+}
+
+//---------------------
+// Function: sewer_attrexians_door_down_dialog_SkipThread
+// Comments:
+// skipthread for the sewer_attrexians_door_down_dialog cinematic
+//---------------------
+void sewer_attrexians_door_down_dialog_SkipThread()
+{
+	skipthread( "null" );
+	cinRescue.setendthread( "" );
+	wait(.1);
+
+	//--- Back to Game
+	cam_fadeout( 1, 0, 0, 0, 1, 0 );
+
+	//kill the cinematic
+	killthread( "sewer_attrexians_door_down_dialog" );
+	wait( 1 );
+	
+	globalCoop_level_removePath($m7l1b_attrexianrescue);//rem cam path, save trafic
+
+	$munro.remove();
+
+	$jurot.show();
+	$korban.show();
+	$chang.show();
+
+	$jurot.solid();
+	$korban.solid();
+	$chang.solid();
+
+	$jurot.ai_on();
+	$korban.ai_on();
+	$chang.ai_on();
+
+	$jurot.origin( '3840 -416 128' );
+	$korban.origin( '3712 -416 128' );
+	$chang.origin( '3840 -352 128' );
+
+	$jurot.settendency( "follow" , 0.0 );
+	$korban.settendency( "follow" , 0.0 );
+	$chang.settendency( "follow" , 0.0 );
+
+	$chang.headwatchtarget( "none" , 3 );
+	$munro.headwatchtarget( "none" , 3 );
+
+	$attrexian_lost1.ai_on();
+	$attrexian_lost2.ai_on();
+
+	$attrexian_lost1.show();
+	$attrexian_lost2.show();
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.origin( '3776 -416 128' );
+	}
+
+	wait( .1 );
+
+	globalCoop_cin_end();
+	cinRescue.endCinematic();
+
+	//--- Action
+	globalCoop_main_camFadeIn(1);
+	wait( .5 );
+
+	$sewerExitDoor1_explosion1Trigger.triggerable();
+	$sewer_attrexians_behind_trigger.nottriggerable();
+
+	attrexianAutoSave();
+
+	//$player.setobjectivecomplete( "RescueTrappedAttrexians", 1 );
+	//$player.setobjectiveshow( "FindElderlyIdryll", 1 );
+	//$player.setobjectiveshow( "FindExitToSurface", 1 );
+	thread globalCoop_objectives_update("complete",1,0);
+	thread globalCoop_objectives_update("incomplete",4,0);
+	globalCoop_objectives_update("incomplete",5,1);
+
+	$arch_ladderpanel2.missionobjective( 1 );
+
+	thread globalCommon_OnUse( $attrexian_lost1, "attrexian_lost1_OnUse" );
+	thread exitDialog1();
+}
+
+
+
+

@@ -1,0 +1,1209 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	      ent-deck7a - MISSION 8
+//  Script By:    K.Thompson
+//  Created on:   08/12/2002
+//	Last Edited:  08/12/2002 - kt
+//-----------------------------------------------------------------
+
+void setupMission8Deck7a();
+
+void cinematicPicardBriefingIGM8();
+void cinematicPicardBriefingIGM8Skipthread();
+
+void cinematicPicardBriefing_EveryoneLookAt( entity entObject );
+void cinematicPicardBriefing_LookAt( entity entActor, entity entObject );
+
+
+//===================================================================================================================
+// Setup 
+//===================================================================================================================
+
+
+void Coop_cin_followDeleteHandle(entity eCam,entity ePath)
+{
+	globalCoop_cin_followEnd(eCam,ePath);
+	globalCoop_level_removePath(ePath);
+}
+
+void Coop_cin_followDelete(entity eCam,entity ePath)
+//deletes entities again avois network overload
+{
+	if(!cvar_bool_multiplayer)
+	{
+		eCam.follow(ePath);
+	}
+	else
+	{
+		thread Coop_cin_followDeleteHandle(eCam,ePath);
+	}
+}
+
+
+//---------------------
+// setupMission7Deck7a	
+// does all the setup stuff for the mission
+//---------------------
+void setupMission8Deck7a()
+{
+//no weapon here it will  interfier with cinematci
+	coop_string_weapon1 = "";
+	//--- fade out
+	globalCoop_main_camFadeOut(0.01);
+	
+	$triggerHazardOps1.thread( "cinematicPicardBriefingIGM8" );
+	$triggerHazardOps2.thread( "cinematicPicardBriefingIGM8" );
+
+	//--- fade the world out
+	globalCoop_cin_start();
+
+	
+	spawn( "Camera", "targetname", "cam1" );
+	spawn( "Camera", "targetname", "cam2" );
+	spawn( "Camera", "targetname", "cam3" );
+	spawn( "Camera", "targetname", "cam4" );
+	cam.load( "IGM8_Deck7a_Briefing_Shot1" );
+		
+	globalCommon_SpawnActor( "char/starfleet_picard.tik", "picard", '-11328 -1136 -68', 0 );
+	globalCommon_SpawnActor( "char/starfleet_tuvok.tik", "tuvok", '-11400 -990 -84', 334 );
+	globalCommon_SpawnActor( "char/hazardteam_sf-jurot.tik", "jurot", '-11051.30 -951.30 -68.00', 195 );
+	globalCommon_SpawnActor( "char/hazardteam_sf-chell.tik", "chell", '-11039.00 -1041.00 -68.00', 185 );
+	globalCommon_SpawnActor( "char/hazardteam_sf-munro.tik", "scriptmunro", '-11038.00 -1136.00 -72.00', 180 );
+	globalCommon_SpawnActor( "char/hazardteam_sf-telsia.tik", "telsia", '-11033.00 -1223.00 -72.00', 175 );
+	globalCommon_SpawnActor( "char/hazardteam_sf-chang.tik", "chang", '-11055.30 -1313.30 -72.00', 165 );
+	//globalCommon_SpawnActor( "char/hazardteam_sf-franklin.tik", "franklin", '-10863.30 -953.30 -48.00', 195 );	//he's dead already
+	globalCommon_SpawnActor( "char/hazardteam_sf-sydney.tik", "sydney", '-10843.00 -1041.00 -40.00', 185 );
+	globalCommon_SpawnActor( "char/hazardteam_sf-kourban.tik", "kourban", '-10846.00 -1136.00 -48.00', 180 );
+	//globalCommon_SpawnActor( "char/hazardteam_sf-gonzales.tik", "gonzales", '-10843.00 -1223.00 -48.00', 175 );	//yup, he's dead too
+	globalCommon_SpawnActor( "char/hazardteam_sf-redshirt4.tik", "waters", '-10843.00 -1223.00 -48.00', 175 );		//replaces gonzales seat next to korban
+	globalCommon_SpawnActor( "char/hazardteam_sf-redshirt3.tik", "stockman", '-10863.30 -1313.30 -48.00', 165 );	
+	globalCommon_SpawnActor( "char/hazardteam_sf-redshirt6.tik", "devaldenebro", '-10667.30 -949.30 -24.00', 195 );	
+	globalCommon_SpawnActor( "char/hazardteam_sf-redshirt5.tik", "katcherside", '-10655.00 -1041.00 -24.00', 185 );	
+	//globalCommon_SpawnActor( "char/hazardteam_sf-redshirt4.tik", "waters", '-10652.00 -1136.00 -24.00', 180 );	//replaces gonzales seat next to korban
+	globalCommon_SpawnActor( "char/hazardteam_sf-redshirt2.tik", "thompson", '-10651.00 -1221.00 -24.00', 175 );
+	globalCommon_SpawnActor( "char/hazardteam_sf-redshirt.tik", "law", '-10667.30 -1317.30 -24.00', 165 );	
+	
+	globalCommon_SpawnActor( "char/kleeya-noweapon.tik", "kleeya", '-11392 -1280 -68', 15 );	
+	
+	thread cinematicPicardBriefingIGM8();
+	
+	thread randomlyAnimateActor( $chang, "ent-sit-room" );
+	thread randomlyAnimateActor( $jurot, "ent-sit-room" );
+	wait( .2 );
+	thread randomlyAnimateActor( $chell, "ent-sit-room" );	
+	thread randomlyAnimateActor( $scriptmunro, "ent-sit-room" );
+	wait( .2 );
+	thread randomlyAnimateActor( $telsia, "ent-sit-room" );
+	thread randomlyAnimateActor( $sydney, "ent-sit-room" );
+	wait( .2 );
+	thread randomlyAnimateActor( $kourban, "ent-sit-room" );
+	//thread randomlyAnimateActor( $gonzales, "ent-sit-room" );
+	wait( .2 );
+	thread randomlyAnimateActor( $stockman, "ent-sit-room" );
+	thread randomlyAnimateActor( $devaldenebro, "ent-sit-room" );
+	wait( .2 );
+	thread randomlyAnimateActor( $katcherside, "ent-sit-room" );
+	thread randomlyAnimateActor( $waters, "ent-sit-room" );
+	wait( .2 );
+	thread randomlyAnimateActor( $thompson, "ent-sit-room" );
+	thread randomlyAnimateActor( $law, "ent-sit-room" );
+}
+
+void testPlate1()
+{
+	$briefingScreen_IGM8_Plate1.hide();
+	$briefingScreen_IGM8_Plate2.hide();
+	$briefingScreen_IGM8_Plate3.hide();
+	$briefingScreen_IGM8_Plate4.hide();
+
+	//--- show the first plate
+	$briefingScreen_Border.show();
+	$briefingScreen_Blank.show();
+	wait( .1 );
+	
+	$briefingScreen_IGM8_Plate1.show();
+}
+
+void testPlate2()
+{
+	$briefingScreen_IGM8_Plate1.hide();
+	$briefingScreen_IGM8_Plate2.hide();
+	$briefingScreen_IGM8_Plate3.hide();
+	$briefingScreen_IGM8_Plate4.hide();
+
+	//--- show the first plate
+	$briefingScreen_Border.show();
+	$briefingScreen_Blank.show();
+	wait( .1 );
+	
+	$briefingScreen_IGM8_Plate2.show();
+}
+
+void testPlate3()
+{
+	$briefingScreen_IGM8_Plate1.hide();
+	$briefingScreen_IGM8_Plate2.hide();
+	$briefingScreen_IGM8_Plate3.hide();
+	$briefingScreen_IGM8_Plate4.hide();
+
+	//--- show the first plate
+	$briefingScreen_Border.show();
+	$briefingScreen_Blank.show();
+	wait( .1 );
+	
+	$briefingScreen_IGM8_Plate3.show();
+}
+
+void testPlate4()
+{
+	$briefingScreen_IGM8_Plate1.hide();
+	$briefingScreen_IGM8_Plate2.hide();
+	$briefingScreen_IGM8_Plate3.hide();
+	$briefingScreen_IGM8_Plate4.hide();
+
+	//--- show the first plate
+	$briefingScreen_Border.show();
+	$briefingScreen_Blank.show();
+	wait( .1 );
+	
+	$briefingScreen_IGM8_Plate4.show();
+}
+
+void testPlate0()
+{
+	$briefingScreen_IGM8_Plate1.hide();
+	$briefingScreen_IGM8_Plate2.hide();
+	$briefingScreen_IGM8_Plate3.hide();
+	$briefingScreen_IGM8_Plate4.hide();
+
+	//--- show the first plate
+	$briefingScreen_Border.show();
+	$briefingScreen_Blank.show();
+	wait( .1 );
+	
+	$briefingScreen_Border.hide();
+	$briefingScreen_Blank.hide();
+}
+
+//---------------------
+// cinematic
+// setup and begin cinematic
+//---------------------
+void cinematicPicardBriefingIGM8()
+{
+	$triggerHazardOps1.thread( "" );
+	$triggerHazardOps2.thread( "" );
+
+//	$player.setobjectivecomplete( "IGM8MeetInBriefingRoom", 1 );
+	
+	//--- everybody look at picard
+	thread cinematicPicardBriefing_EveryoneLookAt( $picard );
+	
+	// --- Skip Thread
+	skipthread( "cinematicPicardBriefingIGM8Skipthread");
+
+	//--------------------------------------------------------
+	//shot1 - establishing shot pushing into room
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 50 );
+	Coop_cin_followDelete($cam1, $IGM8_Deck7a_Briefing_Shot1 );	
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( .1 );
+
+    //--- fade in
+    cam_fadein( 1, 0, 0, 0, 1, 0 );
+    wait( 1.5 );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot2" );
+	
+	//We have seen too many doomsday weapons. And too many warlike leaders eager to use them. But today we have a rare opportunity. The chance to destroy one. Kleeya?
+	thread globalCoop_dialog_play($picard,"ent_m8/picard_toodoom.mp3", 1, 20000, 0 );
+	wait( 4 );
+
+	//--------------------------------------------------------
+	//shot2 - push in on picard and reveal kleeya
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 40 );
+	Coop_cin_followDelete($cam2, $IGM8_Deck7a_Briefing_Shot2 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam2 );
+
+	//--- wait for picard to finish
+	globalCoop_dialog_waitForDialog( $picard );
+	
+	$picard.headwatch($kleeya);
+	wait( .1 );
+	$kleeya.headwatch($picard);
+	
+	wait( .3 );
+
+	
+	//--- everybody look at kleeya
+	thread cinematicPicardBriefing_EveryoneLookAt( $kleeya );
+	wait( .5 );
+
+	//--- kleeya looks at munro
+	$kleeya.resethead(5);
+	thread cinematicPicardBriefing_LookAt( $kleeya, $scriptmunro );
+	wait( .5 );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot3" );
+
+	//My people created the Exomorphs for easy labor and quick power. Endless troops with no remorse and no self-preservation.
+	thread globalCoop_dialog_play($kleeya,"ent_m8/kleeya_easylab.mp3", 1, 20000, 0 );
+	wait( 2.75 );
+	
+	$picard.resethead(3);
+	
+	//--------------------------------------------------------
+	//shot3 - over the shoulder from kleeya to audience
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 50 );
+	globalCoop_cin_follow($cam1, $IGM8_Deck7a_Briefing_Shot3 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot4" );
+	
+	globalCoop_cin_cuecamera( $cam1 );	
+	wait( 2 );
+	
+	//--------------------------------------------------------
+	//shot4 - closeup reaction shot on Telsia
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 50 );
+	globalCoop_cin_follow($cam2, $IGM8_Deck7a_Briefing_Shot4 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam2 );
+	wait( .5 );
+	
+	$telsia.morph( "exp_brows_down" );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot5" );
+	
+	//--- wait for kleeya to finish talking
+	globalCoop_dialog_waitForDialog( $kleeya );
+	wait( 2 );
+
+	//--- picard looks ahead again
+	thread cinematicPicardBriefing_LookAt( $picard, $scriptmunro );
+
+	//--------------------------------------------------------
+	//shot5 - closeup on picard with kleeya in distance
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 50 );
+	globalCoop_cin_follow($cam1, $IGM8_Deck7a_Briefing_Shot5 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam1 );
+	
+	//But doomsday weapons often turn on their masters. The Exomorphs exterminated ninety-five percent of the Idryll people. The few survivors fell into a Dark Age, without science or literacy.
+	thread globalCoop_dialog_play($picard,"ent_m8/picard_turnon.mp3", 1, 20000, 0 );
+	wait( .2 );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot6" );
+
+	//--- everybody look at picard
+	thread cinematicPicardBriefing_EveryoneLookAt( $picard );
+	wait( 3 );
+	
+	//--------------------------------------------------------
+	//shot6 - dolly left behind audience looking at picard
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 30 );
+	Coop_cin_followDelete($cam2, $IGM8_Deck7a_Briefing_Shot6 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam2 );	
+	
+	//--- wait for picard to finish speaking
+	globalCoop_dialog_waitForDialog( $picard );
+	wait( .3 );
+
+	//--- kleeya looks at munro
+	thread cinematicPicardBriefing_LookAt( $kleeya, $scriptmunro );
+	
+	//--------------------------------------------------------
+	//shot7 - close up, slow dolly left on kleeya
+
+	cam.load( "IGM8_Deck7a_Briefing_Shot7" );
+	
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 50 );
+	Coop_cin_followDelete($cam1, $IGM8_Deck7a_Briefing_Shot7 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam1 );
+	
+	//The Attrexians finally destroyed the Exomorphs, and thought they had destroyed the facilities. But the facilities repaired themselves and sat waiting to be activated again.
+	thread globalCoop_dialog_play($kleeya,"ent_m8/kleeya_attrex.mp3", 1, 20000, 0 );
+	wait( .2 );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot8" );
+
+	//--- everybody look at kleeya
+	thread cinematicPicardBriefing_EveryoneLookAt( $kleeya );
+	wait( 3 );
+	
+	//--------------------------------------------------------
+	//shot8 - reaction shot on jurot and chell
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 50 );
+	Coop_cin_followDelete($cam2, $IGM8_Deck7a_Briefing_Shot8 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot9" );
+	
+	globalCoop_cin_cuecamera( $cam2 );		
+	wait( 2 );
+	
+	//--------------------------------------------------------
+	//shot9 - reaction shot on korban, gonzales, and andorian
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 50 );
+	Coop_cin_followDelete($cam1, $IGM8_Deck7a_Briefing_Shot9 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot10" );
+	
+	globalCoop_cin_cuecamera( $cam1 );	
+	wait( 2 );
+	
+	//--------------------------------------------------------
+	//shot10 - reaction shot on munro
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 40 );
+	Coop_cin_followDelete($cam2, $IGM8_Deck7a_Briefing_Shot10 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam2 );			
+	
+	//--- wait for kleeya to finish
+	globalCoop_dialog_waitForDialog( $kleeya );
+	wait( .5 );
+
+	//--- picard looks ahead
+	thread cinematicPicardBriefing_LookAt( $picard, $scriptmunro );
+
+	//--------------------------------------------------------
+	//shot11 - closeup on picard with kleeya in distance
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 50 );
+	globalCoop_cin_follow($cam1, $IGM8_Deck7a_Briefing_Shot5 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam1 );	
+
+	//In revenge, the Attrexians covered up the truth about the Idryll people, and used them for cheap labor.
+	thread globalCoop_dialog_play($picard,"ent_m8/picard_revenge.mp3", 1, 20000, 0 );
+	wait( .2 );
+
+	//--- everybody look at picard
+	thread cinematicPicardBriefing_EveryoneLookAt( $picard );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot11" );
+	cam.load( "IGM8_Deck7a_Briefing_Shot12" );
+
+	wait( 2.75 );
+
+	//--------------------------------------------------------
+	//shot12 - over the shoulder of picard at audience
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 50 );
+	Coop_cin_followDelete($cam2, $IGM8_Deck7a_Briefing_Shot11 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+		
+	globalCoop_cin_cuecamera( $cam2 );			
+	globalCoop_dialog_waitForDialog( $picard );
+	wait( .2 );
+	
+	//--------------------------------------------------------
+	//shot13 - closeup on chell
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 40 );
+	Coop_cin_followDelete($cam1, $IGM8_Deck7a_Briefing_Shot12 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam1 );		
+	
+	//Just like the Idryll used the Exomorphs.
+	thread globalCoop_dialog_play($chell,"ent_m8/chell_justlike.mp3", 1, 20000, 0 );
+	wait( .2 );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot13" );
+	
+	//--- everybody look at chell
+	thread cinematicPicardBriefing_EveryoneLookAt( $chell );
+	globalCoop_dialog_waitForDialog( $chell );
+	wait( .2 );
+	
+	//--- jurot look at picard
+	thread cinematicPicardBriefing_LookAt( $jurot, $picard );
+
+	//--------------------------------------------------------
+	//shot14 - closeup on jurot
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 50 );
+	globalCoop_cin_follow($cam2, $IGM8_Deck7a_Briefing_Shot13 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam2 );				
+	
+	//And just like the Exomorphs, the Idryll turned on their masters when they reactivated the facilities.
+	thread globalCoop_dialog_play($jurot,"ent_m8/jurot_turned.mp3", 1, 20000, 0 );
+	wait( .2 );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot14" );
+
+	//--- everybody look at jurot
+	thread cinematicPicardBriefing_EveryoneLookAt( $jurot );
+	wait( .3 );
+
+	//--------------------------------------------------------
+	//shot14 - dolly left around jurot to show the entire row
+	
+	Coop_cin_followDelete($cam2, $IGM8_Deck7a_Briefing_Shot14 );
+	
+	//--- wait for jurot to finish
+	globalCoop_dialog_waitForDialog( $jurot );
+	wait( .5 );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot15" );
+	
+	thread cinematicPicardBriefing_LookAt( $jurot, $chell );
+	wait( 1.5 );
+	
+	//--- korban looks at picard
+	thread cinematicPicardBriefing_LookAt( $kourban, $picard );
+
+	//--------------------------------------------------------
+	//shot15 - closeup on korban
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 40 );
+	globalCoop_cin_follow($cam1, $IGM8_Deck7a_Briefing_Shot15 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam1 );		
+		
+	//What was the weapon that the Exomorphs used to destroy the Idryll?
+	thread globalCoop_dialog_play($kourban,"ent_m8/korban_weapon.mp3", 1, 20000, 0 );
+	wait( .2 );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot16" );
+	
+	//--- everybody look at korban
+	thread cinematicPicardBriefing_EveryoneLookAt( $kourban );
+	globalCoop_dialog_waitForDialog( $kourban );
+	wait( .2 );
+
+	//--- kleeya looks ahead
+	thread cinematicPicardBriefing_LookAt( $kleeya, $scriptmunro );
+	
+	//--------------------------------------------------------
+	//shot16 - closeup on kleeya
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 50 );
+	Coop_cin_followDelete($cam2, $IGM8_Deck7a_Briefing_Shot16 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam2 );				
+		
+	thread globalCoop_dialog_play($kleeya,"ent_m8/kleeya_intel.mp3", 1, 20000, 0 ); //Intelligence. An Exomorph called the Master Matrix gained full sentience and took control.
+	wait( .2 );
+	
+	//--- everybody look at kleeya
+	thread cinematicPicardBriefing_EveryoneLookAt( $kleeya );
+	wait( 3 );
+
+	//--------------------------------------------------------
+	//shot17 - over the shoulder from kleeya to audience
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 50 );
+	Coop_cin_followDelete($cam1, $IGM8_Deck7a_Briefing_Shot3 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );	
+	globalCoop_cin_cuecamera( $cam1 );
+	
+	//--- wait for kleeya to finish dialog		
+	globalCoop_dialog_waitForDialog( $kleeya );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot17" );
+	wait( .3 );
+
+	//--- chang looks at picard
+	thread cinematicPicardBriefing_LookAt( $chang, $picard );
+
+	//--------------------------------------------------------
+	//shot18 - closeup on chang
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 40 );
+	globalCoop_cin_follow($cam2, $IGM8_Deck7a_Briefing_Shot17 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam2 );
+	
+	//The Master Control Facility is in the Neutral Zone. What about Romulans?
+	thread globalCoop_dialog_play($chang,"ent_m8/chang_mcf.mp3", 1, 20000, 0 );
+	wait( .2 );
+
+	//--- everybody look at chang
+	thread cinematicPicardBriefing_EveryoneLookAt( $chang );
+	globalCoop_dialog_waitForDialog( $chang );
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//shot19 - closeup on picard with kleeya in distance
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 50 );
+	globalCoop_cin_follow($cam1, $IGM8_Deck7a_Briefing_Shot5 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam1 );
+	
+	//Best case, we destroy the facility quickly and leave undetected.
+	thread globalCoop_dialog_play($picard,"ent_m8/picard_bestcase.mp3", 1, 20000, 0 );
+	wait( .2 );
+	
+	//--- everybody look at picard
+	thread cinematicPicardBriefing_EveryoneLookAt( $picard );	
+	globalCoop_dialog_waitForDialog( $picard );
+	wait( .2 );
+	
+	//--------------------------------------------------------
+	//shot20 - closeup on telsia
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 50 );
+	Coop_cin_followDelete($cam2, $IGM8_Deck7a_Briefing_Shot4 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam2 );
+	
+	//Worst case?
+	thread globalCoop_dialog_play($telsia,"ent_m8/telsia_worst.mp3", 1, 20000, 0 );
+	wait( .2 );
+
+	//--- everybody look at telsia
+	thread cinematicPicardBriefing_EveryoneLookAt( $telsia );
+	globalCoop_dialog_waitForDialog( $telsia );
+	wait( .2 );
+	
+	//--------------------------------------------------------
+	//shot21 - closeup on picard with kleeya in distance
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 50 );
+	Coop_cin_followDelete($cam1, $IGM8_Deck7a_Briefing_Shot5 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam1 );
+	
+	//We convince the Romulans of the threat to both our people.
+	thread globalCoop_dialog_play($picard,"ent_m8/picard_convince.mp3", 1, 20000, 0 );
+	wait( .2 );
+	
+	//--- everybody look at picard
+	thread cinematicPicardBriefing_EveryoneLookAt( $picard );
+	globalCoop_dialog_waitForDialog( $picard );
+	wait( .2 );
+	
+	//--------------------------------------------------------
+	//shot22 - closeup on jurot
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 50 );
+	Coop_cin_followDelete($cam2, $IGM8_Deck7a_Briefing_Shot13 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam2 );	
+	
+	//They may not believe it. They think everyone's as devious as they are.
+	globalCoop_dialog_play($jurot,"ent_m8/jurot_notbelieve.mp3", 1, 20000, 0 );
+	wait( .2 );
+	
+	//--------------------------------------------------------
+	//shot23 - closeup on korban
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 50 );
+	globalCoop_cin_follow($cam1, $IGM8_Deck7a_Briefing_Shot15 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam1 );
+		
+	//Then we fight our way out the Neutral Zone!
+	globalCoop_dialog_play($kourban,"ent_m8/korban_fightout.mp3", 1, 20000, 0 );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot18" );
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//shot24 - dolly around picard to tuvok
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 50 );
+	Coop_cin_followDelete($cam2, $IGM8_Deck7a_Briefing_Shot18 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam2 );	
+		
+	//Either way, we destroy a doomsday weapon. Commander?
+	globalCoop_dialog_play($picard,"ent_m8/picard_destroy.mp3", 1, 20000, 0 );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot19" );
+	
+	//--- picard looks at tuvok and vice versa
+	globalCoop_main_printTimeAndString("cinematicPicardBriefing_LookAt");
+	thread cinematicPicardBriefing_LookAt( $picard, $tuvok );
+	thread cinematicPicardBriefing_LookAt( $tuvok, $picard );
+	wait( 1 );
+	
+	//--------------------------------------------------------
+	//shot25 - high shot, zoom in as picard gives tuvok center stage
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 80 );
+	Coop_cin_followDelete($cam1, $IGM8_Deck7a_Briefing_Shot19 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam1 );
+	
+	globalCoop_main_printTimeAndString("globalCineFX_CameraFOVLerp");
+	thread globalCineFX_CameraFOVLerp( $cam1, 80, 50, 5, "rampupdown" );
+	
+	$picard.resetHead( 5 );
+	$tuvok.resetHead( 10 );
+	$picard.walkto( "$nodePicard_ExitPodium", "walk" );
+	wait( 1 );
+	
+	$tuvok.walkto( "$nodePodium_Terminal", "walk" );
+	waitFor( $tuvok );
+	wait( .5 );
+
+	//The Hazard Team will split into two groups. Ensign Murphy will shuttle her team to the far side of the Romulan stronghold
+	thread globalCoop_dialog_play($tuvok,"ent_m8/tuvok_torpedo2.mp3", 1, 20000, 0 );
+	wait( 1.5 );
+	
+	//--- show the first plate
+	$briefingScreen_Border.show();
+	$briefingScreen_Blank.show();
+	wait( .1 );
+	
+	$briefingScreen_IGM8_Plate1.show();
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot19a" );
+	
+	//--- everybody look at tuvok
+	thread cinematicPicardBriefing_EveryoneLookAt( $tuvok );
+	wait( 1 );
+	
+	//--------------------------------------------------------
+	//shot25a - closeup of briefing screen
+
+	//--- set the camera
+	globalCoop_cin_fov($cam3, 50 );
+	globalCoop_cin_follow($cam3, $IGM8_Deck7a_Briefing_Shot19a );
+	globalCoop_cin_cut($cam3);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam3 );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot19b" );
+	wait( 3 );	
+
+	//--------------------------------------------------------
+	//shot25b - closeup of portion of briefing screen
+
+	//--- set the camera
+	globalCoop_cin_fov($cam4, 40 );
+	globalCoop_cin_follow($cam4, $IGM8_Deck7a_Briefing_Shot19b );
+	globalCoop_cin_cut($cam4);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam4 );
+	
+	//--- wait for tuvok to finish
+	globalCoop_dialog_waitForDialog( $tuvok );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot19c" );
+	wait( 2 );
+
+	//--------------------------------------------------------
+	//shot25c - tuvok and the viewscreen
+
+	//--- set the camera
+	globalCoop_cin_fov($cam3, 50 );
+	Coop_cin_followDelete($cam3, $IGM8_Deck7a_Briefing_Shot19c );
+	globalCoop_cin_cut($cam3);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam3 );
+	
+	thread globalCoop_dialog_play($tuvok,"ent_m8/tuvok_torpedo3.mp3", 1, 20000, 0 ); //Her assault will divert attention from Lieutenant Munro’s team as they transport near the entrance to the Master Control Facility
+	wait( .5 );
+	
+	//--- show the second plate
+	$briefingScreen_IGM8_Plate1.hide();
+	$briefingScreen_Border.show();
+	$briefingScreen_Blank.show();
+	wait( .1 );
+	
+	$briefingScreen_IGM8_Plate2.show();	
+	wait( 1.5 );
+
+	//--------------------------------------------------------
+	//shot25d - closeup of portion of briefing screen
+
+	//--- set the camera
+	globalCoop_cin_fov($cam4, 40 );
+	Coop_cin_followDelete($cam4, $IGM8_Deck7a_Briefing_Shot19b );
+	globalCoop_cin_cut($cam4);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam4 );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot19d" );
+	wait( 3 );
+
+	//--------------------------------------------------------
+	//shot25e - munro and telsia reaction
+
+	//--- set the camera
+	globalCoop_cin_fov($cam3, 50 );
+	Coop_cin_followDelete($cam3, $IGM8_Deck7a_Briefing_Shot19d );
+	globalCoop_cin_cut($cam3);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam3 );
+	
+	//--- wait for tuvok to finish
+	globalCoop_dialog_waitForDialog( $tuvok );
+	wait( .2 );
+	
+	thread cinematicPicardBriefing_LookAt( $scriptmunro, $telsia );
+	wait( .2 );
+
+	thread cinematicPicardBriefing_LookAt( $telsia, $scriptmunro );
+	
+	thread globalCoop_dialog_play($tuvok,"ent_m8/tuvok_torpedo4.mp3", 1, 20000, 0 ); //We expect heavy resistance from the renegade Romulan forces
+	wait( .3 );
+	
+	$scriptmunro.morph( "exp_Serious" );
+	$telsia.morph( "exp_Relief" );
+	wait( 3 );
+	
+	thread cinematicPicardBriefing_LookAt( $scriptmunro, $tuvok );
+	thread cinematicPicardBriefing_LookAt( $telsia, $tuvok );
+	$scriptmunro.unmorph( "exp_Serious" );
+	$telsia.unmorph( "exp_Relief" );
+	
+	globalCoop_dialog_waitForDialog( $tuvok );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot19e" );
+	wait( .2 );
+
+	//--------------------------------------------------------
+	//shot25f - push in slowly on tuvok
+
+	//--- set the camera
+	globalCoop_cin_fov($cam4, 50 );
+	Coop_cin_followDelete($cam4, $IGM8_Deck7a_Briefing_Shot19e );
+	globalCoop_cin_cut($cam4);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam4 );
+
+	thread cinematicPicardBriefing_LookAt( $scriptmunro, $tuvok );
+	thread cinematicPicardBriefing_LookAt( $telsia, $tuvok );
+			
+	thread globalCoop_dialog_play($tuvok,"ent_m8/tuvok_torpedo5.mp3", 1, 20000, 0 ); //We have modified your tricorders to allow you to call down orbital strikes from the Enterprise. Target an area, and the Enterprise will bombard it with phaser fire and Quantum torpedoes
+	wait( .5 );
+	
+	//--- show the third plate
+	$briefingScreen_IGM8_Plate2.hide();
+	$briefingScreen_Border.show();
+	$briefingScreen_Blank.show();
+	wait( .1 );
+	
+	$briefingScreen_IGM8_Plate3.show();		
+	wait( 2 );
+
+	//--------------------------------------------------------
+	//shot25g - briefing screen
+
+	//--- set the camera
+	globalCoop_cin_fov($cam3, 50 );
+	globalCoop_cin_follow($cam3, $IGM8_Deck7a_Briefing_Shot19a );
+	globalCoop_cin_cut($cam3);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam3 );
+	wait( 4 );
+
+	//--------------------------------------------------------
+	//shot25h - reaction shot on korban
+
+	//--- set the camera
+	globalCoop_cin_fov($cam4, 50 );
+	Coop_cin_followDelete($cam4, $IGM8_Deck7a_Briefing_Shot15 );
+	globalCoop_cin_cut($cam4);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam4 );
+	wait( .25 );
+	
+	$kourban.morph( "exp_Anger" );
+	wait( 1.5 );
+
+	//--------------------------------------------------------
+	//shot25i - reaction shot on chang
+
+	//--- set the camera
+	globalCoop_cin_fov($cam3, 50 );
+	Coop_cin_followDelete($cam3, $IGM8_Deck7a_Briefing_Shot17 );
+	globalCoop_cin_cut($cam3);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam3 );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot20" );
+	wait( 1.75 );
+	
+	//--------------------------------------------------------
+	//shot26 - push in on tuvok for the last line
+
+	//--- set the camera
+	globalCoop_cin_fov($cam4, 50 );
+	Coop_cin_followDelete($cam4, $IGM8_Deck7a_Briefing_Shot20 );
+	globalCoop_cin_cut($cam4);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam4 );
+
+	//--- wait for tuvok to stop yappin'
+	globalCoop_dialog_waitForDialog( $tuvok );
+	wait( .2 );
+		
+	thread globalCoop_dialog_play($tuvok,"ent_m8/tuvok_torpedo6.mp3", 1, 20000, 0 ); //Use these strikes sparingly, as our torpedo supply is limited
+	wait( .2 );
+
+	//--- wait for tuvok to finish speaking
+	globalCoop_dialog_waitForDialog( $tuvok );
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot22" );
+	wait( 1 );
+
+	//--------------------------------------------------------
+	//shot27 - 2nd closeup on chell
+
+	//--- set the camera
+	//globalCoop_cin_fov($cam1, 40 );
+	//Coop_cin_followDelete($cam1, $IGM8_Deck7a_Briefing_Shot21 );
+	//globalCoop_cin_cut($cam1);
+	//wait( .2 );
+	
+	//globalCoop_cin_cuecamera( $cam1 );
+	
+	//thread globalCoop_dialog_play($chell,"ent_m8/chell_temporal.mp3", 1, 20000, 0 ); //Your tricorder can now detect cloaked creatures that shift temporal phases.  Kleeya says that some advanced Exomorph designs use this ability
+	//wait( .2 );
+
+	//--- show the fourth plate
+	//$briefingScreen_IGM8_Plate3.hide();
+	//$briefingScreen_Border.show();
+	//$briefingScreen_Blank.show();
+	//wait( .1 );
+	
+	//$briefingScreen_IGM8_Plate4.show();		
+	
+	//--- everybody look at chell
+	//thread cinematicPicardBriefing_EveryoneLookAt( $chell );
+	//wait( 2 );
+
+	//--------------------------------------------------------
+	//shot27a - closeup on briefing screen
+
+	//--- set the camera
+	//globalCoop_cin_fov($cam3, 50 );
+	//Coop_cin_followDelete($cam3, $IGM8_Deck7a_Briefing_Shot19a );
+	//globalCoop_cin_cut($cam3);
+	//wait( .2 );
+	
+	//globalCoop_cin_cuecamera( $cam3 );
+	//wait( .2 );
+		
+	//--- let chell finish yappin'
+	//globalCoop_dialog_waitForDialog( $chell );
+	//wait( .3 );
+	
+	//--------------------------------------------------------
+	//shot28 - high push in as picard steps back onto the stage
+
+	//--- set the camera
+	globalCoop_cin_fov($cam2, 50 );
+	Coop_cin_followDelete($cam2, $IGM8_Deck7a_Briefing_Shot22 );
+	globalCoop_cin_cut($cam2);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam2 );		
+		
+	$picard.walkto( "$nodePodium_Right", "walk" );
+	waitFor( $picard );
+	wait( .4 );
+	
+	thread cinematicPicardBriefing_LookAt( $picard, $chell );
+	
+	//--- show the default screen
+	$briefingScreen_IGM8_Plate4.hide();
+	$briefingScreen_Border.show();
+	$briefingScreen_Blank.show();
+	wait( .1 );
+	
+	$briefingScreen_Border.hide();
+	$briefingScreen_Blank.hide();
+	
+	//--- everybody look at picard
+	thread cinematicPicardBriefing_EveryoneLookAt( $picard );
+		
+	thread globalCoop_dialog_play($picard,"ent_m8/picard_fails.mp3", 1, 20000, 0 ); //If this mission fails, the Romulans will have a first-strike weapon that can tip the balance of power in the Alpha Quadrant. Good luck
+	
+	cam.load( "IGM8_Deck7a_Briefing_Shot23" );
+	wait( 3 );
+	
+	//--------------------------------------------------------
+	//shot29 - push in on picard as he says good luck
+
+	//--- set the camera
+	globalCoop_cin_fov($cam1, 50 );
+	Coop_cin_followDelete($cam1, $IGM8_Deck7a_Briefing_Shot23 );
+	globalCoop_cin_cut($cam1);
+	wait( .2 );
+	
+	globalCoop_cin_cuecamera( $cam1 );
+	wait( 2 );
+	
+	thread cinematicPicardBriefing_LookAt( $picard, $chang );
+	
+	//--- wait for Picard to stop speaking
+	globalCoop_dialog_waitForDialog( $picard );
+	wait( .5 );
+	
+	//--- End Thread
+	thread cinematicPicardBriefingIGM8Skipthread();
+}
+
+//---------------------
+// cinematicSkipthread
+// skipthread that calls the skipthread routines
+//------------------------
+void cinematicPicardBriefingIGM8Skipthread()
+{
+	//--- kill the cinematic thread
+	skipthread( "Null" );
+	killthread( "cinematicPicardBriefingIGM8" );
+
+	//--- Fade Out
+	cam_fadeout( .5, 0, 0, 0, 1, 0 );
+	wait( .6 );
+	
+	killAllTalking();
+	
+	$picard.hide();
+	$picard.notsolid();
+	$tuvok.hide();
+	$tuvok.notsolid();
+	$jurot.hide();
+	$jurot.notsolid();
+	$chell.hide();
+	$chell.notsolid();
+	$scriptmunro.hide();
+	$scriptmunro.notsolid();	
+	$telsia.hide();
+	$telsia.notsolid();	
+	$chang.hide();
+	$chang.notsolid();	
+	$franklin.hide();
+	$franklin.notsolid();	
+	$sydney.hide();
+	$sydney.notsolid();	
+	$kourban.hide();
+	$kourban.notsolid();	
+	$gonzales.hide();
+	$gonzales.notsolid();	
+	$stockman.hide();
+	$stockman.notsolid();	
+	$devaldenebro.hide();
+	$devaldenebro.notsolid();	
+	$katcherside.hide();
+	$katcherside.notsolid();
+	$waters.hide();
+	$waters.notsolid();
+	$thompson.hide();
+	$thompson.notsolid();
+	$law.hide();
+	$law.notsolid();
+	
+	
+	if(cvar_bool_multiplayer)
+	{
+		thread globalCoop_objectives_update("complete",3,1);//state,slot,show
+		wait(1);
+		stuffcmd("seta coop_igm 9\n");
+	//load next map
+		sNextLevelToLoadForCoop="m11l1a-drull_ruins3";
+		coop_endLevel();
+	}
+	else
+	{
+		noncinematic();
+		cueplayer();
+		releaseplayer();
+		$player.show();
+		clearletterbox( 1 );
+		$scriptmunro.hide();
+		$scriptmunro.notsolid();	
+
+		spawn ( "trigger_changelevel", "targetname", "trigger_endlevel", "map", "m11l1a-drull_ruins3" );
+		setFloatVar( "game.globalMissionEnterprise", 9 );
+		noIntermission();
+		wait ( 1 );
+		trigger ( "$trigger_endlevel" );
+	}
+}
+
+void test()
+{
+	thread cinematicPicardBriefing_EveryoneLookAt( $kleeya );
+	wait( 3 );
+	
+	thread cinematicPicardBriefing_EveryoneLookAt( $scriptmunro );
+}
+
+//---------------------
+// 	cinematicPicardBriefing_EveryoneLookAt
+//	entObject - entity, the object everyone should look at
+//	makes everyone in the cinematic headwatch the passed object
+//------------------------
+void cinematicPicardBriefing_EveryoneLookAt( entity entObject )
+{
+	globalCommon_AssertEntity( entObject, "ERROR EVERYONE LOOK AT!! The passed entity does not exist!!" );
+	thread cinematicPicardBriefing_LookAt( $picard, entObject );
+	thread cinematicPicardBriefing_LookAt( $tuvok, entObject );
+	thread cinematicPicardBriefing_LookAt( $jurot, entObject );
+	thread cinematicPicardBriefing_LookAt( $chell, entObject );
+	thread cinematicPicardBriefing_LookAt( $scriptmunro, entObject );
+	thread cinematicPicardBriefing_LookAt( $telsia, entObject );
+	thread cinematicPicardBriefing_LookAt( $chang, entObject );
+	thread cinematicPicardBriefing_LookAt( $sydney, entObject );
+	thread cinematicPicardBriefing_LookAt( $kourban, entObject );
+	thread cinematicPicardBriefing_LookAt( $waters, entObject );
+	thread cinematicPicardBriefing_LookAt( $stockman, entObject );
+	thread cinematicPicardBriefing_LookAt( $devaldenebro, entObject );
+	thread cinematicPicardBriefing_LookAt( $katcherside, entObject );
+	thread cinematicPicardBriefing_LookAt( $thompson, entObject );
+	thread cinematicPicardBriefing_LookAt( $law, entObject );
+	thread cinematicPicardBriefing_LookAt( $kleeya, entObject );
+}
+
+//---------------------
+// 	cinematicPicardBriefing_LookAt
+//	entActor - entity, the actor to make look at the passed in entity
+//	entObject - entity, the object to make the actor look at
+//	will make the passed in actor headwatch the passed in entity, with a randomly picked head turn speed
+//------------------------
+void cinematicPicardBriefing_LookAt( entity entActor, entity entObject )
+{
+	globalCoop_main_printTimeAndString("^3"+entActor.getRawTargetname()+"^8 != ^2"+entObject.getRawTargetname());
+//chrissstrahled - because thats the better way!!!
+//avoids actor looking at him self
+	if(entActor.getRawTargetname() != entObject.getRawTargetname())
+	{
+		float fltTurnSpeed;
+		float TURN_SPEED_RANGE = 6;		//will pick a random number between o and 1- this value
+		float TURN_SPEED_BASE = 5;		//the amount that will be added to the randomly picked number
+
+		fltTurnSpeed = randomInt( TURN_SPEED_RANGE ) + TURN_SPEED_BASE;
+		entActor.headwatch( entObject, fltTurnSpeed );
+	}
+}
+
+
+//===================================================================================================================
+// Deck Change Check
+//===================================================================================================================
+//---------------------
+// checkForDeckChangeIGM8	
+//---------------------
+void checkForDeckChangeIGM8()
+{
+	float fRooms,fRoomsCheck,fDeckGoto;
+	string sDialog;
+	
+	fRoomsCheck	= 4;
+	fDeckGoto	= 8;
+	sDialog		= "ent_m1/munro_d8sickb.mp3";
+	
+	fRooms=getFloatVar("game.checkEntMission3RoomsVisited");
+	
+	if(cvar_bool_multiplayer)
+	{
+		fRooms=getCvarInt("coop_igmR");
+	}
+
+	if( fRooms == fRoomsCheck )
+	{
+		setFloatVar("level.deckToChangeToIGM",fDeckGoto);
+		if(cvar_bool_multiplayer)
+		{
+			stuffcmd("seta coop_igmT "+fDeckGoto+"\n");
+		}
+		thread globalCoop_dialog_play($scriptmunro,sDialog, 1, 10000, 0);
+	}
+}
+
+
+

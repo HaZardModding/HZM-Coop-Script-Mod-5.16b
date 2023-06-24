@@ -1,0 +1,108 @@
+TIKI
+setup
+   {
+   scale 3.5
+   lod_scale 2000
+   path models/obj/debris/rock
+   surface material1 shader gibgreen2
+   }
+
+init
+	{
+	server
+	{
+	
+	classname               Projectile
+	setsize                 "-8 -8 -8" "8 8 8"
+	speed                   785
+	hitdamage               15
+	health                  10
+	addvelocity 	      	0 0 105
+	takedamage
+	meansofdeath            slime
+	impactmarkshader        impactmark-chewer
+	impactmarkradius        26
+	impactmarkorientation   random
+	explosionmodel          fx/fx-explosion-projectile-chewer.tik
+	cache 		      	models/fx/fx-explosion-projectile-chewer.tik
+	gravity                 0.325
+	knockback               250
+	life                    2.5
+	proj_notshootable
+
+	surface all +nodraw
+	}
+	client
+	   {
+	   	cache impactmark-chewer.spr
+		cache sound/chars/lurker/lurk_projexplo.wav
+		cache acidspray-chewer.spr
+		cache goomist3.spr
+		cache glowbeam-green-02.spr
+		cache sound/chars/chewer/chew_projloop.wav
+
+
+      	originemitter goocenter
+        	(
+	        spawnrate 25
+	        model acidspray-chewer.spr
+	        color 0.75 1.0 0.75
+		hardlink
+	        life 0.375
+		scale 0.185
+	  	scalerate 1.8
+		angles 0 0 random 360
+		avelocity 0 0 crandom 35
+	        randvel crandom 10 crandom 10 crandom 10
+	        dofade 0.1 0 0
+	        )
+
+      	originemitter goocenter2
+        	(
+	        spawnrate 10
+		model goomist3.spr
+	        color 0.75 1.0 0.75
+		hardlink
+	        life 0.375
+		scale 0.135
+	  	scalerate 1.75
+		angles 0 0 random 360
+		avelocity 0 0 crandom 35
+	        randvel crandom 18 crandom 18 crandom 18
+	        dofade 0.2 0 0
+	        )
+
+	   }
+	}
+
+
+animations
+   {
+   idle swiperock.tan
+	{
+	client
+		{
+		0 loopsound sound/chars/chewer/chew_projloop.wav 1 50
+                exit sound sound/chars/lurker/lurk_projexplo.wav 1 1 150 .7 1.2
+
+		entry swipeon "glowbeam-green-02" tag_p1 tag_p2 0.475
+		exit swipeoff
+
+      		entry originspawn
+        	(
+	        count 6
+	        model acidspray-chewer.spr
+	        color 0.75 1.0 0.75
+		hardlink
+	        life 0.375
+		scale 0.185
+	  	scalerate 1.8
+		angles 0 0 random 360
+		avelocity 0 0 crandom 35
+	        randvel crandom 10 crandom 10 crandom 10
+	        dofade 0.1 0 0
+	        )
+
+		}
+	}
+   }

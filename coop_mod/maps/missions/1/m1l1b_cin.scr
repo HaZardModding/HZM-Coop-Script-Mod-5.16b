@@ -1,0 +1,304 @@
+void cinematicArm_AbductChang_Start();
+void cinematicArm_AbductChang_ArmEnd();
+void cinematicArm_PostAbductChang_Start();
+void cinematicArm_PostAbductChang_ArmEnd();
+void cinematic_chang_find();
+void cinematic_chang_find_skipthread();
+
+void setup_cinematics()
+//---------------------
+{
+	$cin_voyager_chell.ai_off();
+	$cin_voyager_chell.hide();
+	$cin_voyager_chell.notsolid();
+	$cin_voyager_chell.anim ("idle");
+
+	$cin_voyager_munro.ai_off();
+	$cin_voyager_munro.hide();
+	$cin_voyager_munro.notsolid();
+	$cin_voyager_munro.anim ("idle");
+}
+
+
+//---------------------
+// cinematicArm_AbductChang_Start
+// chang gets abducted by the borg, and the imods become useless
+//---------------------
+void cinematicArm_AbductChang_Start()
+{
+	//--- starting cinematic commands
+	globalCoop_cin_start();
+    allowMusicDucking( 0 );
+	
+	//--- hide chell and chang
+	globalCommon_AiDummyHide( $chell );
+	globalCommon_AiDummyHide( $chang );
+	
+//--- start the armature
+	cinematicArm_AbductChang = createCinematic( "M1l1b_chang" );
+	wait( .2 );
+	cinematicArm_AbductChang.setendthread( "cinematicArm_AbductChang_ArmEnd" );
+	cinematicArm_AbductChang.beginCinematic( "M1l1b_chang" );
+	wait( .5 );
+    music ("aux6");
+
+	//--- set the skipthread
+	globalCoop_cin_skipThread( "cinematicArm_AbductChang_ArmEnd" );
+}
+
+
+//---------------------
+// cinematicArm_AbductChang_ArmEnd
+// skipthread for armature cinematic
+//---------------------
+void cinematicArm_AbductChang_ArmEnd()
+{
+//kill the cinematic
+	skipthread( "null" );
+	killthread( "cinematicArm_AbductChang_Start" );	
+	killthread( "m1l1b_chang" );	
+	
+	wait(.1);
+//--- end the armature cinematics, FALSE means don't launch the end thread
+	cinematicArm_AbductChang.endCinematic( FALSE );
+	
+	$m1l1b_chang.endCinematic( FALSE );
+	
+//remove what we do not need
+	globalCoop_level_remove($borg_1_2_hibernate);
+	globalCoop_level_remove($chang);
+	
+	$chell.talkiness( 0 );
+	
+	//fade to black
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+	
+//--- end the armature cinematics, FALSE means don't launch the end thread
+	cinematicArm_AbductChang.endCinematic( FALSE );
+	
+//make sure they are death
+	$borg_1_2_hibernate.origin( '3406 -288 73' );
+	$borg_1_3_hibernate.origin( '3604 -348 73' );
+	wait( .05 );
+	$borg_1_2_hibernate.suicide();
+	$borg_1_3_hibernate.suicide();
+
+//--- position chell and the player
+	if(cvar_bool_multiplayer){//SP
+		$player.origin( '3507 168 73' );
+		$player.turnTowardsEntity( $borg_1_3_hibernate );
+	}
+	$chell.origin( '3397 168 73' );
+	$chell.angles( '0 270 0' );
+	
+	//--- show chell
+	globalCommon_AiActor( $chell );
+	
+	//--- release the cinematic
+	globalCoop_cin_end();
+	
+	globalCoop_player_giveAll("weapons/worldmodel-CompressionRifle.tik",-1);
+	thread globalCoop_player_giveAll("weapons/worldmodel-IMod.tik",0);
+	wait( .5 );
+	
+	globalCoop_player_warpToSpawnOriginAll();
+	
+	if(!cvar_bool_multiplayer){//singleplayer
+		$player.playerviewangles('0 270 0');
+		$player.warp('3468 199 77');
+	}
+	
+    music ("normal");
+	globalCoop_main_camFadeIn(.5);
+
+	//--- turn on green forcefield
+	$forcefield_green3.show();
+	$forcefield_green3.solid();
+	thread activate_borg_1_aggressive();
+	
+	wait( 1.0 );
+//--- break the I MOD
+	$world.addbroken( "i-mod" );
+	$chell.useactorweapon( "Compressionrifle" );
+	
+	globalCoop_dialog_play($chell,"borg01/chell_nomoimods.mp3", 1, 20000, 1); //Our I-Mods! The Borg must be jamming them!
+	
+	globalCoop_player_giveAll("weapons/worldmodel-Tricorder.tik",-1);	
+	wait( 1.0 );
+	$chell.talkiness( .66 );
+	
+	float_changTaken=1;
+	//find chell,find telsia,rescue chang
+	globalCoop_objectives_update("complete",1,0);//State,item,shownow
+	globalCoop_objectives_update("inComplete",2,1);//State,item,shownow
+	thread globalCoop_objectives_update("incomplete",3,1);//State,item,shownow
+}
+
+//---------------------
+// cinematicArm_PostAbductChang_Start
+// after the borg have been defeated, chell states they need to find chang
+//---------------------
+void cinematicArm_PostAbductChang_Start()
+{
+	//--- starting cinematic commands
+	globalCoop_cin_start();
+	
+	//--- fade out
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+	
+	//--- hide chell
+	globalCommon_AiDummyHide( $chell );
+	
+	//--- start the armature
+	cinematicArm_PostAbductChang = createCinematic( "M1l1b_find" );
+	cinematicArm_PostAbductChang.setendthread( "cinematicArm_PostAbductChang_ArmEnd" );
+	wait(.1);
+	cinematicArm_PostAbductChang.beginCinematic( "M1l1b_find" );
+	wait( .5 );
+	
+	//--- fade in
+	globalCoop_main_camFadeIn(.5);
+
+	//--- set the skipthread
+	globalCoop_cin_skipThread( "cinematicArm_PostAbductChang_ArmEnd" );
+}
+
+//---------------------
+// cinematicArm_PostAbductChang_ArmEnd
+// skipthread for armature cinematic
+//---------------------
+void cinematicArm_PostAbductChang_ArmEnd()
+{
+//kill the cinematic
+	skipthread( "null" );
+	cinematicArm_PostAbductChang.endCinematic( FALSE );
+	killthread( "cinematicArm_PostAbductChang_Start" );
+
+//fade to black
+	globalCoop_main_camFadeOut(.5);
+	wait( .6 );
+	
+//--- show chell
+	globalCommon_AiActor( $chell );
+
+//--- release the cinematic
+	globalCoop_cin_end();
+	
+	wait( .25 );
+	globalCoop_main_camFadeIn(.5);
+}
+
+
+//------------------------
+void cinematic_chang_find()
+//------------------------
+{
+	if(float_chang_find_cin){
+		return;
+	}
+	float_chang_find_cin=1;
+	
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.5);
+	wait( .5 );
+
+	forcemusic ( "aux4" );
+	
+//--- spawn cinematic cameras
+	spawn( "Camera", "targetname", "cam1" );
+	spawn( "Camera", "targetname", "cam2" );
+	
+//load camera paths
+	cam.load( "m1l1b_chang_assim01" );
+	cam.load( "m1l1b_chang_assim02" );
+	
+	//original location: 3700.00 -2548.00 -56.00
+	//$munro.model( "char/hazardteam_munro-voyager.tik" );
+	$munro.warpto( "$munro_warptoPos1" );
+	$munro.removeattachedmodel( "tag_rhand" );	
+	$munro.useactorweapon( "none" );
+	$munro.show();
+	wait ( .25 );
+	
+	globalCoop_cin_follow($cam1, $m1l1b_chang_assim01 );
+	globalCoop_cin_cut($cam1);
+	wait ( .05 );
+	globalCoop_cin_cuecamera( $cam1 );
+	
+//--- set the skipthread
+	globalCoop_cin_skipThread( "cinematic_chang_find_skipthread");
+	
+	globalCoop_main_camFadeIn(2);
+		
+	//--- zoom the camera out from chang's position
+	thread globalCineFX_CameraFOVLerp( $cam1, 50, 70, 4.0, "rampupdown" );
+	
+	//--wait for first camera to finish spline
+	wait( 6 );
+	
+	globalCoop_cin_follow($cam2, $m1l1b_chang_assim02 );
+	globalCoop_cin_cut($cam2);
+	wait ( .05 );
+	globalCoop_cin_cuecamera( $cam2 );
+	$munro.walkto( "$munro_runtoPos1", "run" );
+	
+	//--- zoom the camera in
+	thread globalCineFX_CameraFOVLerp( $cam2, 90, 30, 3.0, "rampupdown" );
+	
+	wait( 2.5 );
+		
+	globalCoop_dialog_play($munro,"borg01/munro_seeschang.mp3", 1, 20000, 0); //Chang!!
+   
+	globalCoop_cin_cuecamera( $cam1 );
+	wait ( .05 );
+	
+	//--- zoom the camera onto chang
+	thread globalCineFX_CameraFOVLerp( $cam1, 70, 50, 4.0, "rampupdown" );
+	
+	globalCoop_dialog_play($chang_assimilate,"borg01/chang_leaveme.mp3", 1, 20000, 0);  //Leave me, save Voyager.
+
+    globalCoop_cin_cuecamera( $cam2 );
+	wait ( .05 );
+	
+	globalCoop_dialog_play($munro,"borg01/munro_negative.mp3", 1, 20000, 0); //Negative. We go home as a team. I'll have this forcefield down in a second.
+    
+    thread cinematic_chang_find_skipthread();
+    
+}
+
+//------------------------
+void cinematic_chang_find_skipthread()
+//------------------------
+{
+	killthread( "cinematic_chang_find" );
+	globalCoop_main_camFadeOut(.1);
+	wait(.1);
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.origin($munro.getOrigin());
+		$player.playerviewangles($munro.getAngles());
+	}
+
+	$chang.stopdialog();
+	$chell.stopdialog();
+	$munro.stopdialog();
+	$telsia.stopdialog();
+	$weaponClip01.remove();
+	$munro.hide();
+	$munro.warp('3700.00 -2548.00 -56.00');
+	
+	globalCoop_cin_end();
+	
+	$chang_assimilate.updatebosshealth( 1, 1 );
+	$chang_assimilate.health( 200 );
+	$chang_assimilate.maxhealth( 201 );
+	$chang_assimilate.maxbosshealth( 200 );
+	$chang_assimilate.immortal ( 1 );
+	
+	globalCoop_main_camFadeIn(1);
+	
+	thread changLifeCounter();
+}
+

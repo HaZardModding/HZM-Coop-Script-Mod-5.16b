@@ -1,0 +1,203 @@
+//-----------------------------------------------
+// Cinematic Name: c:\projects\ef2\ef2\base\cins\m11l1a_chell-temp.cin
+// Export Version: 1
+// Export Date:    Fri May 16 21:49:54 2003
+//-----------------------------------------------
+
+Origins
+{
+    Origin
+    {
+          name          "m11l1a_chell"
+          origin         0.000000 0.000000 0.000000
+          yaw            0.000000
+    }
+}
+
+
+Actors
+{
+    Actor
+    {
+        name          "armChell"
+        tiki          "char/hazardteam_chell.tik"
+        anim          "cin-m11l1a_chell_Chell"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         -6695.176758 -4008.207275 543.518311
+        yaw            -67.512601
+    }
+    Actor
+    {
+        name          "armKorban"
+        tiki          "char/hazardteam_kourban.tik"
+        anim          "cin-m11l1a_chell_Korban"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         -6645.122070 -4008.483398 536.878357
+        yaw            85.000000
+    }
+    Actor
+    {
+        name          "armMunro"
+        tiki          "char/hazardteam_munro.tik"
+        anim          "cin-m11l1a_chell_Munro"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         -6730.318848 -3979.432373 541.300903
+        yaw            -25.501152
+    }
+    Actor
+    {
+        name          "armRom"
+        tiki          "char/cin-romulan-rebel-sniper-m2.tik"
+        anim          "cin-m11l1a_chell_Rom"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         -6350.939941 -3378.368896 169.424866
+        yaw            -78.000000
+    }
+}
+
+
+Cameras
+{
+    Camera
+    {
+        name         "cam0-m11l1a_chell"
+        camfile      "cam0-m11l1a_chell"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+    }
+    Camera
+    {
+        name         "cam1-m11l1a_chell"
+        camfile      "cam1-m11l1a_chell"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+    }
+    Cut
+    {
+        toCamera     "cam0-m11l1a_chell"
+        frame         0
+        fadeout       0
+        fadein        20
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam1-m11l1a_chell"
+        frame         82
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam0-m11l1a_chell"
+        frame         171
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam1-m11l1a_chell"
+        frame         270
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam0-m11l1a_chell"
+        frame         344
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam1-m11l1a_chell"
+        frame         450
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam0-m11l1a_chell"
+        frame         477
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam1-m11l1a_chell"
+        frame         506
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam0-m11l1a_chell"
+        frame         570
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam1-m11l1a_chell"
+        frame         623
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam0-m11l1a_chell"
+        frame         707
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam1-m11l1a_chell"
+        frame         744
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+}

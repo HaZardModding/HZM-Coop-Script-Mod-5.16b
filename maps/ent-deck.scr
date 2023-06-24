@@ -1,0 +1,240 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	      ent-deck7a - Enterprise Deck 7 - Hazard Team Areas, Shuttle Bay
+//  Script By:    Kenny T
+//  Geometry By:  Kenny T
+//  Created on:   07/10/2002
+//	Last Edited:  07/10/2002 - LW
+//-----------------------------------------------------------------
+void main();
+void coop_triggerHandle(entity eTrigger,string sMapToVote);
+void onToMission1Wait();
+void onToMission2Wait();
+void onToMission3Wait();
+void onToMission4Wait();
+//void onToMission5Wait();
+void onToMission6Wait();
+void onToMission7Wait();
+void onToMission8Wait();
+void onToMission1Go();
+void onToMission2Go();
+void onToMission3Go();
+void onToMission4Go();
+//void onToMission5Go();
+void onToMission6Go();
+void onToMission7Go();
+void onToMission8Go();
+
+
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/main.scr"
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+void main()
+{
+//DEFINIE SPAWNS
+	coop_vector_spawnOrigin1 			= '0 1 0';
+	coop_vector_spawnOrigin2 			= '0 50 0';
+	coop_vector_spawnOrigin3 			= '0 100 0';
+	coop_vector_spawnOrigin4 			= '0 150 0';
+	coop_vector_spawnOrigin5 			= '0 -50 0';
+	coop_vector_spawnOrigin6 			= '0 -100 0';
+	coop_vector_spawnOrigin7 			= '0 -150 0';
+	coop_vector_spawnOrigin7 			= '0 -1 0';
+	coop_string_weapon1 = "models/weapons/worldmodel-Tricorder-stx.tik";
+	coop_string_weapon2 = "models/weapons/worldmodel-Phaser.tik";		
+ 	thread onToMission1Wait();
+	thread onToMission2Wait();
+	thread onToMission3Wait();
+	thread onToMission4Wait();
+	//thread onToMission5Wait();
+	thread onToMission6Wait();
+	thread onToMission7Wait();
+	thread onToMission8Wait();
+
+//Start the Co-Op Script
+	globalCoop_main();
+	if(!cvar_bool_multiplayer){//Singleplayer
+		noIntermission();
+	}
+}
+
+void coop_triggerHandle(entity eTrigger,string sMapToVote)
+//HANDLE THE TRIGGER
+{
+	if(doesEntityExist(eTrigger)){
+		eTrigger.nodamage();
+		entity ePlayer;
+		ePlayer = eTrigger.getLastActivatingEntity();
+		if(doesEntityExist(ePlayer)){
+			ePlayer.freeInventory();
+			centerPrint("map "+sMapToVote);
+			wait(3);
+			if(cvar_bool_multiplayer)
+			{
+				ePlayer.callvote("map",sMapToVote);
+			}
+			else
+			{
+				//stuffCMD("map "+sMapToVote+"\n");
+				//thread globalCoop_mission_completed(sMapToVote);
+				
+				//--- end the level
+				spawn ( "trigger_changelevel", "targetname", "trigger_endlevel", "map", ""+sMapToVote );
+				wait ( .1 );		
+				trigger ( "$trigger_endlevel" );
+			}
+		}
+	}
+}
+
+void onToMission1Wait()
+{
+	$IGM1.ondamage( "onToMission1Go" );
+	pause();
+}
+void onToMission1Go()
+{
+	if(cvar_bool_multiplayer)
+	{
+		stuffCMD("seta coop_lcT 0\n");
+		stuffCMD("seta coop_lcK 0\n");
+		globalCoop_main_waitAFrame();
+		stuffCMD("seta coop_igm 1\n");
+		stuffCMD("seta coop_igmH 0\n");
+		globalCoop_main_waitAFrame();
+		stuffCMD("seta coop_igmR 0\n");
+		stuffCMD("seta coop_igmT 0\n");
+		globalCoop_main_waitAFrame();
+		stuffCMD("seta coop_igmTr 0\n");
+	}
+	setfloatvar("game.globalMissionEnterprise",1);
+	setfloatvar("game.globalNoneChoice",0);
+	setfloatvar("game.globalTelsiaChoice",0);
+	setfloatvar("game.globalKleeyaChoice",0);
+	coop_triggerHandle(getCurrentEntity(),"ent-deck8");
+	thread onToMission1Wait();
+}
+
+void onToMission2Wait()
+{
+	$IGM2.ondamage( "onToMission2Go" );
+	pause();
+}
+void onToMission2Go()
+{
+	if(cvar_bool_multiplayer){
+		stuffCMD("seta coop_igm 2\n");
+	}
+	setfloatvar("game.globalMissionEnterprise",2);
+	coop_triggerHandle(getCurrentEntity(),"ent-deck1_bridge");
+	thread onToMission1Wait();
+}
+
+void onToMission3Wait()
+{
+	$IGM3.ondamage( "onToMission3Go" );
+	pause();
+}
+void onToMission3Go()
+{
+	if(cvar_bool_multiplayer){
+		stuffCMD("seta coop_igm 3\n");
+	}
+	setfloatvar("game.globalMissionEnterprise",3);
+	coop_triggerHandle(getCurrentEntity(),"ent-deck8");
+	thread onToMission1Wait();
+}
+
+void onToMission4Wait()
+{
+	$IGM4.ondamage( "onToMission4Go" );
+	pause();
+}
+void onToMission4Go()
+{
+	if(cvar_bool_multiplayer){
+		stuffCMD("seta coop_igm 4\n");
+		stuffCMD("coop_igmR 0\n");
+	}
+	setFloatVar("game.checkEntMission4RoomsVisited",0);
+	setfloatvar("game.globalMissionEnterprise",4);
+	coop_triggerHandle(getCurrentEntity(),"ent-deck1_bridge");
+	thread onToMission1Wait();
+}
+
+/*
+m7l3-attrexian_colony->Does not exist
+void onToMission5Wait()
+{
+	$IGM5.ondamage( "onToMission5Go" );
+	pause();
+}
+void onToMission5Go()
+{
+	coop_triggerHandle(getCurrentEntity());
+	globalCoop_level_setFloatVarInSpAndCvarInMP( "game.globalMissionEnterprise", 5 );
+	coop_triggerHandle(getCurrentEntity(),);
+}
+*/
+
+void onToMission6Wait()
+{
+	$IGM6.ondamage( "onToMission6Go" );
+	pause();
+}
+void onToMission6Go()
+{
+	if(cvar_bool_multiplayer){
+		stuffCMD("seta coop_igm 6\n");
+		stuffCMD("coop_igmR 0\n");
+	}
+	setfloatvar("game.globalMissionEnterprise",6);
+	
+
+// if(getCvar("username") == "Chrissstrahl")
+// {
+// stuffCMD("seta coop_igm 6\n");//force IGM nummber
+// stuffCMD("seta coop_igmH 1\n");//spawn inside holodeck
+// stuffCMD("seta coop_igmR 5\n");//rooms visited
+// }
+	
+	coop_triggerHandle(getCurrentEntity(),"ent-deck8");
+	thread onToMission1Wait();
+}
+
+void onToMission7Wait()
+{
+	$IGM7.ondamage( "onToMission7Go" );
+	pause();
+}
+void onToMission7Go()
+{
+	if(cvar_bool_multiplayer){
+		stuffCMD("seta coop_igm 7\n");
+	}
+	setfloatvar("game.globalMissionEnterprise",7);
+	coop_triggerHandle(getCurrentEntity(),"ent-deck1_bridge");
+	thread onToMission1Wait();
+}
+
+void onToMission8Wait()
+{
+	$IGM8.ondamage( "onToMission8Go" );
+	pause();
+}
+void onToMission8Go()
+{
+	if(cvar_bool_multiplayer){
+		stuffCMD("seta coop_igm 8\n");
+	}
+	setfloatvar("game.globalMissionEnterprise",8);
+	coop_triggerHandle(getCurrentEntity(),"ent-deck8");
+	thread onToMission1Wait();
+}
+

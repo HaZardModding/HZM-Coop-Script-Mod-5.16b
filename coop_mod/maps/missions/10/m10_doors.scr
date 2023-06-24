@@ -1,0 +1,109 @@
+void lockDoor ( string doorname )
+{
+	entity door, red, green, openTrigger;
+
+	door		= getentity ( ""+doorname);
+	red			= getentity ( doorname + "Red" );
+	green		= getentity ( doorname + "Green" );
+	openTrigger	= getentity ( doorname + "Trigger" );
+	
+	wait(.2);
+
+	while(doesEntityExist(door))
+	{
+		door.lock();
+		door = getNextEntity ( door );
+	}
+	
+	$world.light_lightstyle ( doorname + "RedLight" , "zzzzzzzzzzzzzzzzzzzzzzzzzyzzzzzzzzzzzzzzz" , 0 );
+	$world.light_lightstyle ( doorname + "GreenLight" , "aaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaa" , 0 );
+
+	if ( doesEntityExist ( red ))
+		red.show ();
+	else
+		print ( "Could not SHOW: " + doorname + "Red\n" );
+
+	if ( doesEntityExist ( green ))
+		green.hide ();
+	else
+		print ( "Could not HIDE: " + doorname + "Green\n" );
+
+}
+
+void unlockDoor ( string doorname )
+{
+	entity door, red, green, openTrigger;
+
+	door		= getentity (""+doorname);
+	red			= getentity ( doorname + "Red" );
+	green		= getentity ( doorname + "Green" );
+	openTrigger	= getentity ( doorname + "Trigger" );
+
+	while(doesEntityExist(door))
+	{
+		door.unlock();
+		door = getNextEntity ( door );
+	}
+
+/* 	while ( doesEntityExist ( openTrigger ))
+	{
+		openTrigger.target ( openTrigger.getstringvar ( "lockedTarget" ));
+		openTrigger.thread ( "" );
+		openTrigger = getNextEntity ( openTrigger );
+	} */
+
+
+	$world.light_lightstyle ( doorname + "RedLight" , "aaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaa" , 0 );
+	$world.light_lightstyle ( doorname + "GreenLight" , "zzzzzzzzzzzzzzzzzzzzzzzzzyzzzzzzzzzzzzzzz" , 0 );
+
+	if ( doesEntityExist ( red ))
+		red.hide ();
+	else
+		print ( "Could not unlock: " + doorname + "Red\n" );
+
+	if ( doesEntityExist ( green ))
+		green.show ();
+	else
+		print ( "Could not unlock: " + doorname + "Green\n" );
+}
+
+void showRed ( string basename , string visibleLightStyle , float repeat )
+{
+	entity red, green;
+	red = getentity ( basename + "Red" );
+	green = getentity ( basename + "Green" );
+
+	$world.light_lightstyle ( basename + "RedLight" , visibleLightStyle , repeat );
+	$world.light_lightstyle ( basename + "GreenLight" , "aaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaa" , 0 );
+
+	if ( doesEntityExist ( red ))
+		red.show ();
+	else
+		print ( "Could not turn to red: " + basename + "Red\n" );
+
+	if ( doesEntityExist ( green ))
+		green.hide ();
+	else
+		print ( "Could not turn off green: " + basename + "Green\n" );
+}
+
+void showGreen ( string basename , string visibleLightStyle , float repeat )
+{
+	entity red, green;
+	red = getentity ( basename + "Red" );
+	green = getentity ( basename + "Green" );
+
+	$world.light_lightstyle ( basename + "GreenLight" , visibleLightStyle , repeat );
+	$world.light_lightstyle ( basename + "RedLight" , "aaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaa" , 0 );
+
+	if ( doesEntityExist ( green ))
+		red.hide ();
+	else
+		print ( "Could not turn off green: " + basename + "Green\n" );
+
+	if ( doesEntityExist ( red ))
+		green.show ();
+	else
+		print ( "Could not turn to red: " + basename + "Red\n" );
+
+}

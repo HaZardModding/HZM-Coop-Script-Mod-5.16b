@@ -1,0 +1,956 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	  Borg 03 (boss level)
+//  Script By:    Jerry 'Powzer' Keehan, Benson 'elmagoo' Russell, Adam 'Senn' Bellefeuil
+//  Geometry By:  Jerry 'Powzer' Keehan, Adam 'Senn' Bellefeuil
+//  Created on:   01/10/2002
+//
+//-----------------------------------------------------------------
+
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  DEFINE SCRIPT
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+void main();
+// setup world
+void setup_door_boss();
+void setup_boss_nodes();
+void setup_world();
+void setupPlayer();
+void setupAI();
+
+// setup AI
+void setup_boss();
+
+// HEALTH AND AMMO CONSOLES
+void health_station1_wait();
+void health_station1_use();
+void ammo_station1_wait();
+void ammo_station1_use();
+
+// FORCEFIELDS
+void ForceFieldDown1();
+void ForceFieldDown2();
+void ForceFieldDown3();
+void munroDialog_01();
+
+
+//NODE STUFF
+void node1_wait();
+void node2_wait();
+void node3_wait();
+void node1_hit();
+void node2_hit();
+void node3_hit();
+void node1_transport_up();
+void node1_transport_down();
+void node2_transport_up();
+void node2_transport_down();
+void node3_transport_up();
+void node3_transport_down();
+void check_nodesactive();
+
+//PLAYER DEATH STUFF
+void deathPlayer();
+//void coop_borgbossUpdatheealth();
+void coop_endLevel();
+
+void coop_spawnDrones();
+void coop_spawnDronesFinale();
+void coop_removePath(entity ePath);
+
+//-----------------------------------------------------------
+//-----------------------------------------------------------
+//--- variables
+
+//--- parameter constants
+float CINEMATIC_STAGE_CHANGE_BOSS_DISTANCE = 288;
+float CINEMATIC_BOSS_SCALE = 1.4;
+float BOSS_SCALE = 1;
+
+
+// Node Status
+float node1_active = 1;
+float node2_active = 1;
+float node3_active = 1;
+float all_inactive = 0;
+
+// for stage cinematics
+float fltBossStage = 1;					//what stage the boss is on
+float munroDialog_01_finished = 0;		//??
+vector vecBossPosition_PreCinematic;	//to keep the pre-cinematic position of the boss
+
+float boolAlreadyRunning = 0;
+float boolAlreadyRunning_cinematicStageChange1To2 = 0;
+float boolAlreadyRunning_cinematicStageChange2To3 = 0;
+float boolAlreadyRunning_cinematicStageChange3To4 = 0;
+float boolAlreadyRunning_cinematicBossDeath = 0;
+//float coop_borgbossUpdatheealthAlreadyRunning = 0;
+float coop_droneToTakeOut;
+
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  INCLUDES
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/global/global_common.scr"
+#include "coop_mod/maps/optional_modules/puzzles_advanced.scr"
+#include "coop_mod/maps/optional_modules/forcefields.scr"
+#include "coop_mod/maps/missions/1/forcefields.scr"
+#include "coop_mod/maps/global/global_tricorderBase.scr"
+#include "maps/global_scripts/global_math.scr"
+#include "maps/global_scripts/global_debugutils.scr"
+#include "maps/global_scripts/global_cinematicFX.scr"
+#include "maps/global_scripts/global_tricordermod.scr"
+#include "maps/m1/m1_forcefields.scr"
+#include "maps/m1/m1_deathCinematic.scr"
+#include "coop_mod/maps/missions/1/m1l3_cin.scr"
+
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  MAIN THREAD
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+void s4()
+{
+	$borgboss.health(300);
+	$borgboss.gotostage(4);
+}
+
+//---------------------
+void main()
+{
+	globalCoop_server_precacheSingleplayer();
+//--- set the soundtrack
+	soundtrack( "music/m1l3-borg_boss.mus" );
+	globalCoop_main_camFadeOut(.1);
+	
+	$cinematic_munro.ai_off();
+	$cinematic_munro.forcealpha(1);
+	$cinematic_munro.alpha(0);
+	$cinematic_munro.hide();
+	
+	if(getCvarInt("g_gametype") != 0){
+		globalCoop_level_remove($munro_assimilate);
+	}
+//--- hide the script model boss for the end cinematic
+	$borgBoss_Dead.hide();
+	$borgBoss_Dead.notsolid();
+	$borgBoss_Dead.flags( "+notarget" );	
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_string_nextMapToCheck			= "m2l0-sfa";//set the map we gona load next while we are in testmode
+//Show Mission Sucess Hud when this mission ends ?
+	coop_bool_showMissionSucessHud = 1;
+//Set spawnangles for this level
+	coop_float_spawnAngle0 				= 90;
+	coop_vector_spawnOrigin8 			= '-25 -630 0';
+	coop_vector_spawnOrigin7 			= '45  -630 0';
+	coop_vector_spawnOrigin6 			= '115 -630 0';
+	coop_vector_spawnOrigin5 			= '-25 -550 0';
+	coop_vector_spawnOrigin4 			= '45  -550 0';
+	coop_vector_spawnOrigin3 			= '115 -550 0';
+	coop_vector_spawnOrigin2 			= '-25 -470 0';
+	coop_vector_spawnOrigin1 			= '45  -470 0';
+//Definie Objective
+	coop_string_objectiveItem1			= "DestroyBorgBoss";
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+//Set viewModes
+	$world.clearAvailableViewModes();
+	$world.addAvailableViewMode( "structuralintegrity" );
+	$world.entity_fade_dist( 8000 );
+	$world.farplane ( 17000 );
+	$world.farplane_cull( 1 );
+	$world.farplane_color ( '0 .26 .13' );//.47 .69 .13 .64 .95 .14
+	
+	waitForPlayer();
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.model("models/char/munro_voyager.tik");
+		freezePlayer();
+	}
+
+	//--- run setup threads
+	setupAI();
+	setup_door_boss();
+	setup_boss_nodes();
+	setup_boss();
+	setup_world();
+
+	//---- put nodes in wait state
+	thread node1_wait();
+	thread node2_wait();
+	thread node3_wait();
+	
+	//--- setup the player
+	
+	setupPlayer();
+	globalCoop_main_waitForWarmupTime();
+	thread cinematicIntro();
+}
+
+
+void coop_removePath(entity ePath)
+{
+	entity eRemove;
+	
+	while(doesEntityExist(ePath)){
+		eRemove = ePath;
+		ePath = ePath.gettargetentity();
+		globalCoop_level_remove(eRemove);
+		globalCoop_main_waitAFrame();
+	}
+}
+
+
+void coop_spawnDronesFinale()
+{
+	if(cvar_bool_multiplayer){
+		while(boolAlreadyRunning_cinematicBossDeath != TRUE)
+		{
+			wait(3);
+			if(!boolAlreadyRunning){//wait for cinematic to end
+				thread coop_spawnDrones();
+			}
+		}
+	}
+}
+
+void coop_spawnDrones()
+{
+	if(cvar_bool_multiplayer){
+		float	fDrone,
+				fDronesMax,
+				fRandomLocation,
+				fDronesActive,
+				fTargetname = -1;
+		entity	eDrone,
+				eDronez;
+				
+		//have as many drones as players
+		fDronesMax=globalCoop_return_integerPlayersQuantity(0);
+		//but min 2
+		if(fDronesMax<2){
+			fDronesMax=2;
+		}
+		
+		for(fDrone=0;fDrone<=fDronesMax;fDrone++){
+			eDronez = getEntity("borschDrohne"+fDrone);
+			if(doesEntityExist(eDronez)){
+				fDronesActive++;
+				if(fDronesActive >= fDronesMax){
+					return;
+				}
+			}
+			else{
+				if(fTargetname == -1){
+					fTargetname = fDrone;
+				}
+			}
+		}
+		
+		vector vSpawn;
+		fRandomLocation = randomInt(7);
+		if(fRandomLocation == $world.getFloatVar("coop_lastDroneSpawnedSpot")){
+			fRandomLocation++;
+		}
+		if(fRandomLocation > 7){
+			fRandomLocation=0;
+		}
+		$world.setFloatVar("coop_lastDroneSpawnedSpot",fRandomLocation);
+		
+		if(fRandomLocation == 0){
+			vSpawn = '-376 48 0';
+		}else if(fRandomLocation == 1){
+			vSpawn = '-528 216 0';
+		}else if(fRandomLocation == 2){
+			vSpawn = '384 872 0';
+		}else if(fRandomLocation == 3){
+			vSpawn = '512 760 0';
+		}else if(fRandomLocation == 4){
+			vSpawn = '448 0 0';
+		}else if(fRandomLocation == 5){
+			vSpawn = '584 128 0';
+		}else if(fRandomLocation == 6){
+			vSpawn = '-336 888 0';
+		}else if(fRandomLocation == 7){
+			vSpawn = '-472 776 0';
+		}
+		
+		string sDroneModel;
+		fDronesActive = randomInt(1);
+		fRandomLocation = randomInt(4);
+		fRandomLocation++;
+		if(fDronesActive == 1){
+			if(fRandomLocation == 1){
+				sDroneModel = "char/borg_drone-male.tik";
+			}else{
+				sDroneModel = "char/borg_drone-male"+fRandomLocation+".tik";
+			}
+		}
+		else{
+			if(fRandomLocation == 1){
+				sDroneModel = "char/borg_drone-female.tik";
+			}else{
+				sDroneModel = "char/borg_drone-female"+fRandomLocation+".tik";
+			}
+		}
+		//spawn em at tuvok, let him have guests
+		eDrone = spawn("actor","model",sDroneModel,"origin",vectorToString('386.00 -1026.00 388.00'),"ai_off","1","talkiness","0");
+		globalCoop_main_waitAFrame();
+		if(doesEntityExist(eDrone)){
+			eDrone.notsolid();
+			eDrone.forcealpha(1);
+			eDrone.alpha(0);
+			eDrone.targetname("borschDrohne"+fTargetname);
+			eDrone.turntowardsEntity($arenaCenter);
+			thread globalCoop_actor_healthMultiplicatePerPlayer(eDrone);
+			eDrone.origin(vSpawn);
+			eDrone.dropToFloor();
+			wait(.1);
+			fRandomLocation=1;
+			fDronesActive=0;
+			while(fRandomLocation != 0){
+				fDronesActive++;
+				fRandomLocation=0;
+//CHEK IS DRONE INSIDE A DUDE
+				if(globalCoop_check_isEntityInsideOfPlayer(eDrone,20)){
+					fRandomLocation++;
+				}
+//CHEK IS DRONE INSIDE THE BOOOOOOOOOOOOOOSS
+				if(fRandomLocation == 0){
+					if(globalCoop_check_isEntityInsideOfEntity(eDrone,$borgboss,20)){
+						fRandomLocation++;
+					}
+//CHEK IF DROEN IS INSIDE OF OTHER DRONEZ
+					for(fDrone=0;fDrone<fDronesMax;fDrone++){
+						eDronez = getEntity("borschDrohne"+fDrone);
+						if(fTargetname != fDrone){
+							if(doesEntityExist(eDronez)){
+								if(globalCoop_check_isBoundingBox2InsideOfBoundingBox1(
+									eDronez.getOrigin(),//ORIGIN BBOX1
+									'-44 -44 -100',//e.getMins()
+									'44 44 100',//e.getMaxs()
+									eDrone.getOrigin(),//ORIGIN BBOX2
+									'-44 -44 -100',//e.getMins()
+									'44 44 100',//e.getMaxs()
+									20)													)
+								{
+									fRandomLocation++;
+								}	
+							}
+						}
+					}
+				}
+				wait(.2);
+			//remove after a while and allow other drownes to be spawned
+				if(fDronesActive >= 100){
+					globalCoop_level_remove(eDrone);
+					return;
+				}
+			}
+			eDrone.solid();
+			eDrone.displayEffect("TransportIn","Borg");
+			eDrone.aggressive(1);
+			eDrone.ai_on();
+			eDrone.talkiness(0);
+		}
+	}
+}
+
+
+//---------------------
+//	setupAI
+//	setup the AI
+//---------------------
+void setupAI()
+{
+	$munro.flags( "+notarget" );
+	$munro.displayEffect( "FadeOut", "Simple" );
+	globalCommon_AiDummy( $munro, "" );
+	globalCommon_AiDummy( $tuvok, "" );
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$munro_assimilate.ai_off();
+	}
+	else{
+		$borgboss.settendency("scriptcontrolled",1);//settendency ( "scriptcontrolled" , 0 )
+		$borgboss.killthread("cinematicBossDeath");
+	}
+}
+
+
+//---------------------
+void setup_world()
+//---------------------
+{
+	$bluefield.hide();
+	$bluefield.notsolid();
+	$steamspray01.hide();// Steam Spray for Borg Boss appearance
+
+	$node1_steamspray.hide();// Steam bursts for node
+	$node2_steamspray.hide();
+	$node3_steamspray.hide();
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		//--- borg boss distribution nodes
+		$bluefield.notsolid();
+		$node1Puzzle.puzzleobject_itemToUse ( "Tricorder" );
+		$node1Puzzle.puzzleobject_solvedThread( "ForceFieldDown1" );
+		$node1Puzzle.puzzleobject_timeToUse ( 3 );
+		$node2Puzzle.puzzleobject_itemToUse ( "Tricorder" );
+		$node2Puzzle.puzzleobject_solvedThread( "ForceFieldDown2" );
+		$node2Puzzle.puzzleobject_timeToUse ( 3 );
+		$node3Puzzle.puzzleobject_itemToUse ( "Tricorder" );
+		$node3Puzzle.puzzleobject_solvedThread( "ForceFieldDown3" );
+		$node3Puzzle.puzzleobject_timeToUse ( 3 );
+	}
+	else{
+		thread globalCoop_puzzle_replace($node1Puzzle,"ForceFieldDown1",4);
+		thread globalCoop_puzzle_replace($node2Puzzle,"ForceFieldDown2",4);
+		globalCoop_puzzle_replace($node3Puzzle,"ForceFieldDown3",4);
+		
+		$node1Puzzle.setFloatVar("coop_puzzle_doNotDisable",1);
+		$node2Puzzle.setFloatVar("coop_puzzle_doNotDisable",1);
+		$node3Puzzle.setFloatVar("coop_puzzle_doNotDisable",1);
+		
+		$node1Puzzle.setFloatVar("coop_puzzle_resetState",1);
+		$node2Puzzle.setFloatVar("coop_puzzle_resetState",1);
+		$node3Puzzle.setFloatVar("coop_puzzle_resetState",1);
+	//spawn Class Selection
+		thread globalCoop_class_setup("Medic",'-51 -721 30');
+		thread globalCoop_class_setup("HeavyWeapons",'50 -721 30');
+		thread globalCoop_class_setup("Technician",'130 -721 30');
+	}
+}
+
+
+//---------------------
+//	setupPlayer
+//	setup the players weapons and load objectives
+//---------------------
+void setupPlayer()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		waitForPlayer();
+		//--- load the objectives
+		$player.loadobjectives( "m1l3-borg_boss" );
+	}
+
+	//--- loadout the player
+	//globalLoadout_AssignWeapons ( "m1l3_borg_boss" );
+	
+
+	//--- assign the death function for the player
+	playerDeathThread( "deathPlayer" );
+}
+
+//---------------------
+void setup_door_boss()
+//---------------------
+{
+	//--- bind the latches
+	$door_boss_westlock_westlatch_south.bind( $door_boss_main_south );
+	$door_boss_westlock_eastlatch_south.bind( $door_boss_main_south );
+	$door_boss_eastlock_westlatch_south.bind( $door_boss_main_south );
+	$door_boss_eastlock_eastlatch_south.bind( $door_boss_main_south );
+
+	$door_boss_westlock_westlatch_north.bind( $door_boss_main_north );
+	$door_boss_westlock_eastlatch_north.bind( $door_boss_main_north );
+	$door_boss_eastlock_westlatch_north.bind( $door_boss_main_north );
+	$door_boss_eastlock_eastlatch_north.bind( $door_boss_main_north );
+
+	//--- bind the locks
+	$door_boss_westlock_south.bind( $door_boss_main_south );
+	$door_boss_eastlock_south.bind( $door_boss_main_south );
+
+	$door_boss_westlock_north.bind( $door_boss_main_north );
+	$door_boss_eastlock_north.bind( $door_boss_main_north );
+}
+
+//---------------------
+void setup_boss_nodes()
+//---------------------
+{
+	//--- bind the nodes to their lifts
+	$node1.bind ( $node1_transport);
+	$node2.bind ( $node2_transport);
+	$node3.bind ( $node3_transport);
+
+	$node1_damaged.bind ( $node1_transport);
+	$node2_damaged.bind ( $node2_transport);
+	$node3_damaged.bind ( $node3_transport);
+
+	//--- hide and non-solidify the damage nodes
+	$node1_damaged.hide ();
+	$node2_damaged.hide ();
+	$node3_damaged.hide ();
+
+	$node1_damaged.notsolid ();
+	$node2_damaged.notsolid ();
+	$node3_damaged.notsolid ();
+}
+
+//---------------------
+void setup_boss()
+//---------------------
+{
+	//--- disable the borg bosses AI
+	$borgboss.ai_off();
+
+	//--- set the killthread on the boss to end the level
+	$borgboss.killthread ( "cinematicBossDeath" );
+}
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//  GAME OBJECT THREADS
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+
+//----------------------------------------------
+// HEALTH AND AMMO STATIONS -------------------------------------------------------- TEMP
+//----------------------------------------------
+//---------------------
+void health_station1_wait()
+//---------------------
+	{
+	$health_station1.anim ( "activate_idle" );
+	$health_station1.solid();
+	$health_station1.onuse ( "health_station1_use");
+	pause();
+	}
+
+//---------------------
+void health_station1_use()
+//---------------------
+	{
+	//$health_station1.anim ( "use" );
+	$health_station1.nouse();
+	$player.addhealth ( 50, 100 );
+	wait ( 2 );
+	thread health_station1_wait();
+	}
+
+
+//---------------------
+void ammo_station1_wait()
+//---------------------
+	{
+	$ammo_station1.anim ( "activate_idle" );
+	$ammo_station1.solid();
+	$ammo_station1.onuse ( "ammo_station1_use");
+	pause();
+	}
+
+//---------------------
+void ammo_station1_use()
+//---------------------
+	{
+	//$ammo_station1.anim ( "use" );
+	$ammo_station1.nouse();
+	$player.ammo ( "Plasma", 50, 100 );
+	wait ( 2 );
+	thread ammo_station1_wait();
+	}
+
+
+/*
+//---------------------
+void lift_thread1()
+//---------------------
+{
+        $lift_trigger1.nottriggerable();
+        wait( .5 );
+        $lift1.time( 1 );
+        $lift1.playsound( "sound/environment/machine/lift2.wav", 8, 2 , 150 );
+        $lift1.moveUp( 506 );
+        waitfor( $lift1 );
+        wait ( 2 );
+        $lift1.time( 1 );
+        $lift1.playsound( "sound/environment/machine/lift2a.wav", 8, 2 , 150 );
+        $lift1.moveDown( 506 );
+        waitfor( $lift1 );
+        $lift_trigger1.triggerable();
+}
+
+//---------------------
+void lift_thread2()
+//---------------------
+{
+        $lift_trigger2.nottriggerable();
+        wait( .5 );
+        $lift2.time( 1 );
+        $lift2.playsound( "sound/environment/machine/lift2.wav", 8, 2 , 150 );
+        $lift2.moveUp( 506 );
+        waitfor( $lift2 );
+        wait ( 2 );
+        $lift2.time( 1 );
+        $lift2.playsound( "sound/environment/machine/lift2a.wav", 8, 2 , 150 );
+        $lift2.moveDown( 506 );
+        waitfor( $lift2 );
+        $lift_trigger2.triggerable();
+}
+
+//---------------------
+void lift_thread3()
+//---------------------
+{
+        $lift_trigger3.nottriggerable();
+        wait( .5 );
+        $lift3.time( 1 );
+        $lift3.playsound( "sound/environment/machine/lift2.wav", 8, 2 , 150 );
+        $lift3.moveUp( 506 );
+        waitfor( $lift3 );
+        wait ( 2 );
+        $lift3.time( 1 );
+        $lift3.playsound( "sound/environment/machine/lift2a.wav", 8, 2 , 150 );
+        $lift3.moveDown( 506 );
+        waitfor( $lift3 );
+        $lift_trigger3.triggerable();
+}
+*/
+
+//----------------------------------------------
+// FORCEFIELD CONTROL
+//----------------------------------------------
+
+void ForceFieldDown1()
+{
+	shutdownForcefield( $forcefield1 );
+
+	//--- check if the dialog's been said about the nodes
+	if( munroDialog_01_finished == 0 ){
+			thread munroDialog_01();
+	}
+	
+	wait( 5 );
+	powerUpForcefield( $forcefield1 );
+	$node1Puzzle.puzzleObject_reset();
+}
+
+void ForceFieldDown2()
+{
+	shutdownForcefield( $forcefield2 );
+
+	//--- check if the dialog's been said about the nodes
+	if( munroDialog_01_finished == 0 )
+		{
+			thread munroDialog_01();
+		}
+	wait( 5 );
+	powerUpForcefield( $forcefield2 );
+	$node2Puzzle.puzzleObject_reset();
+}
+
+void ForceFieldDown3()
+{
+	shutdownForcefield( $forcefield3 );
+
+	//--- check if the dialog's been said about the nodes
+	if( munroDialog_01_finished == 0 )
+		{
+			thread munroDialog_01();
+		}
+	wait( 5 );
+	powerUpForcefield( $forcefield3 );
+	$node3Puzzle.puzzleObject_reset();
+}
+
+
+void munroDialog_01()
+{
+	//Let's see how well you adapt without your adaptive nodes!
+	if(!cvar_bool_multiplayer){
+		globalCoop_dialog_play($cinematic_munro,"borg03/munro_knockout.mp3", 1, 20000, 1);
+	}else{
+		globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($forcefield1),"borg03/munro_knockout.mp3", 1, 20000, 1);
+	}
+	munroDialog_01_finished = 1;	
+}
+
+//----------------------------------------------
+// NODE STUFF
+//----------------------------------------------
+
+//---------------------
+void check_nodesactive()
+//---------------------
+{
+	if( node1_active == 0 && node2_active == 0 && node3_active == 0 ){
+		$borgboss.cripple( 1 );
+		all_inactive = 1;
+	}
+}
+
+
+//---------------------
+void node1_transport_down()
+//---------------------
+{
+	if(all_inactive == 0){
+		//$node1_trigger.nottriggerable();
+		$node1_transport.time ( 3.0  );
+		$node1_transport.moveDown ( 448 );
+		$node1_steamspray.show();
+		wait ( 1 );
+		$node1_steamspray.hide();
+		waitfor ( $node1_transport );
+		thread node1_wait();
+	}
+}
+
+//---------------------
+void node1_transport_up()
+//---------------------
+	{
+     $node1_transport.playsound( "sound/environment/machine/lift2.wav", 8, 2 , 150 );
+	$node1_transport.time ( 1.5 );
+	$node1_transport.moveUp ( 448 );
+	$node1_steamspray.show();
+	wait ( 1 );
+	$node1_steamspray.hide();
+	waitfor ( $node1_transport );
+	wait ( 50 );
+	$node1.show();
+	$node1_damaged.hide();
+	thread node1_transport_down();
+	//$node1_trigger.triggerable();
+	}
+
+//---------------------
+void node2_transport_down()
+//---------------------
+	{
+	if ( all_inactive == 0 )
+		{
+        	$node2_transport.playsound( "sound/environment/machine/lift2.wav", 8, 2 , 150 );
+		//$node2_trigger.nottriggerable();
+		$node2_transport.time ( 3.0  );
+		$node2_transport.moveDown ( 448 );
+		$node2_steamspray.show();
+		wait ( 1 );
+		$node2_steamspray.hide();
+		waitfor ( $node2_transport );
+		thread node2_wait();
+		}
+	}
+
+//---------------------
+void node2_transport_up()
+//---------------------
+	{
+        $node2_transport.playsound( "sound/environment/machine/lift2.wav", 8, 2 , 150 );
+	$node2_transport.time ( 1.5  );
+	$node2_transport.moveUp ( 448 );
+	$node2_steamspray.show();
+	wait ( 1 );
+	$node2_steamspray.hide();
+	waitfor ( $node2_transport );
+	wait ( 50 );
+	$node2_damaged.hide();
+	$node2.show();
+	thread node2_transport_down();
+	//$node2_trigger.triggerable();
+	}
+
+//---------------------
+void node3_transport_down()
+//---------------------
+{
+	if ( all_inactive == 0 )
+	{
+        	$node3_transport.playsound( "sound/environment/machine/lift2.wav", 8, 2 , 150 );
+		//$node3_trigger.nottriggerable();
+		$node3_transport.time ( 3.0 );
+		$node3_transport.moveDown ( 448 );
+		$node3_steamspray.show();
+		wait ( 1 );
+		$node3_steamspray.hide();
+		waitfor ( $node3_transport );
+		thread node3_wait();
+	}
+}
+
+//---------------------
+void node3_transport_up()
+//---------------------
+	{
+        $node3_transport.playsound( "sound/environment/machine/lift2.wav", 8, 2 , 150 );
+	$node3_transport.time ( 1.5 );
+	$node3_transport.moveUp ( 448 );
+	$node3_steamspray.show();
+	wait ( 1 );
+	$node3_steamspray.hide();
+	waitfor ( $node3_transport );
+	wait ( 50 );
+	$node3.show();
+	$node3_damaged.hide();
+	thread node3_transport_down();
+	//$node3_trigger.triggerable();
+	}
+
+
+
+
+//---------------------
+void node1_wait()
+//---------------------
+	{
+	$node1.contents ( "+shootable" );
+	$node1.ondamage ( "node1_hit" );
+	node1_active = 1;
+	pause();
+	}
+
+//---------------------
+void node2_wait()
+//---------------------
+	{
+	$node2.contents ( "+shootable" );
+	$node2.ondamage ( "node2_hit" );
+	node2_active = 1;
+	pause();
+	}
+
+//---------------------
+void node3_wait()
+//---------------------
+	{
+	$node3.contents ( "+shootable" );
+	$node3.ondamage ( "node3_hit" );
+	node3_active = 1;
+	pause();
+	}
+
+//---------------------
+void node1_hit()
+//---------------------
+	{
+	$node1.nodamage();
+	$node1.hide();
+	$node1_damaged.show();
+	node1_active = 0;
+	$borgboss.disable ( 1 );
+	$node1_spawn.modelname( "fx/fx-sml-exp.tik" );
+	$node1_spawn.spawntargetname ( "node1_boom" );
+	trigger ( "$node1_spawn" );
+	wait (.1);
+	thread check_nodesactive();
+	wait ( .5 );
+	$node1_boom.remove();
+	wait ( .1 );
+	thread node1_transport_up();
+	thread coop_spawnDrones();
+	}
+
+
+//---------------------
+void node2_hit()
+//---------------------
+	{
+	$node2.nodamage();
+	$node2_damaged.show();
+	$node2.hide();
+	node2_active = 0;
+	$borgboss.disable ( 1 );
+	$node2_spawn.modelname( "fx/fx-sml-exp.tik" );
+	$node2_spawn.spawntargetname ( "node2_boom" );
+	trigger ( "$node2_spawn" );
+	wait (.1);
+	thread check_nodesactive();
+	wait ( .5 );
+	$node2_boom.remove();
+	wait ( .1 );
+	thread node2_transport_up();
+	thread coop_spawnDrones();
+	}
+
+//---------------------
+void node3_hit()
+//---------------------
+	{
+	$node3.nodamage();
+	$node3.hide();
+	$node3_damaged.show();
+	node3_active = 0;
+	$borgboss.disable ( 1 );
+	$node3_spawn.modelname( "fx/fx-sml-exp.tik" );
+	$node3_spawn.spawntargetname ( "node3_boom" );
+	trigger ( "$node3_spawn" );
+	wait (.1);
+	thread check_nodesactive();
+	wait ( .5 );
+	$node3_boom.remove();
+	wait ( .1 );
+	thread node3_transport_up();
+	thread coop_spawnDrones();
+	}
+
+ 
+//---------------------
+// deathPlayer
+// handle some level specific stuff then call the borg special death cinematic
+//---------------------
+void deathPlayer()
+{
+	killthread( "cinematicIntro_end" );
+	$tuvok.stopDialog();
+	$munro.stopDialog();
+	$borgboss.stopDialog();
+	
+	thread m1_playerDeathCinematic();
+}
+
+/*
+void coop_borgbossUpdatheealth()
+{
+	if(!coop_borgbossUpdatheealthAlreadyRunning){
+		coop_borgbossUpdatheealthAlreadyRunning = 1;
+		float fHealth,fDivide,fCurrentPlayers,fLastActivePlayerCount;
+		fLastActivePlayerCount	= $borgboss.getFloatVar("coop_lastActivePlayersCount");
+		fCurrentPlayers			= globalCoop_return_integerPlayersQuantity(1);
+		
+		if(fLastActivePlayerCount < 1)	{fLastActivePlayerCount = 1;}
+		if(	fCurrentPlayers < 1)		{fCurrentPlayers = 1;}
+
+	//If we have less or same player ammount, do not change anything
+		if(fCurrentPlayers > fLastActivePlayerCount){//Don't change health, since the ai file has fixed health values for the stages!!!
+		 	fHealth = (fCurrentPlayers * 1000);
+			$borgboss.maxhealth(fHealth);
+			$borgboss.maxbosshealth(fHealth);
+			fDivide = ($borgboss.getHealth() / (10 * ));//divide with 1%
+			fHealth = ((fHealth / 100) * fDivide );
+			$borgboss.setFloatVar("coop_lastActivePlayersCount",fCurrentPlayers);
+			$borgboss.health(fHealth);
+			//resistance "assault_rifle" 95
+			resistance "comp_rifle" 95
+			//resistance "explosion" 85
+			//resistance "imod" 75
+		}
+		coop_borgbossUpdatheealthAlreadyRunning=1;
+	}
+	else{
+		wait(1);
+		thread  coop_borgbossUpdatheealth();
+	} 
+}
+*/
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed("m2l0-sfa");
+}

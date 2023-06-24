@@ -1,0 +1,589 @@
+//-------------------------------------------
+// EF2 Level Script File
+//
+// Level: Idyrll Ruins Part 1
+// Script by: Adam 'Senn' Bellefeuil, R. 'Charon' Heath
+// Geometry by: Adam 'Senn' Bellefeuil, R. 'Charon' Heath
+//
+// Last Modified: R. 'Charon' Heath
+//--------------------------------------------
+
+void main();
+void init();
+void coop_setupChar(entity eChar);
+
+//--- Setup
+void setupArchetypes();
+
+//--- Camp Stuff
+void drullKillThread();
+
+void idryllConversation1Thread();
+void idryllConversation2Thread();
+void idryllConversation3Thread();
+void endOfLevel();
+void threadLockedDoor();
+
+void randomlyAnimateActor( entity actorToAnimate, string animationToUse );
+void randomlyAnimateActorOnce( entity actorToAnimate, string animationToUse );
+void makeActorUseTricorder( entity actorToAnimate );
+void coop_waitForTeam();
+void coop_endLevel();
+
+float lockThread = 0;
+
+//=============================================================================
+// Includes
+//=============================================================================
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/global/global_common.scr"
+#include "coop_mod/maps/missions/5/m5l1a_dialog.scr"
+#include "coop_mod/maps/optional_modules/teammate.scr"
+#include "coop_mod/maps/optional_modules/replace.scr"
+#include "maps/global_scripts/global_math.scr"
+#include "maps/global_scripts/global_acceleratedmovement.scr"
+#include "maps/global_scripts/global_cinematicFX.scr"
+#include "coop_mod/maps/missions/5/m5l1a_cin.scr"
+
+
+//==========================================================================================
+//  Main
+//==========================================================================================
+//---------------------
+// Function: main
+// Comments:
+// called at the start of the level
+//---------------------
+void main()
+{
+	globalCoop_server_precacheSingleplayer();
+	globalCoop_main_camFadeOut(.1);
+	soundtrack( "music/m5l1a.mus" );
+	$world.entity_fade_dist( 4000 );
+	$world.farplane_cull( 1 );
+	$world.farplane_color ( '0.0875 0.1 0.145' );
+	$world.farplane( 4000 );
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+//Do not reboot the server when this map ends, this map does not have so many animations loadad
+/////////////////////////////////////////////////////////////////////////
+	coop_string_nextMapToCheck			= "m5l1b-drull_ruins1";//set the map we gona load next while we are in testmode
+//Set spawnangles for this level
+	coop_float_spawnAngle0 				= 1;
+	coop_vector_spawnOrigin1 			= '8838 -11005 -70';
+	coop_vector_spawnOrigin2 			= '8838 -11205 -70';
+	coop_vector_spawnOrigin3 			= '8721 -11326 -70';
+	coop_vector_spawnOrigin4 			= '8721 -11400 -70';
+	coop_vector_spawnOrigin5 			= '8721 -11470 -70';
+	coop_vector_spawnOrigin6 			= '8721 -11540 -70';
+	coop_vector_spawnOrigin7			= '8721 -11610 -70';
+	coop_vector_spawnOrigin8			= '8721 -11690 -70';
+//Definie Objective
+	coop_string_objectiveItem1			= "ProceedToLifeforms";
+	coop_string_objectiveItem2			= "FindScientists";
+	coop_string_objectiveItem3			= "FindScouting";
+	coop_string_objectiveItem4			= "EnterRuins";	
+//Give each player a Item/weapon
+	coop_string_weapon1 				= "models/weapons/worldmodel-BurstRifle.tik";
+	coop_string_weapon2 				= "models/weapons/worldmodel-Phaser-stx.tik";
+	coop_string_weapon3 				= "models/weapons/worldmodel-Tricorder-stx.tik";
+	coop_string_weapon4 				= "models/weapons/worldmodel-FieldAssaultRifle.tik";
+	coop_string_weapon5 				= "models/weapons/worldmodel-attrex-rifle.tik";
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	thread init();
+	
+	if(cvar_bool_multiplayer){//Multiplayer
+	//spawn Class Selection
+		thread globalCoop_class_setup("Medic",'8840 -9305 100');
+		thread globalCoop_class_setup("HeavyWeapons",'8962 -9265 100');
+		thread globalCoop_class_setup("Technician",'9070 -9215 100');
+	}else{
+		waitForPlayer();
+		$player.loadobjectives("m5l1a-drull_ruins1");
+	//set new model
+		$player.model("models/char/munro.tik");
+		stuffCMD("seta g_playermodel char/munro");
+		wait(.1);
+		globalCommon_Autosave();
+	}
+	//Intro, enterprise e in orbit.
+	intro_ente_orbit();
+//inizialize Objective for mp and sp
+	thread globalCoop_objectives_update("incomplete",1,1);
+}
+
+
+//---------------------
+// Function: init
+// Comments:
+// called by main and initializes the level
+//---------------------
+void init()
+{
+	$bugPlant1.notsolid();
+	$drullPlant1.notsolid();
+	$drullPlant2.notsolid();
+	$drullPlant3.notsolid();
+	$bugPlant1.contents( "targetable" );
+	$drullPlant1.contents( "targetable" );
+	$drullPlant2.contents( "targetable" );
+	$drullPlant3.contents( "targetable" );
+	$drullShuttleInt.notsolid();
+	$drullShuttleExt.notsolid();
+
+	globalCommon_SpawnActor( "char/hazardteam_munro.tik", "scriptmunro", '9088.97 -10439.03 -192.00', 135 );
+	globalCommon_AiDummyHide( $scriptmunro );
+	globalCommon_SpawnActor( "char/hazardteam_kourban.tik", "korban", '9120.97 -10567.03 -216.00', 135 );
+	globalCommon_SpawnActor( "char/hazardteam_chell.tik", "chell", '9168.97 -10487.03 -208.00', 135 );
+	globalCommon_SpawnActor( "char/hazardteam_telsia.tik", "telsia", '9044.97 -10515.03 -200.00', 135 );
+	wait(.1);
+	
+
+//Make teammate, co-op...
+	globalCoop_teammate_register($chell);
+	globalCoop_teammate_register($telsia);
+	thread globalCoop_teammate_register($korban);
+	
+	wait(.2);
+	
+	globalCoop_actor_aiOff($telsia);
+	globalCoop_actor_aiOff($chell);
+	globalCoop_actor_aiOff($korban);
+		
+	//if(!getCvarInt("g_gametype")){//Singleplayer
+		// globalCommon_SetupContextDialog( $chell , "chell" );
+		// globalCommon_SetupContextDialog( $telsia, "telsia" );
+		// globalCommon_SetupContextDialog( $korban, "korban" );
+	//}
+	
+	$scriptmunro.immortal( 1 );
+	globalCoop_level_hide($korban);
+	globalCoop_level_hide($chell);
+	globalCoop_level_hide($telsia);
+	
+	spawn("script_model","model","fx/fx-dummy.tik","targetname","coopLevelEndClip1","origin","12804 -5414 -103");
+	wait(.1);
+	$coopLevelEndClip1.setSize('-200 -1 -100','150 1 200');
+	
+	//spawn other actors
+	thread globalCommon_SpawnActor( "char/drull_scientist-male.tik", "idryll1", '11264 -5888 -114', 340 );
+	thread globalCommon_SpawnActor( "char/drull_scientist-male2.tik", "idryll2", '11328 -5952 -114', 160 );
+	globalCommon_SpawnActor( "char/drull_scientist-male.tik", "idryll3", '10752 -4984 -80', 225 );
+	thread globalCommon_SpawnActor( "char/drull_scientist-male2.tik", "idryll4", '10688 -5048 -80', 45 );
+	thread globalCommon_SpawnActor( "char/drull_scientist-male.tik", "idryll5", '10792 -6248 -152', 270 );
+	globalCommon_SpawnActor( "char/drull_scientist-male2.tik", "idryll6", '10792 -6336 -152', 90 );
+
+	globalCommon_SpawnActor( "char/drull_scientist-female2.tik", "idryll7", '11040 -5088 -83', 225 );
+	if(getCvarInt("g_gametype") == 0){//Singleplayer
+		$idryll7.alias( "idryll7Talk1", "localization/sound/dialog/m5l1/idryll3_conc.mp3" );   //I’m very concerned about our missing archeologists.  Please let us know if you find them.
+		$idryll7.alias( "idryll7Talk2", "localization/sound/dialog/m5l1/idryll3_goneoff.mp3" );  //They never should have gone off by themselves.  The terrain is strange and dangerous.
+		$idryll7.dialog( "idryll7Talk" );
+		$arch_waypointCamp1.missionobjective( 1 );
+	}
+	coop_setupChar($idryll1);
+	coop_setupChar($idryll2);
+	coop_setupChar($idryll3);
+	coop_setupChar($idryll4);
+	coop_setupChar($idryll5);
+	coop_setupChar($idryll6);
+	coop_setupChar($idryll7);
+	
+	//Keep Conversations from triggering untill after idryll cinematic
+	$idryllConversation1Trigger.nottriggerable();
+	$idryllConversation2Trigger.nottriggerable();
+	$idryllConversation3Trigger.nottriggerable();
+
+	thread randomlyAnimateActor( $idryll1, "conv" );
+	thread randomlyAnimateActor( $idryll2, "conv" );
+	thread randomlyAnimateActor( $idryll3, "conv" );
+	thread randomlyAnimateActor( $idryll4, "conv" );
+	thread randomlyAnimateActor( $idryll5, "conv" );
+	thread randomlyAnimateActor( $idryll6, "conv" );
+
+	setupArchetypes();
+}
+
+void coop_setupChar(entity eChar)
+{
+	if(doesEntityExist(eChar)){
+		eChar.killthread( "drullKillThread" );
+		eChar.mass( 99999999999 );
+		eChar.health( 200 );
+		eChar.pushable( 0 );
+	}
+}
+
+void coop_stopIt(entity eActor)
+{
+	if(doesEntityExist(eActor)){
+		eActor.settendency("getoutoftheway",0);
+		eActor.settendency("wander",0);
+		eActor.settendency("follow",0);
+		eActor.anim("Idle");
+		eActor.pushable( 0 );
+		eActor.mass( 99999999999 );
+		globalCoop_actor_aiOff(eActor);
+	}
+}
+
+
+void coop_continueIt(entity eActor)
+{
+	if(doesEntityExist(eActor)){
+		eActor.settendency("getoutoftheway",1);
+		eActor.settendency("wander",1);
+		eActor.settendency("follow",1);
+		eActor.pushable( 1 );
+		eActor.mass( 200 );//200 ai-default, player has 800
+		eActor.ai_on();
+	}
+}
+
+
+//==========================================================================================
+//  Setup Functions
+//==========================================================================================
+//---------------------
+// Function: setupArchetypes
+// Comments:
+// setups the archetypes in the level
+//---------------------
+void setupArchetypes()
+{
+	$arch_waypointCamp1.archetype( "Waypoint" );
+	$arch_waypointCamp1.notsolid();
+	$arch_waypointCave1.archetype( "Waypoint" );
+	$arch_waypointCave1.notsolid();
+}
+
+/*
+//---------------------
+// Function: killAllTalking
+// Comments:
+// stops all the peeps from yapping
+//---------------------
+void killAllTalking()
+{
+
+ 	$scriptmunro.stopdialog();
+	$telsia.stopdialog();
+	$chell.stopdialog();
+	$korban.stopdialog();
+	$idryll1.stopdialog();
+	$idryll2.stopdialog();
+	$idryll3.stopdialog();
+	$idryll4.stopdialog();
+	$idryll5.stopdialog();
+	$idryll6.stopdialog(); 
+}
+*/
+
+//==========================================================================================
+//  Camp Stuff
+//==========================================================================================
+//---------------------
+// Function: idryllConversation1Thread
+// Comments:
+// make Idryll have an ambient conversation
+//---------------------
+void idryllConversation1Thread()
+{
+	$idryll5.setFloatVar( "pauseRandomAnimate", 1 );
+	$idryll6.setFloatVar( "pauseRandomAnimate", 1 );
+	wait ( .25 );
+	$idryll5.anim(	"idle" );
+	$idryll6.anim(	"idle" );
+
+	$idryll5.headwatch( $idryll6, 10 );
+	$idryll6.headwatch( $idryll5, 10 );
+	// I don't agree that the ancient Idryll were a completely agrarian society.
+	globalCoop_dialog_play($idryll5,"m5l1/idryll1_agreecomp.mp3", 1, 256, 0);
+	//They show decisive evidence of sophisticated manufacturing techniques.
+	globalCoop_dialog_play($idryll6,"m5l1/idryll2_show.mp3", 1, 256, 0);
+	//I'm just not convinced.  We've discovered no conclusive proof that the Idryll were the ones who created the artifacts we're finding.
+	globalCoop_dialog_play($idryll5,"m5l1/idryll1_notconv.mp3", 1, 256, 0);
+	//I'm confident the data will bear out my conclusions in the end.
+	globalCoop_dialog_play($idryll6,"m5l1/idryll2_conf.mp3", 1, 256, 0);
+	//Perhaps.  We need to keep investigating.
+	globalCoop_dialog_play($idryll5,"m5l1/idryll1_inves.mp3", 1, 256, 0);
+	//Agreed.
+	globalCoop_dialog_play($idryll5,"m5l1/m5l1/idryll2_agreed.mp3", 1, 256, 0);
+	$idryll5.setFloatVar( "pauseRandomAnimate", 0 );
+	$idryll6.setFloatVar( "pauseRandomAnimate", 0 );
+	$idryll5.resetHead();
+	$idryll6.resetHead();
+
+	//--- actor and registering
+	if(!cvar_bool_multiplayer){//Singleplayer temporary only for sp until we have a alternative for the co-op mod
+		$idryll5.alias( "idryll5Talk1", "localization/sound/dialog/m5l1/idryll1_terain.mp3" ); //This landscape is remarkable, don't you think?
+		$idryll5.alias( "idryll5Talk2", "localization/sound/dialog/m5l1/idryll1_drying.mp3" ); //This heat is intolerable. How can you stand to wear such heavy clothing?
+		$idryll5.alias( "idryll5Talk3", "localization/sound/dialog/m5l1/idryll1_exotic.mp3" ); //There is some very exotic flora indigenous to this area.  One of the plants appears to possess a strange exoskeleton of sorts.  I should collect a sample for later study.
+		$idryll5.dialog( "idryll5Talk" );
+		$idryll6.alias( "idryll6Talk1", "localization/sound/dialog/m5l1/idryll2_wejust.mp3" ); //We were just discussing the influence of ancient Idryll architecture on emerging Attrexian city design.  If you have any thoughts on the subject, feel free to jump in.
+		$idryll6.dialog( "idryll6Talk" );
+	}
+}
+
+//---------------------
+// Function: idryllConversation2Thread
+// Comments:
+// make Idryll have an ambient conversation
+//---------------------
+void idryllConversation2Thread()
+{
+//walk back to each other , in mp only
+	if(cvar_bool_multiplayer){//Multiplayer
+		thread globalCoop_actor_walkTo($idryll1,"$idryll2","walk");
+		globalCoop_actor_walkTo($idryll2,"$idryll1","walk");
+	}
+	$idryll1.setFloatVar( "pauseRandomAnimate", 1 );
+	$idryll2.setFloatVar( "pauseRandomAnimate", 1 );
+	wait ( .25 );
+	$idryll1.anim(	"idle" );
+	$idryll2.anim(	"idle" );
+
+	$idryll1.headwatch( $idryll2, 10 );
+	$idryll2.headwatch( $idryll1, 10 );
+	
+	//These environmental conditions are making it difficult to properly use our equipment.
+	globalCoop_dialog_play($idryll1,"m5l1/idryll1_quakes.mp3", 1, 256, 0);
+	//We'll need to figure a way to adapt our systems to account for the increased temperature.
+	globalCoop_dialog_play($idryll2,"m5l1/idryll2_bigone.mp3", 1, 256, 0);
+	//We must carry on as best we can.
+	globalCoop_dialog_play($idryll1,"m5l1/idryll1_carryon.mp3", 1, 256, 0);
+	//I wish the others were still here.
+	globalCoop_dialog_play($idryll2,"m5l1/idryll2_wish.mp3", 1, 256, 0);
+
+	$idryll1.setFloatVar( "pauseRandomAnimate", 0 );
+	$idryll2.setFloatVar( "pauseRandomAnimate", 0 );
+	$idryll1.resetHead();
+	$idryll2.resetHead();
+
+	if(!cvar_bool_multiplayer){//Singleplayer temporary only for sp until we have a alternative for the co-op mod
+		//--- actor and registering
+		$idryll1.alias( "idryll1Talk1", "localization/sound/dialog/m5l1/idryll1_resfed.mp3" ); //If I had the resources of the Federation, I could complete my work sooner.
+		$idryll1.alias( "idryll1Talk2", "localization/sound/dialog/m5l1/idryll1_binary.mp3" ); //I'm going over to the binary loadlifter to take some readings.  Do you wish to observe?
+		$idryll1.dialog( "idryll1Talk" );
+		$idryll2.alias( "idryll2Talk1", "localization/sound/dialog/m5l1/idryll2_story.mp3" ); //Your story about attacking aliens is difficult to believe.  It sounds like an Attrexian ploy to discredit our work.
+		$idryll2.alias( "idryll2Talk2", "localization/sound/dialog/m5l1/idryll2_campus.mp3" ); //I led the campus demonstrations against the Attrexians last year.
+		$idryll2.dialog( "idryll2Talk" );
+	}
+	
+}
+
+//---------------------
+// Function: idryllConversation3Thread
+// Comments:
+// make Idryll have an ambient conversation
+//---------------------
+void idryllConversation3Thread()
+{
+	$idryll3.setFloatVar( "pauseRandomAnimate", 1 );
+	$idryll4.setFloatVar( "pauseRandomAnimate", 1 );
+	wait ( .25 );
+	$idryll3.anim(	"idle" );
+	$idryll4.anim(	"idle" );
+
+	$idryll3.headwatch( $idryll4, 10 );
+	$idryll4.headwatch( $idryll3, 10 );
+	
+	//Keep trying the communications equipment.  We've got to try and get through to Inigor.
+	globalCoop_dialog_play($idryll3,"m5l1/idryll1_keeptry.mp3", 1, 256, 0);
+	//I'm still getting nothing but static.
+	globalCoop_dialog_play($idryll4,"m5l1/idryll2_static.mp3", 1, 256, 0);
+	//This planet poses many challenges… let me know if anything comes through.
+	globalCoop_dialog_play($idryll3,"m5l1/idryll1_poses.mp3", 1, 256, 0);
+
+	$idryll3.setFloatVar( "pauseRandomAnimate", 0 );
+	$idryll4.setFloatVar( "pauseRandomAnimate", 0 );
+	$idryll3.resetHead();
+	$idryll4.resetHead();
+
+	if(!cvar_bool_multiplayer){//Singleplayer temporary only for sp until we have a alternative for the co-op mod
+		//--- actor and registering
+		$idryll3.alias( "idryll3Talk1", "localization/sound/dialog/m5l1/idryll2_story.mp3" ); //Your story about attacking aliens is difficult to believe.  It sounds like an Attrexian ploy to discredit our work.
+	//	$idryll3.alias( "idryll3Talk2", "localization/sound/dialog/m5l1/idryll2_campus.mp3" ); //I led the campus demonstrations against the Attrexians last year.
+		$idryll3.dialog( "idryll3Talk" );
+		$idryll4.alias( "idryll4Talk1", "localization/sound/dialog/m5l1/idryll1_truerep.mp3" );   //If you don't understand why we’re here, it's because the true history of the Idryll has been suppressed.
+		$idryll4.alias( "idryll4Talk2", "localization/sound/dialog/m5l1/idryll1_studseek.mp3" );    //My students and I merely seek the truth.
+		$idryll4.dialog( "idryll4Talk" );
+	}
+}
+
+//---------------------
+// Function: drullKillThread
+// Comments:
+// killthread for the drull peeps in the map
+//---------------------
+void drullKillThread()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.missionfailed( "CivilianKilled" );
+	}else{
+		thread globalCoop_mission_failWithReason("CivilianKilled");
+	}
+
+	$idryll1.setFloatVar( "pauseRandomAnimate", 1 );
+	$idryll2.setFloatVar( "pauseRandomAnimate", 1 );
+	$idryll3.setFloatVar( "pauseRandomAnimate", 1 );
+	$idryll4.setFloatVar( "pauseRandomAnimate", 1 );
+	$idryll5.setFloatVar( "pauseRandomAnimate", 1 );
+	$idryll6.setFloatVar( "pauseRandomAnimate", 1 );
+	$idryll7.setFloatVar( "pauseRandomAnimate", 1 );
+}
+
+//==========================================================================================
+//  End Of Level Stuff
+//==========================================================================================
+//---------------------
+// Function: endOfLevel
+// Comments:
+// this is the end of the level
+//---------------------
+void endOfLevel()
+{
+	if(cvar_bool_multiplayer){
+		thread coop_waitForTeam();
+	}
+	else{//Singleplayer
+		dontSaveOrientation();
+		wait( .1 );
+		spawn ( "trigger_changelevel", "targetname", "trigger_endlevel", "map", "m5l1b-drull_ruins1" );
+		wait ( 1 );
+		trigger ( "$trigger_endlevel" );
+	}
+}
+
+///////////////////////////
+// threadLockedDoor
+// Makes doors play locked sound
+///////////////////////////
+void threadLockedDoor()
+{
+	$triggerLockedDoor.nottriggerable();
+	$triggerLockedDoor.playsound ( "sound/ships/drull/drull-beepreject.wav", 3, 1, 10000 );
+	wait( .5 );
+	$triggerLockedDoor.triggerable();
+}
+
+///////////////////////////
+// randomlyAnimateActor
+// Keeps an actor animating
+///////////////////////////
+void randomlyAnimateActor( entity actorToAnimate, string animationToUse )
+{
+	while( doesEntityExist( actorToAnimate ) )
+	{
+		if ( actorToAnimate.doesVarExist( "pauseRandomAnimate" ) )
+		{
+			while( 1 == actorToAnimate.getFloatVar( "pauseRandomAnimate" ) )
+			{
+				wait( .25 );
+			}
+		}
+		//This will make the actor use the tricorder; set > 1 for longer use.
+		if ( actorToAnimate.doesVarExist( "actorToUseTricorder" ) )
+		{
+			if( actorToAnimate.getfloatVar( "actorToUseTricorder" ) >= 1 )
+			{
+				makeActorUseTricorder( actorToAnimate );
+			}
+		}
+		randomlyAnimateActorOnce( actorToAnimate, animationToUse );
+		wait(.1);
+	}
+}
+
+///////////////////////////
+// randomlyAnimateActorOnce
+// Make an Actor Animate a random animation once
+///////////////////////////
+void randomlyAnimateActorOnce( entity actorToAnimate, string animationToUse )
+{
+	float randomNumber;
+	string appendedAnimationName;
+
+	//This will make the actor randomly use his tricorder instead of other animation if set.
+	if ( actorToAnimate.doesVarExist( "actorToRandomlyUseTricorder" ) )
+	{
+		if( 1 == actorToAnimate.getfloatVar( "actorToRandomlyUseTricorder" ) )
+		{
+			randomNumber = randomint( 18 ) + 1;
+			//uncomment to make them tricorder more
+			//randomNumber = randomint( 4 ) + 15;
+		}
+	}
+	else
+	{
+		randomNumber = randomint( 16 ) + 1;
+	}
+
+	//wait( .05 );
+	if( randomNumber <=8 ){ appendedAnimationName = animationToUse + "-idle"; }
+	else if( randomNumber <= 10 ){ appendedAnimationName = animationToUse + "-idle-look"; }
+	else if( randomNumber <= 14 ){ appendedAnimationName = animationToUse + "-gesture"; }
+	else if( randomNumber <= 16 ){ appendedAnimationName = animationToUse + "-gesture1"; }
+	else if( randomNumber <= 17 )
+	{
+		actorToAnimate.setfloatVar( "actorToUseTricorder", 1 );
+		return;
+	}
+	else if( randomNumber <= 18 )
+	{
+		actorToAnimate.setfloatVar( "actorToUseTricorder", 2 );
+		return;
+	}
+
+	actorToAnimate.anim( appendedAnimationName );
+	waitforanimation( actorToAnimate, appendedAnimationName );
+}
+
+///////////////////////////
+// makeActorUseTricorder
+// Make an Actor use the tricorder
+///////////////////////////
+void makeActorUseTricorder( entity actorToAnimate )
+{
+	float actorToUseTricorderFloat;
+
+	actorToUseTricorderFloat = actorToAnimate.getfloatVar( "actorToUseTricorder" );
+
+	globalCommon_AiActorUseWeapon( actorToAnimate, "tricorder" );
+
+	while( actorToUseTricorderFloat >= 1 )
+	{
+		actorToAnimate.anim( "tricorder_use_loop" );
+		waitforanimation( actorToAnimate, "tricorder_use_loop" );
+
+		actorToUseTricorderFloat--;
+		wait(.1);
+	}
+
+	actorToAnimate.setfloatVar( "actorToUseTricorder", actorToUseTricorderFloat );
+
+	globalCommon_AiActorUseWeapon( actorToAnimate, "none" );
+}
+
+
+void coop_waitForTeam()
+//------------------------------------------------------------------------------
+//waitForPlayers beeing close, end then the Level
+//------------------------------------------------------------------------------
+{
+	globalCoop_main_waitForTeam('12815 -5562 -20','-420 -420 -200','420 420 300');
+	coop_endLevel();
+}
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	globalCoop_main_waitAFrame();
+	thread globalCoop_mission_completed("m5l1b-drull_ruins1");
+}
+

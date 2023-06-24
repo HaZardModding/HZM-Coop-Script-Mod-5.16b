@@ -1,0 +1,854 @@
+//-----------------------------------------------------------------
+//  EF2 Level Script File
+//
+//  Level:	      ent-training2
+//  Script By:    Richard "Charon" H.
+//  Geometry By:  Richard "Charon" H.
+//  Created on:   09/16/2002
+//
+//	Last Edited:  Richard "Charon" H.
+//-----------------------------------------------------------------
+
+void main();
+void init();
+void initArchetypes();
+
+void moveAxisAlignedEntity( string entityName, float totalTime, float totalDistance, string moveDirection );
+
+void area2Confirm();
+void area2Start();
+void area2StartDialog();
+void area2Jumping1();
+void area2Jumping1New();
+void area2Jumping1_end();
+void area2Falling1();
+void area2Falling1Dialog();
+void area2Falling2();
+void area2Falling2Dialog();
+
+void healthTerminalUsed();
+void area2doors1();
+void area2doors1Dialog();
+void area2doors1openDialog();
+//void area2Lift1();
+void area2Lift2Dialog();
+void area2Lift1_move();
+void area2End();
+void coop_endLevel();
+
+float doorSwitchAbleToBeUsed = 0;
+float doorSwitchUsed = 0;
+float saidLiftDialog;
+float saidDoorDialog;
+
+float temp_freeze;
+
+
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/missions/training/tuvok.scr"
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+//==========================================================================================
+// Includes
+//==========================================================================================
+#include "maps/global_scripts/global_common.scr"
+#include "maps/global_scripts/global_debugUtils.scr"
+#include "maps/global_scripts/global_math.scr"
+#include "maps/global_scripts/global_archetype.scr"
+
+//================================================================================
+// Main
+//================================================================================
+
+//---------------------
+// Function: main
+// Comments:
+// the main thread run at the start of the level
+//---------------------
+void main()
+{
+	coop_string_nextMapToCheck		= "ent-training3";//set the map we gona load next while we are in testmode
+	coop_float_spawnAngle0 			= 90;//SpawnOrigin0 Angle
+//spawnorigins, Spawn Players on those locations, at map start
+	coop_vector_spawnOrigin1 			= '-1500 -64 266';
+	coop_vector_spawnOrigin3 			= '-1575 -64 266';
+	coop_vector_spawnOrigin2 			= '-1500 -130 266';
+	coop_vector_spawnOrigin4 			= '-1575 -130 266';
+	coop_vector_spawnOrigin5 			= '-1650 -64 266';
+	coop_vector_spawnOrigin6 			= '-1650 -130 266';
+	coop_vector_spawnOrigin7 			= '-1725 -64 266';
+	coop_vector_spawnOrigin8 			= '-1725 -130 266';
+//Definie Objectives
+	coop_string_objectiveItem1			= "jumpGapT2";
+	coop_string_objectiveItem2			= "jumpDownT2";
+	coop_string_objectiveItem3			= "healthT2";
+	coop_string_objectiveItem4			= "panelT2";
+	coop_string_objectiveItem5			= "liftT2";
+	coop_string_objectiveItem6			= "consoleT2";
+//Start the Co-Op Script
+	thread globalCoop_main();
+//wait for a player to join the game
+	waitforplayer();
+//Give each player a Item/weapon, the integer stands for the player-ID
+	coop_string_weapon1 				= "models/weapons/worldmodel-Tricorder.tik";	
+//Set viewModes
+	$world.clearAvailableViewModes();
+	$world.addAvailableViewMode( "structuralintegrity" );
+	thread globalCoop_main_camFadeIn(1);
+	
+//Immobilize
+	thread globalCoop_player_imobilizeAll( 1 );
+//Singleplayer Only
+	if(!cvar_bool_multiplayer){
+		$player.model("models/char/munro_voyager.tik");
+		$player.turn(45);
+		$player.origin( '-1522 -5 255' );
+		$player.loadobjectives( "ent-training2" );
+	}	
+//Play Mukke
+	soundtrack( "music/training2.mus" );
+	
+//Inizialisize all other crap
+	thread init();
+	initArchetypes();
+}
+
+//---------------------
+// Function: setupArchetypeObject
+// Comments:
+// archetype setup function
+//---------------------
+void setupArchetypeObject( entity e, string theArchetype )
+{
+	e.contents( "targetable" );
+	e.archetype( theArchetype );
+}
+
+//---------------------
+// Function: init
+// Comments:
+// the initilization thread called at the start of the level via main
+//---------------------
+void init()
+{
+	saidLiftDialog = 0;
+	saidDoorDialog = 0;
+
+	initTuvok();
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////CO-OP
+	$holoDeck.origin('-1619 64 241');
+	$tuvok.origin('-1522 118 240');
+	$tuvok.angle( -90 );
+	$tuvok.gravity(0);
+	$tuvok.setvelocity('0 0 0');
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+	$holoDeck.forcealpha( 1 );
+	$holoDeck.alpha( 1 );
+	$holoDeck.notsolid();
+
+	$triggerArea2doors1.nottriggerable();
+	//$area2doors_door2button.nottriggerable();
+	$area2Door2.lock();
+	$area2doors_door2.lock();
+	$area2Door2_greenlight.hide();
+	$area2doors_door2_lightgreen.hide();
+
+	$archetype_elevatorswitch.bind( $area2Lift1_lift );
+	
+	//First door you come to should be locked( for sound )
+	//$controlroom1_door5.lock();
+
+	//thread globalCommon_OnUse( $area2bridge1_button, "area2bridge1_button_OnUse" );
+	//thread globalCommon_OnTouch( $area2Lift1_lift, "area2Lift1_move" );
+	
+	//---setup archetypes
+	globalArchetype_Setup( $archetype_powerpanel, "TrainingPowerPanel" );
+	globalArchetype_Setup( $archetype_doorpanel, "DoorPanel" );
+	
+	thread area2Start();
+}
+
+//---------------------
+// Archetypes Setup
+// Setup the archetypes
+//---------------------
+void initArchetypes()
+{
+	setupArchetypeObject( $archetype_elevatorswitch, "TrainingElevatorSwitch" );
+}
+
+//================================================================================
+// General
+//================================================================================
+
+//------------------------------------------------------------------
+// Function: moveAxisAlignedEntity
+// Comments:
+// moves an entity with acceleration and deceleration.
+//
+// Parameters:
+//   entity name - targetname of entity .
+//
+//   totalTime - A floating point value that represents the 
+//   the total time it takes the entity to move the specified distance.
+//
+//   totalDistance - The total distance the entity will move.
+//
+//   moveDirection - The direction the entity will move. Valid values are:
+//       up
+//       down
+//		 north
+//		 south
+//       east
+//       west
+//------------------------------------------------------------------
+void moveAxisAlignedEntity( string entityName, float totalTime, float totalDistance, string moveDirection )
+{
+	entity entityReference;
+	entityReference = getEntity( entityName );
+	
+	//
+	// IMPORTANT timeStep should be about .1 seconds.
+	// Otherwise, you may get jerks at low frame rates (fps < 20).
+	//
+	float iterations = 100;		// Number of iterations
+	float halfDistance;			// Distance at which transition occurs
+	float transitionStep;		// Step at which transition from acceleration to deceleration occurs
+	float timeStep;				// Time duration for a single step
+	timeStep = totalTime / iterations;
+	transitionStep = iterations / 2;
+	halfDistance = totalDistance / 2;
+	
+	float sum;
+	float distanceInc;
+	sum = (transitionStep * (transitionStep + 1)) / 2;
+	distanceInc = halfDistance / sum;
+	
+	float moveDir = 0;
+	if ( moveDirection == "up" )
+	{
+		moveDir = 0;
+	}
+	else if ( moveDirection == "down" )
+	{
+		moveDir = 1;	
+	}
+	else if ( moveDirection == "west" )
+	{
+		moveDir = 2;	
+	}
+	else if ( moveDirection == "east" )
+	{
+		moveDir = 3;
+	}
+	else
+	{
+		centerprint( "Invalid move direction" ); 	
+	}
+
+	float idx;
+	float moveInc = 0;
+	for ( idx = 0; idx < iterations; idx += 1)
+	{	
+	 	if ( idx < transitionStep )
+	 	{
+	 		moveInc += distanceInc;
+	 	}
+	 	else
+	 	{
+	 	    moveInc -= distanceInc;
+	 	}
+		entityReference.time( timeStep );
+		if ( moveDir == 0 )
+		{
+			entityReference.moveUp( moveInc );
+		}
+		else if ( moveDir == 1 )
+		{
+			entityReference.moveDown( moveInc );
+		}
+		else if ( moveDir == 2 )
+		{
+			entityReference.moveWest( moveInc );
+		}
+		else
+		{
+			entityReference.moveEast( moveInc );
+		}
+		waitfor ( entityReference );
+	}
+}
+
+
+//================================================================================
+// Area 2
+//================================================================================
+
+//---------------------
+// Function: area2Confirm
+// Comments:
+// plays a confirmation sound each time the player completes a task
+//---------------------
+void area2Confirm()
+{
+	$world.playsound( "sound/ships/enterprise/ent_beep_confirm.wav", 4 ,8 ,900000 );
+}
+
+//---------------------
+// Function: area2Start
+// Comments:
+// very beginning of the level where player is introduced to the training mission
+//---------------------
+void area2Start()
+{
+
+	if(doesEntityExist($holoDeck)){
+		$holoDeck.rendereffects( "+depthhack" );
+	}
+
+	if(doesEntityExist($tuvok)){
+		$tuvok.rendereffects( "+depthhack" );
+	}
+	
+//Wait until the Game Starts in Multiplayer
+	globalCoop_main_waitForWarmupTime();
+	
+//Wait tow secs
+	wait( 2 );
+	
+	//Fade Tuvi in...
+	fadeTuvokIn();
+
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_ifyrwb.mp3",2, 20000,0);//vol,dist,time,head	
+
+//Fadeout Tuvi
+	fadeTuvokOut();
+
+//Dissable tuvis hacking
+	if(doesEntityExist($tuvok)){
+		$tuvok.rendereffects( "-depthhack" );
+	}
+	
+//Fade the holo out....
+	if(doesEntityExist($holoDeck)){
+		$holoDeck.fade( 2 , 0 );
+		wait( 2 );
+	}
+
+//Hide the holodeck finaly
+	if(doesEntityExist($holoDeck)){
+		$holoDeck.hide();
+	}
+	
+//Start secound Dialog
+	thread area2StartDialog();
+	
+//Play Sound (If world does not exist nothing exist, so we do not need a doesExist check :))
+	$world.playsound( "sound/environment/computer/holo_change.wav", 3 ,3 ,10000 );
+
+//Relase the player(s)
+	thread globalCoop_player_imobilizeAll( 0 );
+}
+
+//---------------------
+// Function: area2StartDialog
+// Comments:
+// 
+//---------------------
+void area2StartDialog()
+{
+	threadname ( "area2StartDialog" );
+	area2Jumping1New();
+//Play Dialog
+	/* THIS DIALOG IS MISSING 	
+	globalCoop_dialog_play($tuvok,"train2/tuvok_jumpac.mp3",2, 20000,1);//vol,dist,time,head
+	//Jump across all three platforms, and we will continue the exercise. */
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_inymiss.mp3",2, 20000,1);//vol,dist,time,head
+	//In your missions, you will encounter occasions where jumping will require
+	//both distance and precision.  In a situation like this, a miscalculated
+	//step will often end in injury or death
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_runtow.mp3",2, 20000,1);//vol,dist,time,head
+	//For this exercise, cross all three platforms...  While in the air, you
+	//will find you can control your velocity to a degree by using your movement
+	//keys.  This will allow you to tune your jump for a precision landing.
+}
+
+//---------------------
+// Function: area2Jumping1
+// Comments: REPLACED!!!! -> void area2Jumping1New()
+// player must jump across gaps
+//---------------------
+void area2Jumping1()
+{
+	return;
+}
+
+
+void area2Jumping1New()
+//---------------------
+// Function: area2Jumping1New
+// Comments: Replacement!
+// player must jump across gaps
+//---------------------
+{
+	if(doesEntityExist($tuvok)){
+		$tuvok.origin( '-1880 800 256' );
+		$tuvok.angle( 0 );
+	}
+//Make all Quiet :)
+	killAllTalking();
+//Fade In tuvi
+	fadeTuvokIn();
+
+//Set New Objective
+	thread globalCoop_objectives_update("incomplete",1,1);//State,Item,ShowIt	
+}
+
+//---------------------
+// Function: area2Jumping1_end
+// Comments:
+// player completes jumping across the gaps.
+//---------------------
+void area2Jumping1_end()
+{
+	killthread ( "area2StartDialog" );
+	killAllTalking();
+	wait ( 1 );
+	
+	
+//Need to change as soon as other dialog is recorded, this is okay for now <-RITUAL Comment
+//Set Objective Complete
+	thread globalCoop_objectives_update("complete",1,1);//State,Item,ShowIt
+//Very good. Lets move on.
+	globalCoop_dialog_play($tuvok,"train1/tuvok_vgltc.mp3",2, 20000,0);//vol,dist,time,head
+//Set Objective Complete
+	thread globalCoop_objectives_update("complete",1,1);//State,Item,ShowIt
+
+	//Yaw, finaly unlock that crap door...
+	$area2Door2_greenlight.show();
+	$area2Door2_redlight.hide();
+	$area2Door2.unlock();
+	
+	//Fade Tuvi away...
+	fadeTuvokOut();
+}
+
+//---------------------
+// Function: area2Falling1
+// Comments:
+// player must jump down to lower floor
+//---------------------
+void area2Falling1()
+{
+	//Show naked girls ;)
+	killAllTalking();
+
+	//Do only in Single Player Mode
+	if(!cvar_bool_multiplayer){//Not Multi Player Mode
+		$area2Door2_redlight.show();
+		$area2Door2_greenlight.hide();
+		$area2Door2.lock();
+	}
+	
+	if(doesEntityExist($tuvok)){//Co-Op
+		//Fade Tuvi in...
+		$tuvok.origin('-989 1897 260');
+		$tuvok.dropToFloor();
+		$tuvok.angle(270);
+		thread fadeTuvokIn();
+	//Immobilize Players
+		thread globalCoop_player_imobilizeAll( 1 );
+	}
+		
+
+	//Continue Training
+	thread area2Falling1Dialog();
+
+	//Makes you rich :)
+	wait( 1 );
+	
+	
+//Show new Objective
+	globalCoop_objectives_update("incomplete",2,1);//State,Item,ShowIt
+//Mobilize Players
+	thread globalCoop_player_imobilizeAll( 0 );
+}
+
+//---------------------
+// Function: area2Falling1Dialog
+// Comments:
+// 
+//---------------------
+void area2Falling1Dialog()
+{
+//Set a thread Name
+	threadname( "area2Falling1Dialog" );
+//play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_injuron.mp3",2, 20000,0);//vol,dist,time,head
+	//It is unfortunate, but you can expect to be injured on missions.
+	//Jump or run off of this ledge to the floor below.
+}
+
+//---------------------
+// Function: area2Falling2
+// Comments:
+// player takes damage from fall and must heal
+//---------------------
+void area2Falling2()
+{
+//Set Objective Complete
+	thread globalCoop_objectives_update("complete",2,0);//State,Item,ShowIt
+	
+//Kill all dialoges wich are registred atm and running
+	killAllTalking();
+	
+//Start new dialog
+	thread area2Falling2Dialog();
+
+//Set Objective Complete
+	thread globalCoop_objectives_update("incomplete",3,1);//State,Item,ShowIt
+}
+
+//---------------------
+// Function: area2Falling2Dialog
+// Comments:
+// 
+//---------------------
+void area2Falling2Dialog()
+{
+	//Set a thread name (name is not the label, but here they are now named same)
+	threadname( "area2Falling2Dialog" );
+	
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_siminj.mp3",2, 20000,0);//vol,dist,time,head
+	//Notice the change in your health status.
+	//While your hazard suit is designed to help absorb the shock of an impact,
+	//a fall from too great a height will end in injury… or death.
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_hazted.mp3",2, 20000,0);//vol,dist,time,head
+	//Additionally, your hazard suit does more than just protect and inform…
+	//it is also lined with nanites, which when powered, can provide field-level
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_hdoesm.mp3",2, 20000,0);//vol,dist,time,head
+	//To power the nanites, your suit is equipped with a phase-matrix converter
+	//that will allow it to utilize many different energy types.  Your suit will
+	//alert you to such an energy source with an identification overlay inside your TED
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_hdoesm.mp3",2, 20000,0);//vol,dist,time,head
+	//Identify the energy terminal on the wall near you.  Approach it, and press
+	//your Use key to power the nanites strewn about your suit.  They will
+	//provide Medical assistance until your life signs are normal or the energy
+	//in the terminal is exhausted.
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_ifyoulkw.mp3",2, 20000,0);//vol,dist,time,head
+	//Identify the energy terminal on the wall near you.  Approach it, and press
+	//your Use key to power the nanites strewn about your suit.  They will
+	//provide Medical assistance until your life signs are normal or the energy
+	//in the terminal is exhausted.
+}
+
+//---------------------
+// Function: healthTerminalUsed
+// Comments:
+// when player used terminal
+//---------------------
+void healthTerminalUsed()
+{
+//Set Objective Complete
+	thread globalCoop_objectives_update("complete",3,1);//State,Item,ShowIt
+	
+//Kill Tuvi Talking about tech crap
+	killthread ( "area2Falling2Dialog" );
+
+//Make them silent :>
+	killAllTalking();
+	
+//Make trigger triggerable wich was disabled to avoid players to run away from Tuvi his lessons
+	$triggerArea2doors1.triggerable();
+	
+//Enable Switch
+	doorSwitchAbleToBeUsed++;
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_progac.mp3",2, 20000,0);//vol,dist,time,head
+	//Excellent work, Lieutenant; your progress is acceptable.
+
+}
+
+//---------------------
+// Function: area2doors1
+// Comments:
+// runs the door training sequence
+//---------------------
+float area2thread;
+
+void area2doors1()
+{
+//Fade Tuvi in :D
+	fadeTuvokOut();
+	
+//Set New Objective
+	thread globalCoop_objectives_update("incomplete",4,1);//State,Item,ShowIt
+	
+//Stop all Dialog
+	killAllTalking();
+
+//Wait to make the game play time just longer, nothing else :P
+	wait( 1 );
+
+//Warp Tuvi to new Location
+	if(doesEntityExist($tuvok)){//Co-Op
+		$tuvok.warpTo( "$tuvokWarpToPos2" );
+	}
+	wait( .1 );
+
+//Fade Tuvi in :D
+	fadeTuvokIn();
+	
+	area2thread = thread area2doors1Dialog();
+	
+//Mobilize Players
+	thread globalCoop_player_imobilizeAll( 0 );
+}
+
+//---------------------
+// Function: area2doors1Dialog
+// Comments:
+// runs the door training sequence
+//---------------------
+void area2doors1Dialog()
+{
+	threadname( "area2doors1Dialog" );
+
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_notdoor.mp3",2, 20000,0);//vol,dist,time,head
+	//$tuvokDummy.playdialog("localization/sound/dialog/train2/tuvok_notdoor.mp3", 1, 80000, 1);
+	//Many of the doors in your environment will open automatically as you approach.  However, some doors
+	//-- such as the one with the damaged operations panel -- are malfunctioning, and will not open.
+//Play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_arelk.mp3",2, 20000,0);//vol,dist,time,head
+	//Some doors can open, but are locked.  A door's locked status can be ascertained by looking for
+	//a red or green indicator light… Most often found above the door itself.  You will notice the
+	//light on the functioning door is red, meaning it is currently locked, and will not open. 
+	//If you look around, you should be able to find a switch nearby.  Walk to the switch and press your Use key.
+}
+
+//---------------------
+// Function: area2DoorUnlock
+// Comments:
+// 
+//---------------------
+void area2DoorUnlock()
+{
+	$area2DoorUnlockTrigger.thread( "" );
+	
+	if( doorSwitchAbleToBeUsed == 1 )
+	{
+	//Stop talking about that
+		killThread("area2doors1Dialog");
+		terminate( area2thread );
+		$world.playsound ( "sound/ships/klingon/kling_beep3.wav" , 3 , 1.5 , 2000000 );
+		wait( 1 );
+
+		//$area2doors_door2button.triggerable();
+		
+		$area2doors_door2.playsound ( "sound/ships/klingon/kling_beep3.wav" , 8 , 3 , 2000 );
+		$area2doors_door2.unlock();
+		$area2doors_door2_lightgreen.show();
+		$area2doors_door2_lightred.hide();
+
+		doorSwitchUsed = 1;
+
+		if ( saidDoorDialog == 0 )
+		{
+			saidDoorDialog = 1;
+			killAllTalking();
+			thread area2doors1openDialog();
+		//Set Objectives Complete
+			thread globalCoop_objectives_update("complete",4,1);//State,Item,ShowIt
+		}
+			
+		doorSwitchAbleToBeUsed++;
+	}
+	else
+	{
+		$world.playsound( "sound/environment/computer/lcars_error.wav" , 3 , 3 , 200000 );
+		wait( .5 );
+	}
+	
+	$area2DoorUnlockTrigger.thread( "area2DoorUnlock" );	
+}
+
+//---------------------
+// Function: area2doors1openDialog
+// Comments:
+//---------------------
+void area2doors1openDialog()
+{
+//play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_welldrun.mp3",2, 20000,0);//vol,dist,time,head
+	//Well done.  Notice the indicator light is now green, confirming that the door is unlocked. 
+	//To open the door and proceed to our next exercise, move to its operations panel and press your Use key.
+}
+
+//---------------------
+// Function: area2doors1open
+// Comments:
+//---------------------
+void area2doors1open()
+{
+	if ( doorSwitchUsed == 0 )
+	{
+		
+		$world.playsound( "sound/environment/computer/lcars_error.wav" , 3 , 1 , 200000 );
+	}
+	if ( doorSwitchUsed == 1 )
+	{
+		$world.playsound( "sound/ships/klingon/kling_beep1.wav" , 8 , 1 , 200000 );
+		killthread( "area2doors1openDialog" );
+		
+		if ( saidLiftDialog == 0 )
+			{
+				saidLiftDialog = 1;
+				killAllTalking();
+			//play Dialog
+				thread globalCoop_dialog_play($tuvok,"train2/tuvok_excewrk.mp3",2, 20000,0);//vol,dist,time,head
+				//Excellent work.
+				wait( .5 );
+			//Set Objectives Complete
+				thread globalCoop_objectives_update("complete",5,1);//State,Item,ShowIt
+				area2Lift2Dialog();
+			}	
+	}
+}
+
+//---------------------
+// Function: area2Lift2Dialog
+// Comments:
+// 
+//---------------------
+void area2Lift2Dialog()
+{
+//play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_oplift.mp3",2, 20000,0);//vol,dist,time,head
+	//You are likely to run into situations where you will be required to operate a lift to achieve
+	//a more advantageous position or to advance through a mission itself.  To operate a lift, move
+	//on to it, and press your Use key to activate it.  Like many objects you can interact with,
+	//the activation switch is indicated with an identification overlay inside your TED.
+//play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_uselift.mp3",2, 20000,0);//vol,dist,time,head
+	//Use this lift to proceed to our next exercise.
+}
+
+/*
+//---------------------
+// Function: area2Lift1
+// Comments:
+// tells the player how to use the lift
+//---------------------
+void area2Lift1()
+{
+	$player.setobjectivecomplete( "panelT2", 1 );
+
+	killAllTalking();
+	
+	$player.setobjectiveshow( "liftT2", 1 );
+
+}
+*/
+
+//---------------------
+// Function: area2Lift1_move
+// Comments:
+// moves the lift up with accelleration
+//---------------------
+void area2Lift1_move()
+{
+	$area2doors_door2.close();
+	$area2doors_door2.wait( -1 );
+	
+//Play Sound
+	$world.playsound ( "sound/ships/klingon/kling_beepyes.wav" , 3 , 1.5 , 2000 );
+//Set Objectives Complete
+	thread globalCoop_objectives_update("incomplete",6,1);//State,Item,ShowIt
+
+	killthread( "area2Lift2Dialog" );
+	killAllTalking();
+	
+	wait( .25 );
+//play Dialog
+	globalCoop_dialog_play($tuvok,"train2/tuvok_ex3.mp3",2, 20000,0);//vol,dist,time,hea
+	//Excellent.
+
+	//$area2Lift1_lift.nouse();
+	$area2Lift1_lift.playsound ( "sound/ships/attrexian/att-elevat_start.wav", 3, 1, 500 );
+	moveAxisAlignedEntity( "area2Lift1_lift" , 4, 448, "up" );
+	$area2Lift1_lift.playsound ( "sound/doors/drull_smldoor_stop_01.wav", 3, 1, 500 );
+	
+	//wait( 4 );
+	
+	//$area2Lift1_lift.playsound ( "sound/ships/attrexian/att-elevat_start.wav", 3, 1, 500 );
+	//moveAxisAlignedEntity( "area2Lift1_lift" , 4, 448, "down" );
+	//$area2Lift1_lift.playsound ( "sound/doors/drull_smldoor_stop_01.wav", 3, 1, 500 );
+	
+	//wait( 2 );
+
+	//thread globalCommon_OnTouch( $area2Lift1_lift, "area2Lift1_move" );
+}
+
+//---------------------
+// Function: area2End
+// Comments:
+// player completes area 2
+//---------------------
+void area2End()
+{
+//Set Objectives Complete
+	thread globalCoop_objectives_update("complete",6,1);//State,Item,ShowIt
+	
+//Wait a mo
+	wait ( 1 );
+	
+	killAllTalking();
+	//$tuvok.playdialog("localization/sound/dialog/train2/tuvok_succ2.mp3", 1, 10000, 1); //You have successfully completed Training Area 2.
+	//wait(5.555); //waitForDialog( $tuvok );
+	
+	//vector originStash;
+	
+	//originStash =  $player.getorigin();
+	
+	//$holoDeck.origin( originStash );
+	
+	//$holoDeck.show();
+	//$holoDeck.fadein( 1, 1 );
+	
+//Play Sound
+	$world.playsound( "sound/environment/computer/holo_change.wav", 3 ,2 ,10000 );
+	cam_fadeout( 1, 0, 0, 0, 1 );
+	wait( 1 );
+	
+	if(!cvar_bool_multiplayer){//Multi Player Mode
+		dontSaveOrientation();
+	}
+	
+	thread coop_endLevel();
+	
+	
+}
+
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed("ent-training3");
+}

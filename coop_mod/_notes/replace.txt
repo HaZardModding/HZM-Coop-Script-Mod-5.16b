@@ -1,0 +1,268 @@
+////////////////////////////////////////////////////////////////////////////////
+//Hazard Modding Coop Script Mod///////COMMAND REPLACEMENTS/////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//THIS DOCUMENTS SHOWS A LIST OF CRITICAL GAME SCRIPT COMMANDS AND THEIR
+//REPLACMENTS TO BE USED INSTEAD FOR MULTIPLAYER, TO AVOID CHRASHES
+
+
+//Chrash on Linux Server
+//------------------------------------------------------------------------------
+$player.loadobjectives(string objectiveToLoad);
+//------------------------------------------------------------------------------
+//Do not put too much code into the Main Function!
+//Especially avoid using spawn(send to cl) for and while in teh main thread!
+//This will cause the strings to be to long for trasnmission
+//used to send the the soundtrack during loading screen.
+void main()
+{
+//Definie Objective Items before you inizial a objective
+	coop_string_objectiveItem1			= "ProceedToCommandCenter";
+	coop_string_objectiveItem2			= "FindDallasCrew";
+	coop_string_objectiveItem3			= "RestoreCartPower";
+	coop_string_objectiveItem4			= "ActivateCart";
+	coop_string_objectiveItem5			= "HelpAttrexian";
+	coop_string_objectiveItem6			= "GetBackAttrexian";
+	
+//Start the Co-Op Script Mod
+	globalCoop_main();
+
+//Inizial the objective list load for the singleplayer
+	if(getCvarInt("g_gametype") == 0){
+		//wait for the player to join the game
+		waitForPlayer();
+		//load objectives
+		$player.loadobjectives("m4l1a-attrexian_station");
+	}
+}
+
+
+
+//Chrash on Linux Server
+//------------------------------------------------------------------------------
+$player.setobjectiveshow( String name, Boolean show );
+//------------------------------------------------------------------------------
+//status(incomplete),item(3=RestoreCartPower),show(display now and notify player)
+globalCoop_objectives_update("incomplete",3,1);
+
+
+
+//Chrash on Linux Server
+//------------------------------------------------------------------------------
+$player.setobjectivecomplete( String name, Boolean complete );
+//------------------------------------------------------------------------------
+//status(complete),item(3=RestoreCartPower),show(display now and notify player)
+globalCoop_objectives_update("complete",3,1);
+
+
+
+//Chrash on Linux Server
+//------------------------------------------------------------------------------
+$player.setobjectivefailed( String name, Boolean failed );
+//------------------------------------------------------------------------------
+//status(failed),item(3=RestoreCartPower),show(display now and notify player)
+globalCoop_objectives_update("failed",3,1);
+
+
+
+//Chrash on Multiplayer
+//------------------------------------------------------------------------------
+$munro.playdialog( "localization/sound/dialog/m6l1/munro_ready2.mp3", 1, 20000, 0 );
+//------------------------------------------------------------------------------
+globalCoop_dialog_play($munro,"m6l1/munro_ready2.mp3",1,2000,0);
+
+
+
+//Chrash on Multiplayer
+//------------------------------------------------------------------------------
+waitfordialog($chell);
+//------------------------------------------------------------------------------
+//Wait for the given Actor or Player to end the current Dialog
+globalCoop_dialog_waitForDialog($chell);
+
+
+
+//Chrash on Multiplayer map restart
+//------------------------------------------------------------------------------
+while(1){...}
+//------------------------------------------------------------------------------
+//Ensure there is 'wait(<float>);' within, else sv can chrash on map restart
+while(1)
+{
+	...
+	wait(.02);
+}
+
+
+
+//Chrash dedicated sv if client0 is not on the server
+//------------------------------------------------------------------------------
+cinematic();
+//------------------------------------------------------------------------------
+globalCoop_cin_start();
+
+
+
+//Chrash dedicated sv if client0 is not on the server
+//------------------------------------------------------------------------------
+noncinematic();
+//------------------------------------------------------------------------------
+globalCoop_cin_end();
+
+
+
+//Can not be checked if it has faded out completly
+//------------------------------------------------------------------------------
+cam_fadeout( .5, 0, 0, 0, 1, 0 );
+//------------------------------------------------------------------------------
+globalCoop_main_camFadeOut(.5);
+
+
+
+//Chrash dedicated sv if client0 is not on the server
+//------------------------------------------------------------------------------
+cuecamera($cam1);
+//------------------------------------------------------------------------------
+globalCoop_cin_cuecamera($cam1);
+
+
+
+//Chrash dedicated sv if client0 is not on the server
+//------------------------------------------------------------------------------
+cueplayer();
+//------------------------------------------------------------------------------
+Not needed, it is included in -> globalCoop_cin_end();
+
+
+
+//Chrash dedicated sv if client0 is not on the server
+//------------------------------------------------------------------------------
+$cam1.fov(120);
+//------------------------------------------------------------------------------
+globalCoop_cin_fov($cam1,120);
+
+
+
+//Chrash dedicated sv if client0 is not on the server
+//------------------------------------------------------------------------------
+$cam1.follow($path);
+//------------------------------------------------------------------------------
+globalCoop_cin_follow($cam1,$path);
+
+
+
+//Chrash dedicated sv if client0 is not on the server
+//------------------------------------------------------------------------------
+$cam1.follow($path,$watchMe);
+//------------------------------------------------------------------------------
+globalCoop_cin_followWatch($cam1,$path,$watchMe);
+
+
+
+//Chrash on Multiplayer Linux Server
+//------------------------------------------------------------------------------
+$cam1.watch($movingobject);
+//------------------------------------------------------------------------------
+globalCoop_cin_watch($cam1,$movingobject);
+
+
+
+//Does not work for Multiplayer Cinematic
+//------------------------------------------------------------------------------
+skipthread("threadname");
+//------------------------------------------------------------------------------
+globalCoop_cin_skipThread(string sSkipThread);
+
+
+
+//Chrash the server when the entity does not exist
+//------------------------------------------------------------------------------
+trigger( "$entity" );
+//------------------------------------------------------------------------------
+if(doesEntityExist($entity))
+{
+	triggerEntity($entity);
+}
+
+//Chrash in Multiplayer
+//------------------------------------------------------------------------------
+CLASS: trigger_callVolume //this is not for music or sound!
+//------------------------------------------------------------------------------
+//INCLUDE THE OPTIONAL SCRIPT
+#include "coop_mod/maps/optional_modules/callVolume.scr"
+
+//REPLACE A EXISTING CALL VOLUME TRIGGER BEFORE ANY PLAYER CAN ENTER IT
+globalCoop_callVolume_replace($callvollumetrigger,"threadtostartwhenallarein");
+	
+//Place a new Callvolume Entity
+globalCoop_callVolume_add(vector vOrigin,vector vBbMins,vector vBbMaxs,string sTargetname,string sThread);
+
+//Add a new REQUIRED entity to the list, trigger checks if all are inside when they exist before it activates the thread
+globalCoop_callVolume_addRequiredEntity(entity eTrigger,string sReqEntity);//all=Every Player
+
+
+
+//Chrash the server when the entity does not exist, or has been removed allready
+//------------------------------------------------------------------------------
+$entityTargetName.remove();
+//------------------------------------------------------------------------------
+globalCoop_remove($entityTargetName);
+
+
+
+//Walkto can crash if ai fails to reach the exact destination
+//------------------------------------------------------------------------------
+$annyAI.walkto($annyLocation,"run",1,5);
+//------------------------------------------------------------------------------
+$annyAI.walkto($annyLocation,"run");
+
+
+
+//Dynamic lights are not working in multiplayer if they are not flickering!
+//------------------------------------------------------------------------------
+$world.light_lightstyle("lightName","z");
+$world.light_lightstyle("lightName","a");
+//------------------------------------------------------------------------------
+$world.light_lightstyle("lightName","zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzy");
+$world.light_lightstyle("lightName","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab");
+
+
+
+//Chrash if a projective hits the entity while the owner is far away
+//------------------------------------------------------------------------------
+sentity.onTouch();
+//------------------------------------------------------------------------------
+- No replacment
+
+
+
+//Frezzes the game some times
+//------------------------------------------------------------------------------
+.physics_on();
+.physics_off();
+//------------------------------------------------------------------------------
+- No replacment
+
+
+
+//Chrash when they can't find a player to follow
+//------------------------------------------------------------------------------
+Behavior GroupFollow ( 256 , 320 )
+//------------------------------------------------------------------------------
+Behavior CloseInOnPlayer ( "run" , 256 )
+
+
+
+//Does chrash if follow target is missing
+//------------------------------------------------------------------------------
+groupattack 
+//------------------------------------------------------------------------------
+- No replacment
+
+//Does not work at all, need to write it diffrent
+//------------------------------------------------------------------------------
+if(returnBool() && returnBool2())
+{...}
+//------------------------------------------------------------------------------
+if(returnBool() == 1 && returnBool2() == 1)
+{...}
+

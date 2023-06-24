@@ -1,0 +1,1499 @@
+//Modified for the HZM co-op mod 29.03.2008 Chrissstrahl
+init
+{
+	server
+	{
+		classname Actor
+	}
+}
+
+animations models/char/base-male2
+	{
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m12-end
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+cin-m12-end-2nd-munro			cin-m12-end-2nd-munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			630 playDialog "loc/eng/sound/dialog/m11l3/munro_thankpic.mp3" 1, 10000, 0
+			630 simpleplayDialog "loc/deu/sound/dialog/m11l3/munro_thankpic.mp3" 1, 10000, 0
+		}
+	}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m12-end
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+cin-m12-end-munro			cin-m12-end-munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                end_kleeya
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-end_kleeya_munro cin-end_kleeya_munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			89 playDialog "loc/eng/sound/dialog/m11l3/munro_comein.mp3" 1, 10000, 0
+			89 simpleplayDialog "loc/deu/sound/dialog/m11l3/munro_comein.mp3" 1, 10000, 0
+			
+			152 playDialog "loc/eng/sound/dialog/m11l3/munro_empire.mp3" 1, 10000, 0
+			152 simpleplayDialog "loc/deu/sound/dialog/m11l3/munro_empire.mp3" 1, 10000, 0
+			
+			307 playDialog "loc/eng/sound/dialog/m11l3/munro_longago.mp3" 1, 10000, 0
+			307 simpleplayDialog "loc/deu/sound/dialog/m11l3/munro_longago.mp3" 1, 10000, 0
+			
+			511 playDialog "loc/eng/sound/dialog/m11l3/munro_depends.mp3" 1, 10000, 0
+			511 simpleplayDialog "loc/deu/sound/dialog/m11l3/munro_depends.mp3" 1, 10000, 0
+			
+			609 playDialog "loc/eng/sound/dialog/m11l3/munro_special.mp3" 1, 10000, 0
+			609 simpleplayDialog "loc/deu/sound/dialog/m11l3/munro_special.mp3" 1, 10000, 0
+			
+			680 playDialog "loc/eng/sound/dialog/m11l3/munro_truth.mp3" 1, 10000, 0
+			680 simpleplayDialog "loc/deu/sound/dialog/m11l3/munro_truth.mp3" 1, 10000, 0
+			
+			760 playDialog "loc/eng/sound/dialog/m11l3/munro_your.mp3" 1, 10000, 0
+			760 simpleplayDialog "loc/deu/sound/dialog/m11l3/munro_your.mp3" 1, 10000, 0
+			
+			841 playDialog "loc/eng/sound/dialog/m11l3/munro_itwas.mp3" 1, 10000, 0
+			841 simpleplayDialog "loc/deu/sound/dialog/m11l3/munro_itwas.mp3" 1, 10000, 0
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                end_telsia
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-end_telsia_munro cin-end_telsia_munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			118 playDialog "loc/eng/sound/dialog/m11l3/munro_seeyou.mp3" 1, 10000, 0
+			118 simpleplayDialog "loc/deu/sound/dialog/m11l3/munro_seeyou.mp3" 1, 10000, 0
+			
+			181 playDialog "loc/eng/sound/dialog/m11l3/munro_accept.mp3" 1, 10000, 0
+			181 simpleplayDialog "loc/deu/sound/dialog/m11l3/munro_accept.mp3" 1, 10000, 0
+			
+			235 playDialog "loc/eng/sound/dialog/m11l3/munro_iguess.mp3" 1, 10000, 0
+			235 simpleplayDialog "loc/deu/sound/dialog/m11l3/munro_iguess.mp3" 1, 10000, 0
+			
+			316 playDialog "loc/eng/sound/dialog/m11l3/munro_coward.mp3" 1, 10000, 0
+			316 simpleplayDialog "loc/deu/sound/dialog/m11l3/munro_coward.mp3" 1, 10000, 0
+			
+			466 playDialog "loc/eng/sound/dialog/m11l3/munro_imight.mp3" 1, 10000, 0
+			466 simpleplayDialog "loc/deu/sound/dialog/m11l3/munro_imight.mp3" 1, 10000, 0
+			
+			635 playDialog "loc/eng/sound/dialog/m11l3/munro_ready.mp3" 1, 10000, 0
+			635 simpleplayDialog "loc/deu/sound/dialog/m11l3/munro_ready.mp3" 1, 10000, 0
+			
+			737 playDialog "loc/eng/sound/dialog/m11l3/munro_youlook.mp3" 1, 10000, 0
+			737 simpleplayDialog "loc/deu/sound/dialog/m11l3/munro_youlook.mp3" 1, 10000, 0
+			
+			960 playDialog "loc/eng/sound/dialog/m11l3/munro_solong.mp3" 1, 10000, 0
+			960 simpleplayDialog "loc/deu/sound/dialog/m11l3/munro_solong.mp3" 1, 10000, 0
+			
+			1080 playDialog "loc/eng/sound/dialog/m11l3/munro_really.mp3" 1, 10000, 0
+			1080 simpleplayDialog "loc/deu/sound/dialog/m11l3/munro_really.mp3" 1, 10000, 0
+			
+			1265 playDialog "loc/eng/sound/dialog/m11l3/munro_themost.mp3" 1, 10000, 0
+			1265 simpleplayDialog "loc/deu/sound/dialog/m11l3/munro_themost.mp3" 1, 10000, 0
+			1315 morph MORPH_LID-LSHUT 100
+			1315 morph MORPH_LID-RSHUT 100
+			1360 morph MORPH_LID-LSHUT 0
+			1360 morph MORPH_LID-RSHUT 0
+			1407 morph MORPH_LID-LSHUT 100
+			1407 morph MORPH_LID-RSHUT 100
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                M7-end
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m7-end-munro cin-m7-end-munro.ska
+	{
+		server
+		{
+			entry forcealpha
+			entry alpha 0
+			0 useactorweapon "none"
+
+			entry morph morph_lid-lshut 100 0.5
+			entry morph morph_lid-rshut 100 0.5
+			entry surface material3 +nodraw
+			entry blink 0
+			0 displayEffect TransportIn FederationNoAnim
+
+			34 playDialog "loc/eng/sound/dialog/m7l2/munro_fullscan.mp3" 1, 10000, 0
+			34 simpleplayDialog "loc/deu/sound/dialog/m7l2/munro_fullscan.mp3" 1, 10000, 0
+			
+			93 playDialog "loc/eng/sound/dialog/m7l2/munro_patchmethough.mp3" 1, 10000, 0
+			93 simpleplayDialog "loc/deu/sound/dialog/m7l2/munro_patchmethough.mp3" 1, 10000, 0
+			
+			112 playDialog "loc/eng/sound/dialog/m7l2/munro_areyou.mp3" 1, 10000, 0
+			112 simpleplayDialog "loc/deu/sound/dialog/m7l2/munro_areyou.mp3" 1, 10000, 0
+			
+			157 playDialog "loc/eng/sound/dialog/m7l2/munro_whatgoing.mp3" 1, 10000, 0
+			157 simpleplayDialog "loc/deu/sound/dialog/m7l2/munro_whatgoing.mp3" 1, 10000, 0
+			
+			389 playDialog "loc/eng/sound/dialog/m7l2/munro_killyou.mp3" 1, 10000, 0
+			389 simpleplayDialog "loc/deu/sound/dialog/m7l2/munro_killyou.mp3" 1, 10000, 0
+			
+			441 playDialog "loc/eng/sound/dialog/m7l2/munro_whereishe.mp3" 1, 10000, 0
+			441 simpleplayDialog "loc/deu/sound/dialog/m7l2/munro_whereishe.mp3" 1, 10000, 0
+			
+			496 playDialog "loc/eng/sound/dialog/m7l2/munro_nopromise.mp3" 1, 10000, 0
+			496 simpleplayDialog "loc/deu/sound/dialog/m7l2/munro_nopromise.mp3" 1, 10000, 0
+			
+			617 playDialog "loc/eng/sound/dialog/m7l2/munro_krincoo.mp3" 1, 10000, 0
+			617 simpleplayDialog "loc/deu/sound/dialog/m7l2/munro_krincoo.mp3" 1, 10000, 0
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m10-l2b-rom
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m10-rom-munro		cin-m10-rom-munro.ska
+	{
+		server
+		{
+			entry morph MORPH_DOWN
+			0 useactorweapon "none"
+			0 rendereffects +shadowFromBip01
+			174 playDialog "loc/eng/sound/dialog/m10l2/munro_notgetcapt.mp3" 1, 10000, 0
+			174 simpleplayDialog "loc/deu/sound/dialog/m10l2/munro_notgetcapt.mp3" 1, 10000, 0
+			
+			327 playDialog "loc/eng/sound/dialog/m10l2/munro_notempire.mp3" 1, 10000, 0
+			327 simpleplayDialog "loc/deu/sound/dialog/m10l2/munro_notempire.mp3" 1, 10000, 0
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m8l2 - Idryll Ruins (father death)  intro
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m8l2_fatherintro_munro cin-m8l2_fatherintro_munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			0 rendereffects +shadowFromBip01
+			5 playDialog "loc/eng/sound/dialog/m8l2/munro_trade.mp3" 1, 10000, 0
+			5 simpleplayDialog "loc/deu/sound/dialog/m8l2/munro_trade.mp3" 1, 10000, 0
+			
+			43 playDialog "loc/eng/sound/dialog/m8l2/munro_whereteam3.mp3" 1, 10000, 0
+			43 simpleplayDialog "loc/deu/sound/dialog/m8l2/munro_whereteam3.mp3" 1, 10000, 0
+			
+			80 playDialog "loc/eng/sound/dialog/m8l2/munro_anoth.mp3" 1, 10000, 0
+			80 simpleplayDialog "loc/deu/sound/dialog/m8l2/munro_anoth.mp3" 1, 10000, 0
+			
+			126 playDialog "loc/eng/sound/dialog/m8l2/munro_justfather.mp3" 1, 10000, 0
+			126 simpleplayDialog "loc/deu/sound/dialog/m8l2/munro_justfather.mp3" 1, 10000, 0
+			
+			154 playDialog "loc/eng/sound/dialog/m8l2/munro_taravar.mp3" 1, 10000, 0
+			154 simpleplayDialog "loc/deu/sound/dialog/m8l2/munro_taravar.mp3" 1, 10000, 0
+			
+			231 playDialog "loc/eng/sound/dialog/m8l2/munro_toobad.mp3" 1, 10000, 0
+			231 simpleplayDialog "loc/deu/sound/dialog/m8l2/munro_toobad.mp3" 1, 10000, 0
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              igm4_attrex
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-igm4_attrex_Munro cin-igm4_attrex_Munro.ska
+	{
+		server
+		{
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              igm4_protect
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-igm4_protect_Munro cin-igm4_protect_Munro.ska
+	{
+		server
+		{
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m8-shuttlecrash lighting
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	cin-m8-shuttlecrash-munro	cin-m8-shuttlecrash-munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			17 playDialog "loc/eng/sound/dialog/m8l1/munro_lunch.mp3" 1, 10000, 0
+			17 simpleplayDialog "loc/deu/sound/dialog/m8l1/munro_lunch.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m9l2-munro
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m9l2_munro_munro cin-m9l2_munro_munro.ska
+	{
+		server
+		{
+			0 rendereffects +shadowFromBip01
+			0 useactorweapon "none"
+			0 removeactorweapon "FieldAssaultRifle"
+			74 attachmodel actorweapons/klingon-tetryon.tik tag_Rhand
+			150 removeattachedmodel tag_Rhand
+			82 playDialog "loc/eng/sound/dialog/m9l2/munro_tetryon.mp3" 1, 10000, 0
+			82 simpleplayDialog "loc/deu/sound/dialog/m9l2/munro_tetryon.mp3" 1, 10000, 0
+			150 hide
+
+		}
+	}
+	cin-m9l2_munro_alex cin-m9l2_munro_alex.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			0 rendereffects +shadowFromBip01
+			0 removeactorweapon "FieldAssaultRifle"
+			0 hide
+			150 attachmodel actorweapons/klingon-tetryon.tik tag_Rhand
+			150 show
+		}
+	}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m6l0-attack
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m6l0-munro cin-m6l0-munro.ska
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m1l1b_find
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m1l1b_find_Munro cin-m1l1b_find_Munro.ska
+	{
+		server
+		{
+			0 playDialog "loc/eng/sound/dialog/borg01/munro_beamchang.mp3" 1, 10000, 0
+			0 simpleplayDialog "loc/deu/sound/dialog/borg01/munro_beamchang.mp3" 1, 10000, 0
+			
+			216 playDialog "loc/eng/sound/dialog/borg01/munro_standbyvoy.mp3" 1, 10000, 0
+			216 simpleplayDialog "loc/deu/sound/dialog/borg01/munro_standbyvoy.mp3" 1, 10000, 0
+			
+			508 playDialog "loc/eng/sound/dialog/borg01/munro_diverted.mp3" 1, 10000, 0
+			508 simpleplayDialog "loc/deu/sound/dialog/borg01/munro_diverted.mp3" 1, 10000, 0
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m1l1b_chang
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m1l1b_chang_Munro cin-m1l1b_chang_Munro.ska
+	{
+		server
+		{
+			0 rendereffects +shadowFromBip01
+			0 giveactorweapon "actorweapons/fed-IMod.tik"
+			0 useactorweapon "I-Mod"
+			791 playDialog "loc/eng/sound/dialog/borg01/munro_changyell.mp3" 1, 10000, 0
+			791 simpleplayDialog "loc/deu/sound/dialog/borg01/munro_changyell.mp3" 1, 10000, 0
+
+			605 playDialog "sound/weapons/imod/imodfire.wav" 1, 10000, 0
+			605 weaponanimon "fire1" "dual"
+			606 weaponanimon "idle" "dual"
+
+			621 playDialog "sound/weapons/imod/imodfire.wav" 1, 10000, 0
+			621 weaponanimon "fire1" "dual"
+			622 weaponanimon "idle" "dual"
+
+			706 weaponanimon "fire1" "dual"
+			707 weaponanimon "idle" "dual"
+
+			722 weaponanimon "fire1" "dual"
+			723 weaponanimon "idle" "dual"
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              igm3-alienautopsy
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-igm3_munro cin-igm3_munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			970 playDialog "loc/eng/sound/dialog/ent_m3/munro_hard.mp3" 1, 10000, 0
+			970 simpleplayDialog "loc/deu/sound/dialog/ent_m3/munro_hard.mp3" 1, 10000, 0
+			
+			1622 playDialog "loc/eng/sound/dialog/ent_m3/munro_aye.mp3" 1, 10000, 0
+			1622 simpleplayDialog "loc/deu/sound/dialog/ent_m3/munro_aye.mp3" 1, 10000, 0
+			
+			1720 playDialog "loc/eng/sound/dialog/ent_m3/munro_wing.mp3" 1, 10000, 0
+			1720 simpleplayDialog "loc/deu/sound/dialog/ent_m3/munro_wing.mp3" 1, 10000, 0
+			
+			1902 playDialog "loc/eng/sound/dialog/ent_m3/munro_assign.mp3" 1, 10000, 0
+			1902 simpleplayDialog "loc/deu/sound/dialog/ent_m3/munro_assign.mp3" 1, 10000, 0
+			
+			2108 playDialog "loc/eng/sound/dialog/ent_m3/munro_thankyou.mp3" 1, 10000, 0
+			2108 simpleplayDialog "loc/deu/sound/dialog/ent_m3/munro_thankyou.mp3" 1, 10000, 0
+			
+			2288 playDialog "loc/eng/sound/dialog/ent_m3/munro_thanksir4.mp3" 1, 10000, 0
+			2288 simpleplayDialog "loc/deu/sound/dialog/ent_m3/munro_thanksir4.mp3" 1, 10000, 0
+		}
+	}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              igm1_intro
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	cin-igm1_intro_Munro cin-igm1_intro_Munro.ska
+	{
+		server
+		{
+			entry morph morph_lid-lshut 100 0.5
+			entry morph morph_lid-rshut 100 0.5
+			entry surface material3 +nodraw
+			entry blink 0
+			0 displayEffect TransportIn FederationNoAnim
+
+			0 useactorweapon "none"
+			86 playDialog "loc/eng/sound/dialog/ent_m1/munro_reporting.mp3" 1, 10000, 0
+			86 simpleplayDialog "loc/deu/sound/dialog/ent_m1/munro_reporting.mp3" 1, 10000, 0
+			
+			164 playDialog "loc/eng/sound/dialog/ent_m1/munro_thanksir.mp3" 1, 10000, 0
+			164 simpleplayDialog "loc/deu/sound/dialog/ent_m1/munro_thanksir.mp3" 1, 10000, 0
+			
+			795 playDialog "loc/eng/sound/dialog/ent_m1/munro_incorp.mp3" 1, 10000, 0
+			795 simpleplayDialog "loc/deu/sound/dialog/ent_m1/munro_incorp.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              igm6_telsia
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-igm6_telsia_Munro cin-igm6_telsia_Munro.ska
+	{
+		server
+		{
+			0 rendereffects +shadowFromBip01
+			0 useactorweapon "none"
+			74 playDialog "loc/eng/sound/dialog/ent_m6/munro_hitel.mp3" 1, 10000, 0
+			74 simpleplayDialog "loc/deu/sound/dialog/ent_m6/munro_hitel.mp3" 1, 10000, 0
+			
+			224 playDialog "loc/eng/sound/dialog/ent_m6/munro_lotof.mp3" 1, 10000, 0
+			224 simpleplayDialog "loc/deu/sound/dialog/ent_m6/munro_lotof.mp3" 1, 10000, 0
+			
+			299 playDialog "loc/eng/sound/dialog/ent_m6/munro_jealous.mp3" 1, 10000, 0
+			299 simpleplayDialog "loc/deu/sound/dialog/ent_m6/munro_jealous.mp3" 1, 10000, 0
+			
+			362 playDialog "loc/eng/sound/dialog/ent_m6/munro_ofwhat.mp3" 1, 10000, 0
+			362 simpleplayDialog "loc/deu/sound/dialog/ent_m6/munro_ofwhat.mp3" 1, 10000, 0
+			
+			536 playDialog "loc/eng/sound/dialog/ent_m6/munro_notthat.mp3" 1, 10000, 0
+			536 simpleplayDialog "loc/deu/sound/dialog/ent_m6/munro_notthat.mp3" 1, 10000, 0
+			
+			620 playDialog "loc/eng/sound/dialog/ent_m6/munro_death.mp3" 1, 10000, 0
+			620 simpleplayDialog "loc/deu/sound/dialog/ent_m6/munro_death.mp3" 1, 10000, 0
+			
+			771 playDialog "loc/eng/sound/dialog/ent_m6/munro_youwere.mp3" 1, 10000, 0
+			771 simpleplayDialog "loc/deu/sound/dialog/ent_m6/munro_youwere.mp3" 1, 10000, 0
+			
+			885 playDialog "loc/eng/sound/dialog/ent_m6/munro_sawyou.mp3" 1, 10000, 0
+			885 simpleplayDialog "loc/deu/sound/dialog/ent_m6/munro_sawyou.mp3" 1, 10000, 0
+			
+			989 playDialog "loc/eng/sound/dialog/ent_m6/munro_alive.mp3" 1, 10000, 0
+			989 simpleplayDialog "loc/deu/sound/dialog/ent_m6/munro_alive.mp3" 1, 10000, 0
+			
+			1080 playDialog "loc/eng/sound/dialog/ent_m6/munro_losing.mp3" 1, 10000, 0
+			1080 simpleplayDialog "loc/deu/sound/dialog/ent_m6/munro_losing.mp3" 1, 10000, 0
+		}
+	}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m9l1_intro
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m9l1_intro_munro cin-m9l1_intro_munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			121 playDialog "loc/eng/sound/dialog/m9l1/munro_walkover.mp3" 1, 10000, 0
+			121simpleplayDialog "loc/deu/sound/dialog/m9l1/munro_walkover.mp3" 1, 10000, 0
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m6l1_idcap
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m6l1_idcap_Munro cin-m6l1_idcap_Munro.ska
+	{
+		server
+		{
+			 0 useactorweapon "none"
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m7m8_crash
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m7m8_crash_Munro cin-m7m8_crash_Munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			205 playdialog "loc/eng/sound/dialog/m8l1/munro_sydsyd.mp3" 1, 10000, 0
+			205 simpleplayDialog "loc/deu/sound/dialog/m8l1/munro_sydsyd.mp3" 1, 10000, 0
+			
+			346 playdialog "loc/eng/sound/dialog/m8l1/munro_gether.mp3" 1, 10000, 0
+			346 simpleplayDialog "loc/deu/sound/dialog/m8l1/munro_gether.mp3" 1, 10000, 0
+			
+			626 playdialog "loc/eng/sound/dialog/m8l1/munro_suttcomm.mp3" 1, 10000, 0
+			626 simpleplayDialog "loc/deu/sound/dialog/m8l1/munro_suttcomm.mp3" 1, 10000, 0
+			
+			984 playdialog "loc/eng/sound/dialog/m8l1/munro_seeyousoon.mp3" 1, 10000, 0
+			984 simpleplayDialog "loc/deu/sound/dialog/m8l1/munro_seeyousoon.mp3" 1, 10000, 0
+			
+			380 playDialog "sound/player/CommunicatorBeep.wav" 1, 10000, 1
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m11l1a_chelldeath
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m11l1a_chell_Munro cin-m11l1a_chell_Munro.ska
+	{
+		server
+		{
+			0 giveactorweapon "actorweapons/fed-compressionrifle-enhanced.tik"
+			1 useactorweapon "CompressionRifleEnhanced"
+			entry morph morph_lid-lshut 100 0.5
+			entry morph morph_lid-rshut 100 0.5
+			entry surface material3 +nodraw
+			entry blink 0
+			0 displayEffect TransportIn FederationNoAnim
+
+			84 playdialog "loc/eng/sound/dialog/m11l1/munro_object.mp3" 1, 10000, 0
+			84 simpleplayDialog "loc/deu/sound/dialog/m11l1/munro_object.mp3" 1, 10000, 0
+			
+			408 playdialog "loc/eng/sound/dialog/m11l1/munro_back.mp3" 1, 10000, 0
+			408 simpleplayDialog "loc/deu/sound/dialog/m11l1/munro_back.mp3" 1, 10000, 0
+			
+			623 playdialog "loc/eng/sound/dialog/m11l1/munro_looksbad.mp3" 1, 10000, 0
+			623 simpleplayDialog "loc/deu/sound/dialog/m11l1/munro_looksbad.mp3" 1, 10000, 0
+			
+			674 playdialog "loc/eng/sound/dialog/m11l1/munro_entevc.mp3" 1, 10000, 0
+			674 simpleplayDialog "loc/deu/sound/dialog/m11l1/munro_entevc.mp3" 1, 10000, 0
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m11l1a_korbandeath
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m11l1a_korbandeath_Munro cin-m11l1a_korbandeath_Munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			638 playDialog "loc/eng/sound/dialog/m11l1/munro_maytom.mp3" 1, 10000, 0
+			638 simpleplayDialog "loc/deu/sound/dialog/m11l1/munro_maytom.mp3" 1, 10000, 0
+			
+			734 playDialog "loc/eng/sound/dialog/m11l1/munro_korbout.mp3" 1, 10000, 0
+			734 simpleplayDialog "loc/deu/sound/dialog/m11l1/munro_korbout.mp3" 1, 10000, 0
+			
+			192 playDialog "sound/ships/romulan/rom_beep_activate.wav" 1, 10000, 0
+			928 playDialog "sound/ships/romulan/rom_beep_activate.wav" 1, 10000, 0
+			366 playDialog "sound/environment/terminal/fed_open.wav" 1, 10000, 0
+			713 playDialog "sound/player/CommunicatorBeep.wav" 1, 10000, 0
+			389 playDialog "sound/impact/bodyfall/bodyfall1.wav" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m9l1a_k7intro
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m9l1a_k7intro_Munro cin-m9l1a_k7intro_Munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			57 playDialog "loc/eng/sound/dialog/m9l1/munro_enginehot.mp3" 1, 10000, 0
+			57 simpleplayDialog "loc/deu/sound/dialog/m9l1/munro_enginehot.mp3" 1, 10000, 0
+			
+			135 playDialog "loc/eng/sound/dialog/m9l1/munro_stashed.mp3" 1, 10000, 0
+			135 simpleplayDialog "loc/deu/sound/dialog/m9l1/munro_stashed.mp3" 1, 10000, 0
+			
+			262 playDialog "loc/eng/sound/dialog/m9l1/munro_takeus.mp3" 1, 10000, 0
+			262 simpleplayDialog "loc/deu/sound/dialog/m9l1/munro_takeus.mp3" 1, 10000, 0
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m8l1b_knockout
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m8l1b_nok_Munro cin-m8l1b_nok_Munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			14 playDialog "sound/footsteps/concrete/concrete1.wav" 1, 10000, 0
+			16 playDialog "sound/footsteps/rock/r3.wav" 1, 10000, 0
+			20 playDialog "sound/footsteps/rock/r2.wav" 1, 10000, 0
+			26 playDialog "sound/footsteps/rock/r2.wav" 1, 10000, 0
+			29 playDialog "sound/footsteps/rock/r2.wav" 1, 10000, 0
+			32 playDialog "sound/footsteps/concrete/concrete1.wav" 1, 10000, 0
+			34 playDialog "sound/footsteps/rock/r3.wav" 1, 10000, 0
+			38 playDialog "sound/footsteps/rock/r3.wav" 1, 10000, 0
+			39 playDialog "sound/footsteps/rock/r4.wav" 1, 10000, 0
+			43 playDialog "sound/footsteps/rock/r3.wav" 1, 10000, 0
+			45 playDialog "sound/footsteps/concrete/concrete1.wav" 1, 10000, 0
+			50 playDialog "sound/footsteps/rock/r3.wav" 1, 10000, 0
+			52 playDialog "sound/footsteps/rock/r1.wav" 1, 10000, 0
+			59 playDialog "sound/footsteps/grill/g7.wav" 1, 10000, 0
+			61 playDialog "sound/footsteps/rock/r3.wav" 1, 10000, 0
+			64 playDialog "sound/footsteps/rock/r1.wav" 1, 10000, 0
+			72 playDialog "sound/footsteps/concrete/concrete1.wav" 1, 10000, 0
+			73 playDialog "sound/footsteps/rock/r3.wav" 1, 10000, 0
+			74 playDialog "sound/footsteps/grill/g7.wav" 1, 10000, 0
+			78 playDialog "sound/footsteps/rock/r3.wav" 1, 10000, 0
+			82 playDialog "sound/footsteps/rock/r1.wav" 1, 10000, 0
+			88 playDialog "sound/footsteps/concrete/concrete1.wav" 1, 10000, 0
+			97 playDialog "sound/footsteps/concrete/concrete1.wav" 1, 10000, 0
+			
+			133 playDialog "loc/eng/sound/dialog/m8l1/munro_saved.mp3" 1, 10000, 0
+			133 simpleplayDialog "loc/deu/sound/dialog/m8l1/munro_saved.mp3" 1, 10000, 0
+			
+			191 playDialog "sound/weapons/bat-leth/bat-mainattack2.wav" 1, 10000, 0
+			193 playDialog "sound/weapons/bat-leth/bat_impactflesh.wav" 1, 10000, 0
+			208 playDialog "sound/impact/bodyfall/bodyfall1.wav" 1, 10000, 0
+
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m5l2-bioscan
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m5l2-bio-munro cin-m5l2-bio-munro.ska
+	{
+		server
+		{
+			0 useactorweapon "FieldAssaultRifle"
+			0 rendereffects +shadowFromBip01
+			469 playDialog "loc/eng/sound/dialog/m5l2/munro_trap.mp3" 1, 10000, 0
+			469 simpleplayDialog "loc/deu/sound/dialog/m5l2/munro_trap.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m6l1_picgun
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m6l1_picgun_Munro cin-m6l1_picgun_Munro.ska
+	{
+		server
+		{
+		0 rendereffects +shadowFromBip01
+		0 useactorweapon "none"
+		0 attachmodel actorweapons/fed-compressionrifle-enhanced.tik tag_Rhand
+		58 removeattachedmodel tag_Rhand
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m6l1_Krindo
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		cin-m6l1_krindo_Munro cin-m6l1_krindo_Munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			439 playDialog "loc/eng/sound/dialog/m6l1/munro_yessir.mp3" 1, 10000, 0
+			439 simpleplayDialog "loc/deu/sound/dialog/m6l1/munro_yessir.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m9l1_omagc
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m9l1_omagc_munro cin-m9l1_omagc_munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			610 playDialog "loc/eng/sound/dialog/m9l1/munro_insult.mp3" 1, 10000, 0
+			610 simpleplayDialog "loc/deu/sound/dialog/m9l1/munro_insult.mp3" 1, 10000, 0
+			
+			681 playDialog "loc/eng/sound/dialog/m9l1/munro_nowont.mp3" 1, 10000, 0
+			681 simpleplayDialog "loc/deu/sound/dialog/m9l1/munro_nowont.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m9l1_omagb
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m9l1_omagb_munro cin-m9l1_omagb_munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			15 playDialog "loc/eng/sound/dialog/m9l1/munro_85.mp3" 1, 10000, 0
+			15 simpleplayDialog "loc/deu/sound/dialog/m9l1/munro_85.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m9l1_omaga
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m9l1_omaga_munro cin-m9l1_omaga_munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			222 playDialog "loc/eng/sound/dialog/m9l1/munro_helloomag.mp3" 1, 10000, 0
+			222 simpleplayDialog "loc/deu/sound/dialog/m9l1/munro_helloomag.mp3" 1, 10000, 0
+			
+			272 playDialog "loc/eng/sound/dialog/m9l1/munro_sitdown.mp3" 1, 10000, 0
+			272 simpleplayDialog "loc/deu/sound/dialog/m9l1/munro_sitdown.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m8l2b campsite
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m8l2b-munro cin-m8l2b-munro.ska
+	{
+		server
+		{
+			0 removeactorweapon "CompressionRifle"
+			310 playDialog "loc/eng/sound/dialog/m8l2/munro_whatwasthat.mp3" 1, 10000, 0
+			310 simpleplayDialog "loc/deu/sound/dialog/m8l2/munro_whatwasthat.mp3" 1, 10000, 0
+			
+			381 playDialog "loc/eng/sound/dialog/m8l2/munro_cancloak.mp3" 1, 10000, 0
+			381 simpleplayDialog "loc/deu/sound/dialog/m8l2/munro_cancloak.mp3" 1, 10000, 0
+			
+			408 playDialog "loc/eng/sound/dialog/m8l2/munro_howkillit.mp3" 1, 10000, 0
+			408 simpleplayDialog "loc/deu/sound/dialog/m8l2/munro_howkillit.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m5l1a campsite
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		cin-m5l1a_campsite_Munro cin-m5l1a_campsite_Munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			41 playDialog "loc/eng/sound/dialog/m5l1/munro_withfed.mp3" 1, 10000, 0
+			41 simpleplayDialog "loc/deu/sound/dialog/m5l1/munro_withfed.mp3" 1, 10000, 0
+			
+			110 playDialog "loc/eng/sound/dialog/m5l1/munro_invest.mp3" 1, 10000, 0
+			110 simpleplayDialog "loc/deu/sound/dialog/m5l1/munro_invest.mp3" 1, 10000, 0
+			
+			237 playDialog "loc/eng/sound/dialog/m5l1/munro_wipedout.mp3" 1, 10000, 0
+			237 simpleplayDialog "loc/deu/sound/dialog/m5l1/munro_wipedout.mp3" 1, 10000, 0
+			
+			318 playDialog "loc/eng/sound/dialog/m5l1/munro_invaders.mp3" 1, 10000, 0
+			318 simpleplayDialog "loc/deu/sound/dialog/m5l1/munro_invaders.mp3" 1, 10000, 0
+			
+			421 playDialog "loc/eng/sound/dialog/m5l1/munro_whyhere.mp3" 1, 10000, 0
+			421 simpleplayDialog "loc/deu/sound/dialog/m5l1/munro_whyhere.mp3" 1, 10000, 0
+			
+			616 playDialog "loc/eng/sound/dialog/m5l1/munro_whatruins.mp3" 1, 10000, 0
+			616 simpleplayDialog "loc/deu/sound/dialog/m5l1/munro_whatruins.mp3" 1, 10000, 0
+			
+			872 playDialog "loc/eng/sound/dialog/m5l1/munro_maybe.mp3" 1, 10000, 0
+			872 simpleplayDialog "loc/deu/sound/dialog/m5l1/munro_maybe.mp3" 1, 10000, 0
+		}
+	}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m5l1a intro
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m5l1a_intro_Munro cin-m5l1a_intro_Munro.ska
+	{
+		server
+		{
+			entry useactorweapon "none"
+			entry forcealpha
+			entry alpha 0
+
+			entry morph morph_lid-lshut 100 0.5
+			entry morph morph_lid-rshut 100 0.5
+			entry surface material3 +nodraw
+			entry blink 0
+			20 displayEffect TransportIn FederationNoAnim
+
+			313 playDialog "loc/eng/sound/dialog/m5l1/munro_maybe.mp3" 1, 10000, 0
+			313 simpleplayDialog "loc/deu/sound/dialog/m5l1/munro_maybe.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m4l1_attrexinfo
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m4l1_attrexinfo_Munro cin-m4l1_attrexinfo_Munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			11 playDialog "loc/eng/sound/dialog/m4l1/munro_whoinv.mp3" 1, 10000, 0
+			11 simpleplayDialog "loc/deu/sound/dialog/m4l1/munro_whoinv.mp3" 1, 10000, 0
+			
+			108 playDialog "loc/eng/sound/dialog/m4l1/munro_wheresh.mp3" 1, 10000, 0
+			108 simpleplayDialog "loc/deu/sound/dialog/m4l1/munro_wheresh.mp3" 1, 10000, 0
+			
+			299 playDialog "loc/eng/sound/dialog/m4l1/munro_leaders.mp3" 1, 10000, 0
+			299 simpleplayDialog "loc/deu/sound/dialog/m4l1/munro_leaders.mp3" 1, 10000, 0
+			
+			367 playDialog "loc/eng/sound/dialog/m4l1/munro_coord.mp3" 1, 10000, 0
+			367 simpleplayDialog "loc/deu/sound/dialog/m4l1/munro_coord.mp3" 1, 10000, 0
+			
+			514 playDialog "loc/eng/sound/dialog/m4l1/munro_clever2.mp3" 1, 10000, 0
+			514 simpleplayDialog "loc/deu/sound/dialog/m4l1/munro_clever2.mp3" 1, 10000, 0
+			
+			576 playDialog "loc/eng/sound/dialog/m4l1/munro_armory.mp3" 1, 10000, 0
+			576 simpleplayDialog "loc/deu/sound/dialog/m4l1/munro_armory.mp3" 1, 10000, 0
+			
+			778 playDialog "loc/eng/sound/dialog/m4l1/munro_withyou.mp3" 1, 10000, 0
+			778 simpleplayDialog "loc/deu/sound/dialog/m4l1/munro_withyou.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              m7l2b_dyingattrex
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m7l2b_dyingattrex_Munro cin-m7l2b_dyingattrex_Munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			71 playDialog "loc/eng/sound/dialog/m7l2/munro_imwithfed.mp3" 1, 10000, 0
+			71 simpleplayDialog "loc/deu/sound/dialog/m7l2/munro_imwithfed.mp3" 1, 10000, 0
+			
+			168 playDialog "loc/eng/sound/dialog/m7l2/munro_med.mp3" 1, 10000, 0
+			168 simpleplayDialog "loc/deu/sound/dialog/m7l2/munro_med.mp3" 1, 10000, 0
+		}
+
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////              M4L1 Alive
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m4l1-munro-b cin-m4l1-munro-b.ska
+	{
+		server
+		{
+			entry giveactorweapon "actorweapons/attrex-rifle.tik"
+			entry useactorweapon "AttrexianRifle"
+			entry rendereffects +shadowFromBip01
+			94 playDialog "loc/eng/sound/dialog/m4l1/munro_these.mp3" 1, 10000, 0
+			94 simpleplayDialog "loc/deu/sound/dialog/m4l1/munro_these.mp3" 1, 10000, 0
+			
+			192 playDialog "loc/eng/sound/dialog/m4l1/munro_youdo.mp3" 1, 10000, 0
+			192 simpleplayDialog "loc/deu/sound/dialog/m4l1/munro_youdo.mp3" 1, 10000, 0
+			
+			333 playDialog "loc/eng/sound/dialog/m4l1/munro_moveon.mp3" 1, 10000, 0
+			333 simpleplayDialog "loc/deu/sound/dialog/m4l1/munro_moveon.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               igm2 debrief
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-igm2_debrief_Munro cin-igm2_debrief_Munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			149 playDialog "loc/eng/sound/dialog/ent_m2/munro_attrex.mp3" 1, 10000, 0
+			149 simpleplayDialog "loc/deu/sound/dialog/ent_m2/munro_attrex.mp3" 1, 10000, 0
+			
+			1366 playDialog "loc/eng/sound/dialog/ent_m2/munro_ayesir3.mp3" 1, 10000, 0
+			1366 simpleplayDialog "loc/deu/sound/dialog/ent_m2/munro_ayesir3.mp3" 1, 10000, 0
+		}
+	}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               m7l1a quadintro
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m7l1a_quadintro_Munro cin-m7l1a_quadintro_Munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			248 playDialog "loc/eng/sound/dialog/m7l1/munro_goahead2.mp3" 1, 10000, 0
+			248 simpleplayDialog "loc/deu/sound/dialog/m7l1/munro_goahead2.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////               m7l1a Sewer Entrance
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m7l1b_sewerenter_Munro cin-m7l1b_sewerenter_Munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m4l1 Dead
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m4l1-munro-a cin-m4l1-munro-a.ska
+	{
+		server
+		{
+			entry giveactorweapon "actorweapons/fed-fieldassaultrifle.tik"
+			entry useactorweapon "FieldAssaultRifle"
+			entry rendereffects +shadowFromBip01
+			51 playDialog "loc/eng/sound/dialog/m4l1/munro_hedead.mp3" 1, 10000, 0
+			51 simpleplayDialog "loc/deu/sound/dialog/m4l1/munro_hedead.mp3" 1, 10000, 0
+			
+			112 playDialog "loc/eng/sound/dialog/m4l1/munro_seen.mp3" 1, 10000, 0
+			112 simpleplayDialog "loc/deu/sound/dialog/m4l1/munro_seen.mp3" 1, 10000, 0
+			
+			284 playDialog "loc/eng/sound/dialog/m4l1/munro_not.mp3" 1, 10000, 0
+			284 simpleplayDialog "loc/deu/sound/dialog/m4l1/munro_not.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                M4L2 - Gonz
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m4l2-munro cin-m4l2-munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			64 playDialog "loc/eng/sound/dialog/m4l2/munro_defenses.mp3" 1, 10000, 0
+			64 simpleplayDialog "loc/deu/sound/dialog/m4l2/munro_defenses.mp3" 1, 10000, 0
+			
+			177 playDialog "loc/eng/sound/dialog/m4l2/munro_sostart.mp3" 1, 10000, 0
+			177 simpleplayDialog "loc/deu/sound/dialog/m4l2/munro_sostart.mp3" 1, 10000, 0
+			
+			265 playDialog "loc/eng/sound/dialog/m4l2/munro_crew.mp3" 1, 10000, 0
+			265 simpleplayDialog "loc/deu/sound/dialog/m4l2/munro_crew.mp3" 1, 10000, 0
+			
+			425 playDialog "loc/eng/sound/dialog/m4l2/munro_outhere.mp3" 1, 10000, 0
+			425 simpleplayDialog "loc/deu/sound/dialog/m4l2/munro_outhere.mp3" 1, 10000, 0
+			
+			550 playDialog "loc/eng/sound/dialog/m4l2/munro_escort3.mp3" 1, 10000, 0
+			550 simpleplayDialog "loc/deu/sound/dialog/m4l2/munro_escort3.mp3" 1, 10000, 0
+			
+			658 playDialog "loc/eng/sound/dialog/m4l2/munro_beamout.mp3" 1, 10000, 0
+			658 simpleplayDialog "loc/deu/sound/dialog/m4l2/munro_beamout.mp3" 1, 10000, 0
+			
+			750 playDialog "loc/eng/sound/dialog/m4l2/munro_findeng.mp3" 1, 10000, 0
+			750 simpleplayDialog "loc/deu/sound/dialog/m4l2/munro_findeng.mp3" 1, 10000, 0
+			
+			540 playDialog "sound/player/CommunicatorBeep.wav" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                igm8 Kleeya
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-igm8_kleeya_Munro cin-igm8_kleeya_Munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			182 playDialog "loc/eng/sound/dialog/ent_m8/munro_thanks2.mp3" 1, 10000, 0
+			182 simpleplayDialog "loc/deu/sound/dialog/ent_m8/munro_thanks2.mp3" 1, 10000, 0
+			
+			326 playDialog "loc/eng/sound/dialog/ent_m8/munro_cause.mp3" 1, 10000, 0
+			326 simpleplayDialog "loc/deu/sound/dialog/ent_m8/munro_cause.mp3" 1, 10000, 0
+			
+			409 playDialog "loc/eng/sound/dialog/ent_m8/munro_even.mp3" 1, 10000, 0
+			409 simpleplayDialog "loc/deu/sound/dialog/ent_m8/munro_even.mp3" 1, 10000, 0
+			
+			621 playDialog "loc/eng/sound/dialog/ent_m8/munro_ofcourse2.mp3" 1, 10000, 0
+			621 simpleplayDialog "loc/deu/sound/dialog/ent_m8/munro_ofcourse2.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                igm8 Telsia
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-igm8_telsia_Munro cin-igm8_telsia_Munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			157 playDialog "loc/eng/sound/dialog/ent_m8/munro_sodo.mp3" 1, 10000, 0
+			157 simpleplayDialog "loc/deu/sound/dialog/ent_m8/munro_sodo.mp3" 1, 10000, 0
+			
+			237 playDialog "loc/eng/sound/dialog/ent_m8/munro_goodman.mp3" 1, 10000, 0
+			237 simpleplayDialog "loc/deu/sound/dialog/ent_m8/munro_goodman.mp3" 1, 10000, 0
+			
+			317 playDialog "loc/eng/sound/dialog/ent_m8/munro_youwill.mp3" 1, 10000, 0
+			317 simpleplayDialog "loc/deu/sound/dialog/ent_m8/munro_youwill.mp3" 1, 10000, 0
+			
+			377 playDialog "loc/eng/sound/dialog/ent_m8/munro_members.mp3" 1, 10000, 0
+			377 simpleplayDialog "loc/deu/sound/dialog/ent_m8/munro_members.mp3" 1, 10000, 0
+			
+			661 playDialog "loc/eng/sound/dialog/ent_m8/munro_yeah.mp3" 1, 10000, 0
+			661 simpleplayDialog "loc/deu/sound/dialog/ent_m8/munro_yeah.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                igm6 brig
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-igm6_brig_Munro cin-igm6_brig_Munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			124 playDialog "loc/eng/sound/dialog/ent_m6/munro_powerup.mp3" 1, 10000, 0
+			124 simpleplayDialog "loc/deu/sound/dialog/ent_m6/munro_powerup.mp3" 1, 10000, 0
+			
+			181 playDialog "loc/eng/sound/dialog/ent_m6/munro_krindo2.mp3" 1, 10000, 0
+			181 simpleplayDialog "loc/deu/sound/dialog/ent_m6/munro_krindo2.mp3" 1, 10000, 0
+			
+			317 playDialog "loc/eng/sound/dialog/ent_m6/munro_behavreg.mp3" 1, 10000, 0
+			317 simpleplayDialog "loc/deu/sound/dialog/ent_m6/munro_behavreg.mp3" 1, 10000, 0
+			
+			383 playDialog "loc/eng/sound/dialog/ent_m6/munro_captains.mp3" 1, 10000, 0
+			383 simpleplayDialog "loc/deu/sound/dialog/ent_m6/munro_captains.mp3" 1, 10000, 0
+			
+			431 playDialog "loc/eng/sound/dialog/ent_m6/munro_thewhat.mp3" 1, 10000, 0
+			431 simpleplayDialog "loc/deu/sound/dialog/ent_m6/munro_thewhat.mp3" 1, 10000, 0
+			
+			1027 playDialog "loc/eng/sound/dialog/ent_m6/munro_ayesir.mp3" 1, 10000, 0
+			1027 simpleplayDialog "loc/deu/sound/dialog/ent_m6/munro_ayesir.mp3" 1, 10000, 0
+			
+			1038 playDialog "loc/eng/sound/dialog/ent_m6/munro_callomag.mp3" 1, 10000, 0
+			1038 simpleplayDialog "loc/deu/sound/dialog/ent_m6/munro_callomag.mp3" 1, 10000, 0
+			
+			1081 playDialog "loc/eng/sound/dialog/ent_m6/munro_fedfreq.mp3" 1, 10000, 0
+			1081 simpleplayDialog "loc/deu/sound/dialog/ent_m6/munro_fedfreq.mp3" 1, 10000, 0
+			
+			1278 playDialog "loc/eng/sound/dialog/ent_m6/munro_adjust.mp3" 1, 10000, 0
+			1278 simpleplayDialog "loc/deu/sound/dialog/ent_m6/munro_adjust.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                igm7 brief
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-igm7_brief_Munro cin-igm7_brief_Munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			850 playDialog "loc/eng/sound/dialog/ent_m7/munro_ayesir7.mp3" 1, 10000, 0
+			850 simpleplayDialog "loc/deu/sound/dialog/ent_m7/munro_ayesir7.mp3" 1, 10000, 0
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                igm7 ready
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-igm7_ready_Munro cin-igm7_ready_Munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			363 playDialog "loc/eng/sound/dialog/ent_m7/munro_accmass.mp3" 1, 10000, 0
+			363 simpleplayDialog "loc/deu/sound/dialog/ent_m7/munro_accmass.mp3" 1, 10000, 0
+			
+			488 playDialog "loc/eng/sound/dialog/ent_m7/munro_fort.mp3" 1, 10000, 0
+			488 simpleplayDialog "loc/deu/sound/dialog/ent_m7/munro_fort.mp3" 1, 10000, 0
+			
+			555 playDialog "loc/eng/sound/dialog/ent_m7/munro_presonally.mp3" 1, 10000, 0
+			555 simpleplayDialog "loc/deu/sound/dialog/ent_m7/munro_presonally.mp3" 1, 10000, 0
+			
+			724 playDialog "loc/eng/sound/dialog/ent_m7/munro_ithink.mp3" 1, 10000, 0
+			724 simpleplayDialog "loc/deu/sound/dialog/ent_m7/munro_ithink.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                igm3 Brief
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-igm3_brief_Munro cin-igm3_brief_Munro.ska
+	{
+		server
+		{
+			976 playDialog "loc/eng/sound/dialog/ent_m3/munro_ayesir2.mp3" 1, 10000, 0
+			976 simpleplayDialog "loc/deu/sound/dialog/ent_m3/munro_ayesir2.mp3" 1, 10000, 0
+			
+			1041 playDialog "loc/eng/sound/dialog/ent_m3/munro_loadup.mp3" 1, 10000, 0
+			1041 simpleplayDialog "loc/deu/sound/dialog/ent_m3/munro_loadup.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                IGM1-Picard
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-igm1-munro cin-igm1-munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			0 rendereffects +shadowFromBip01
+			112 playDialog "loc/eng/sound/dialog/ent_m1/munro_glad.mp3" 1, 10000, 0
+			112 simpleplayDialog "loc/deu/sound/dialog/ent_m1/munro_glad.mp3" 1, 10000, 0
+			
+			969 playDialog "loc/eng/sound/dialog/ent_m1/munro_ayesir.mp3" 1, 10000, 0
+			969 simpleplayDialog "loc/deu/sound/dialog/ent_m1/munro_ayesir.mp3" 1, 10000, 0
+			
+			1006 playDialog "loc/eng/sound/dialog/ent_m1/munro_yessir.mp3" 1, 10000, 0
+			1006 simpleplayDialog "loc/deu/sound/dialog/ent_m1/munro_yessir.mp3" 1, 10000, 0
+			
+			1085 playDialog "loc/eng/sound/dialog/ent_m1/munro_letdown.mp3" 1, 10000, 0
+			1085 simpleplayDialog "loc/deu/sound/dialog/ent_m1/munro_letdown.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                igm4-leave
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-igm4_leave_Munro cin-igm4_leave_Munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			938 playDialog "loc/eng/sound/dialog/ent_m4/munro_suggest.mp3" 1, 10000, 0
+			938 simpleplayDialog "loc/deu/sound/dialog/ent_m4/munro_suggest.mp3" 1, 10000, 0
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m2l3-Chell
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m2l3-c-munro cin-m2l3-c-munro.ska
+	{
+		server
+		{
+			0 noshadow
+			29 playDialog "loc/eng/sound/dialog/m2l2/munro_toolong.mp3" 1, 10000, 0
+			29 simpleplayDialog "loc/deu/sound/dialog/m2l2/munro_toolong.mp3" 1, 10000, 0
+			
+			155 playDialog "loc/eng/sound/dialog/m2l2/munro_sure.mp3" 1, 10000, 0
+			155 simpleplayDialog "loc/deu/sound/dialog/m2l2/munro_sure.mp3" 1, 10000, 0
+			
+			252 playDialog "loc/eng/sound/dialog/m2l2/munro_doing.mp3" 1, 10000, 0
+			252 simpleplayDialog "loc/deu/sound/dialog/m2l2/munro_doing.mp3" 1, 10000, 0
+			
+			537 playDialog "loc/eng/sound/dialog/m2l2/munro_guernica.mp3" 1, 10000, 0
+			537 simpleplayDialog "loc/deu/sound/dialog/m2l2/munro_guernica.mp3" 1, 10000, 0
+			
+			692 playDialog "loc/eng/sound/dialog/m2l2/munro_pure.mp3" 1, 10000, 0
+			692 simpleplayDialog "loc/deu/sound/dialog/m2l2/munro_pure.mp3" 1, 10000, 0
+			
+			917 playDialog "loc/eng/sound/dialog/m2l2/munro_serious.mp3" 1, 10000, 0
+			917 simpleplayDialog "loc/deu/sound/dialog/m2l2/munro_serious.mp3" 1, 10000, 0
+			
+			1033 playDialog "loc/eng/sound/dialog/m2l2/munro_cancel.mp3" 1, 10000, 0
+			1033 simpleplayDialog "loc/deu/sound/dialog/m2l2/munro_cancel.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m2l1-telsia
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m2l1-t-munro cin-m2l1-t-munro.ska
+	{
+		server
+		{
+			0 rendereffects +shadowFromBip01
+			95 playDialog "loc/eng/sound/dialog/m2l1/munro_isee.mp3" 1, 10000, 0
+			95 simpleplayDialog "loc/deu/sound/dialog/m2l1/munro_isee.mp3" 1, 10000, 0
+			
+			146 playDialog "loc/eng/sound/dialog/m2l1/munro_whatcan.mp3" 1, 10000, 0
+			146 simpleplayDialog "loc/deu/sound/dialog/m2l1/munro_whatcan.mp3" 1, 10000, 0
+			
+			190 playDialog "loc/eng/sound/dialog/m2l1/munro_teamback.mp3" 1, 10000, 0
+			190 simpleplayDialog "loc/deu/sound/dialog/m2l1/munro_teamback.mp3" 1, 10000, 0
+			
+			281 playDialog "loc/eng/sound/dialog/m2l1/munro_bully.mp3" 1, 10000, 0
+			281 simpleplayDialog "loc/deu/sound/dialog/m2l1/munro_bully.mp3" 1, 10000, 0
+			
+			464 playDialog "loc/eng/sound/dialog/m2l1/munro_dallas.mp3" 1, 10000, 0
+			464 simpleplayDialog "loc/deu/sound/dialog/m2l1/munro_dallas.mp3" 1, 10000, 0
+		}
+	}
+
+	cin-m2l1-t-3munro cin-m2l1-t-munro3.ska
+	{
+		server
+		{
+			6 playDialog "loc/eng/sound/dialog/m2l1/munro_over.mp3" 1, 10000, 0
+			6 simpleplayDialog "loc/deu/sound/dialog/m2l1/munro_over.mp3" 1, 10000, 0
+		}
+	}
+
+	cin-m2l1-t-1munro cin-m2l1-t-munro1.ska
+	{
+		server
+		{
+			5 playDialog "loc/eng/sound/dialog/m2l1/munro_iwont.mp3" 1, 10000, 0
+			5 simpleplayDialog "loc/deu/sound/dialog/m2l1/munro_iwont.mp3" 1, 10000, 0
+		}
+	}
+
+	cin-m2l1-t-2munro cin-m2l1-t-munro2.ska
+	{
+		server
+		{
+			7 playDialog "loc/eng/sound/dialog/m2l1/munro_work.mp3" 1, 10000, 0
+			7 simpleplayDialog "loc/deu/sound/dialog/m2l1/munro_work.mp3" 1, 10000, 0
+		}
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                igm4_brief
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-igm4_brief_Munro cin-igm4_brief_Munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			477 playDialog "loc/eng/sound/dialog/ent_m4/munro_reck.mp3" 1, 10000, 0
+			477 simpleplayDialog "loc/deu/sound/dialog/ent_m4/munro_reck.mp3" 1, 10000, 0
+			
+			713 playDialog "loc/eng/sound/dialog/ent_m4/munro_furious.mp3" 1, 10000, 0
+			713 simpleplayDialog "loc/deu/sound/dialog/ent_m4/munro_furious.mp3" 1, 10000, 0
+			
+			1317 playDialog "loc/eng/sound/dialog/ent_m4/munro_ayesir4.mp3" 1, 10000, 0
+			1317 simpleplayDialog "loc/deu/sound/dialog/ent_m4/munro_ayesir4.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m3l2 - Chell
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m3l2-c-munro cin-m3l2-c-munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			256 playDialog "loc/eng/sound/dialog/dallas02/munro_leavem3.mp3" 1, 10000, 0
+			256 simpleplayDialog "loc/deu/sound/dialog/dallas02/munro_leavem3.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m3l2 - Transporter Room
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m3l2-trans-munro cin-m3l2-trans-munro.ska
+	{
+		server
+		{
+			//0 runthread "TransporterRoomLockedDialog"
+			0 useactorweapon "none"
+			78 simpleplayDialog "loc/deu/sound/dialog/dallas02/munro_morepow.mp3" 1, 10000, 0
+			78 playDialog "loc/eng/sound/dialog/dallas02/munro_morepow.mp3" 1, 10000, 0
+			
+			380 simpleplayDialog "loc/deu/sound/dialog/dallas02/munro_backnorm.mp3" 1, 10000, 0
+			381 playDialog "loc/eng/sound/dialog/dallas02/munro_backnorm.mp3" 1, 10000, 0
+			
+			511 simpleplayDialog "loc/deu/sound/dialog/dallas02/munro_plan.mp3" 1, 10000, 0
+			512 playDialog "loc/eng/sound/dialog/dallas02/munro_plan.mp3" 1, 10000, 0
+			
+			771 simpleplayDialog "loc/deu/sound/dialog/dallas02/munro_clever.mp3" 1, 10000, 0
+			772 playDialog "loc/eng/sound/dialog/dallas02/munro_clever.mp3" 1, 10000, 0
+			
+			969 simpleplayDialog "loc/deu/sound/dialog/dallas02/munro_jurotbeam.mp3" 1, 10000, 0
+			970 playDialog "loc/eng/sound/dialog/dallas02/munro_jurotbeam.mp3" 1, 10000, 0
+			
+			1174 simpleplayDialog "loc/deu/sound/dialog/dallas02/munro_comingchell.mp3" 1, 10000, 0
+			1175 playDialog "loc/eng/sound/dialog/dallas02/munro_comingchell.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m5l2c - Scientist
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+cin-m5l2csci_munro cin-m5l2csci_munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			38 playDialog "loc/eng/sound/dialog/m5l2/munro_getyouout.mp3" 1, 10000, 0
+			38 simpleplayDialog "loc/deu/sound/dialog/m5l2/munro_getyouout.mp3" 1, 10000, 0
+			
+			148 playDialog "loc/eng/sound/dialog/m5l2/munro_inthis.mp3" 1, 10000, 0
+			148 simpleplayDialog "loc/deu/sound/dialog/m5l2/munro_inthis.mp3" 1, 10000, 0
+			
+			241 playDialog "loc/eng/sound/dialog/m5l2/munro_invest2.mp3" 1, 10000, 0
+			241 simpleplayDialog "loc/deu/sound/dialog/m5l2/munro_invest2.mp3" 1, 10000, 0
+			
+			341 playDialog "loc/eng/sound/dialog/m5l2/munro_apply.mp3" 1, 10000, 0
+			341 simpleplayDialog "loc/deu/sound/dialog/m5l2/munro_apply.mp3" 1, 10000, 0
+			
+			1123 playDialog "loc/eng/sound/dialog/m5l2/munro_protecthem.mp3" 1, 10000, 0
+			1123simpleplayDialog "loc/deu/sound/dialog/m5l2/munro_protecthem.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m5l2c - Idryll Son
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m5l2cson_munro cin-m5l2cson_munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			1019 giveactorweapon "actorweapons/fed-fieldassaultrifle.tik"
+			1020 useactorweapon "FieldAssaultRifle"
+			0 rendereffects +shadowFromBip01
+			
+			0 playDialog "loc/eng/sound/dialog/m5l2/munro_doctor.mp3" 1, 10000, 0
+			0 simpleplayDialog "loc/deu/sound/dialog/m5l2/munro_doctor.mp3" 1, 10000, 0
+			
+			59 playDialog "loc/eng/sound/dialog/m5l2/munro_imwith.mp3" 1, 10000, 0
+			59 simpleplayDialog "loc/deu/sound/dialog/m5l2/munro_imwith.mp3" 1, 10000, 0
+			
+			163 playDialog "loc/eng/sound/dialog/m5l2/munro_lucky2.mp3" 1, 10000, 0
+			163 simpleplayDialog "loc/deu/sound/dialog/m5l2/munro_lucky2.mp3" 1, 10000, 0
+			
+			290 playDialog "loc/eng/sound/dialog/m5l2/munro_mistakes.mp3" 1, 10000, 0
+			290 simpleplayDialog "loc/deu/sound/dialog/m5l2/munro_mistakes.mp3" 1, 10000, 0
+			
+			471 playDialog "loc/eng/sound/dialog/m5l2/munro_murderw.mp3" 1, 10000, 0
+			471 simpleplayDialog "loc/deu/sound/dialog/m5l2/munro_murderw.mp3" 1, 10000, 0
+			
+			700 playDialog "loc/eng/sound/dialog/m5l2/munro_shutitdown.mp3" 1, 10000, 0
+			700 simpleplayDialog "loc/deu/sound/dialog/m5l2/munro_shutitdown.mp3" 1, 10000, 0
+			
+			860 playDialog "loc/eng/sound/dialog/m5l2/munro_donthave.mp3" 1, 10000, 0
+			860 simpleplayDialog "loc/deu/sound/dialog/m5l2/munro_donthave.mp3" 1, 10000, 0
+			
+			999 playDialog "loc/eng/sound/dialog/m5l2/munro_faster2.mp3" 1, 10000, 0
+			999 simpleplayDialog "loc/deu/sound/dialog/m5l2/munro_faster2.mp3" 1, 10000, 0
+		}
+
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////M10-L2 Gonzales
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m10l2-munro cin-m10l2-munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			0 morph MORPH_DOWN
+			0 rendereffects +shadowFromBip01
+			35 playDialog "loc/eng/sound/dialog/m10l2/munro_betrayed.mp3" 1, 10000, 0
+			35 simpleplayDialog "loc/deu/sound/dialog/m10l2/munro_betrayed.mp3" 1, 10000, 0
+			
+			132 playDialog "loc/eng/sound/dialog/m10l2/munro_suldok.mp3" 1, 10000, 0
+			132 simpleplayDialog "loc/deu/sound/dialog/m10l2/munro_suldok.mp3" 1, 10000, 0
+			
+			301 playDialog "loc/eng/sound/dialog/m10l2/munro_learn.mp3" 1, 10000, 0
+			301 simpleplayDialog "loc/deu/sound/dialog/m10l2/munro_learn.mp3" 1, 10000, 0
+			
+			483 playDialog "loc/eng/sound/dialog/m10l2/munro_nuts.mp3" 1, 10000, 0
+			483 simpleplayDialog "loc/deu/sound/dialog/m10l2/munro_nuts.mp3" 1, 10000, 0
+			
+			624 playDialog "loc/eng/sound/dialog/m10l2/munro_how.mp3" 1, 10000, 0
+			624 simpleplayDialog "loc/deu/sound/dialog/m10l2/munro_how.mp3" 1, 10000, 0
+			
+			746 playDialog "loc/eng/sound/dialog/m10l2/munro_neverstrike.mp3" 1, 10000, 0
+			746 simpleplayDialog "loc/deu/sound/dialog/m10l2/munro_neverstrike.mp3" 1, 10000, 0
+			
+			1002 playDialog "loc/eng/sound/dialog/m10l2/munro_supply.mp3" 1, 10000, 0
+			1002 simpleplayDialog "loc/deu/sound/dialog/m10l2/munro_supply.mp3" 1, 10000, 0
+			
+			1151 playDialog "loc/eng/sound/dialog/m10l2/munro_flawed.mp3" 1, 10000, 0
+			1151 simpleplayDialog "loc/deu/sound/dialog/m10l2/munro_flawed.mp3" 1, 10000, 0
+			
+			1372 playDialog "loc/eng/sound/dialog/m10l2/munro_purely.mp3" 1, 10000, 0
+			1372 simpleplayDialog "loc/deu/sound/dialog/m10l2/munro_purely.mp3" 1, 10000, 0
+			
+			1680 displayEffect TransportOut FederationAttach
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                M2-L3 Picard
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m2l3_munro 			cin-m2l3_munro.ska
+	{
+		server
+		{
+			0 useactorweapon "none"
+			189 playDialog "loc/eng/sound/dialog/m2l2/munro_delta.mp3" 1, 10000, 0
+			189 simpleplayDialog "loc/deu/sound/dialog/m2l2/munro_delta.mp3" 1, 10000, 0
+			
+			216 playDialog "loc/eng/sound/dialog/m2l2/munro_voyager.mp3" 1, 10000, 0
+			216 simpleplayDialog "loc/deu/sound/dialog/m2l2/munro_voyager.mp3" 1, 10000, 0
+			
+			248 playDialog "loc/eng/sound/dialog/m2l2/munro_hazis.mp3" 1, 10000, 0
+			248 simpleplayDialog "loc/deu/sound/dialog/m2l2/munro_hazis.mp3" 1, 10000, 0
+			
+			629 playDialog "loc/eng/sound/dialog/m2l2/munro_every.mp3" 1, 10000, 0
+			629 simpleplayDialog "loc/deu/sound/dialog/m2l2/munro_every.mp3" 1, 10000, 0
+			
+			686 playDialog "loc/eng/sound/dialog/m2l2/munro_thanksir2.mp3" 1, 10000, 0
+			686 simpleplayDialog "loc/deu/sound/dialog/m2l2/munro_thanksir2.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                M2L1-SF-Acadamy
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m2_munro	cin-m2_munro.ska
+
+	cin-m2_2munro cin-m2_2munro.ska
+	{
+		server
+		{
+			410 playDialog "loc/eng/sound/dialog/m2l1/munro_calm.mp3" 1, 10000, 0
+			410 simpleplayDialog "loc/deu/sound/dialog/m2l1/munro_calm.mp3" 1, 10000, 0
+			
+			916 playDialog "loc/eng/sound/dialog/m2l1/munro_prec.mp3" 1, 10000, 0
+			916 simpleplayDialog "loc/deu/sound/dialog/m2l1/munro_prec.mp3" 1, 10000, 0
+		}
+	}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////                m8l2 - Idryll Ruins (father death)
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	cin-m8l2_father_2munro cin-m8l2_father_2munro.ska
+	{
+		server
+		{
+			0 removeactorweapon "CompressionRifle"
+			0 forcealpha
+			0 alpha 0
+			0 noshadow
+			730 alpha 100
+			735 playDialog "loc/eng/sound/dialog/m8l2/munro_keepalive.mp3" 1, 10000, 0
+			735 simpleplayDialog "loc/deu/sound/dialog/m8l2/munro_keepalive.mp3" 1, 10000, 0
+			
+			863 playDialog "loc/eng/sound/dialog/m8l2/munro_nocome.mp3" 1, 10000, 0
+			863 simpleplayDialog "loc/deu/sound/dialog/m8l2/munro_nocome.mp3" 1, 10000, 0
+		}
+	}
+
+	cin-m8l2_father_munro cin-m8l2_father_munro.ska
+	{
+		server
+		{
+			0 removeactorweapon "CompressionRifle"
+			0 rendereffects +shadowFromBip01
+			363 playDialog "loc/eng/sound/dialog/m8l2/munro_sendstop.mp3" 1, 10000, 0
+			363 simpleplayDialog "loc/deu/sound/dialog/m8l2/munro_sendstop.mp3" 1, 10000, 0
+			
+			411 playDialog "loc/eng/sound/dialog/m8l2/munro_makework.mp3" 1, 10000, 0
+			411 simpleplayDialog "loc/deu/sound/dialog/m8l2/munro_makework.mp3" 1, 10000, 0
+			
+			451 playDialog "loc/eng/sound/dialog/m8l2/munro_letmeout.mp3" 1, 10000, 0
+			451 simpleplayDialog "loc/deu/sound/dialog/m8l2/munro_letmeout.mp3" 1, 10000, 0
+			
+			505 playDialog "loc/eng/sound/dialog/m8l2/munro_turnedon.mp3" 1, 10000, 0
+			505 simpleplayDialog "loc/deu/sound/dialog/m8l2/munro_turnedon.mp3" 1, 10000, 0
+			
+			539 playDialog "loc/eng/sound/dialog/m8l2/munro_getyou.mp3" 1, 10000, 0
+			539 simpleplayDialog "loc/deu/sound/dialog/m8l2/munro_getyou.mp3" 1, 10000, 0
+			
+			580 playDialog "loc/eng/sound/dialog/m8l2/munro_litentome.mp3" 1, 10000, 0
+			580 simpleplayDialog "loc/deu/sound/dialog/m8l2/munro_litentome.mp3" 1, 10000, 0
+			
+			639 playDialog "loc/eng/sound/dialog/m8l2/munro_opendoor.mp3" 1, 10000, 0
+			639 simpleplayDialog "loc/deu/sound/dialog/m8l2/munro_opendoor.mp3" 1, 10000, 0
+			727 forcealpha
+			727 alpha 0
+		}
+	}
+
+//////////////////
+// TC anims
+//////////////////
+
+	cin-m8_back   			cin-m8_back.ska
+	cin-m8_lean   			cin-m8_lean.ska
+	cin-m8_foward 			cin-m8_foward.ska
+	cin-m8_legup  			cin-m8_legup.ska
+	cin-m8_situp  			cin-m8_situp.ska
+
+}

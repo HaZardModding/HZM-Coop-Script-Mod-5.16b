@@ -1,0 +1,51 @@
+//Avialable Packagages
+registerpackage "general_ai_off"
+registerpackage "borgboss_stage1"
+registerpackage "borgboss_stage2"
+registerpackage "borgboss_stage3"
+registerpackage "borgboss_stage4"
+registerpackage "borgboss_disabled"
+registerpackage "borgboss_crippled"
+
+
+////masterstatemap - ALLWAYS LOADED
+base\ai\BrgBos\MS_BrgBos.st
+-> Loads AI_OFF
+-> Loads on default STAGE 1
+-> Loads STAGE 2
+-> Loads STAGE 3
+-> Loads STAGE 4
+-> Loads DISABLED
+-> Loads CRIPPLED
+
+////BEHAVIOR WHEN - AI IS OFF
+base\ai\All\General_AIOff.st
+
+////GLOBAL BEHAVIOR
+ai\BrgBos\Glob\GP_BrgBos_Global.st
+
+////BEHAVIOR - FOR STAGE 1
+base\ai\BrgBos\Bpck\P_BrgBos_Stage1.st
+$include ai/BrgBos/Glob/GP_BrgBos_Global.st
+
+////BEHAVIOR - FOR STAGE 2
+base\ai\BrgBos\Bpck\P_BrgBos_Stage2.st
+$include ai/BrgBos/Glob/GP_BrgBos_Global.st
+
+////BEHAVIOR - FOR STAGE 3
+base\ai\BrgBos\Bpck\P_BrgBos_Stage3.st
+$include ai/BrgBos/Glob/GP_BrgBos_Global.st
+
+////BEHAVIOR - FOR STAGE 4
+base\ai\BrgBos\Bpck\P_BrgBos_Stage4.st
+$include ai/BrgBos/Glob/GP_BrgBos_Global.st
+
+
+////BEHAVIOR WHEN - Chrippled (Changing STATE)
+base\ai\BrgBos\Bpck\P_BrgBos_Crippled.st
+
+////BEHAVIOR WHEN - Disabled (Player Shot a Node)
+base\ai\BrgBos\Bpck\P_BrgBos_Disabled.st
+
+
+

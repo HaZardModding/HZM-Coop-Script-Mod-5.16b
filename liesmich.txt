@@ -1,0 +1,66 @@
+FÜR DAS SPIEL:               STAR TREK ELITE FORCE II
+SPIEL VERSION:               Alle offiziellen versionen, ausser die DEMO!
+KLASSIFIKATION:              Modifikation
+AUSFÜHRUNGS TYP:             Serverseitig (LevelScript - Morpheus Scripting System)
+MODUS:                       Mehrspieler
+HERSTELLER:                  HaZardModding
+
+Weitere Lektüre:
+- Installations Anleitung: installation.txt
+- Rechtliches: lizenz.txt
+
+
+EINLEITUNG====================================================================
+==============================================================================
+Die HaZardModding Co-Operativ Modifikation ist eine interaktive,
+unterstützende umfassende qualitäts Lösung, integriert in die
+Star Trek(R) Elite Force II Karten-Scripte; SIe ist nicht nur
+vollständig soft-gecoded, sondern wird auch serverseitig
+ausgeführt mit Ritual Entertainments stark modifizierten variante
+der ID-Tech 3 Spiel Engine.
+
+SIE SIND DAS HAZARDTEAM!
+Erleben Sie die Kampagne zusammen mit Ihren Freunden, im Lokalen Netzwark oder Über das Internet.
+	- Spielen Sie die vollständige Kampagne
+	- Inklusive allen Video-Sequenzen (Cut-Scenes)
+	- Inklusive allen Geheimkarten
+    - Nützen Sie den Tricorder um mit Ihrere Umgebung zu Interagieren
+	- Nützen Sie den Coop Kommunikator zur einfachen zweisprachigen Kommunikation
+    - Unterstüzen Sie Ihr Team als Doktor, Waffenspezialist oder Techniker
+    - Profitieren Sie durch Überarbeitete Menüs und HUDs
+    - Wählen Sie einen passenden Schwierigkeitsgrad
+    - Ändern Sie jeder Zeit die Server Spieloptionen
+    - Wählen Sie eine beliebige Mission
+    - Geniessen Sie zusätzliche Details
+	- Zusätzliche Benutzer erstellte Karten verfügbar
+
+	
+BENUTZER KARTEN===============================================================
+==============================================================================
+Benutzer erstellte Karten müssen herunter geladen werden! Verfügbare Seiten:
+1. http://hazardmodding.com
+2. http://www.moddb.com
+3. http://eliteforce2.filefront.com
+4. http://www.filefront.com
+
+
+KONTAKT - SUPPORT=============================================================
+==============================================================================
+Bitte Lesen Sie unsere FAQ bevor Sie uns kontaktieren.
+Das FAQ Dokument finden Sie unter: mod_hzm_co-op/Documents/faq.txt
+Sollte Ihnen das FAQ nicht weiter helfen schreiben Sie uns:
+http://www.hazardmodding.com/index.php?s=contact
+
+
+LINKS=========================================================================
+==============================================================================
+EF community -> http://eliteforce2.filefront.com
+Modding Community -> www.moddb.com
+Kompressions-Software (Zip,pk3,pk4) -> www.7zip.org
+Borg War - Der Film -> www.borgwarmovie.org
+Inno Setup (Installer) -> http://www.jrsoftware.org
+Ritual Entertainment Community -> www.ritualistic.com
+Star Traks: Machinima -> www.khobrah.net/silver/machinima.html
+Podcast Star Trek Spielen gewidmet -> http://www.hailingfrequency.co.uk
+Das PRogramm mit dem diese Mod entwickelt wurde -> http://notepad-plus.sourceforge.net
+Benütze DDS Konvertierungs Software: http://www.getpaint.net

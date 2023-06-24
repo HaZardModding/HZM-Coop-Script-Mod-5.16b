@@ -1,0 +1,19 @@
+cache models/weapons/projectile-burstrifle.tik
+
+cache models/item/holdable_medkit.tik
+cache models/item/holdable_explosive.tik
+cache models/item/holdable_forcefield.tik
+
+cache localization/sound/dialog/dm/comp_infil.mp3
+cache localization/sound/dialog/dm/comp_demoli.mp3
+cache localization/sound/dialog/dm/comp_sniper.mp3
+
+cache models/item/mp_specialty_demolitionist.tik
+cache models/item/mp_specialty_infiltrator.tik
+cache models/item/mp_specialty_sniper.tik
+
+cache sysimg/icons/mp/specialty_infiltrator.img
+cache sysimg/icons/mp/specialty_demolitionist.img
+cache sysimg/icons/mp/specialty_sniper.img
+
+cache models/item/powerup_invisibility.tik

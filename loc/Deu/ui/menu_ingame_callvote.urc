@@ -1,0 +1,2573 @@
+menu "callvote" 640 480 NONE 0
+bgcolor 0 0 0 0.8
+borderstyle NONE
+depth 0.2
+
+showcommand "seta coop_ui_sm -1;seta coop_ui_vt 4;ui_setvoteoptionwidget VoteOptionList;globalwidgetcommand VoteOptionList deleteallitems;globalwidgetcommand votelist deselectall\n"
+//showcommand "ui_showmouse\n"
+
+include "loc/Deu/ui/ingame-background.inc"
+
+
+resource
+Label
+{
+    name "tooltip_callvote"
+    rect 49 403 320 26
+    fgcolor 1 1 1 1
+    bgcolor 0 0 0 0
+    font tahoma-8
+    
+    horizontaljustify left
+    verticaljustify top
+}
+
+
+resource
+Button
+{
+	title "$$Game$$"
+	name "Default"
+	rect 44 55 138 32
+	fgcolor 0.12 0.15 0.25 1.00
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "none"
+	
+	font serpentinemedium-12
+	horizontaljustify center
+	verticaljustify center
+	
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	hovercommand "globalwidgetcommand tooltip_callvote title \"$$MultimatchIngameMenu$$\""
+	hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+	
+	stuffcommand "popmenu 0"
+	
+    hoversound sound/misc/menu/hover.wav
+    clicksound sound/misc/menu/click.wav
+}
+
+resource
+Button
+{
+    title "$$Multiplayer$$"
+    name "Default"
+    rect 182 55 138 32
+	fgcolor 0.12 0.15 0.25 1.00
+	bgcolor 1.00 1.00 1.00 0.00
+	
+	font serpentinemedium-12
+	horizontaljustify center
+	verticaljustify center
+	
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+
+    stuffcommand "transitionmenu multimatch"
+
+	hovercommand "globalwidgetcommand tooltip_callvote title \"$$MultiplayerGame$$\""
+	hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+    
+    hoversound sound/misc/menu/hover.wav
+    clicksound sound/misc/menu/click.wav
+  
+}
+
+
+resource
+Button
+{
+	title "$$MPConfigure$$"
+	name "Default"
+	rect 458 55 138 32
+	fgcolor 0.12 0.15 0.25 1.00
+	bgcolor 1.00 1.00 1.00 0.00
+	borderstyle "none"
+	
+	font serpentinemedium-12
+	horizontaljustify center
+	verticaljustify center
+	
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	
+	hovercommand "globalwidgetcommand tooltip_callvote title \"$$SetPlayerOptions$$\""
+	hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+	
+	stuffcommand "pushmenu playersetup_multiplayer"
+	
+    hoversound sound/misc/menu/hover.wav
+    clicksound sound/misc/menu/click.wav
+}
+
+
+resource
+vertscroll
+{
+	name "votescrollinfo"
+	fgcolor 		0.937 0.643 0.129 1.000
+	bgcolor			0.125 0.157 0.251 0.500
+	scrollbar_thumbcolor	0.125 0.157 0.251 1.000
+	scrollbar_width 12
+	borderstyle "3D_BORDER"
+}
+
+resource
+widget
+{
+	rect 	 46 102 256 32
+	fgcolor 1.00 1.00 0.00 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle "none"
+	
+	shader menu/main/credits
+	shadercolor 1.0 1.0 1.0 1.0 
+	hovershadercolor 1.0 1.0 1.0 1.0 
+	armedshadercolor 1.0 1.0 1.0 1.0 
+	selectedshadercolor 1.0 1.0 1.0 1.0 
+}
+
+resource
+Button
+{
+	title "$$KickPlayer$$"
+	name 	"Default"
+	rect 	 96 102 123 26
+	font serpentinemedium-12
+	fgcolor 		1.000 1.000 1.000 1.000
+	bgcolor 		0.000 0.000 0.000 0.000
+
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+
+	//borderstyle "BORDER_OUTLINE"
+	//borderwidth 1
+	//bordercolor 0.12 0.15 0.25 1.00
+
+	stuffcommand "ui_setvotetype kick;seta coop_ui_vt 1;\n"
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"$$KickPlayerToolTip$$\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+    
+    clicksound sound/misc/menu/click.wav
+}
+
+resource
+widget
+{
+	cvarvisibility coop_ui_vt 3 !=
+	rect 	 46 133 256 32
+	fgcolor 1.00 1.00 0.00 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle "none"
+	
+	shader menu/main/credits
+	shadercolor 1.0 1.0 1.0 1.0 
+	hovershadercolor 1.0 1.0 1.0 1.0 
+	armedshadercolor 1.0 1.0 1.0 1.0 
+	selectedshadercolor 1.0 1.0 1.0 1.0 
+}
+
+resource
+Button
+{
+	cvarvisibility coop_ui_vt 3 !=
+	title "$$ChangeMap$$"
+	name 	"changeMap"
+	rect 	 96 133 123 26
+	font serpentinemedium-12
+	fgcolor 		1.000 1.000 1.000 1.000
+	bgcolor 		0.000 0.000 0.000 0.000
+
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+
+	//borderstyle "BORDER_OUTLINE"
+	//borderwidth 1
+	//bordercolor 0.12 0.15 0.25 1.00
+
+	stuffcommand "ui_setvotetype map;seta coop_ui_vt 3;\n"
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"$$ChangeMapToolTip$$\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+    
+    clicksound sound/misc/menu/click.wav
+}
+
+resource
+widget
+{
+	cvarvisibility coop_ui_vt 3 ==
+	rect 	 46 133 256 32
+	fgcolor 1.00 1.00 0.00 1.00
+	bgcolor 0.00 1.00 1.00 0.00
+	borderstyle "none"
+	
+	shader menu/main/credits
+	shadercolor		1.000 0.000 0.000 1.000
+	hovershadercolor 1.000 0.000 0.000 1.000
+	armedshadercolor 1.000 0.000 0.000 1.000
+	selectedshadercolor 1.000 0.000 0.000 1.000
+}
+
+resource
+Button
+{
+	cvarvisibility coop_ui_vt 3 ==
+	title "restart Map"
+	name 	"restartMap"
+	rect 	 96 133 123 26
+	font serpentinemedium-12
+	fgcolor 		1.000 0.000 0.000 1.000
+	bgcolor 		0.000 0.000 0.000 0.000
+
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+
+	//borderstyle "BORDER_OUTLINE"
+	//borderwidth 1
+	//bordercolor 0.12 0.15 0.25 1.00
+
+	stuffcommand "seta coop_ui_vt 2;callvote restart;\n"
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"$$ChangeMapToolTip$$\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+    
+    clicksound sound/misc/menu/click.wav
+}
+
+/////////////////////////////////////////////////////////////////////////NEXTMAP
+resource
+widget
+{
+	cvarvisibility coop_ui_vt 3 ==
+	
+	rect 	46 185 256 26
+	fgcolor 1.00 1.00 0.00 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle "none"
+	
+	shader menu/main/secrets
+	shadercolor 1.00 0.00 0.00 1.00
+	hovershadercolor 1.00 0.00 0.00 1.00
+	armedshadercolor 1.00 0.00 0.00 1.00
+	selectedshadercolor 1.00 0.00 0.00 1.00
+}
+resource
+Button
+{
+	cvarvisibility coop_ui_vt 3 ==
+	title "Nächste Karte"
+	name 	"next map"
+	rect 	62 185 190 26
+	font serpentinemedium-10
+	fgcolor 		1.000 1.000 1.000 1.000
+	bgcolor 		0.000 0.000 0.000 0.000
+
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	clicksound sound/misc/menu/click.wav
+ 
+	stuffcommand "vstr coop_nMap\n"
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Gehe zur nächsten Karte...\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+/////////////////////////////////////////////////////////////////////////PREVMAP
+resource
+widget
+{
+	cvarvisibility coop_ui_vt 3 ==
+	
+	rect 	46 210 256 26
+	fgcolor 1.00 1.00 0.00 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle "none"
+	
+	shader menu/main/secrets
+	shadercolor 1.00 0.00 0.00 1.00
+	hovershadercolor 1.00 0.00 0.00 1.00
+	armedshadercolor 1.00 0.00 0.00 1.00
+	selectedshadercolor 1.00 0.00 0.00 1.00
+}
+resource
+Button
+{
+	cvarvisibility coop_ui_vt 3 ==
+	title "Vorherige Karte"
+	name 	"previous map"
+	rect 	62 210 190 26
+	font serpentinemedium-10
+	fgcolor 		1.000 1.000 1.000 1.000
+	bgcolor 		0.000 0.000 0.000 0.000
+
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	clicksound sound/misc/menu/click.wav
+ 
+	stuffcommand "vstr coop_pMap\n"
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Gehe zur vorherigen Karte...\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+/////////////////////////////////////////////////////////////////////NEXTMISSION
+resource
+widget
+{
+	cvarvisibility coop_ui_vt 3 ==
+	
+	rect 	46 235 256 26
+	fgcolor 1.00 1.00 0.00 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle "none"
+	
+	shader menu/main/secrets
+	shadercolor 1.00 0.00 0.00 1.00
+	hovershadercolor 1.00 0.00 0.00 1.00
+	armedshadercolor 1.00 0.00 0.00 1.00
+	selectedshadercolor 1.00 0.00 0.00 1.00
+}
+resource
+Button
+{
+	cvarvisibility coop_ui_vt 3 ==
+	title "Nächste Mission"
+	name 	"next Mission"
+	rect 	62 235 190 26
+	font serpentinemedium-10
+	fgcolor 		1.000 1.000 1.000 1.000
+	bgcolor 		0.000 0.000 0.000 0.000
+
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	clicksound sound/misc/menu/click.wav
+ 
+	stuffcommand "vstr coop_nMission\n"
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Gehe zur nächsten Mission...\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+//COOP TYPE SELECTION BUTTONS///////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////{
+
+
+//}
+//Campaign  Maps////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////{
+resource
+widget
+{
+	
+	cvarvisibility coop_ui_vt 7 !=
+	
+	rect 	46 314 256 26
+	fgcolor 1.00 1.00 0.00 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle "none"
+	
+	shader menu/main/secrets
+	shadercolor 1.00 0.00 0.00 1.00
+	hovershadercolor 1.00 0.00 0.00 1.00
+	armedshadercolor 1.00 0.00 0.00 1.00
+	selectedshadercolor 1.00 0.00 0.00 1.00
+}
+
+
+resource
+Button
+{
+	cvarvisibility coop_ui_vt 7 !=
+	title "^2Campaign"
+	name 	"1buttonCo-OpCampaignMaps"
+	rect 	62 314 190 26
+	font serpentinemedium-10
+	fgcolor 		1.000 1.000 1.000 1.000
+	bgcolor 		0.000 0.000 0.000 0.000
+
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+
+	//borderstyle "BORDER_OUTLINE"
+	//borderwidth 1
+	//bordercolor 0.12 0.15 0.25 1.00
+
+	stuffcommand "seta coop_ui_vt 7;set coop_ui_smn $$mission-m1$$;set coop_ui_sm 1;\n"
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+    
+    clicksound sound/misc/menu/click.wav
+}
+
+//}
+//Secret Maps/////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////{
+resource
+widget
+{
+	cvarvisibility coop_ui_vt 5 !=
+
+	rect 	46 340 256 26
+	fgcolor 1.00 1.00 0.00 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle "none"
+	
+	shader menu/main/secrets
+	shadercolor 1.00 0.00 0.00 1.00
+	hovershadercolor 1.00 0.00 0.00 1.00
+	armedshadercolor 1.00 0.00 0.00 1.00
+	selectedshadercolor 1.00 0.00 0.00 1.00
+}
+
+resource
+Button
+{
+	cvarvisibility coop_ui_vt 5 !=
+	
+	title "^1Secrets"
+	name 	"buttonCo-OpSecretMaps"
+	rect 	62 340 190 26
+	font serpentinemedium-10
+	fgcolor 		1.000 1.000 1.000 1.000
+	bgcolor 		0.000 0.000 0.000 0.000
+	horizontaljustify center
+
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+
+	//borderstyle "BORDER_OUTLINE"
+	//borderwidth 1
+	//bordercolor 0.12 0.15 0.25 1.00
+
+	stuffcommand "set coop_ui_sm -1;seta coop_ui_vt 5;\n"
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+    
+    clicksound sound/misc/menu/click.wav
+	
+}
+
+//}
+//Training Maps/////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////{
+resource
+widget
+{
+	cvarvisibility coop_ui_vt 6 !=
+	
+	rect 	46 366 256 26
+	fgcolor 1.00 1.00 0.00 1.00
+	bgcolor 0.00 0.00 0.00 0.00
+	borderstyle "none"
+	
+	shader menu/main/secrets
+	shadercolor 1.00 0.00 0.00 1.00
+	hovershadercolor 1.00 0.00 0.00 1.00
+	armedshadercolor 1.00 0.00 0.00 1.00
+	selectedshadercolor 1.00 0.00 0.00 1.00
+}
+
+resource
+Button
+{
+	cvarvisibility coop_ui_vt 6 !=
+	
+	title "^3Training"
+	name 	"buttonCo-OpTrainingMaps"
+	rect 	62 366 190 26
+	font serpentinemedium-10
+	fgcolor 		1.000 1.000 1.000 1.000
+	bgcolor 		0.000 0.000 0.000 0.000
+
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+
+	//borderstyle "BORDER_OUTLINE"
+	//borderwidth 1
+	//bordercolor 0.12 0.15 0.25 1.00
+
+	stuffcommand "seta coop_ui_vt 6;set coop_ui_sm -1;\n"
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+    
+    clicksound sound/misc/menu/click.wav
+	
+}
+//}
+// COOP MISSION SELECTION DROPDOWN//////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////{
+// mission-default									"INFORMATIONSMISSION"
+// mission-m0									"HAZARD-TEAM-HOLODECK-TRAINING"
+// mission-m1									"MISSION 1: Endspiel @Borg-Sphäre"
+// mission-m2									"MISSION 2: Neue Einsätze @Sternenflottenakademie"
+// mission-m3									"MISSION 3: Herrenlos @USS Dallas"
+// mission-m4									"MISSION 4: Besitzwechsel @Attrexianische Station"
+// mission-m5									"MISSION 5: Entdeckung @Fremder Planet"
+// mission-m6									"MISSION 6: Zerstörung @enterprise-E"
+// mission-m6ext                                "MISSION 6: Beseitigung @enterprise-E-Hülle"
+// mission-m7									"MISSION 7: Rettungseinsatz @Attrexianische Kolonie"
+// mission-m8									"MISSION 8: Tag der Abrechnung @Alter idryllischer Planet"
+// mission-m9									"MISSION 9: Die Söldner @K7-Sternenbasis"
+// mission-m10									"MISSION 10: Inkognito @Geheime Romulanerbasis"
+// mission-m11									"MISSION 11: Endspiel 2 @Hauptkontrolle"
+// mission-ent									"USS Enterprise-E"
+
+resource 
+Label
+{
+	cvarvisibility coop_ui_vt 6 ==
+	name "labelShowMissionNameDropdown1"
+	title "$$mission-m0$$"
+	rect 058 84 530 20//258//274 86 330 16
+	fgcolor 0.963 0.677 0.281 1//0.953 0.667 0.271
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify right
+    font serpentinemedium-12
+}
+
+resource 
+Label
+{
+	cvarvisibility coop_ui_vt 5 ==
+	name "labelShowMissionNameDropdown2"
+	title "$$SecretMapList$$"
+	rect 380 84 230 20//258//274 86 330 16
+	fgcolor 0.963 0.677 0.281 1//0.953 0.667 0.271
+    bgcolor 0.000 0.000 0.000 0.000
+    borderstyle "none"
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-12
+}
+
+
+
+resource 
+Label
+{
+	cvarvisibility coop_ui_vt 7 ==
+	name "labelMissionName"
+	title "Missions"
+	linkcvar "coop_ui_smn"
+    rect 058 84 530 20//258//274 86 330 16
+    fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 0.750
+    borderstyle "OUTLINE_BORDER"
+    bordercolor 0.122 0.157 0.251 1.000
+    verticaljustify top
+    horizontaljustify left
+    font serpentinemedium-12
+}
+
+
+resource
+SwitchBox
+{
+	cvarvisibility coop_ui_vt 7 ==
+    name "Defaultswitchmission"
+    rect 058 84 530 20//258//274 86 330 16
+    fgcolor 0.953 0.667 0.271 1.000
+    bgcolor 0.000 0.000 0.000 1
+    borderstyle "OUTLINE_BORDER"
+    bordercolor 0.122 0.157 0.251 1.000
+    
+    linkcvar "coop_ui_sm"
+
+    option "$$mission-m1$$"		"set coop_ui_sm 1" 1
+    option "$$mission-m2$$"		"set coop_ui_sm 2" 2
+    option "$$mission-m3$$"		"set coop_ui_sm 3" 3
+    option "$$mission-m4$$"		"set coop_ui_sm 4" 4
+    option "$$mission-m5$$"		"set coop_ui_sm 5" 5
+    option "$$mission-m6$$"		"set coop_ui_sm 6" 6
+    option "$$mission-m7$$"		"set coop_ui_sm 7" 7
+    option "$$mission-m8$$"		"set coop_ui_sm 8" 8
+    option "$$mission-m9$$"		"set coop_ui_sm 9" 9
+    option "$$mission-m10$$"	"set coop_ui_sm 10" 10
+    option "$$mission-m11$$"	"set coop_ui_sm 11" 11
+    option "$$mission-ent$$"	"set coop_ui_sm 12" 12
+    
+    font serpentinemedium-12
+    hovercommand "globalwidgetcommand tooltip_video title \"$$SelectLevel$$\""
+    hoverexitcommand "globalwidgetcommand tooltip_video title \"\""
+    
+    clicksound sound/misc/menu/click.wav
+}
+
+resource
+PulldownMenuContainer
+{
+	cvarvisibility coop_ui_vt 7 ==
+	title "$$list$$"
+	name "miselection"
+	rect 588 86 16 16
+    fgcolor 				0.953 0.667 0.271 1.000
+    bgcolor                 1.000 1.000 1.000 0.000
+    shadercolor             0.953 0.667 0.271 1.000
+    hovershadercolor        0.953 0.667 0.271 0.700
+    armedshadercolor        0.953 0.667 0.271 1.000
+    selectedshadercolor     0.953 0.667 0.271 0.000
+	font serpentinelight-8
+	
+	menushader "MENU" "textures/menu/pulldownarrow"
+	selmenushader "MENU" "textures/menu/pulldownarrow_sel"
+
+	addpopup "MENU" "$$mission-m1$$"		command	"set coop_ui_sm 1;set coop_ui_smn $$mission-m1$$\n"
+	addpopup "MENU" "$$mission-m2$$"		command	"set coop_ui_sm 2;set coop_ui_smn $$mission-m2$$\n"
+	addpopup "MENU" "$$mission-m3$$"		command	"set coop_ui_sm 3;set coop_ui_smn $$mission-m3$$\n"
+	addpopup "MENU" "$$mission-m4$$"		command	"set coop_ui_sm 4;set coop_ui_smn $$mission-m4$$\n"
+	addpopup "MENU" "$$mission-m5$$"		command	"set coop_ui_sm 5;set coop_ui_smn $$mission-m5$$\n"
+	addpopup "MENU" "$$mission-m6$$"		command	"set coop_ui_sm 6;set coop_ui_smn $$mission-m6$$\n"
+	//addpopup "MENU" "$$mission-m6ext$$"		command	"set coop_ui_sm 66;set coop_ui_smn $$mission-m6ext$$\n"
+	addpopup "MENU" "$$mission-m7$$"		command	"set coop_ui_sm 7;set coop_ui_smn $$mission-m7$$\n"
+	addpopup "MENU" "$$mission-m8$$"		command	"set coop_ui_sm 8;set coop_ui_smn $$mission-m8$$\n"
+	addpopup "MENU" "$$mission-m9$$"		command	"set coop_ui_sm 9;set coop_ui_smn $$mission-m9$$\n"
+	addpopup "MENU" "$$mission-m10$$"		command	"set coop_ui_sm 10;set coop_ui_smn $$mission-m10$$\n"
+	addpopup "MENU" "$$mission-m11$$"		command	"set coop_ui_sm 11;set coop_ui_smn $$mission-m11$$\n"
+	addpopup "MENU" "$$mission-ent$$"		command	"set coop_ui_sm 12;set coop_ui_smn $$mission-ent$$\n"
+	popup_width "MENU" 340
+    clicksound sound/misc/menu/click.wav
+}
+
+
+//}
+//TRAINING MAPS////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////{
+resource
+label
+{
+	cvarvisibility coop_ui_vt 6 ==
+	title	"$$TrainingLevel1Desc$$ @ent-training1"
+	name	"$$TrainingLevel1Desc$$"
+	rect		274 106 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_vt 6 ==
+	title	""
+	name	"$$TrainingLevel1Desc$$Button"
+	rect	274 106 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map ent-training1;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+resource
+label
+{
+	cvarvisibility coop_ui_vt 6 ==
+	title	"$$TrainingLevel2Desc$$ @ent-training2"
+	name	"$$TrainingLevel2Desc$$"
+	rect		274 122 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_vt 6 ==
+	title	""
+	name	"$$TrainingLevel2Desc$$Button"
+	rect	274 122 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map ent-training2;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+resource
+label
+{
+	cvarvisibility coop_ui_vt 6 ==
+	title	"$$TrainingLevel3Desc$$ @ent-training3"
+	name	"$$TrainingLevel3Desc$$"
+	rect		274 138 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_vt 6 ==
+	title	""
+	name	"$$TrainingLevel3Desc$$Button"
+	rect	274 138 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map ent-training3;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+resource
+label
+{
+	cvarvisibility coop_ui_vt 6 ==
+	title	"$$TrainingLevel4Desc$$ @ent-training4"
+	name	"$$TrainingLevel4Desc$$"
+	rect		274 154 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_vt 6 ==
+	title	""
+	name	"$$TrainingLevel4Desc$$Button"
+	rect	274 154 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map ent-training4;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+//}
+//SECRET MAPS////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////{
+resource
+label
+{
+	cvarvisibility coop_ui_vt 5 ==
+	title	"$$Secret1$$ @secret1"
+	name	"$$Secret1$$"
+	rect		274 106 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_vt 5 ==
+	title	""
+	name	"$$Secret1$$Button"
+	rect	274 106 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map secret1;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+resource
+label
+{
+	cvarvisibility coop_ui_vt 5 ==
+	title	"$$Secret2$$ @secret2"
+	name	"$$Secret2$$"
+	rect		274 122 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_vt 5 ==
+	title	""
+	name	"$$Secret2$$Button"
+	rect	274 122 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map secret2;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+resource
+label
+{
+	cvarvisibility coop_ui_vt 5 ==
+	title	"$$Secret3$$ @secret3"
+	name	"$$Secret3$$"
+	rect		274 138 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_vt 5 ==
+	title	""
+	name	"$$Secret3$$Button"
+	rect	274 138 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map secret3;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+resource
+label
+{
+	cvarvisibility coop_ui_vt 5 ==
+	title	"$$Minigame$$ @ef2_minigame2"
+	name	"$$Minigame$$"
+	rect		274 154 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_vt 5 ==
+	title	""
+	name	"$$Minigame$$Button"
+	rect	274 154 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map ef2_minigame2;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_vt 5 ==
+	title	"$$Zoo1$$ @zoo1"
+	name	"$$Zoo1$$"
+	rect		274 170 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_vt 5 ==
+	title	""
+	name	"$$Zoo1$$Button"
+	rect	274 170 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map zoo1;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_vt 5 ==
+	title	"$$Zoo2$$ @testmorph"
+	name	"$$Zoo2$$"
+	rect		274 186 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_vt 5 ==
+	title	""
+	name	"$$Zoo2$$Button"
+	rect	274 186 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map testmorph;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+//}
+//MISSION 1 MAPS////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////{
+resource
+label
+{
+	cvarvisibility coop_ui_sm 1 ==
+	title	"$$BorgSphereLevel1aDesc$$ @m1l1a-borg_sphere"
+	name	"$$BorgSphereLevel1aDesc$$"
+	rect		274 106 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 1 ==
+	title	""
+	name	"$$BorgSphereLevel1aDesc$$Button"
+	rect	274 106 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m1l1a-borg_sphere;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 1 ==
+	title	"$$BorgSphereLevel1bDesc$$ @m1l1b-borg_sphere"
+	name	"$$BorgSphereLevel1bDesc$$"
+	rect		274 122 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 1 ==
+	title	""
+	name	"$$BorgSphereLevel1bDesc$$Button"
+	rect	274 122 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	stuffcommand "callvote map m1l1b-borg_sphere;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 1 ==
+	title	"$$BorgSphereLevel1cDesc$$ @m1l1c-borg_sphere"
+	name	"$$BorgSphereLevel1cDesc$$"
+	rect		274 138 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 1 ==
+	title	""
+	name	"$$BorgSphereLevel1cDesc$$Button"
+	rect	274 138 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m1l1c-borg_sphere;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 1 ==
+	title	"$$BorgSphereLevel2aDesc$$ @m1l2a-borg_sphere"
+	name	"$$BorgSphereLevel2aDesc$$"
+	rect		274 154 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 1 ==
+	title	""
+	name	"$$BorgSphereLevel2aDesc$$Button"
+	rect	274 154 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m1l2a-borg_sphere;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 1 ==
+	title	"$$BorgSphereLevel2bDesc$$ @m1l2b-borg_sphere"
+	name	"$$BorgSphereLevel2bDesc$$"
+	rect		274 170 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 1 ==
+	title	""
+	name	"$$BorgSphereLevel2bDesc$$Button"
+	rect	274 170 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m1l2b-borg_sphere;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+resource
+label
+{
+	cvarvisibility coop_ui_sm 1 ==
+	title	"$$BorgSphereLevel2cDesc$$ @m1l2c-borg_sphere"
+	name	"$$BorgSphereLevel2cDesc$$"
+	rect		274 186 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 1 ==
+	title	""
+	name	"$$BorgSphereLevel2cDesc$$Button"
+	rect	274 186 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m1l2c-borg_sphere;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 1 ==
+	title	"$$BorgBossLevelDesc$$ @m1l3-borg_boss"
+	name	"$$BorgBossLevelDesc$$"
+	rect		274 202 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 1 ==
+	title	""
+	name	"$$BorgBossLevelDesc$$Button"
+	rect	274 202 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m1l3-borg_boss;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+//}
+//MISSION 2 MAPS////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////{
+resource
+label
+{
+	cvarvisibility coop_ui_sm 2 ==
+	title	"$$StarfleetAcademyLevel1Desc$$ @m2l0-sfa"
+	name	"$$StarfleetAcademyLevel1Desc$$"
+	rect		274 106 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 2 ==
+	title	""
+	name	"$$StarfleetAcademyLevel1Desc$$Button"
+	rect	274 106 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m2l0-sfa;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 2 ==
+	title	"$$StarfleetAcademyLevel2Desc$$ @m2l1-sfa"
+	name	"$$StarfleetAcademyLevel2Desc$$"
+	rect		274 122 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 2 ==
+	title	""
+	name	"$$StarfleetAcademyLevel2Desc$$Button"
+	rect	274 122 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m2l1-sfa;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 2 ==
+	title	"$$StarfleetAcademyLevel3Desc$$ @m2l2-sfa"
+	name	"$$StarfleetAcademyLevel3Desc$$"
+	rect		274 138 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 2 ==
+	title	""
+	name	"$$StarfleetAcademyLevel3Desc$$Button"
+	rect	274 138 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m2l2-sfa;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+//}
+//MISSION 3 MAPS////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////{
+resource
+label
+{
+	cvarvisibility coop_ui_sm 3 ==
+	title	"$$DallasLevel1aDesc$$ @m3l1a-forever"
+	name	"$$DallasLevel1aDesc$$"
+	rect		274 106 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 3 ==
+	title	""
+	name	"$$DallasLevel1aDesc$$Button"
+	rect	274 106 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m3l1a-forever;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 3 ==
+	title	"$$DallasLevel1bDesc$$ @m3l1b-forever"
+	name	"$$DallasLevel1bDesc$$"
+	rect		274 122 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 3 ==
+	title	""
+	name	"$$DallasLevel1bDesc$$Button"
+	rect	274 122 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m3l1b-forever;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 3 ==
+	title	"$$DallasLevel2Desc$$ @m3l2-forever"
+	name	"$$DallasLevel2Desc$$"
+	rect		274 138 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 3 ==
+	title	""
+	name	"$$DallasLevel2Desc$$Button"
+	rect	274 138 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m3l2-forever;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+//}
+//MISSION 4 MAPS////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////{
+resource
+label
+{
+	cvarvisibility coop_ui_sm 4 ==
+	title	"$$AttrexianStationLevel1aDesc$$ @m4l1a-attrexian_station"
+	name	"$$AttrexianStationLevel1aDesc$$"
+	rect		274 106 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 4 ==
+	title	""
+	name	"$$AttrexianStationLevel1aDesc$$Button"
+	rect	274 106 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m4l1a-attrexian_station;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 4 ==
+	title	"$$AttrexianStationLevel1bDesc$$ @m4l1b-attrexian_station"
+	name	"$$AttrexianStationLevel1bDesc$$"
+	rect		274 122 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 4 ==
+	title	""
+	name	"$$AttrexianStationLevel1bDesc$$Button"
+	rect	274 122 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m4l1b-attrexian_station;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 4 ==
+	title	"$$AttrexianStationLevel2bDesc$$ @m4l2b-attrexian_station"
+	name	"$$AttrexianStationLevel2bDesc$$"
+	rect		274 138 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 4 ==
+	title	""
+	name	"$$AttrexianStationLevel2bDesc$$Button"
+	rect	274 138 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m4l2b-attrexian_station;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+//}
+//MISSION 5 MAPS////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////{
+resource
+label
+{
+	cvarvisibility coop_ui_sm 5 ==
+	title	"$$DrullRuinsLevel1aDesc$$ @m5l1a-drull_ruins1"
+	name	"$$DrullRuinsLevel1aDesc$$"
+	rect		274 106 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 5 ==
+	title	""
+	name	"$$DrullRuinsLevel1aDesc$$Button"
+	rect	274 106 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m5l1a-drull_ruins1;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 5 ==
+	title	"$$DrullRuinsLevel1bDesc$$ @m5l1b-drull_ruins1"
+	name	"$$DrullRuinsLevel1bDesc$$"
+	rect		274 122 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 5 ==
+	title	""
+	name	"$$DrullRuinsLevel1aDesc$$Button"
+	rect	274 122 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m5l1b-drull_ruins1;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 5 ==
+	title	"$$DrullRuinsLevel2aDesc$$ @m5l2a-drull_ruins1"
+	name	"$$DrullRuinsLevel2aDesc$$"
+	rect		274 138 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 5 ==
+	title	""
+	name	"$$DrullRuinsLevel2aDesc$$Button"
+	rect	274 138 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m5l2a-drull_ruins1;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 5 ==
+	title	"$$DrullRuinsLevel2bDesc$$ @m5l2b-drull_ruins1"
+	name	"$$DrullRuinsLevel2bDesc$$"
+	rect		274 154 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 5 ==
+	title	""
+	name	"$$DrullRuinsLevel2bDesc$$Button"
+	rect	274 154 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m5l2b-drull_ruins1;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 5 ==
+	title	"$$DrullRuinsLevel2cDesc$$ @m5l2c-drull_ruins1"
+	name	"$$DrullRuinsLevel2cDesc$$"
+	rect		274 170 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 5 ==
+	title	""
+	name	"$$DrullRuinsLevel2cDesc$$Button"
+	rect	274 170 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m5l2c-drull_ruins1;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+//}
+//MISSION 6 MAPS////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////{
+resource
+label
+{
+	cvarvisibility coop_ui_sm 6 ==
+	title	"$$M6l0$$ @m6l0-attack"
+	name	"$$M6l0$$"
+	rect		274 106 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 6 ==
+	title	""
+	name	"$$M6l0$$Button"
+	rect	274 106 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m6l0-attack;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 6 ==
+	title	"$$M6Deck8_red$$ @m6-deck8_redalert"
+	name	"$$M6Deck8_red$$"
+	rect		274 122 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 6 ==
+	title	""
+	name	"$$M6Deck8_red$$Button"
+	rect	274 122 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m6-deck8_redalert;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 6 ==
+	title	"$$M6Deck16$$ @m6-deck16_engineering"
+	name	"$$M6Deck16$$"
+	rect		274 138 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 6 ==
+	title	""
+	name	"$$M6Deck16$$Button"
+	rect	274 138 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m6-deck16_engineering;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 6 ==
+	title	"$$M6Deck1Bridge_red$$ @m6-deck1_bridge_redalert"
+	name	"$$M6Deck1Bridge_red$$"
+	rect		274 154 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 6 ==
+	title	""
+	name	"$$M6Deck1Bridge_red$$Button"
+	rect	274 154 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m6-deck1_bridge_redalert;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 6 ==
+	title	"$$M6Ext$$ @m6-exterior"
+	name	"$$M6Ext$$"
+	rect		274 170 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 6 ==
+	title	""
+	name	"$$M6Ext$$Button"
+	rect	274 170 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m6-exterior;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+//}
+//MISSION 7 MAPS////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////{
+resource
+label
+{
+	cvarvisibility coop_ui_sm 7 ==
+	title	"$$AttrexianColonyLevel1aDesc$$ @m7l1a-attrexian_colony"
+	name	"$$AttrexianColonyLevel1aDesc$$"
+	rect		274 106 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 7 ==
+	title	""
+	name	"$$AttrexianColonyLevel1aDesc$$Button"
+	rect	274 106 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m7l1a-attrexian_colony;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 7 ==
+	title	"$$AttrexianColonyLevel1bDesc$$ @m7l1b-attrexian_colony"
+	name	"$$AttrexianColonyLevel1bDesc$$"
+	rect		274 122 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 7 ==
+	title	""
+	name	"$$AttrexianColonyLevel1bDesc$$Button"
+	rect	274 122 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m7l1b-attrexian_colony;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 7 ==
+	title	"$$AttrexianColonyLevel2aDesc$$ @m7l2a-attrexian_colony"
+	name	"$$AttrexianColonyLevel2aDesc$$"
+	rect		274 138 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 7 ==
+	title	""
+	name	"$$AttrexianColonyLevel2aDesc$$Button"
+	rect	274 138 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m7l2a-attrexian_colony;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 7 ==
+	title	"$$AttrexianColonyLevel2bDesc$$ @m7l2b-attrexian_colony"
+	name	"$$AttrexianColonyLevel2bDesc$$"
+	rect		274 154 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 7 ==
+	title	""
+	name	"$$AttrexianColonyLevel2bDesc$$Button"
+	rect	274 154 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m7l2b-attrexian_colony;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 7 ==
+	title	"$$AttrexianColonyLevel2cDesc$$ @m7l2c-attrexian_colony"
+	name	"$$AttrexianColonyLevel2cDesc$$"
+	rect		274 170 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 7 ==
+	title	""
+	name	"$$AttrexianColonyLevel2cDesc$$Button"
+	rect	274 170 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m7l2c-attrexian_colony;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+//}
+//MISSION 8 MAPS////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////{
+resource
+label
+{
+	cvarvisibility coop_ui_sm 8 ==
+	title	"$$DrullRuins2Level1aDesc$$ @m8l1a-drull_ruins2"
+	name	"$$DrullRuins2Level1aDesc$$"
+	rect		274 106 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 8 ==
+	title	""
+	name	"$$DrullRuins2Level1aDesc$$Button"
+	rect	274 106 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m8l1a-drull_ruins2;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 8 ==
+	title	"$$DrullRuins2Level1bDesc$$ @m8l1b-drull_ruins2"
+	name	"$$DrullRuins2Level1bDesc$$"
+	rect		274 122 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 8 ==
+	title	""
+	name	"$$DrullRuins2Level1bDesc$$Button"
+	rect	274 122 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m8l1b-drull_ruins2;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 8 ==
+	title	"$$DrullRuins2Level2aDesc$$ @m8l2a-drull_ruins2"
+	name	"$$DrullRuins2Level2aDesc$$"
+	rect		274 138 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 8 ==
+	title	""
+	name	"$$DrullRuins2Level2aDesc$$Button"
+	rect	274 138 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m8l2a-drull_ruins2;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 8 ==
+	title	"$$DrullRuins2Level2bDesc$$ @m8l2b-drull_ruins2"
+	name	"$$DrullRuins2Level2bDesc$$"
+	rect		274 154 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 8 ==
+	title	""
+	name	"$$DrullRuins2Level2bDesc$$Button"
+	rect	274 154 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m8l2b-drull_ruins2;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+//}
+//MISSION 9 MAPS////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////{
+resource
+label
+{
+	cvarvisibility coop_ui_sm 9 ==
+	title	"$$KlingonBaseLevel1aDesc$$ @m9l1a-klingon_base"
+	name	"$$KlingonBaseLevel1aDesc$$"
+	rect		274 106 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 9 ==
+	title	""
+	name	"$$KlingonBaseLevel1aDesc$$Button"
+	rect	274 106 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m9l1a-klingon_base;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 9 ==
+	title	"$$KlingonBaseLevel1bDesc$$ @m9l1b-klingon_base"
+	name	"$$KlingonBaseLevel1bDesc$$"
+	rect		274 122 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 9 ==
+	title	""
+	name	"$$KlingonBaseLevel1bDesc$$Button"
+	rect	274 122 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m9l1b-klingon_base;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 9 ==
+	title	"$$KlingonBaseLevel2Desc$$ @m9l2-klingon_base"
+	name	"$$KlingonBaseLevel2Desc$$"
+	rect		274 138 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 9 ==
+	title	""
+	name	"$$KlingonBaseLevel2Desc$$Button"
+	rect	274 138 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m9l2-klingon_base;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+//}
+//MISSION 10 MAPS////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////{
+resource
+label
+{
+	cvarvisibility coop_ui_sm 10 ==
+	title	"$$RomulanInstallation1Desc$$ @m10l1-romulan_installation"
+	name	"$$RomulanInstallation1Desc$$"
+	rect		274 106 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 10 ==
+	title	""
+	name	"$$RomulanInstallation1Desc$$Button"
+	rect	274 106 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m10l1-romulan_installation;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 10 ==
+	title	"$$RomulanInstallation2aDesc$$ @m10l2a-romulan_installation"
+	name	"$$RomulanInstallation2aDesc$$"
+	rect		274 122 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 10 ==
+	title	""
+	name	"$$RomulanInstallation2aDesc$$Button"
+	rect	274 122 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m10l2a-romulan_installation;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 10 ==
+	title	"$$RomulanInstallation2bDesc$$ @m10l2b-romulan_installation"
+	name	"$$RomulanInstallation2bDesc$$"
+	rect		274 138 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 10 ==
+	title	""
+	name	"$$RomulanInstallation2bDesc$$Button"
+	rect	274 138 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m10l2b-romulan_installation;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+//}
+//MISSION 11 MAPS////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////{
+resource
+label
+{
+	cvarvisibility coop_ui_sm 11 ==
+	title	"$$DrullRuins3Level1aDesc$$ @m11l1a-drull_ruins3"
+	name	"$$DrullRuins3Level1aDesc$$"
+	rect		274 106 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 11 ==
+	title	""
+	name	"$$DrullRuins3Level1aDesc$$Button"
+	rect	274 106 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m11l1a-drull_ruins3;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 11 ==
+	title	"$$DrullRuins3Level1bDesc$$ @m11l2a-drull_ruins3"
+	name	"$$DrullRuins3Level1bDesc$$"
+	rect		274 122 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 11 ==
+	title	""
+	name	"$$DrullRuins3Level1bDesc$$Button"
+	rect	274 122 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m11l2a-drull_ruins3;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 11 ==
+	title	"$$DrullRuins3BossLevel3aDesc$$ @m11l3a-drull_ruins3_boss"
+	name	"$$DrullRuins3BossLevel3aDesc$$"
+	rect		274 138 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 11 ==
+	title	""
+	name	"$$DrullRuins3BossLevel3aDesc$$Button"
+	rect	274 138 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m11l3a-drull_ruins3_boss;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+resource
+label
+{
+	cvarvisibility coop_ui_sm 11 ==
+	title	"$$DrullRuins3BossLevel3bDesc$$ @m11l3b-drull_ruins3_boss"
+	name	"$$DrullRuins3BossLevel3bDesc$$"
+	rect		274 154 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 11 ==
+	title	""
+	name	"$$DrullRuins3BossLevel3bDesc$$Button"
+	rect	274 154 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map m11l3b-drull_ruins3_boss;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+//}
+//MISSION 12 MAPS////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////{
+resource
+label
+{
+	cvarvisibility coop_ui_sm 12 ==
+	title	"$$SelectLevel$$ @ent-deck"
+	name	"$$SelectLevel$$"
+	rect		274 106 336	14
+	fgcolor 	1 1 1 0.9
+	bgcolor 	0.000 0.000 0.000 0.800
+	font serpentinemedium-10
+}
+
+resource
+button
+{
+	cvarvisibility coop_ui_sm 12 ==
+	title	""
+	name	"$$ent-deck$$Button"
+	rect	274 106 336	14
+	font serpentinemedium-10
+	fgcolor 		0.000 1.000 0.000 1.000
+	bgcolor 		0 0 0 0
+	hoverfgcolor	1 1 1 0.5
+
+	stuffcommand "callvote map ent-deck;popmenu 0;\n"
+	clicksound sound/misc/menu/click.wav
+	
+    hovercommand "globalwidgetcommand tooltip_callvote title \"Co-Op Mod Level.\""
+    hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+//}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+resource 
+Label
+{
+	name "voteHeader"
+	fgcolor 		1.0 1.0 1.0 1.000
+	bgcolor 0.12 0.15 0.25 1.00
+	
+	
+	borderstyle "3D_BORDER"
+	
+	font tahoma-8
+	horizontaljustify left
+	verticaljustify center
+	font 	serpentinemedium-10
+}
+
+resource
+Label
+{
+	name "voteLabel"
+	fgcolor 		0.278 0.365 0.510 1.000
+	bgcolor 		0.000 0.000 0.000 0.000
+	hoverfgcolor		0.278 0.365 0.510 1.000
+	hoverbgcolor		0.953 0.667 0.271 0.500
+	selectedfgcolor 	1.000 1.000 1.000 1.000
+	selectedbgcolor 	0.278 0.365 0.510 0.750
+	font 	serpentinemedium-10
+	
+	borderstyle "OUTLINE_BORDER"
+	borderwidth 1
+	bordercolor 0.12 0.15 0.25 0.00
+	
+	hoverbordercolor	0.953 0.667 0.271 1.000
+	selectedbordercolor	0.278 0.365 0.510 1.000
+	
+	clicksound sound/misc/menu/click.wav
+}
+
+
+resource
+Table
+{
+	cvarvisibility coop_ui_vt 4 <
+	name "VoteOptionList"
+	rect 274 103 336 294//326 103 272 200
+	fgcolor 0 0 0 0
+	bgcolor 0.0 0.0 0.00 1.00
+	
+	borderstyle "OUTLINE_BORDER"
+	borderwidth 1
+	bordercolor 0.12 0.15 0.25 1.00
+	allowusersort 1
+
+	headerheight 24
+	itemheight 14
+
+	scrollbar_width 12
+	scrollbartemplate "votescrollinfo"
+	
+	tablecolumn	"voteLabel"		336	alpha	"voteHeader"	"$$VoteOption$$"		//Label 260
+	tablecolumn	"voteLabel"		0	alpha	"voteHeader"	"voteOption"	//embedded data
+	tablecolumn	"voteLabel"		12  alpha	"voteHeader"	""		//Label
+
+	selectedcommand "ui_setvoteoption" 2
+	
+	hovercommand "globalwidgetcommand tooltip_callvote title \"$$SelectVoteOption$$\""
+	hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+	
+	clicksound sound/misc/menu/click.wav
+}
+
+
+resource
+Widget
+{
+	cvarvisibility coop_ui_vt 3 <=
+    rect 	 371 399 256 32
+
+	fgcolor 		1.000 1.000 1.000 1.000
+	bgcolor 		0.000 0.000 0.000 0.000
+	hoverfgcolor		1.000 1.000 1.000 1.000
+	hoverbgcolor		0.000 0.000 0.000 0.000
+	selectedfgcolor 	1.000 1.000 1.000 1.000
+	selectedbgcolor 	0.000 0.000 0.000 0.000
+	
+	shadercolor		1.000 1.000 1.000 1.000
+	hovershadercolor	1.000 1.000 1.000 1.000
+	
+    shader menu/main/credits
+	hovercommand "globalwidgetcommand tooltip_callvote title \"$$CallSelectedVote$$\""
+	hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+}
+
+resource
+Button
+{
+	cvarvisibility coop_ui_vt 3 <=
+	title "$$CallVote$$"
+	name "CallVoteButton"
+	font serpentinemedium-12
+	rect 	 424 401 123 26
+	
+	fgcolor 				1.0   1.0   1.0   1.0
+	bgcolor 				0.000 0.000 0.000 0.000
+
+	borderstyle "none"
+		
+	stuffcommand "ui_callvote;popmenu 0"
+	
+	hovershader menu/generic/button-hover
+	pressedshader menu/generic/button-press
+	
+	hovercommand "globalwidgetcommand tooltip_callvote title \"$$CallSelectedVote$$\""
+	hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+	
+	clicksound sound/misc/menu/click.wav
+}
+
+resource
+Button
+{
+    title "$$MainMenu$$"
+    name "Default"
+    rect 435 428 96 32
+    fgcolor 0.12 0.15 0.25 1.00
+    bgcolor 1.00 1.00 1.00 0.00
+    borderstyle "None"
+    
+    font serpentinemedium-12
+    horizontaljustify center
+    verticaljustify center
+    
+    hovershader menu/generic/button-hover
+    pressedshader menu/generic/button-press
+    stuffcommand "popmenu 0"
+    
+    ordernumber 5
+
+   	hovercommand "globalwidgetcommand tooltip_callvote title \"$$ReturnToMainMenu$$\""
+	hoverexitcommand "globalwidgetcommand tooltip_callvote title \"\""
+	
+    clicksound sound/misc/menu/back1.wav
+}
+
+end.

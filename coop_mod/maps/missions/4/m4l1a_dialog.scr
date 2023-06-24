@@ -1,0 +1,43 @@
+
+//--------------------------------------------------------------------------------------
+// Dialog Script
+// 	Contains all dialog setup code for one specific BSP.  That map's script should
+//	#include this file and call the function "initDialog" somewhere in it's main function.
+//--------------------------------------------------------------------------------------
+void initDialog()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		print( "Initializing dialog\n" );
+
+		//attrexian weapon locker dude onuse dialog
+		$weapon_dude.setdialogmode("normal");
+		$weapon_dude.settalkwatchmode ( "turnto" );
+
+		$weapon_dude.alias( "weapon_dudeDialogPhaseOne1", "localization/sound/dialog/m4l1/attrex2_locker.mp3");
+		$weapon_dude.alias( "weapon_dudeDialogPhaseOne2", "localization/sound/dialog/m4l1/attrex2_right.mp3");
+		$weapon_dude.alias( "weapon_dudeDialogPhaseOne3", "localization/sound/dialog/m4l1/attrex2_moving.mp3");
+
+		$weapon_dude.alias( "weapon_dudeDialogPhaseTwo1", "localization/sound/dialog/m4l1/attrex2_moving.mp3");
+		$weapon_dude.alias( "weapon_dudeDialogPhaseTwo2", "localization/sound/dialog/m4l1/attrex2_theway.mp3");
+
+		$weapon_dude.alias( "weapon_dudeDialogPhaseThree1", "localization/sound/dialog/m4l1/att2_tanklt.mp3");
+
+		$weapon_dude.dialog( "weapon_dudeDialogPhaseOne", "depends", "level.ToWeaponsLocker" );	
+		$weapon_dude.dialog( "weapon_dudeDialogPhaseTwo", "depends", "level.FromWeaponsLocker" );
+		$weapon_dude.dialog( "weapon_dudeDialogPhaseThree", "depends", "level.AfterWeaponsLocker" );
+
+		//barricaded attrexian onuse dialog
+		$attrexian_barricade.setdialogmode("normal");
+		$attrexian_barricade.settalkwatchmode ( "turnto" );
+		$attrexian_barricade.alias( "attrexian_barricadeDialog1", "localization/sound/dialog/m4l1/attrex_help.mp3");
+		$attrexian_barricade.alias( "attrexian_barricadeDialog2", "localization/sound/dialog/m4l1/attrex_repel.mp3");
+		$attrexian_barricade.dialog( "attrexian_barricadeDialog" );
+		
+		// setup attrexian 1 onuse dialog
+		$cowergus1.setdialogmode("normal");
+		$cowergus1.settalkwatchmode ( "turnto" );
+		//$cowergus1.alias( "attrexian1Dialog1", "localization/sound/dialog/m4l1/attrex_help.mp3");
+		$cowergus1.alias( "attrexian1Dialog1", "localization/sound/dialog/m4l1/attrex2_moving.mp3");
+		$cowergus1.dialog( "attrexian1Dialog" );
+	}
+}

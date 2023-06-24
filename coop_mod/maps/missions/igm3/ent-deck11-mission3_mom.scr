@@ -1,0 +1,192 @@
+//USED for MOM IGM3 deck11 Library, resarch attrexian
+
+//Global Variables, can be accessed by all Functions/scriptfiles
+//if definied outside a function, just like this
+////////////////////////////////////////////////////////////////////////////////
+
+
+//declaration
+////////////////////////////////////////////////////////////////////////////////
+void	library_noMenu();
+void	library();
+void	library_One();
+void	library_Two();
+void	library_Three();
+void	library_Four();
+void	library_Five();
+void	library_Six();
+void	library_Seven();
+void	library_Eight();
+void	library_Nine();
+void	library_Ten();
+void	library_Eleven();
+
+void library_noMenu()
+//displays a message to the player when he does not have the menu
+{
+	entity	ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+//check if the player exists
+	if(doesEntityExist(ePlayer))
+	{
+		thread globalCoop_player_transmitter(ePlayer,"globalwidgetcommand OkDialogTitle title ^8Needs^0_^5Coop^8Mod^0_^8above^0_^8Build^5#11");
+		thread globalCoop_player_transmitter(ePlayer,"forcemenu okdialog");
+	}
+//skip resarch and allow to proceed
+	wait(5);
+	globalCoop_objectives_update("complete",2,1);//state,slot,show
+	globalCoop_level_callReliably("picardCommsMunroIGM3");
+}
+
+void library()
+//this function is started once the trigger is used
+{
+	entity	ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+//check if the player exists
+	if(doesEntityExist(ePlayer))
+	{
+	//add menu to player
+		ePlayer.addHud("coop_ent-console_page1-IGM3");
+		ePlayer.setStringVar("mom_menuName0","coop_ent-console_page1-2-IGM3");
+		ePlayer.setStringVar("mom_menuName1","coop_ent-console_page2-IGM3");
+		ePlayer.setStringVar("mom_menuName2","coop_ent-console_page3-IGM3");
+		ePlayer.setStringVar("mom_menuName3","coop_ent-console_page4-IGM3");
+		ePlayer.setStringVar("mom_menuName4","coop_ent-console_page5-IGM3");
+		ePlayer.setStringVar("mom_menuName5","coop_ent-console_page6-IGM3");
+	}
+	globalCoop_level_callReliably("useLibraryTerminalIGM3Page1");
+}
+
+void library_One() //next 1
+{
+	entity	ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+//check if the player exists
+	if(doesEntityExist(ePlayer))
+	{
+		ePlayer.removehud("coop_ent-console_page1-IGM3");
+		ePlayer.removehud("coop_ent-console_page1-2-IGM3");
+		ePlayer.addHud("coop_ent-console_page2-IGM3");
+	}
+}
+void library_Two() //back 2
+{
+	entity	ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+//check if the player exists
+	if(doesEntityExist(ePlayer))
+	{
+		ePlayer.removehud("coop_ent-console_page2-IGM3");
+		ePlayer.addHud("coop_ent-console_page1-2-IGM3");
+		ePlayer.setStringVar("mom_menuName0","coop_ent-console_page2-IGM3");
+	}
+}
+void library_Three() //next 2
+{
+	entity	ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+//check if the player exists
+	if(doesEntityExist(ePlayer))
+	{
+		ePlayer.addHud("coop_ent-console_page3-IGM3");
+		ePlayer.removehud("coop_ent-console_page2-IGM3");
+	}
+	globalCoop_level_callReliably("useLibraryTerminalIGM3Page3");
+}
+void library_Four() //back 3
+{
+	entity	ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+//check if the player exists
+	if(doesEntityExist(ePlayer))
+	{
+		ePlayer.removehud("coop_ent-console_page3-IGM3");
+		ePlayer.addHud("coop_ent-console_page2-IGM3");
+	}
+}
+void library_Five() //next 3
+{
+	entity	ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+//check if the player exists
+	if(doesEntityExist(ePlayer))
+	{
+		ePlayer.removehud("coop_ent-console_page3-IGM3");
+		ePlayer.addHud("coop_ent-console_page4-IGM3");
+	}
+}
+void library_Six() //back 4
+{
+	entity	ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+//check if the player exists
+	if(doesEntityExist(ePlayer))
+	{
+		ePlayer.removehud("coop_ent-console_page4-IGM3");
+		ePlayer.addHud("coop_ent-console_page3-IGM3");
+	}
+}
+void library_Seven() //next 4
+{
+	entity	ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+//check if the player exists
+	if(doesEntityExist(ePlayer))
+	{
+		ePlayer.removehud("coop_ent-console_page4-IGM3");
+		ePlayer.addHud("coop_ent-console_page5-IGM3");
+	}
+	globalCoop_level_callReliably("useLibraryTerminalIGM3Page5");
+}
+void library_Eight() //back 5
+{
+	entity	ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+//check if the player exists
+	if(doesEntityExist(ePlayer))
+	{
+		ePlayer.removehud("coop_ent-console_page5-IGM3");
+		ePlayer.addHud("coop_ent-console_page4-IGM3");
+	}
+}
+void library_Nine() //next 5
+{
+	entity	ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+//check if the player exists
+	if(doesEntityExist(ePlayer))
+	{
+		ePlayer.removehud("coop_ent-console_page5-IGM3");
+		ePlayer.addHud("coop_ent-console_page6-IGM3");
+	}
+}
+void library_Ten() //back 6
+{
+	entity	ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+//check if the player exists
+	if(doesEntityExist(ePlayer))
+	{
+		ePlayer.removehud("coop_ent-console_page6-IGM3");
+		ePlayer.addHud("coop_ent-console_page5-IGM3");
+	}
+}
+
+void library_Eleven() //close 6
+{
+	entity	ePlayer;
+	ePlayer = mom_returnPlayerForTrigger(getCurrentEntity());
+//check if the player exists
+	if(doesEntityExist(ePlayer))
+	{
+		ePlayer.removehud("coop_ent-console_page6-IGM3");
+		ePlayer.give("models/weapons/worldmodel-Knife.tik");
+		ePlayer.use("Knife");
+	}
+	
+	wait(7);
+	globalCoop_level_callReliably("useLibraryTerminalIGM3Page0");
+}
+
+

@@ -1,0 +1,23 @@
+//this allows us to pre-disable classes for all the IGMs
+float	cvar_bool_coop_disClass	= 0;//enabled->Cvar setting decides
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////CLASS
+////////////////////////////////////////////////////////////////////////////////
+float	globalCoop_class_checkMsg(entity eDisposer,float fSlaveId,string sType);
+void	globalCoop_class_setup(string sClass,vector vOrigin);
+void	globalCoop_class_select();
+void	globalCoop_class_setupPlayer(entity ePlayer);
+void	globalCoop_class_update();
+void	globalCoop_class_updateInternal();
+void	globalCoop_class_modulating(entity ePlayer);
+float	globalCoop_class_returnIntegerClassPlayers(string sClass);
+void	globalCoop_class_addIndicator(entity ePlayer,string sClassAdd);
+void	globalCoop_class_autoSelect(entity ePlayer);
+void	globalCoop_class_medicUpdateTeamHealthStats();
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////INCLUDE ALL SCRIPTS MODULES
+////////////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/declaration_basic.scr"
+#include "coop_mod/maps/classes.scr"
+
+

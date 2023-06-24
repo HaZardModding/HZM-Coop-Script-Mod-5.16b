@@ -1,0 +1,205 @@
+//-----------------------------------------------
+// Cinematic Name: c:\projects\ef2\ef2\base\cins\m8-shuttlecrash.cin
+// Export Version: 1
+// Export Date:    Tue Apr 15 15:19:06 2003
+//-----------------------------------------------
+
+Origins
+{
+    Origin
+    {
+          name          "m8-shuttlecrash"
+          origin         0.000000 0.000000 0.000000
+          yaw            0.000000
+    }
+}
+
+
+Actors
+{
+    Actor
+    {
+        name          "ArmChang"
+        tiki          "char/hazardteam_chang.tik"
+        anim          "cin-m8-shuttlecrash-chang"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         -1483.536865 -38438.062500 190.101105
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "ArmJurot"
+        tiki          "char/hazardteam_jurot.tik"
+        anim          "cin-m8-shuttlecrash-jurot"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         -1604.891113 -38461.824219 192.406311
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "ArmKourban"
+        tiki          "char/hazardteam_kourban.tik"
+        anim          "cin-m8-shuttlecrash-kourban"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         -1601.112183 -38347.824219 185.441071
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "ArmMunro"
+        tiki          "char/hazardteam_munro.tik"
+        anim          "cin-m8-shuttlecrash-munro"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         -1733.830444 -38393.867188 185.953918
+        yaw            -90.000000
+    }
+    Actor
+    {
+        name          "ArmSydney"
+        tiki          "char/hazardteam_sydney.tik"
+        anim          "cin-m8-shuttlecrash-sydney"
+        moveanim      "walk"
+        alwaysSpawn    true
+        snap           true
+        nopain         true
+        nosight        true
+        nosound        true
+        rootActor      false
+        afterBehavior  REMOVE
+        origin         -1486.776123 -38362.382813 195.857269
+        yaw            -90.000000
+    }
+}
+
+
+Cameras
+{
+    Camera
+    {
+        name         "cam2-m8-shuttlecrash"
+        camfile      "cam2-m8-shuttlecrash"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+		selfRemoving false
+    }
+    Camera
+    {
+        name         "cam3-m8-shuttlecrash"
+        camfile      "cam3-m8-shuttlecrash"
+        movetype     "ANIM"
+        looktype     "ANIM"
+        moveActor    ""
+        lookActor    ""
+		selfRemoving false
+    }
+    Cut
+    {
+        toCamera     "cam2-m8-shuttlecrash"
+        frame         0
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m8-shuttlecrash"
+        frame         17
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam2-m8-shuttlecrash"
+        frame         70
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m8-shuttlecrash"
+        frame         106
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam2-m8-shuttlecrash"
+        frame         131
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m8-shuttlecrash"
+        frame         159
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam2-m8-shuttlecrash"
+        frame         226
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m8-shuttlecrash"
+        frame         288
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam2-m8-shuttlecrash"
+        frame         323
+        fadeout       0
+        fadein        0
+        lerp          false
+    }
+    Cut
+    {
+        toCamera     "cam3-m8-shuttlecrash"
+        frame         370
+        fadeout       20
+        fadein        0
+        lerp          false
+    }
+}

@@ -1,0 +1,53 @@
+FÜR DAS SPIEL:               STAR TREK ELITE FORCE II
+SPIEL VERSION:               Alle offiziellen versionen, ausser die DEMO!
+KLASSIFIKATION:              Modifikation
+AUSFÜHRUNGS TYP:             Serverseitig (LevelScript - Morpheus Scripting System)
+MODUS:                       Mehrspieler
+HERSTELLER:                  HaZardModding
+
+
+HINWEIS=======================================================================
+==============================================================================
+Dies ist die CLIENT Version, Sie können hiermit NICHT einen Coop Server
+erstellen, dafür benötigen Sie die SERVER, bzw FULL Version dieser Modifikation.
+
+Diese Version eignet sich für alle die nur einem Server beitreten wollen
+aber dennoch ihre Einzelspieler Kammpangie unbeeinflusst lassen wollen.
+
+
+KOMPATIBILITÄT================================================================
+==============================================================================
+! -> NICHT kompatiebel mit älteren versionen
+
+
+INSTALLATIONS ANLEITUNG=======================================================
+==============================================================================
+1. Beenden Sie alle laufenden Anwendungen von Star Trek(R) Elite Force II
+2. Starten Sie den Installer und folgen Sie den Anweisungen
+
+
+WIE DIE MODIFIKATION GESTARTET WIRD===========================================
+==============================================================================
+Sie müssen einen exstierenden Coop Server beiterten diese CLIENT Version kann
+keinen eigenen Coop Server starten.
+
+Sie können sich auf jeden beliebigen Server verbinden der entsprechend
+konfiguriert wurde, egal ob dieser Server als LOKALER (LAN) oder Internet
+bzw DEDIZIERTER Server gestartet wurde.
+
+Können Sie keine Server im Internet sehen starten Sie die mitgelieferte
+Datei ef2_master_server_client_toggle.bat und folgen Sie den Anweisungen.
+
+Weitere Informatinen hierzu sind in der SERVER bzw FULL version enthalten.
+
+
+DE-INSTALLATION===============================================================
+==============================================================================
+1.	Beenden Sie das Spiel (und den Server) Star Trek(R) Elite Force II.
+2.	Sollten Sie die Modifikation nicht über Programme oder Software entfehrnen
+können (Systemsteuerung), löschen Sie folgende Dateien aus Ihrem base Ordner:
+	zzzzzz_co-op_hzm_script_mod.pk3
+	zzzzzz_co-op_hzm_script_mod_clientonly.pk3
+	zzzzzz_co-op_hzm_script_mod_deutsch.pk3
+
+

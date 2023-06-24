@@ -1,0 +1,199 @@
+//VIEWMODE//////////////////////////////////////////////////////////////////////
+BogusMode
+
+edgetriggered( Boolean newEdgeTriggered )
+//If true, trigger will only trigger when object enters trigger, not when it is inside it. 
+
+//SPECTATORS////////////////////////////////////////////////////////////////////
+Model is set to monro.tik, players can change it while in spec
+
+
+//LEVELVARS/////////////////////////////////////////////////////////////////////
+levelVars.SetVariable( "total_secrets", total_secrets );
+levelVars.SetVariable( "found_secrets", found_secrets );
+levelVars.SetVariable( "total_specialItems" , total_specialItems );
+levelVars.SetVariable( "found_specialItems" , found_specialItems );
+levelVars.SetVariable( "total_enemies_spawned", _totalEnemiesSpawned );
+
+//SYSTEM THREADS, STARTED BY THE GAME///////////////////////////////////////////
+void main()
+
+//Singleplayer//////////////////////////////////////////////////////////////////
+saveweaps
+
+//COMMANDS//////////////////////////////////////////////////////////////////////
+gamevars			//SHOW floatvars "game.~" a FAKK2 relict (Ü-1dot0)
+levelvars			//SHOW floatvars "level.~" a FAKK2 relict (Ü-1dot0)
+
+
+typedef enum {
+	MOD_NONE,
+	MOD_DROWN,
+	MOD_SUICIDE,
+	MOD_CRUSH,
+	MOD_CRUSH_EVERY_FRAME,
+	MOD_TELEFRAG,
+	MOD_LAVA,
+	MOD_SLIME,
+	MOD_FALLING,
+	MOD_LAST_SELF_INFLICTED,
+	MOD_EXPLOSION,
+	MOD_EXPLODEWALL,
+	MOD_ELECTRIC,
+	MOD_ELECTRICWATER,
+	MOD_THROWNOBJECT,
+	MOD_BEAM,
+	MOD_ROCKET,
+	MOD_IMPACT,
+	MOD_GAS,
+	MOD_GAS_BLOCKABLE,
+	MOD_ACID,
+	MOD_SWORD,
+	MOD_PLASMA,
+	MOD_PLASMABEAM,
+	MOD_PLASMASHOTGUN,
+	MOD_STING,
+	MOD_STING2,
+	MOD_SLING,
+	MOD_BULLET,
+	MOD_FAST_BULLET,
+	MOD_VEHICLE,
+	MOD_FIRE,
+	MOD_FIRE_BLOCKABLE,
+	MOD_VORTEX,
+	MOD_LIFEDRAIN,
+	MOD_FLASHBANG,
+	MOD_POO_EXPLOSION,
+	MOD_AXE,
+	MOD_CHAINSWORD,
+	MOD_ON_FIRE,
+	MOD_FIRESWORD,
+	MOD_ELECTRICSWORD,
+	MOD_CIRCLEOFPROTECTION,
+	MOD_RADIATION,
+	MOD_LIGHTSWORD,
+	MOD_GIB,
+	MOD_IMPALE,
+	MOD_UPPERCUT,
+	MOD_POISON,
+	MOD_EAT,
+	MOD_REDEMPTION,
+	MOD_STASIS,
+
+	// Added for EF
+	MOD_PHASER,
+	MOD_VAPORIZE,
+	MOD_COMP_RIFLE,
+	MOD_VAPORIZE_COMP,
+	MOD_IMOD_PRIMARY,
+	MOD_IMOD_SECONDARY,	
+	MOD_SMALL_EXPLOSION,
+	MOD_TETRYON,
+	MOD_DISRUPTOR,
+	MOD_VAPORIZE_DISRUPTOR,
+	MOD_VAPORIZE_PHOTON,
+	MOD_SNIPER,
+	MOD_MELEE,
+	MOD_ALIEN_MELEE,
+	MOD_KLINGON_MELEE,
+	MOD_TURRET,
+
+	// Powerups/runes
+
+	MOD_DEATH_QUAD,
+	MOD_EMPATHY_SHIELD,
+	MOD_ARMOR_PIERCING,
+
+	MOD_TOTAL_NUMBER
+	} meansOfDeath_t;
+
+// If you add to the enum above go add a string to the means_of_death_strings in g_utils.cpp
+extern char means_of_death_strings[ MOD_TOTAL_NUMBER ][ 32 ];
+
+
+//GAME SPECIFICATIONS///////////////////////////////////////////////////////////
+#define	MAX_MODELS			512		//OVERALL MODELS 64res.Players (TEMP+STATIC+ENTITIES)
+#define MAX_LOCATIONS		64 		//info_player_deathmatch[all types]
+#define MAX_IMAGES           128 	//textures/sysimg
+#define MAX_LIGHTSTYLES      32		//DynLight
+#define MAX_ARENA_INFO       32 	//info_player_deathmatch[deathmatch]
+#define MAX_TEAM_INFO        64 	//info_player_deathmatch[blue/red]
+#define MAX_ARCHETYPES		  383 	//APPENDS TO MAX_CONFIGSTRINGS AND MAX_GAMESTATE_CHARS
+#define MAX_OBJECTIVE_NAMES  5 		//ALLWAYS USED ONLY ONE! POSSIBLE A RELICT!
+#define MAX_GENERAL_STRINGS  256	//String MAX-LENGTH
+#define	MAX_STRINGS			4096	//Overall string NUMBER, including vars
+#define	MAX_STATEMENTS		16384	//SCRIPT
+#define	MAX_FUNCTIONS		2560	//SCRIPT
+#define	MAX_PARMS	   		16		//SCRIPT FUNC PARAMETER
+#define	MAX_NAME		   	64		//MAX LENGTH OF FUNCTION NAME
+#define	MAX_REGS		   	16384	//LEXER->MAX_STATEMENTS
+#define	MAX_CONFIGSTRINGS	2300	//ACTIVE OBJECTS SV!=CL [USE RCON]
+#define	MAX_GAMESTATE_CHARS	36000	//ONLY CRITICAL DURING SYNC ON CONNECT
+//EOF///////////////////////////////////////////////////////////////////////////
+
+//GAME SPECIFICATION RELATION///////////////////////////////////////////////////
+typedef struct {
+	int			stringOffsets[MAX_CONFIGSTRINGS];
+	char		stringData[MAX_GAMESTATE_CHARS];
+	int			dataCount;
+} gameState_t;
+//EOF///////////////////////////////////////////////////////////////////////////
+
+//CONFIG FILES EXECUTION ORDER//////////////////////////////////////////////////
+global/default.cfg
+global/game.cfg
+global/menu.cfg
+user.cfg
+global/localized.cfg
+global/autoexec.cfg
+global/fast.cfg			//[FIRST-RUN] VARIOUSE NAMES
+global/memoryhigh.cfg	//[FIRST-RUN] VARIOUSE NAMES
+//EOF///////////////////////////////////////////////////////////////////////////
+
+//DAMAGE TYPES///KILLED BY EVENT////////////////////////////////////////////////
+suicide //default and when ever a event is invalid
+drown
+lava
+slime
+falling
+//EOF///////////////////////////////////////////////////////////////////////////
+
+
+//CL ERRORS/////////////////////////////////////////////////////////////////////
+$$RecursiveErrorAfter$$ Z_Free: memory block wrote past end //coudn't figure out
+ERROR: mover::MoveTo : Speed is negative! //Copyed func_door (SPACE) and rotated it FIX->Recrate door from a new brush!
+//EOF///////////////////////////////////////////////////////////////////////////
+
+
+OBJECT TeammateData		TeammateRoster
+{
+    string HealthyAnimation		idle
+    string HealthyShader		hud_mission_objective_monitor_healthy
+    string InjuredAnimation		idle
+    string InjuredShader		hud_mission_objective_monitor_injured
+    string CriticalAnimation	idle
+    string CriticalShader		hud_mission_objective_monitor_critical
+    string DefaultShader		EMPTY
+}
+
+//CVARS/////////////////////////////////////////////////////////////////////////
+#
+	com_printwarnings
+#Not Writeable
+	cl_running
+	sv_running
+	cg_mpgametype
+	cg_gametype	
+	cg_maxclients
+#Changes after next mapload
+	bot_enable
+	developer
+#Unused cvars in regular deathmatch:
+	dm_morph_c1 //morph control
+	activeAction //unknown
+#Temp vars
+	loadingstatus
+#Relict from FAKK2
+	deathmatch
+
+	

@@ -1,0 +1,67 @@
+menu "coop_serverLoading" 256 32 NONE 0
+bgcolor 0 0 0 0
+hideDuringLoad
+align centerx centery
+nomouse
+noescape 0
+depth 0.1
+gamefocus
+fadedelay 40
+showcommand	"popmenu 0;ui_removehud sublevelLoading\n"
+hidecommand	"ui_removehud coop_serverLoading\n"
+noresize
+
+resource
+Label
+{
+name "Default"
+rect 0 0 256 32
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 0.50 0.50 0.50 0.00
+borderstyle "NONE"
+shader coop_hud_sv_loading
+}
+
+resource
+Label
+{
+rect 0 1 256 10
+fgcolor 1.00 1.00 1.00 1.00
+bgcolor 0.50 0.50 0.50 0.00
+borderstyle "NONE"
+title "Bitte dran bleiben..."
+font serpentinemedium-10
+horizontaljustify center
+verticaljustify center
+ordernumber 2
+}
+
+resource
+Label
+{
+rect 17 13 256 20
+fgcolor 0 0 0 0.5
+bgcolor 0 0 0 0
+borderstyle "NONE"
+title "DER SERVER LÄDT"
+font serpentinemedium-16
+horizontaljustify center
+verticaljustify center
+ordernumber 2
+}
+
+resource
+Label
+{
+rect 16 12 256 20
+//fgcolor 0 0 0 0.7
+fgcolor 1 1 1 0.85
+bgcolor 0 0 0 0
+borderstyle "NONE"
+title "DER SERVER LÄDT"
+font serpentinemedium-16
+horizontaljustify center
+verticaljustify center
+ordernumber 2
+}
+

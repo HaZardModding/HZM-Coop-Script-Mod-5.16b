@@ -1,0 +1,314 @@
+void introCinematic();
+void endIntroCinematic();
+void cinematicInformant();
+void cinematicInformantEnd();
+		
+//enterprise arrives in orbit around ice planet
+void introCinematic()
+{
+	music ("aux2");
+	spawn( "Camera", "targetname", "cam1","origin","11516 -6237 592");
+	
+	if(cvar_bool_multiplayer)
+	{
+		cam.load ( "m10l1_entIntro" );
+		wait(.1);
+	}
+	
+//	vector v;
+//	v = $entPart1.getorigin ();
+//	v_y += .20;
+//	v_z -= .31;
+//	$entPart1.origin ( v );
+
+	$entPart1.origin ( $entPart2.getorigin ());
+	$entPart3.origin ( $entPart2.getorigin ());
+
+	$entPart1.angles ( '0 0 0' );
+	$entPart2.angles ( '0 0 0' );
+	$entPart3.angles ( '0 0 0' );
+
+	$entPart1.bind ( $entOrigin );
+	$entPart2.bind ( $entOrigin );
+	$entPart3.bind ( $entOrigin );	
+	
+	globalCoop_cin_start();
+
+	$entOrigin.angles ( '-10 0 0' );
+	$entOrigin.followpath ( $entPath , "normalangles", "loop" );
+	
+	wait ( .2 );
+//smoothiness of the cam path in mp is bad
+	if(cvar_bool_multiplayer)
+	{
+		globalCoop_cin_followWatch($cam1,$cam1,$entPart2);
+	}
+	else
+	{
+		globalCoop_cin_followWatch($cam1,$m10l1_entIntro,$entPart2);
+	}
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+	wait ( 2 );	//get rid of jittering at beginning
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+	globalCoop_cin_skipThread( "endIntroCinematic" );
+	
+	wait ( 11 );
+	thread endIntroCinematic ();
+}
+
+void endIntroCinematic ()
+{
+	cam_fadeout( .5, 0, 0, 0, 1, 0 );
+	wait ( .5 );
+	killthread ( "introCinematic" );
+	
+	
+//remove the useless entities, this map is traffic intense !!!
+	globalCoop_level_removePath($m10l1_entIntro);
+	globalCoop_level_remove($entPart1);
+	globalCoop_level_remove($entPart2);
+	globalCoop_level_remove($entPart3);
+	globalCoop_level_remove($entOrigin);
+//wait so the trafic can become reduced before we beam the players in!!!
+	wait(.5);
+
+	globalCoop_cin_end();
+	thread globalCoop_player_warpToSpawnOriginAll();
+	
+	$world.entity_fade_dist( 5000 );
+	$world.farplane_color( '0.0875 0.1 0.145' );
+	$world.farplane( 3000 );
+	$world.farplane_cull ( 1 );
+	$world.farplane_fog ( 1 );
+	$world.weather( "snow", 400 );
+	$world.wind_intensity( .5 );
+	
+	wait ( 1 );
+	cam_fadein( .5 , 0, 0, 0, 1, 0 );
+
+	globalCoop_player_displayEffectAll("TransportIn","Federation");
+	coop_string_weapon1 = "models/weapons/worldmodel-rom-datapad.tik";
+	thread globalCoop_player_giveAll(coop_string_weapon1,3);		
+	if(!cvar_bool_multiplayer)
+	{
+		wait ( 3 );
+		$player.immobilize ( 0 );
+	}
+}
+
+
+void cinematicInformant()
+{
+	cam.load ( "m10l1_cam1" );
+	cam.load ( "m10l1_cam2" );
+	cam.load ( "m10l1_cam3" );
+	cam.load ( "m10l1_informant" );
+	cam.load ( "m10l1_munro" );
+	cam.load ( "m10l1_informant2" );
+	cam.load ( "m10l1_munro2" );
+	//cam.load ( "m10l1_commroom" ); not used
+	cam.load ( "m10l1_longshot" );
+	spawn( "Camera", "targetname", "camInformant" );
+	spawn( "Camera", "targetname", "camInformant2" );
+	spawn( "Camera", "targetname", "camMunro" );
+	spawn( "Camera", "targetname", "camMunro2" );
+	thread closeStage2Door ();
+	
+	
+	globalCoop_cin_start();
+	globalCoop_main_camFadeOut(.5);
+	wait ( .5 );
+
+	spawn ("Actor","model","models/char/hazardteam_munro-rom-uniform.tik","targetname","munro","ai_off","1");
+	wait(.1);
+	$munro.ai_off();
+	$munro.notarget();//do not alert ai
+	$munro.notsolid();//do not allow the indicator to show
+	$munro.warpto ( "$fakeplayerStartNode" );
+	$munro.removeattachedmodel ( "tag_rhand" );
+
+	$informant.forcealpha ( 1 );
+	$informant.alpha ( 0 );
+	
+	globalCoop_cin_skipThread( "cinematicInformantEnd" );
+
+	globalCoop_cin_follow($camMunro, $m10l1_munro );
+	globalCoop_cin_cut($camMunro);
+
+	globalCoop_cin_follow($camInformant, $m10l1_informant );
+	globalCoop_cin_cut($camInformant);
+
+	globalCoop_cin_follow($camMunro2, $m10l1_munro2 );
+	globalCoop_cin_cut($camMunro2);
+
+	globalCoop_cin_follow($camInformant2, $m10l1_informant2 );
+	globalCoop_cin_cut($camInformant2);
+
+	globalCoop_cin_followWatch($cam1, $m10l1_longshot,$munro);
+	globalCoop_cin_cut($cam1);
+
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+
+	$munro.walkto ( "$fakeplayerNode" , "run" );
+	globalCoop_cin_cuecamera ( $cam1 );
+	wait ( 3 );
+	globalCoop_cin_cuecamera ( $camMunro2 );
+	$informant.show();
+	//$informant.fadein ( 2 );
+	$informant.anim ( "idle" );
+	$informant.displayeffect ( "FadeIn" ,"Slow" );
+
+	wait ( 1.5 );
+
+
+	globalCoop_cin_cuecamera ( $camMunro2 );
+	thread globalCoop_dialog_play($munro,"m10l1/munro_nicetrick.mp3", 1, 10000 , 0);
+	thread animActor ( $munro , "conv-gestureL" , "idle" );
+	globalCoop_dialog_waitForDialog( $munro );
+
+	globalCoop_cin_cuecamera ( $camInformant );
+	globalCoop_dialog_play($informant,"m10l1/info_cloak.mp3", 1, 10000 , 0);
+
+	globalCoop_cin_cuecamera ( $camMunro2 );
+	thread globalCoop_dialog_play($munro,"m10l1/munro_takeone.mp3", 1, 10000 , 0);
+	wait ( 1 );
+	thread animActor ( $munro , "conv-scratchingchin-thinking" , "idle" );
+	globalCoop_dialog_waitForDialog( $munro );
+
+	globalCoop_cin_cuecamera ( $camInformant2 );
+	thread globalCoop_dialog_play($informant,"m10l1/info_sorry.mp3", 1, 10000 , 0);
+	animActor ( $informant , "conv-shakehead" , "idle" );
+	thread animActor ( $informant , "conv-talk-handsonhips" , "idle" );
+	globalCoop_dialog_waitForDialog( $informant  );
+
+	globalCoop_cin_cuecamera ( $camMunro2 );
+	thread globalCoop_dialog_play($munro,"m10l1/munro_oldtech.mp3", 1, 10000 , 0);
+	thread animActor ( $munro , "conv-affirmative" , "idle" );
+	globalCoop_dialog_waitForDialog( $munro );
+
+	globalCoop_cin_cuecamera ( $camInformant );
+	globalCoop_dialog_play($informant,"m10l1/info_inside.mp3", 1, 10000 , 0);
+
+	globalCoop_cin_cuecamera ( $camMunro );
+	thread globalCoop_dialog_play($munro,"m10l1/munro_howweget.mp3", 1, 10000 , 0);
+	thread animActor ( $munro , "conv-talk1" , "idle" );
+	globalCoop_dialog_waitForDialog( $munro );
+
+	globalCoop_cin_cuecamera ( $camInformant );
+	globalCoop_dialog_play($informant,"m10l1/info_youllget.mp3", 1, 10000 , 0);
+
+	globalCoop_cin_cuecamera ( $camMunro2 );
+	thread globalCoop_dialog_play($munro,"m10l1/munro_intoinst.mp3", 1, 10000 , 0);
+	thread animActor ( $munro , "conv-talk2" , "idle" );
+	globalCoop_dialog_waitForDialog( $munro );
+
+	globalCoop_cin_cuecamera ( $camInformant );
+	thread globalCoop_dialog_play($informant,"m10l1/info_download.mp3", 1, 10000 , 0);
+	wait ( 2 );
+	thread animActor ( $informant , "conv-talk1" , "idle" );
+	globalCoop_dialog_waitForDialog( $informant );
+
+	globalCoop_cin_cuecamera ( $camMunro2 );
+	globalCoop_dialog_play($munro,"m10l1/munro_easy.mp3", 1, 10000 , 0);
+
+	globalCoop_cin_cuecamera ( $camInformant2 );
+	thread globalCoop_dialog_play($informant,"m10l1/info_past.mp3", 1, 10000 , 0);
+	wait ( 1 );
+	thread animActor ( $informant , "conv-shrug" , "idle" );
+	globalCoop_dialog_waitForDialog( $informant );
+
+	globalCoop_cin_cuecamera ( $camMunro2 );
+	globalCoop_dialog_play($munro,"m10l1/munro_howdoi.mp3", 1, 10000 , 0);
+
+	$informant.attachmodel ( "models/weapons/worldmodel-rom-disruptor.tik" , "tag_rhand" , .6 , "" , 0 , 0  , 1.0 );
+	thread animActor ( $informant , "conv-fingerpoint-atyou" , "idle" );
+	thread globalCoop_dialog_play($informant,"m10l1/info_create.mp3", 1, 10000, 0); //Create a diversion. Shooting the nearby communications room should distract the guards long enough to download the security code.
+	globalCoop_cin_cuecamera ( $camInformant2 );
+	thread animActor ( $munro , "conv-poundfist" , "idle" );
+	wait ( 1 );
+	$munro.attachmodel ( "models/weapons/worldmodel-rom-disruptor.tik" , "tag_rhand" , .6 , "" , 0 , 0  , 1.0 );
+	$informant.removeattachedmodel ( "tag_rhand" );
+	globalCoop_cin_cuecamera ( $camMunro2 );
+	globalCoop_dialog_waitForDialog( $informant );
+
+	globalCoop_dialog_play($munro,"m10l1/munro_getmethedata.mp3", 1, 10000 , 0);
+
+	globalCoop_cin_cuecamera ( $camInformant );
+	thread globalCoop_dialog_play($informant,"m10l1/info_ifget.mp3", 1, 10000 , 0);
+	thread animActor ( $informant , "conv-idle-look" , "idle" );
+	globalCoop_dialog_waitForDialog( $informant );
+
+	globalCoop_cin_cuecamera ( $camMunro );
+	thread globalCoop_dialog_play($munro,"m10l1/munro_vote.mp3", 1, 10000 , 0);
+	thread animActor ( $munro , "conv-gestureR" , "idle" );
+	globalCoop_dialog_waitForDialog( $munro );
+
+	globalCoop_cin_cuecamera ( $camInformant );
+	thread globalCoop_dialog_play($informant,"m10l1/info_notjob.mp3", 1, 80000, 0); //I don’t know. This is not my job, but I’ll see if I can find him inside.
+	thread animActor ( $informant , "conv-gestureL" , "idle" );
+	globalCoop_dialog_waitForDialog( $informant );
+
+	thread cinematicInformantEnd();
+}
+
+
+
+void cinematicInformantEnd ()
+{
+	cam_fadeout( .5, 0, 0, 0, 1, 0 );
+	$informant.stopdialog();
+	$munro.stopdialog();
+	killthread ( "cinematicInformant" );
+	wait ( .5 );
+	
+//remove USELESS
+	globalCoop_level_removePath($m10l1_informant);
+	globalCoop_level_removePath($m10l1_munro);
+	globalCoop_level_removePath($m10l1_informant2);
+	globalCoop_level_removePath($m10l1_munro2);
+	globalCoop_level_removePath($m10l1_commroom);
+	globalCoop_level_removePath($m10l1_longshot);
+	globalCoop_level_remove($camInformant);
+	globalCoop_level_remove($camInformant2);
+	globalCoop_level_remove($camMunro);
+	globalCoop_level_remove($camMunro2);
+	globalCoop_level_remove($munro);
+	
+	coop_string_weapon1 = "models/weapons/worldmodel-rom-disruptor-romhands.tik";
+	coop_string_weapon2 = "models/weapons/worldmodel-rom-datapad.tik";
+	globalCoop_player_giveAll(coop_string_weapon1,0);
+	globalCoop_cin_end();
+
+	$StationOfficerInnerDoor.unlock();
+	$StationOfficerOuterDoorTrigger.triggerable();
+
+	wait ( .5 );
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+
+	$informant.missionobjective(0);
+	$commStationWaypoint.missionobjective ( 1 );
+
+	//$informant.fadeout ( 2 );
+	$informant.anim ( "idle" );
+	displayeffect ( "FadeOut" ,"Slow" );
+
+	wait ( 2 );
+	$informant.remove();
+
+	//$player.setobjectiveshow ( "CreateDiversion" , 1);
+	//$player.setobjectivecomplete( "MeetInformant" , 1 );
+	globalCoop_objectives_update("complete",1,0);
+	thread globalCoop_objectives_update("incomplete",4,1);
+
+	unlockDoor ( "comDoor" );
+	unlockDoor ( "comDoor2" );
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		globalCoop_level_remove($khoal);
+	}
+	
+	wait ( .5 );
+	globalCommon_Autosave ();
+
+}

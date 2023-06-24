@@ -1,0 +1,52 @@
+menu "coop_speaking" 256 64 NONE 1
+bgcolor 0 0 0 0
+align center bottom
+noresize
+depth 0.3
+gamefocus
+hideDuringLoad
+
+fadedelay 30
+hidecommand	"ui_removehud coop_speaking\n"
+
+resource 
+widget
+{
+    name "coop_updateinfonotifie"
+    rect 0 0 256 64
+    fgcolor 			0.80 0.20 0.20 1.00
+    bgcolor 			0.00 0.00 0.00 0.00
+    borderstyle "NONE"
+	shader coop_hud_speaking
+}
+
+resource 
+Label
+{
+    name "coop_speaking_shadow"
+    title "Sie wurden vom Co-Op Mod für einen Spiel relevanten Dialog ausgewählt."
+    rect 59 26 190 40
+    fgcolor 			0 0 0 1
+    bgcolor 			0 0 0 0 
+    borderstyle "NONE"
+    
+   	font tahoma-8
+	horizontaljustify center
+	verticaljustify top
+}
+resource 
+Label
+{
+    name "coop_speaking_front"
+    title "Sie wurden vom Co-Op Mod für einen Spiel relevanten Dialog ausgewählt."
+	rect 58 25 190 40
+	//fgcolor 0.74 0.67 0.07 1.00
+	fgcolor				1 1 1 1
+    bgcolor 			0 0 0 0
+    borderstyle "NONE"
+    
+   	font tahoma-8
+	horizontaljustify center
+	verticaljustify top
+}
+end.

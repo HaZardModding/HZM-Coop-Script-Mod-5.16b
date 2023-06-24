@@ -1,0 +1,166 @@
+LEGEND:
+<bool> 	= Use only a Boolean value (0-1)
+<int> 	= Use only an integer (natural numbers) as a value
+<flt> 	= Use an integer or floating-point value
+
+
+DO I GET OFFICIAL SUPPORT?
+::::::::::::::::::::::::::::::::::::::::::::::::
+    This is a an un-official modification. You can ask for Support
+    from the Mod creators (HaZardModing), but you cannot get
+    any support from Ritual Entertainment, Mumbo Jumbo or Activision.
+
+
+WHAT OPERATING SYSTEMS ARE SUPPORTED?
+::::::::::::::::::::::::::::::::::::::::::::::::
+    The Mod is limited to the exact same Operating-Systems
+    as Star Trek(R) Elite Force II: Mac OS X; Windows 98, ME, 2000, XP, Vista, Windows 7
+    and Linux (dedicated server only).
+
+
+DOES THE MOD FORCE SETTINGS ?
+::::::::::::::::::::::::::::::::::::::::::::::::
+	YES! The Mod can only operate within specific settings,
+	if they are not compatible to the Mod they will be enforced.
+	1. sv_maxclients (Maximum Player Slots 1-32)
+		When sv_maxclients is lower than 2 the Mod will enforce: sv_maxclients 4
+	2. g_gametype (GameModus: 0=Singleplayer,1=Multiplayer,2=Solomatch)
+		When server is set to DEDICATED - LAN/Internet g_gametype will be set to 1.
+	3. sv_timeout (A player will get kicked after x secounds in the loading screen or when disconnected [ping: 999])
+		When sv_timeout is lower than 90 it sill be set to 90.
+	4. sv_pure (Unmodified Clients, if you enable it players must have the exact same files as the server)
+		When set to 1 will be set to 0, for compatibility reasons.
+	5. sv_jumpvelocity (Velocity per jump)
+		When lower than 325 it will be set to 325, required for some missions to work proper.
+
+
+HOW CAN I DIABLE TEAM KILLING ?
+::::::::::::::::::::::::::::::::::::::::::::::::
+	You need to set Team-Holomatch (set mp_gametype 1),	restart or reload
+	the current map(callvote restart) to applay the new Game-Type.
+	If you have Team-Holomatch enabled you need to
+	DISABLE: "Allow Friendly Fire" and "Auto Balance Teams"
+
+
+HOW CAN I DIABLE FALL-DAMAGE ?
+::::::::::::::::::::::::::::::::::::::::::::::::
+	You need to enable "No Falling Damage" (set mp_flags 8)
+	(set mp_flags 524296 //enables also Full Collision Detection, suggested by Oberlerchner)
+
+	
+HOW CAN I DIABLE PLAYERS JUMPING(FLYING) EXTREMLY FAST ACCROSS THE MAP ?
+::::::::::::::::::::::::::::::::::::::::::::::::
+	You need to disable "Strafe Jump" (set sv_strafeJumpingAllowed 0).
+
+	
+
+TO HOW MANY PLAYERS IS THE CO-OP MOD LIMITED?
+::::::::::::::::::::::::::::::::::::::::::::::::
+    The Mod is limited to a maximum of 8 players.
+    If your player limit (sv_maxclients) is lower than 8 the Mod
+    will automatic set it's player limit (coop_maxPlayers) equal
+    to operate more efficent.
+
+
+WHY DOES THE MOD HAVE A TIMELIMIT OF 60 MINUTES FOR EACH LEVEL ?
+::::::::::::::::::::::::::::::::::::::::::::::::
+	These levels where never made for multiplayer use, that is why
+	some levels do exceed the multiplayer limitations after some time. 
+	To prevent these we have decided to set a time limit which will
+	keep the data which has to be syncronized under the limit.
+
+
+HOW CAN I FIX THE DISAPPEARING MODELS?
+::::::::::::::::::::::::::::::::::::::::::::::::
+    You need to reboot your server. The HaZardModding Co-OP Script Mod
+    offers a routine to automatically shut down the Server at each mission end.
+    This routine will shut-down the server and make all players reconnect;
+    once the server has been shut-down it needs to be started again by an
+    external application.
+
+
+I HAVE INVISIBLE OBJECTS BLOCKING MY WAY, WHAT CAN I DO?
+::::::::::::::::::::::::::::::::::::::::::::::::
+    To solve that issue please refer (above) to: "HOW CAN I FIX DISAPPEARING MODELS?"
+    Star Trek(R) Elite Force II was never designed to handle the Models shown
+    in Single-Player in the Multiplayer mode. This massive amount of
+    Models and Animations is overloading the engine its cache.
+
+
+WHAT IS A CVAR?
+::::::::::::::::::::::::::::::::::::::::::::::::
+    A Cvar is a configuration-variable saved in a *.cfg file. You can
+    set your own Cvars via the Game Console, example: seta variablename variablevalue
+  
+  
+HOW CAN I OPEN MY GAME CONSOLE?
+::::::::::::::::::::::::::::::::::::::::::::::::
+    It's depending of your keyboard language/layout!
+    Try the follow keys to open the console:
+    ^ or ° or ² or ³ or @ or < or ~ or '
+
+
+HOW CAN I APPLY MY CVAR SETTINGS?
+::::::::::::::::::::::::::::::::::::::::::::::::
+    Some changes to the cvars require a map/level/server restart;
+    otherwise they apply intimately.
+
+
+HOW TO DISABLE AUTOMATIC SERVER SHUT-DOWN?
+::::::::::::::::::::::::::::::::::::::::::::::::
+    Set the following cvar to '1': coop_disReboot <bool>
+ 
+
+HOW DO I ENABLE LAST MAN STANDING MODE (LMS)?
+::::::::::::::::::::::::::::::::::::::::::::::::
+Set the following cvar to '1': coop_lmsEnable <bool>
+
+
+HOW DO I SET THE LIVES FOR THE PLAYERS IN LMS?
+::::::::::::::::::::::::::::::::::::::::::::::::
+    Change the following cvar value: coop_lmsLifes <int>
+
+
+HOW DO I CHANGE THE LEVEL END COUNTDOWN ?
+::::::::::::::::::::::::::::::::::::::::::::::::
+     Change the following cvar value: coop_countdown <int>
+
+
+HOW DO I SET A PLAYER LIMIT FOR THE MOD ONLY?
+::::::::::::::::::::::::::::::::::::::::::::::::
+    You can define a limit for the Mod only with
+    the following cvar(range 1-12): coop_maxPlayers <int>
+
+
+CAN I RESTORE MY DEFAULT HEALTH HUD WITHOUT REMOVING THE MOD?
+::::::::::::::::::::::::::::::::::::::::::::::::
+    Yes it is possible, go to: mod_hzm_co-op/Extras/ef2_hzm_health_hud_mod
+    and open the folder 'standard', and copy the file
+    'zzzzzzzz_ef2_hzm_health_hud.pk3' in to your EF2 'base'
+    folder to restore the standard hud.
+
+
+DID THE CO-OP MOD MADE ME STUCK IN SINGLE-PLAYER ?
+::::::::::::::::::::::::::::::::::::::::::::::::
+    That is indeed possible, if you still have troubles,
+    please feel free to inform us of any problems;
+    we will probably fix it and provide you with an exclusive update.
+
+
+CAN I USE PARTS OF THIS MOD IN A DERIVATIVE WORK?
+::::::::::::::::::::::::::::::::::::::::::::::::
+    No, you are forbidden to use any materials or intellectual property
+    included without the explicit written permission of the respective
+    owners. Please contact HaZardModding for further details.
+
+	
+DO I HAVE TO PAY / CAN I CHARGE FOR A COPY OF THIS MOD?
+::::::::::::::::::::::::::::::::::::::::::::::::
+    No, this Mod has to be provided for free.
+
+
+WHY IS MY NAME NOT IN THE CREDITS ?
+::::::::::::::::::::::::::::::::::::::::::::::::
+    If your name is missing please contact us, we will correct
+    it at the next release.
+

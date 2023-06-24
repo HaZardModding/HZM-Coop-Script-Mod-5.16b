@@ -1,0 +1,16 @@
+//-Caching characters - SP and MP(Spectator)
+cache models/char/munro.tik 
+cache models/fx/fx-dummy.tik
+cache models/fx/fx-beamsparkle.tik
+
+//-Global sounds
+cache sound/weapons/noammo.wav
+cache sound/misc/menu/change.wav
+cache sound/misc/menu/select.wav
+cache sound/menu/hover.wav
+cache sound/doors/door_locked.wav
+cache sound/player/player_invdrop.wav
+cache sound/player/player_heartbeat.wav
+cache sound/ships/enterprise/ent_beep_confirm.wav
+//cache sound/environment/earthquake/earthquake01.wav
+//cache sound/misc/menu/reject.wav //no cd reject, dosn't matter if it lags then

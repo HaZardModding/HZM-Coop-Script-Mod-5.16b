@@ -1,0 +1,336 @@
+//-----------------------------------------------------------------
+//  EF2 Level Script File
+//
+//  Level:        m0-intro	  
+//  Script By:    HoGjoNNy
+//  Geometry By:  Adam
+//  Created on:   4/11/2003
+//
+//  Last Edited By: HoGJoNNy
+//-----------------------------------------------------------------
+
+void main();
+void setupWorld();
+void cinematicMain();
+void exitRoutine();
+void coop_pushmenu(string sMenu);
+void coop_popmenu();
+void coop_endLevel();
+
+void coop_justSpawnedplayer1();
+void coop_justSpawnedplayer2();
+void coop_justSpawnedplayer3();
+void coop_justSpawnedplayer4();
+void coop_justSpawnedplayer5();
+void coop_justSpawnedplayer6();
+void coop_justSpawnedplayer7();
+void coop_justSpawnedplayer8();
+void coop_playerRemoveHuds(entity ePlayer);
+
+string sLastHud;
+
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+#include "coop_mod/maps/main.scr"
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+void main()
+{
+	//--- set the soundtrack
+	soundtrack( "music/credits.mus" );
+	
+	globalCoop_main_camFadeOut(.1);
+//Co-op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	coop_string_nextMapToCheck	= "secret1"; //set the map we gona load next while we are in testmode
+	coop_vector_spawnOrigin1 = '-1240 -5163 -1066';
+	coop_vector_spawnOrigin2 = '-1240 -5163 -1066';
+	coop_vector_spawnOrigin3 = '-1240 -5163 -1066';
+	coop_vector_spawnOrigin4 = '-1240 -5163 -1066';
+	coop_vector_spawnOrigin5 = '-1240 -5163 -1066';
+	coop_vector_spawnOrigin6 = '-1240 -5163 -1066';
+	coop_vector_spawnOrigin7 = '-1240 -5163 -1066';
+	coop_vector_spawnOrigin8 = '-1240 -5163 -1066';
+//Start the Co-Op Script
+	globalCoop_main();
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	//--fade the world out
+	waitForPlayer();
+	setupWorld();
+	thread cinematicMain();
+}
+
+
+void coop_justSpawnedplayer1(){thread coop_playerRemoveHuds($player1);}
+void coop_justSpawnedplayer2(){thread coop_playerRemoveHuds($player2);}
+void coop_justSpawnedplayer3(){thread coop_playerRemoveHuds($player3);}
+void coop_justSpawnedplayer4(){thread coop_playerRemoveHuds($player4);}
+void coop_justSpawnedplayer5(){thread coop_playerRemoveHuds($player5);}
+void coop_justSpawnedplayer6(){thread coop_playerRemoveHuds($player6);}
+void coop_justSpawnedplayer7(){thread coop_playerRemoveHuds($player7);}
+void coop_justSpawnedplayer8(){thread coop_playerRemoveHuds($player8);}
+
+void coop_playerRemoveHuds(entity ePlayer)
+{
+	wait(2);
+	globalCoop_huds_Add(ePlayer,"coop_removeAllHuds");
+}
+
+
+void coop_pushmenu(string sMenu)
+{
+	sLastHud = sMenu;
+	if(!cvar_bool_multiplayer){//single-player
+		stuffcmd( "showmenu "+sMenu);
+	}else{
+		globalCoop_huds_AddAll(sMenu);
+	}
+}
+
+void coop_popmenu()
+{
+	if(!cvar_bool_multiplayer){//single-player
+		stuffcmd("popmenu 1\n");
+	}else{
+		globalCoop_huds_RemoveAll(sLastHud);
+	}
+}
+
+//---------------------
+// setupWorld
+// setup world objects
+//---------------------
+void setupWorld()
+{
+	//--- set the sky box
+	$sky.rendereffects( "+skyorigin" );
+
+	//--- spawn cameras
+	spawn( "Camera", "targetname", "cam1");
+	
+	//--- hide sky camera
+	$sky.hide();
+	$sky.notsolid();
+
+	//--- rotate the sky dome
+	$skydome.rotateX( 0.2 );
+	$skydome.rotateY( 0.7 );
+}
+
+//---------------------
+// cinematicMain
+// the main cinematic of the level
+//---------------------
+void cinematicMain()
+{
+	globalCoop_main_waitForWarmupTime();
+	globalCoop_cin_start();
+
+	globalCoop_cin_follow($cam1,$pathCinematicIntro_TempExterior );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+	
+	if(cvar_bool_multiplayer){//MP
+		globalCoop_cin_skipThread("exitRoutine");
+	}
+	wait(.2);
+	
+	//--- fade in
+	globalCoop_main_camFadeIn(1);
+	
+//letterbox workarround, no huds are shown as long as the letter box is active!!!
+	killthread("globalCoop_cin_autoLetterBox");
+	clearletterbox(.1);
+	
+	wait( 2 );
+	
+	//--- Background - exit button
+	if(!cvar_bool_multiplayer){//single-player
+		stuffcmd( "pushmenu credits-bkg\n" );
+		wait( .1 );
+		stuffcmd( "ui_showmouse\n" );
+		wait( .1 );
+	}
+	
+	//--- Begin Text Prologue
+	thread coop_pushmenu("credits-leads-left\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+	
+	thread coop_pushmenu("credits-prog-right\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+	
+	thread coop_pushmenu("credits-gp-left\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+	
+	thread coop_pushmenu("credits-ld1-right\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+	
+	thread coop_pushmenu("credits-ld2-left\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+	
+	thread coop_pushmenu("credits-art1-right\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+	
+	thread coop_pushmenu("credits-art2-left\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+	
+	thread coop_pushmenu("credits-cin-right\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+	
+	thread coop_pushmenu("credits-admin-left\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+	
+	thread coop_pushmenu("credits-intro-right\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+	
+	thread coop_pushmenu("credits-sound-left\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+	
+	thread coop_pushmenu("credits-voice1-right\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+	
+	thread coop_pushmenu("credits-voice2-left\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+	
+	thread coop_pushmenu("credits-spec-right\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+
+	thread coop_pushmenu("credits-ATVI-left\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+
+	thread coop_pushmenu("credits-ATVI-left2\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+
+	thread coop_pushmenu("credits-ATVI-GBM-Right\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+
+	thread coop_pushmenu("credits-ATVI-Pr-left\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+
+	thread coop_pushmenu("credits-ATVI-loc-Right\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+
+	thread coop_pushmenu("credits-ATVI-loc-left\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+
+	thread coop_pushmenu("credits-ATVI-GM-Right\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+
+	thread coop_pushmenu("credits-ATVI-Installer-left\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+
+	thread coop_pushmenu("credits-ATVI-QA-Right\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+
+	thread coop_pushmenu("credits-ATVI-Testers-left\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+
+	thread coop_pushmenu("credits-ATVI-QA2-right\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+
+	thread coop_pushmenu("credits-ATVI-thanks-left\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+
+	thread coop_pushmenu("credits-ATVI-thanks-left2\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+
+	thread coop_pushmenu("credits-PAR-right\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+
+	thread coop_pushmenu("credits-LEG-left\n" );
+	wait( 8 );
+	thread coop_popmenu();
+	wait( 1 );
+	
+	thread exitRoutine();
+}
+
+void exitRoutine()
+{
+    killthread( "CinematicMain" );
+	if(!cvar_bool_multiplayer){//single-player
+		stuffcmd ( "popmenu 0\n" );
+		wait( 1 );
+	}
+	
+	globalCoop_main_camFadeOut(1);
+	
+	if(!cvar_bool_multiplayer){//single-player
+		wait( 1 );
+	//--- disconnect	
+		stuffcmd ( "disconnect\n" );
+	}else{
+		thread coop_endLevel();
+	}
+}
+
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed("m0-intro");
+}
+
+

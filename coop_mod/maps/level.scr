@@ -1,0 +1,375 @@
+//-----------------------------------------------------------------------------------
+// Script By:	Christian Sebastian Strahl (Chrissstrahl)
+// Created on:	2007.09.29
+// E-Mail:		chrissstrahl@yahoo.de
+// Organisation:	HaZardModding
+//
+// CONTAININS LEVEL INTERACTION RUTINES USED BY THE CO-OP MOD
+
+//HAZARDMODDING CO-OP SCRIPT MODIFICATION ©2006-2012 SOME RIGHTS RESERVED AND
+//(IP)INTELLECTUAL PROPERTY HELD BY CHRISTIAN SEBASTIAN STRAHL, ALIAS CHRISSSTRAHL.
+
+//YOU ARE EXPLICITE FORBIDDEN TO USE/MODIFIE/REDISTRIBUTE/REPLICATE/RELEASE/REBUILD/COPY
+//ANY MATERIALS OR INTELLECTUAL PROPERTY OF THIS FILE WITHOUT THE EXPLICIT
+//WRITTEN PERMISSION OF THE RESPECTIVE OWNERS!
+
+//
+//CONTACT: chrissstrahl@yahoo.de [Christian Sebastian Strahl, Germany]
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////Functions
+////////////////////////////////////////////////////////////////////////////////
+void globalCoop_level_world()
+//------------------------------------------------------------------------------
+// Inizial World settings , simulatePlayersingleplayer conditions
+// NOTE: MAIN THREAD IS WAITING FOR THIS ONE TO FINISH!
+//------------------------------------------------------------------------------
+{
+//required to be set to 1 in SP and MP
+	if(getCvarInt("sv_airaccelerate") < 1)
+	{
+		$world.physicsVar("airAccelerate",1);
+	}
+//MULTIPLAYER
+	if(cvar_bool_multiplayer)
+	{
+		$world.physicsVar("maxspeed",cvar_float_maxSpeed);
+		thread globalCoop_server_rebootTimer();
+//remove all dispensers if option is set
+	//moved to::globalCoop_player_setup
+	}
+}
+
+
+void globalCoop_level_onUse(entity eOnUse,string sThread)
+//----------------------------------------------------------------------
+// Set thread to start if this entity gets used
+//----------------------------------------------------------------------
+{
+//CHECK IF ENTITY EXISTS, DO NOTHING IF NOT
+	if(doesEntityExist(eOnUse)){
+		eOnUse.noUse();
+		globalCoop_main_waitAFrame();
+		eOnUse.onUse(sThread);
+		pause();
+	}
+}
+
+
+void globalCoop_level_triggerEntity(entity eToTrigger)
+//----------------------------------------------------------------------
+// Triggers a entity, replacement function avoids game crash
+//----------------------------------------------------------------------
+{
+//Check if entity exsits, if so trigger it
+	if(doesEntityExist(eToTrigger)){
+		triggerentity(eToTrigger);
+	}
+}
+
+
+void globalCoop_level_triggerable(entity eMakeTriggerable)
+//----------------------------------------------------------------------
+// Makes a entity triggerable if it exist
+//----------------------------------------------------------------------
+{
+//Check if entity exsits, if so make it trigger able
+	if(doesEntityExist(eMakeTriggerable)){
+		eMakeTriggerable.triggerable();
+	}
+}
+
+
+void globalCoop_level_notTriggerable(entity eMakeNotTriggerable)
+//----------------------------------------------------------------------
+// Makes a entity triggerable if it exist
+//----------------------------------------------------------------------
+{
+//Check if entity exsits, if so make it trigger able
+	if(doesEntityExist(eMakeNotTriggerable))
+	{
+		eMakeNotTriggerable.notTriggerable();
+	}
+}
+
+
+void globalCoop_level_remove(entity eToRemove)
+//----------------------------------------------------------------------
+// Removes a entity if it exists, avoids game chrash
+//----------------------------------------------------------------------
+{
+//Check if entity exsits, if remove it
+	if(doesEntityExist(eToRemove)){
+		if(eToRemove.getRawTargetname() != "world"){
+			eToRemove.remove();
+		}
+	}
+}
+
+void globalCoop_level_removePath(entity ePath)
+//----------------------------------------------------------------------
+// Removes Paths, reduces entity count creating TRAFFIC in multiplayer!!!
+//----------------------------------------------------------------------
+{
+	entity eRemove;
+	while(doesEntityExist(ePath)){
+		eRemove = ePath;
+		ePath = ePath.gettargetentity();
+		globalCoop_main_waitAFrame();
+		globalCoop_level_remove(eRemove);
+	}
+}
+
+
+void globalCoop_level_hideAndNotSolid(entity eHideAndMakeNotsolid)
+//----------------------------------------------------------------------
+// makes a entity notsolid and hides it if exists, saves statments
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eHideAndMakeNotsolid))
+	{
+		eHideAndMakeNotsolid.hide();
+		eHideAndMakeNotsolid.notSolid();
+	}
+}
+
+
+void globalCoop_level_showAndSolid(entity eShowAndMakeSolid)
+//----------------------------------------------------------------------
+// makes a entity solid and shows it if exists, replacement function for multiplayer use!!!
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eShowAndMakeSolid))
+	{
+		eShowAndMakeSolid.show();
+		eShowAndMakeSolid.solid();
+	}
+}
+
+
+void globalCoop_level_hide(entity eHide)
+//----------------------------------------------------------------------
+// hides entity it if exists, replacement function for multiplayer use!!!
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eHide))
+	{
+		eHide.hide();
+	}
+}
+
+
+void globalCoop_level_show(entity eShow)
+//----------------------------------------------------------------------
+// shows entity it if exists, replacement function for multiplayer use!!!
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eShow))
+	{
+		eShow.show();
+	}
+}
+
+void globalCoop_level_callReliably(string sTreadName)
+//----------------------------------------------------------------------
+//Calls a thread from a trigger...
+//This does not crash the game if that thread does not exist
+//----------------------------------------------------------------------
+{//testthread("",sTreadName); does not work proper on includes!!!!!!!!!!!
+	//globalCoop_main_printTimeAndString("globalCoop_level_callReliably("+sTreadName+")");
+	
+	entity eTrigger;
+	eTrigger = spawn("trigger_relay","thread",sTreadName);
+	globalCoop_main_waitAFrame();
+	globalCoop_level_triggerEntity( eTrigger );
+}
+
+
+float globalCoop_level_getFloatVar(entity eEntity,string sVaraiableName)
+//----------------------------------------------------------------------
+// get the var with the given name of the entity
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eEntity))
+	{
+		return (eEntity.getFloatVar(sVaraiableName)) ;
+	}
+	return -1;
+}
+
+
+void globalCoop_level_setFloatVar(entity eEntity,string sVaraiableName,float fVarValue)
+//----------------------------------------------------------------------
+// set the var with the given name on the entity
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eEntity))
+	{
+		eEntity.setFloatVar(sVaraiableName,fVarValue);
+	}
+}
+
+
+string globalCoop_level_getStringVar(entity eEntity,string sVaraiableName)
+//----------------------------------------------------------------------
+// set the var with the given name on the entity
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eEntity))
+	{
+		return eEntity.getStringVar(sVaraiableName);
+	}
+	return "";
+}
+
+
+void globalCoop_level_setStringVar(entity eEntity,string sVaraiableName,string sValueToSet)
+//----------------------------------------------------------------------
+// set the var with the given name on the entity
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eEntity))
+	{
+		eEntity.setStringVar(sVaraiableName,sValueToSet);
+	}
+}
+
+
+void globalCoop_level_secretShip()
+//----------------------------------------------------------------------
+// let the players benefit from picking up the secrets, so they make still sence
+//----------------------------------------------------------------------
+{
+//Chnaged 4.4 was seperate entity var on player, we do now overwrite eTrigger!
+	if(cvar_bool_multiplayer){
+		entity eTrigger;
+		eTrigger = getCurrentEntity();
+//CHECK IF THE ACUTAL ENTITY EXISTS, IF NOT, THREAD HAS POSSIBLE BEEN CALED FROM CONOLE
+		if(doesEntityExist(eTrigger))
+		{
+			eTrigger = eTrigger.getLastActivatingEntity();
+//CHECK IF PLAYER PICKING UP THAT SHIP IS STILL ON THE SERVER
+			if(doesEntityExist(eTrigger))
+			{
+				string sBenefit;
+//GIVE THE PLAYER FOUND THE SECRET A LIL EXTRA
+ 				eTrigger.health(100);
+				eTrigger.armor("BasicArmor",200);
+				float fRandomInt;
+				fRandomInt = randomInt(30);
+				sBenefit = "ammo";
+				
+				if(fRandomInt <= 10){
+					sBenefit		= "health";
+				}
+				else if(fRandomInt <= 20){			
+					sBenefit		= "armor";
+				}
+//GIVE TEAM BENEFIT
+				globalCoop_huds_manageAll("coop_msg07",1,0);
+				globalCoop_main_globalCommand(sBenefit);
+			}
+		}
+	}
+}
+
+
+void globalCoop_level_endProcedur()
+//----------------------------------------------------------------------
+// Does the level end rutine
+//----------------------------------------------------------------------
+{
+	coop_bool_scriptIsPaused = 1;
+	globalCoop_main_globalCommand("nodamage");
+	thread globalCoop_player_imobilizeAll(1);
+	level_ai(0);
+}
+
+
+void globalCoop_level_triggerLevelChange()
+//----------------------------------------------------------------------
+// triggers the level end trigger
+//----------------------------------------------------------------------
+{
+	entity eTrigger;
+	eTrigger = spawn("trigger_changelevel","map",cvar_string_mapname);
+	globalCoop_main_waitAFrame();
+	thread globalCoop_level_triggerEntity(eTrigger);
+}
+
+
+void globalCoop_level_warpDroptofloor(entity eWarpDrop,vector vWarpTo)
+//----------------------------------------------------------------------
+// Warp entity to a location and droop it to the floor
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eWarpDrop))
+	{
+		eWarpDrop.warp(vWarpTo);
+		eWarpDrop.dropToFloor();
+	}
+}
+void globalCoop_level_moveToPos(entity eMove,vector vMoveTo)
+//----------------------------------------------------------------------
+// Move Entity to a specified location
+//----------------------------------------------------------------------
+{
+	if(doesEntityExist(eMove))
+	{
+		eMove.time(.05);
+		eMove.moveToPos(vMoveTo);
+	}
+}
+
+
+void globalCoop_level_warpEntityToVectorSafty(entity eWarpMe,vector vOrigin)
+//----------------------------------------------------------------------
+// Warp given entity to the given location
+//----------------------------------------------------------------------
+{
+//EXIT: WHEN PASSED ENTITY DOES NOT EXISTS
+	if(doesEntityExist(eWarpMe))
+	{
+	//DON'T PLAY WITH THE WORLD! -> should tell this industry and politicans
+		string sEntityTargetname;
+		sEntityTargetname = eWarpMe.getRawTargetName();
+		if(sEntityTargetname == "world")
+		{
+			return;
+		}
+	//RELOCATE
+		eWarpMe.warp(vOrigin);
+		thread globalCoop_player_makeSolidASAP(eWarpMe);
+	}
+}
+
+
+//float globalCoop_level_getFloatVarInSpAndCvarInMP(string sVarName)
+//----------------------------------------------------------------------
+// GET FLOATVAR OR CVAR VALUE (floatvars are just temporary for the game sesion if server is loading next map they are lost, this is a more permanent solution!)
+//----------------------------------------------------------------------
+// {
+	// float fValue;
+	// if(getCvarInt("g_gameType") != 0){
+		// fValue = getCvarInt(sVarName);
+	// }else{
+		// fValue = getfloatvar(sVarName);
+	// }
+	// return fValue;
+// }
+
+//void globalCoop_level_setFloatVarInSpAndCvarInMP(string sVarName,float fValue)
+//----------------------------------------------------------------------
+// SET FLOATVAR OR CVAR VALUE (floatvars are just temporary for the game sesion if server is loading next map they are lost, this is a more permanent solution!)
+//----------------------------------------------------------------------
+// {
+	// if(getCvarInt("g_gameType") != 0){
+		// stuffCMD("seta "+sVarName+" "+fValue+"\n");//do not use setcvar, it does not archive!
+	// }else{
+		// setfloatvar(sVarName,fValue);
+	// }
+// }
+
+

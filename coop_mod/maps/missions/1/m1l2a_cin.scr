@@ -1,0 +1,156 @@
+void IntroCinematic();
+void introCinematic_skipthread();
+
+
+//---------------------
+void IntroCinematic()
+//---------------------
+{
+	spawn( "Camera", "targetname", "cam1");
+	spawn( "Camera", "targetname", "cam2");
+	cam.load( "borg02_cam1" );
+	cam.load( "borg02_cam2" );
+	
+	$StartLiftClip.remove();
+	$StartLift.time ( .1 );
+	$StartLiftPlatform.moveWest ( 216 );
+	$StartLift.time( .1 );
+	$StartLift.movedown( 500 );
+
+	globalCoop_cin_start();
+
+    allowMusicDucking( 0 );
+	music ("aux4");
+	
+	wait(.1);
+	
+	$chell.ai_off();
+	$telsia.ai_off();
+	$munro.ai_off();
+	
+	$telsia.warp('-189.00 443.00 -100');//z324
+	$chell.warp('-276.00 443.00 -100');
+	$munro.warp('-270.00 313.00 -100');
+	
+	$munro.show();
+	$munro.anim ("idle");
+	$munro.useactorweapon( "none" );
+	
+	$munro.angles('0 270 0');
+	$telsia.angles('0 270 0');
+	$chell.angles('0 270 0');
+	
+	$telsia.headwatch($munro,5);
+	$chell.headwatch($munro,5);
+	
+	$telsia.anim ( "idle" );
+	$telsia.useactorweapon( "none" );
+	
+	$chell.anim ("idle");
+	$chell.useactorweapon( "none" );
+
+	globalCoop_cin_follow($cam1,$borg02_cam1 );
+	globalCoop_cin_fov($cam1,65);
+	//globalCoop_cin_watch($cam1,$StartLift);
+	
+	$cam1.bind($StartLift);//$cam1.watch ( "$StartLift" );
+	globalCoop_cin_cut($cam1);
+	wait( .5 );
+	globalCoop_cin_cuecamera ( $cam1 );
+	
+	globalCoop_main_camFadeIn(1);
+	wait( 1 );
+	
+	globalCoop_cin_skipThread( "introCinematic_skipthread");
+	
+	//--play tuvok dialog
+	thread LevelStart_Dialog();
+
+	$StartLift.time( 5 );
+	$StartLift.playsound( "sound/environment/machine/solanlift.wav", 8, 1, 1500 );
+	$StartLift.moveup( 500 );
+	waitfor ($StartLift);
+	$StartLift.playsound( "sound/environment/machine/solanlift_stop.wav", 8, 1, 1500 );
+	
+	globalCoop_cin_follow($cam2,$borg02_cam2 );
+	wait( .25 );
+	
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera ( $cam2 );
+
+	$StartLiftPlatform.time ( 1.5 );
+	$StartLiftPlatform.playsound( "sound/doors/borg_door_01.wav", 8, 1, 1500 );
+	$StartLiftPlatform.moveEast ( 216 );
+	wait( 1 );
+	
+	$munro.walkto ( "$intro_cinematic_waypoint2" );
+	wait( .2 );
+
+	$StartLiftPlatform.playsound( "sound/doors/borg_door_stop_01.wav", 8, 1, 1500 );
+
+	$telsia.walkto ( "$intro_cinematic_waypoint2" );
+	wait( .2 );
+	
+	$chell.walkto ( "$intro_cinematic_waypoint2");	
+	wait ( 4 );
+	
+	thread introCinematic_skipthread();
+	
+}
+
+void introCinematic_skipthread()
+{
+	skipthread( "null" );
+	killthread( "LevelStart_Dialog" );
+	killthread( "IntroCinematic" );
+	
+	thread globalCoop_huds_RemoveAll("coop_dialogheadhud_"+coop_string_dialogNameOfSpeaker);
+	
+	globalCoop_main_camFadeOut(1);
+	wait( 1 );
+	$StartLift.stopsound();
+	$StartLiftPlatform.stopsound();
+	$StartLift.remove();
+	$StartLiftPlatform.remove();
+	$dummyLift.show();
+	$dummyLift.solid();
+	
+	$tuvok.stopdialog();
+	$tuvok.remove();
+	
+	$munro.stopdialog();
+	$munro.notsolid();
+	$munro.hide();
+	$munro.flags("+notarget");
+	
+	globalCoop_cin_end();
+	globalCoop_player_warpToSpawnOriginAll();
+	
+	if(!cvar_bool_multiplayer){
+		$player.use("compressionrifle");
+	}
+	
+	wait ( 1 );
+	globalCoop_main_camFadeIn(1);
+	
+	$telsia.warp('-887 514 385');
+	$chell.warpto("$intro_cinematic_waypoint2");
+	
+	if(!cvar_bool_multiplayer){
+		$telsia.turntowardsentity($player);
+		$chell.turntowardsentity($player);
+	}
+	
+	$telsia.resethead();
+	$telsia.ai_on();
+	$chell.resethead();
+	$chell.ai_on();
+	
+	$chell.useactorweapon( "compressionrifle" );
+	$telsia.useactorweapon( "compressionrifle" );
+	
+	$clip_elevator_start.solid();
+	$elevator_start_clip.solid();
+	wait ( 1 );
+}
+

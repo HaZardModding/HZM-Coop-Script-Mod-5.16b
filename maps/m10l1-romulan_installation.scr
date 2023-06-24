@@ -1,0 +1,1932 @@
+//-----------------------------------------------------------------
+//
+//  EF2 Level Script File
+//
+//  Level:	  m10l1-romulan_installation
+//  Script By:    Jared "BirdDawg" Hefty
+//  Geometry By:  R. "Charon" Heath, Jared "BirdDawg" Hefty
+//  Created on:   06/19/2002
+//	Last Edited:  05/8/2003 - Jared "BirdDawg" Hefty
+//-----------------------------------------------------------------
+
+void init();
+void initGuards();
+void runCrateSelector ();
+
+//Functions
+void m10l1_FromStateMachine_ToEnemy();
+void rotateSearchLightCones( float x );
+void deleteSearchLights ();
+void closeWindowPortal ();
+void introCinematic ();
+void endIntroCinematic ();
+void endUpgradeConversation ();
+void killHoundConversation ();
+void cinematicInformant();
+void launchShuttle();
+
+
+void setup_puzzles();
+void setup_scriptObjects();
+void setup_ai();
+void setup_archetypes();
+
+//why the hell didn't you do proper declaration Hefty ?
+void stage2DoorOpen();
+void closeStage2Door ();
+void unlockDoor(string s);
+
+void gus1OpenDoor();
+void closeGate1 ();
+void coop_waitForTeam();
+void coop_endLevel();
+
+float coop_bool_playerDiscovered = 0;
+float fLunchShuttle = 0;
+
+//=============================================================================
+// Includes
+//=============================================================================
+#include "coop_mod/maps/main.scr"
+#include "coop_mod/maps/global/global_common.scr"
+#include "coop_mod/maps/optional_modules/alias.scr"
+#include "coop_mod/maps/optional_modules/puzzles_advanced.scr"
+#include "coop_mod/maps/optional_modules/codepanel.scr"
+#include "maps/global_scripts/global_debugUtils.scr"
+#include "maps/global_scripts/global_archetype.scr"
+#include "maps/global_scripts/global_tricorderBase.scr"
+#include "maps/global_scripts/global_tricorderMod.scr"
+#include "maps/global_scripts/global_tricorderKeypad.scr"
+#include "maps/global_scripts/global_soundPan.scr"
+#include "maps/global_scripts/global_math.scr"
+#include "maps/global_scripts/global_acceleratedMovement.scr"
+#include "maps/m10/m10_common.scr"
+#include "maps/m11/m11_groupspawn.scr"
+#include "coop_mod/maps/missions/10/m10_searchlight.scr"
+#include "coop_mod/maps/missions/10/m10l1_dialog.scr"
+#include "coop_mod/maps/missions/10/m10_doors.scr"
+#include "coop_mod/maps/missions/10/m10l1_cin.scr"
+
+float LIGHT_SPEED = 300;
+float stage2DoorHacked = 0;
+
+void setupStationaryGuard ( entity e , float id )
+{
+	if(doesEntityExist(e)){
+		e.pushable ( 0 );
+		e.settendency ( "getoutoftheway" , 0.0 );
+		e.settendency ( "wander" , 0.0 );
+		e.settendency ( "patrol" , 0.0 );
+		e.setgroupid ( id );
+	}
+}
+
+void setupPatrollingGuard ( entity e , float id )
+{
+	if(doesEntityExist(e)){
+		e.settendency ( "wander" , 0.0 );
+		e.settendency ( "patrol" , 1.0 );
+		e.settendency ( "work" , 1.0 );
+		e.setgroupid ( id );
+		wait(.1);
+		e.allowfall( 1 );
+		//e.feetwidth(27);//20
+		e.feetwidth(31);//20
+	}
+}
+
+void setupWorkerGuard ( entity e , float id )
+{
+	if(doesEntityExist(e)){
+		e.settendency ( "wander" , 0.0 );
+		e.settendency ( "patrol" , 1.0 );
+		e.settendency ( "work" , 1.0 );
+		e.setgroupid ( id );
+	}
+}
+
+void coop_setupGeneralHelpDialog(entity eActor,string sDialog)
+{
+	if(doesEntityExist(eActor))
+	{
+		globalCoop_alias_set(eActor,eActor.getRawTargetName()+"generalDialog","m10l1/romguard_canihelp.mp3");
+		globalCoop_alias_set(eActor,eActor.getRawTargetName()+"generalDialog",sDialog);
+		thread globalCoop_level_onUse(eActor,"globalCoop_alias_play");
+	}
+}
+
+void coop_setupGeneralDialog(entity eActor,string sDialog)
+{
+	if(doesEntityExist(eActor))
+	{
+		globalCoop_alias_set(eActor,eActor.getRawTargetName()+"generalDialog",sDialog);
+		thread globalCoop_level_onUse(eActor,"globalCoop_alias_play");
+	}
+}
+
+
+void coop_newPlayerEntered()
+//----------------------------------------------------------------------
+//Welcome Player to this map
+//----------------------------------------------------------------------
+{
+}
+
+
+//---------------------
+// main
+// do start up stuff
+//---------------------
+void main()
+{
+	thread globalCoop_server_soundSingleplayer();
+	globalCoop_server_precacheSingleplayer();
+	globalCoop_main_camFadeOut(.1);
+	$world.entity_fade_dist( 5000 );
+	$world.farplane_color( '0.0875 0.1 0.145' );
+	$world.farplane( 3000 );
+	$world.farplane_cull ( 1 );
+	$world.farplane_fog ( 1 );
+//Co-Op
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+//allowed special model
+	//coop_string_playerModelResetTiki	= "models/char/dm_romulan_rebel-guard-snow.tik";
+	coop_string_playerModelResetTiki	= "models/char/munro-romulan.tik";
+//set the map we gona load next while we are in testmode
+	coop_string_nextMapToCheck			= "m10l2a-romulan_installation";
+//Set spawnangles for this level
+	coop_float_spawnAngle1 				= 86;
+	coop_float_spawnAngle2 				= 67;
+	coop_float_spawnAngle3 				= 26;
+	coop_float_spawnAngle4 				= 64;
+	coop_float_spawnAngle5 				= 57;
+	coop_float_spawnAngle6 				= 14;
+	coop_float_spawnAngle7 				= 38;
+	coop_float_spawnAngle8 				= 41;
+	coop_vector_spawnOrigin1 			= '10009 -6598 200';
+	coop_vector_spawnOrigin2 			= '9896 -6455 200';
+	coop_vector_spawnOrigin3 			= '9738 -6345 200';
+	coop_vector_spawnOrigin4 			= '9705 -6869 110';
+	coop_vector_spawnOrigin5 			= '9553 -6912 110';
+	coop_vector_spawnOrigin6 			= '9399 -6647 130';
+	coop_vector_spawnOrigin7 			= '9436 -6790 100';
+	coop_vector_spawnOrigin8 			= '9354 -6919 100';
+	
+// if(getCvar("username") == "Chrissstrahl")
+// {
+	// coop_vector_spawnOrigin1 = '6257 -3293 -85';//first guard - $gus1
+	// coop_vector_spawnOrigin1 = '13479 -907 255'; //sector t access code left guard
+	// coop_vector_spawnOrigin1 = '11180 -237 178'; //near the shuttle
+	// coop_float_spawnAngle1	 = 326;
+// }
+	
+	
+//Definie Objective
+	coop_string_objectiveItem1			= "MeetInformant";
+	coop_string_objectiveItem2			= "EnterBase";
+	coop_string_objectiveItem3			= "AvoidBioScanners";	
+	coop_string_objectiveItem4			= "CreateDiversion";
+//weapons
+	//see function :: endIntroCinematic ()
+//Start the Co-Op Script
+	globalCoop_main();
+//disable classes on default here, bcaus players are often so close together at one spot
+	cvar_bool_coop_disClass				= 1;
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+	thread init();
+	
+	waitforplayer();	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.model("models/char/hazardteam_munro-rom-uniform.tik");
+		$player.loadObjectives( "m10l1-romulan_installation" );
+		$player.immobilize(1);
+	}
+	$world.clearAvailableViewModes();
+	$world.addAvailableViewMode ( "tripwire" );
+	$world.addAvailableViewMode ( "structuralintegrity" );
+
+//beamin sequence
+	thread introCinematic();
+}
+
+//---------------------
+// init
+//---------------------
+void init()
+{
+    //--- change the music
+	music( "aux1" , "normal");
+	thread initGuards ();	//do these guys first so they don't have a chance to wander
+
+	setfloatvar ( "level.securityAccess" , 0 );
+	thread runCrateSelector ();
+	closeWindowPortal ();
+
+	float i;
+	entity e;
+	for ( i = 1 ; i <= 8 ; i++ )
+	{
+		e = getentity ( "doorPanel" + i );
+		globalArchetype_Setup ( e , "RomulanDoorPanel" );
+	}	
+	
+	//dummy actors that we can send events to
+	spawn ( "Actor" , "targetname" , "group1" , "setgroupid" , "1" );
+	spawn ( "Actor" , "targetname" , "group2" , "setgroupid" , "2" );
+	spawn ( "Actor" , "targetname" , "group3" , "setgroupid" , "3" );
+
+	$world.light_lightstyle ( "crateSelectorLights" , "llllllllllllllllllllllllkllllllllllllllllllllm" , 1 );
+//Lock the doors
+	thread lockDoor ( "comDoor" );
+	thread lockDoor ( "comDoor2" );
+	thread lockDoor ( "securityDoor" );
+	thread lockDoor ( "outerDoor1" );
+	thread lockDoor ( "outerDoor2" );
+	thread lockDoor ( "stage2Door" );
+	thread lockDoor ( "exitDoor" );
+
+//Splitted up stuff
+	thread setup_scriptObjects();
+	thread setup_puzzles();
+	thread setup_archetypes();
+	thread setup_ai();
+
+
+//Set the model of the romulan shuttle on the moving object
+	cam.load ( "m10l1_ShuttlePath" );
+	entity eSpawned;
+	eSpawned = spawn("script_model","model","fx/fx-dummy.tik","origin","6281 -3324 -86");//-6->-86
+	wait ( .1 );
+	eSpawned.setSize('-400 -400 -64','400 400 0');
+	$shuttle1.model("vehicle/romulan_assault.tik");
+	$shuttle1.followpath ( $m10l1_ShuttlePath );
+	wait ( .1 );
+	$shuttle1.endpath ();
+
+//Wait for a player to join
+	waitForPlayer();
+	
+	//--- Sniper Tower Stuff
+	//---
+	//---
+	//start the range checking stuff
+	
+  	float x;
+	entity e;
+	for( x = 1; x <= 10; x++ )
+	{
+		// initialize paths and start each searchlight
+		e = getentity( "searchlight" + x );
+		if (doesEntityExist ( e ))
+			thread setupLight( e, LIGHT_SPEED );
+		else
+			print ( "Missing searchlight" + x + "\n" );
+		wait ( .05 );
+	}
+	
+ 	string thisSearchLightCone;
+	string thisSearchLightBase;
+	string thisSearchLightConeOrigin;
+	string thisSearchLightConeAttackOrigin;
+
+	entity currentSearchLightCone;
+	entity currentSearchLightBase;
+	entity currentSearchLightConeOrigin;
+	entity currentSearchLightConeAttackOrigin;
+
+	//start rotating them
+	for( x = 1; x <= 10; x ++ )
+	{
+		thisSearchLightCone = "searchLightCone" + x;
+		thisSearchLightBase = "searchLightBase" + x;
+		thisSearchLightConeOrigin = "searchLightConeOrigin" + x;
+		thisSearchLightConeAttackOrigin = "searchLightConeAttackOrigin" + x;
+
+		currentSearchLightCone = getentity( thisSearchLightCone );
+		currentSearchLightBase = getentity( thisSearchLightBase );
+		currentSearchLightConeOrigin = getentity( thisSearchLightConeOrigin );
+		currentSearchLightConeAttackOrigin = getentity( thisSearchLightConeAttackOrigin );
+
+		currentSearchLightCone.bind( currentSearchLightConeOrigin );
+		currentSearchLightBase.bind( currentSearchLightConeOrigin );
+		currentSearchLightConeAttackOrigin.bind( currentSearchLightConeOrigin );
+		currentSearchLightCone.viewmode( "tripwire" );
+		currentSearchLightConeOrigin.loopsound ( "sound/ships/romulan/rom_search.wav", .5, 200);
+
+		float threadID;
+		threadID = thread rotateSearchLightCones( x );
+		currentSearchLightCone.setfloatvar ( "myThreadID" , threadID );	//save this thread so we can kill it later
+		wait ( .1 );
+	}
+	
+	$world.light_lightstyle ( "commDestroyedRedLight" , "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaa" , 1 );
+//SET MUSIC
+	soundtrack( "music/m10l1-romulan_installation.mus" );
+//load sounds, removed for MP due to trafic issues
+	if(!cvar_bool_multiplayer)//Singleplayer
+	{
+		cam.load("sound_m10l1-romulan_installation");
+	}
+	
+//Update Objectives
+	globalCoop_objectives_update("incomplete",1,0);
+	thread globalCoop_objectives_update("incomplete",2,1);
+}
+
+void setup_puzzles()
+//setup puzzles, split up the ini thread a lil
+{
+	if(cvar_bool_multiplayer){//Multiplayer
+	//Spawn Class Selection
+		//globalCoop_class_setup("HeavyWeapons",'15334 -3812 300');
+		//globalCoop_class_setup("Technician",'15234 -3695 300');
+		//globalCoop_class_setup("Medic",'15151 -3603 300');
+	//REPLACE + ADD
+		spawn("trigger_use","targetname","momy","thread","mom_basic","origin","14576 -2480 -40");
+		globalCoop_main_waitAFrame();
+		$momy.setstringvar("uservar1","coop_tricorderKeypadRom");
+		$momy.setstringvar("uservar2","codepanel");
+		$momy.setvectorvar("coop_codepannelCCD",'0 95713 5');
+		$momy.setstringvar("coop_codepannelSucess","stage2DoorOpen");
+
+		globalCoop_puzzle_replace($gus1Credentials,"gus1OnUseCredentials",2);
+		//globalCoop_puzzle_replace($stage2Puzzle,"stage2DoorOpen",2);
+		globalCoop_puzzle_replace($gus2Credentials,"gus2OnUseCredentials",2);
+		globalCoop_puzzle_replace($khoalCredentials,"khoalOnUseCredentials",2);
+		globalCoop_puzzle_add("securityStation","securityStationOnUse",3,'13948 -920 348');
+		globalCoop_main_waitAFrame();
+	//subcommander (just one player needs to unlock this doors)
+		$khoalCredentials.setFloatVar("globalCoop_puzzle_disabled",1);
+		$khoalCredentials.setFloatVar("coop_puzzle_resetState",1);
+		$khoalCredentials.setFloatVar("coop_puzzle_doNotDisable",1);
+		$khoalCredentials.setFloatVar("globalCoop_puzzleAllowAllClasses",1);
+		globalCoop_main_waitAFrame();
+	//Outside Door 1
+		$gus1Credentials.setFloatVar("globalCoop_puzzle_disabled",0);
+		$gus1Credentials.setFloatVar("coop_puzzle_doNotDisable",0);
+		$gus1Credentials.setFloatVar("coop_puzzle_resetState",1);
+		$gus1Credentials.setFloatVar("globalCoop_puzzleAllowAllClasses",1);
+		globalCoop_main_waitAFrame();
+	//Outside Door 2
+		$gus2Credentials.setStringVar("globalCoop_puzzle_solveThread","gus2OpenDoor");
+		$gus2Credentials.setFloatVar("globalCoop_puzzle_disabled",0);
+		$gus2Credentials.setFloatVar("coop_puzzle_doNotDisable",0);
+		$gus2Credentials.setFloatVar("coop_puzzle_resetState",1);
+		$gus2Credentials.setFloatVar("globalCoop_puzzleAllowAllClasses",1);
+		globalCoop_main_waitAFrame();
+	//Security
+		$securityStation.setFloatVar("globalCoop_puzzle_disabled",0);
+		$securityStation.setStringVar("coop_puzzle_key","khoalCredentials");
+		$securityStation.setFloatVar("coop_puzzle_resetState",1);
+		$securityStation.setFloatVar("coop_puzzle_doNotDisable",1);
+		$securityStation.setFloatVar("globalCoop_puzzleAllowAllClasses",1);
+		$securityStation.setStringVar("coop_puzzle_addHud","codehud_m10_sectort");
+		globalCoop_main_waitAFrame();
+	//Sector T Door
+		$stage2Puzzle.setStringVar("coop_puzzle_key","securityStation");
+		$stage2Puzzle.setFloatVar("coop_puzzle_resetState",1);
+		$stage2Puzzle.setFloatVar("coop_puzzle_doNotDisable",1);
+		$stage2Puzzle.setFloatVar("globalCoop_puzzleAllowAllClasses",1);
+		$stage2Puzzle.setStringVar("coop_puzzle_removeHud","codehud_m10_sectort");
+		globalCoop_main_waitAFrame();
+	}
+	else{
+		$stage2Puzzle.puzzleobject_itemToUse      ( "Tricorder"          );
+		$stage2Puzzle.puzzleobject_itemUsedthread ( "startStage2Puzzle"  );
+		$stage2Puzzle.puzzleobject_solvedThread   ( "stage2DoorOpen"     );
+	//	$stage2Puzzle.puzzleobject_failedThread   ( "resetStage2Puzzle"  );
+	//	$stage2Puzzle.puzzleobject_canceledThread ( "resetStage2Puzzle"  );
+	
+	//Setup the credential puzzle objects for the Guses
+		$gus1Credentials.puzzleobject_itemToUse ( "Tricorder" );
+		$gus1Credentials.puzzleobject_timeToUse ( 1 );
+		$gus1Credentials.puzzleobject_solvedThread ( "gus1OnUseCredentials" );
+		globalCoop_main_waitAFrame();
+		
+		$gus2Credentials.puzzleobject_itemToUse ( "Tricorder" );
+		$gus2Credentials.puzzleobject_solvedThread ( "gus2OpenDoor" );
+		$gus2Credentials.puzzleobject_timeToUse ( 1 );
+
+	//Sitting dude (subcomander)
+		$khoalCredentials.puzzleobject_itemToUse ( "Tricorder" );
+		$khoalCredentials.puzzleobject_solvedThread ( "khoalOnUseCredentials" );
+		$khoalCredentials.puzzleobject_timeToUse ( 1 );
+	}
+}
+
+void setup_scriptObjects()
+//setup scriptObjects, split up the ini thread a lil
+{
+// make script_object doors solid (allowing path connections )
+	$Gate2Bottom1.solid();
+	$Gate2Mid1.solid();
+	$Gate2Mid2.solid();
+
+	$Gate3Bottom1.solid();
+	$Gate3Mid1.solid();
+	$Gate3Mid2.solid();
+
+	$Gate4Bottom1.solid();
+	$Gate4Mid1.solid();
+	$Gate4Mid2.solid();
+
+	$conduit1.bind ( $conduitOrigin );
+	$conduit2.bind ( $conduitOrigin );
+	$conduit1.forcealpha ( 1 );
+	$conduit2.forcealpha ( 1 );
+	$conduit1.alpha ( .6 );
+	$conduit2.alpha ( .6 );
+	
+	$rotatingDisplay1.time ( 12 );
+	$rotatingDisplay1.rotateY ( 10 );
+	$windowAreaPortal.hide ();
+	$windowAreaPortal.notsolid ();
+}
+
+void setup_ai()
+//setup ai, split up the ini thread a lil
+{
+//The Informanty
+	$informant.ai_off();
+	$informant.pushable ( 0 );
+//Search light patrol dudes
+	thread globalCommon_OnUse ( $gus1 , "gus1OnUseNoCredentials" );
+	thread globalCommon_OnUse ( $gus2 , "gus2OnUseNoCredentials" );
+	//if(!cvar_bool_multiplayer){//Singleplayer
+	//}
+	//Make immortal else game chrash after kill
+	
+ 	if(cvar_bool_multiplayer){//Multiplayer
+/* 		$gus1.immortal ( 1 );
+		$gus2.immortal ( 1 );
+		$gus1.ai_off(); */
+		$gus2.ai_off();
+	}
+//Other dudes
+	//terminate conversations as necessary
+	$patrol6.addcustomthread ( "damaged" , "killHoundConversationAttacked" );
+	$patrol7.addcustomthread ( "damaged" , "killHoundConversationAttacked" );
+	$worker2.addcustomthread ( "damaged" , "killReadinessConversationAttacked" );
+	$worker4.addcustomthread ( "damaged" , "killReadinessConversationAttacked" );	
+//Groups
+	AIHideGroup ( 666 );
+//The upgradeDude
+	$khoal.ai_off ();
+	$khoal.anim ( "chair_idle" );
+	$khoal.useactorweapon ( "none" );
+	$khoal.immortal ( 1 );
+	thread globalCommon_OnUse ( $khoal , "khoalOnUseNoCredentials" );
+	
+//setup dialog setup dialog setup dialog setup dialog
+//setup dialog setup dialog setup dialog setup dialog
+//stationary1 - locked door
+	globalCoop_alias_condition($stationary1,"stationSecurityGuard1Dialog","level.securityAccess","0");
+	globalCoop_alias_setAnim($stationary1,"stationSecurityGuard1Dialog","m10l1/statgueard_noacc.mp3","conv-no");
+	globalCoop_alias_set($stationary1,"stationSecurityGuard1Dialog","m10l1/doorguard2_walled.mp3");
+//stationary2 - locked door
+	globalCoop_alias_condition($stationary2,"stationSecurityGuard2Dialog","level.securityAccess","0");
+	globalCoop_alias_setAnim($stationary2,"stationSecurityGuard2Dialog","m10l1/romguard_clear.mp3","conv-no");
+//stationary4 - sector t
+	globalCoop_alias_condition($stationary4,"stationSecurityGuard4DialogT","level.securityAccess","2");
+	globalCoop_alias_setAnim($stationary4,"stationSecurityGuard4DialogT","m10l1/doorguard1_entert.mp3","conv-affirmative");
+	globalCoop_alias_set($stationary4,"stationSecurityGuard4DialogT","m10l1/doorguard2_watchback.mp3");
+//gus2 - can i help you, 
+//worker1 - doing my job do yours romguard_suggest.mp3
+//worker2 - never seen u before welcome to emptiest sector romguard_empty.mp3
+//worker3 - can barly feel my hands, ahhhhhhhh outrom1_feelhand.mp3 outrom1_arr.mp3
+//worker4 - security is paramount romguard_tightw.mp3
+//patrol2 - can i help you, bored as I am
+//patrol3 - can i help you, dono you new guy
+//patrol4 stationary5 - can i help you, cold as you are
+//patrol5 stationary6 - can i help you, hounds
+//patrol6 - can i help you, bored
+//patrol7 - can i help you, dono you new guy
+//patrol
+	coop_setupGeneralHelpDialog($patrol2,"m10l1/romguard_bored.mp3");
+	coop_setupGeneralHelpDialog($patrol3,"m10l1/romguard_newrecruit.mp3");
+	coop_setupGeneralHelpDialog($patrol4,"m10l1/romguard_stopc.mp3");
+	coop_setupGeneralHelpDialog($patrol5,"m10l1/romguard_hounds.mp3");
+	coop_setupGeneralHelpDialog($patrol6,"m10l1/romguard_bored.mp3");
+	coop_setupGeneralHelpDialog($patrol7,"m10l1/romguard_newrecruit.mp3");
+//stationary
+	coop_setupGeneralHelpDialog($stationary1,"");//can I help you - only
+	coop_setupGeneralHelpDialog($stationary2,"");//can I help you - only
+	globalCoop_alias_setAnim($stationary4,"stationSecurityGuard4Dialog","m10l1/doorguard1_nodoor.mp3","conv-no");
+	thread globalCoop_level_onUse($stationary4,"globalCoop_alias_play");
+	coop_setupGeneralHelpDialog($stationary5,"m10l1/romguard_stopc.mp3");
+	coop_setupGeneralHelpDialog($stationary6,"m10l1/romguard_hounds.mp3");
+//worker
+	coop_setupGeneralDialog($worker1,"m10l1/romguard_suggest.mp3");
+	coop_setupGeneralDialog($worker2,"m10l1/romguard_empty.mp3");
+	globalCoop_alias_set($worker3,"worker3GeneralDialog","m10l1/outrom1_feelhand.mp3");
+	globalCoop_alias_set($worker3,"worker3GeneralDialog","m10l1/outrom1_arr.mp3");
+	thread globalCoop_level_onUse($worker3,"globalCoop_alias_play");
+	coop_setupGeneralDialog($worker4,"m10l1/romguard_tightw.mp3");
+}
+
+void setup_archetypes()
+//setup archeTypes, split up the ini thread a lil
+{
+	$stage2Puzzle.archetype ( "RomulanConsole" );
+	globalArchetype_Setup ( $securityStationArchetype , "RomulanSecurityConsole" );
+	globalArchetype_Setup ( $rotateConduitArchetype , "RomulanGenericUsableConsole" );
+
+	globalArchetype_Setup ( $door1Archetype , "CredentialPanel" );
+	globalArchetype_Setup ( $door2Archetype , "CredentialPanel" );
+	globalArchetype_Setup ( $khoalCredentialInput , "CredentialPanel" );
+
+	globalArchetype_Setup ( $stage2DoorArchetype , "RomulanKeypad" );
+	globalArchetype_Setup ( $commStationEquipment1Archetype , "RomulanCommEquipment" );
+	globalArchetype_Setup ( $commStationEquipment2Archetype , "RomulanCommEquipment" );
+	globalArchetype_Setup ( $commStationEquipment3Archetype , "RomulanCommEquipment" );
+
+	globalArchetype_Setup ( $commandRoomArchetype1 , "RomulanCommandSign" );
+	globalArchetype_Setup ( $commandRoomArchetype2 , "RomulanCommandSign" );
+
+	globalArchetype_Setup ( $securityArchetype1 , "RomulanSecuritySign" );
+	globalArchetype_Setup ( $commArchetype1 , "RomulanCommStationSign" );
+	globalArchetype_Setup ( $entranceArchetype1 , "RomulanEntranceSign" );
+
+	globalArchetype_Setup ( $sectorTArchetype , "RomulanTSectorSign" );
+}
+
+
+void startStage2Puzzle ()
+{
+	globalTricorderKeypad_SetType( "romulan" );
+	globalTricorderKeypad_SetScannedCodeFlag ( stage2DoorHacked );
+	globalTricorderKeypad_SetSecretCode (  9, 5 , 7 , 1 , 3 , 0 , 0 , 0 , 0 );
+	globalTricorderKeypad_Run ( $stage2Puzzle , 0 /*second timelimit*/ , 1 /*3 tries */);
+}
+
+void stage2DoorOpen()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.removehud ( "codehud_m10_sectort" );
+	}
+	else
+	{
+		globalCoop_huds_RemoveAll("codehud_m10_sectort");
+	}
+
+	setfloatvar ( "level.securityAccess" , 2 );
+	$stage2Puzzle.missionobjective ( 0 );
+	$informant.missionobjective ( 1 );
+	globalCoop_level_remove($stage2DoorArchetype);
+
+	unlockDoor ( "stage2Door" );
+
+	$stage2Console.playsound ( "sound/environment/switches/switch_01.wav" , 3, .3, 10000 );
+	$stage2Console.playsound ( "sound/ships/romulan/rom_beep_yes.wav" , 7, .3, 10000 );
+
+	wait( .1 );
+    $Gate2Top1.playsound ( "sound/doors/drull_smldoor_01.wav", 4, 1, 300);
+	$Gate2Top1.time(2);
+	$Gate2Top1.rotateXup( 90 );
+	$Gate2Top2.time(2);
+	$Gate2Top2.moveup( 48 );
+	$Gate2Top3.time(2);
+	$Gate2Top3.rotateXdown( 90 );
+	waitfor( $Gate2Top1 );
+	$Gate2Top1.playsound ( "sound/doors/drull_smldoor_stop_01.wav", 4, 1, 300);
+
+    $Gate2Bottom1.playsound ( "sound/doors/drull_bigdoor_01.wav", 5, 1, 300);
+	$Gate2Bottom1.time( 4 );
+	$Gate2Bottom1.moveDown( 48 );
+	$Gate2Mid1.time( 4 );
+	$Gate2Mid1.moveNorth( 96 );
+	$Gate2Mid2.time( 4 );
+	$Gate2Mid2.moveSouth( 96 );
+	waitfor( $Gate2Bottom1 );
+	$Gate2Bottom1.playsound ( "sound/doors/drull_bigdoor_stop_01.wav", 5, 1, 300);
+}
+
+void closeStage2Door ()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		waitfor ( $Gate2Bottom1 );
+		$Gate2Bottom1.playsound ( "sound/doors/drull_bigdoor_01.wav", 5, 1, 300);
+		$Gate2Bottom1.time( 2 );
+		$Gate2Bottom1.moveUp( 48 );
+		$Gate2Mid1.time( 2 );
+		$Gate2Mid1.moveSouth( 96 );
+		$Gate2Mid2.time( 2 );
+		$Gate2Mid2.moveNorth( 96 );
+		waitfor( $Gate2Bottom1 );
+		$Gate2Bottom1.playsound ( "sound/doors/drull_bigdoor_stop_01.wav", 5, 1, 300);
+
+		$Gate2Top1.playsound ( "sound/doors/drull_smldoor_01.wav", 4, 1, 300);
+		$Gate2Top1.time(1);
+		$Gate2Top1.rotateXdown( 90 );
+		$Gate2Top2.time(1);
+		$Gate2Top2.movedown( 48 );
+		$Gate2Top3.time(1);
+		$Gate2Top3.rotateXup( 90 );
+		$Gate2Top1.playsound ( "sound/doors/drull_smldoor_stop_01.wav", 4, 1, 300);
+		waitfor ( $Gate2Top3 );
+
+		lockDoor ( "stage2Door" );
+		CommandToGroup ( 1 , "remove" , "" ,"" );	//get rid of the outdoor guys and replace them
+		CommandToGroup ( 2 , "remove" , "" ,"" );	//get rid of the outdoor guys and replace them
+		globalCoop_level_remove($worker4);
+		globalCoop_level_remove($worker2);
+	}
+}
+void initGuards()
+{
+	//the two guys guarding the outer gates
+	setupStationaryGuard ( $gus1 , 0 );		//targetname,groupid
+	setupStationaryGuard ( $gus2 , 0 );
+
+	//the two guys guarding the security office
+	setupStationaryGuard ( $stationary1 , 1 );
+	setupStationaryGuard ( $stationary2 , 1 );
+
+	//guy guarding the exit
+	setupStationaryGuard ( $stationary3 , 3 );
+
+	//guy guarding sector T
+	setupStationaryGuard ( $stationary4 , 1 );
+
+	//guys guarding khoal's office
+	setupStationaryGuard ( $stationary5 , 1 );
+	setupStationaryGuard ( $stationary6 , 1 );
+
+	setupStationaryGuard ( $khoal , 2 );
+	setupStationaryGuard ( $worker1 , 2 );
+	setupStationaryGuard ( $worker2 , 4 );
+	setupStationaryGuard ( $worker3 , 2 );
+	setupStationaryGuard ( $worker4 , 4 );
+
+//	setupStationaryGuard ( $patrol2 , 1 );	//make him stationary for the conversation
+	setupPatrollingGuard ( $patrol2 , 1 );
+	setupPatrollingGuard ( $patrol3 , 1 );
+	setupPatrollingGuard ( $patrol4 , 1 );
+
+	setupPatrollingGuard ( $patrol5 , 3 );
+//	setupPatrollingGuard ( $patrol6 , 3 );	//defered for the hound conversation
+//	setupPatrollingGuard ( $patrol7 , 3 );
+	setupStationaryGuard ( $patrol6 , 3 );
+	setupStationaryGuard ( $patrol7 , 3 );
+
+	initStationarySecurityGuardDialog  ( $stationary1 , 1);
+	initStationarySecurityGuardDialog  ( $stationary2 , 2);
+	initStationaryEntranceGuardDialog  ( $stationary3 );
+	initStationaryTZoneGuardDialog     ( $stationary4 );
+
+	initOutdoorGuardDialog ( $patrol2 , -1 );
+	initOutdoorGuardDialog ( $patrol3 , -1 );
+	initOutdoorGuardDialog ( $patrol4 , -1 );
+	initOutdoorGuardDialog ( $patrol5 , -1 );
+	initOutdoorGuardDialog ( $patrol6 , -1 );
+	initOutdoorGuardDialog ( $patrol7 , -1 );
+
+	initFemaleDialog ( $worker3 );
+	initGuardDialog ( $worker1 , -1 );
+
+	initKhoalDialog ( $khoal );
+}
+//=============================================================================
+// Gamplay Stuff
+//==============================================================================
+
+//=============================================================================
+// Gate Stuff
+//==============================================================================
+
+
+//Front door, before the spotlights
+void gus1OpenDoor()
+{
+	if(!cvar_bool_multiplayer){//Singleplayer
+		globalCommon_Autosave ();
+	}
+//DELETE PUZZLE IN MP!
+	else{
+		globalCoop_level_remove($gus1Credentials);
+	}
+	unlockDoor ( "outerDoor1" );
+	wait( .1 );
+
+	if($world.getFloatvar("coop_disableThread_gus1OpenDoor") == 1){
+		return;
+	}
+	$world.setFloatvar("coop_disableThread_gus1OpenDoor",1);
+	thread initOutdoorGuardDialog ( $gus1 , -1 );
+//OPEN UP
+	if($Gate3Top1.getFloatvar("coop_doorIsOpen") != 1){
+		$Gate3Top1.setFloatvar("coop_doorIsOpen",2);
+	    //--- play gate sound
+		$Gate3Top1.playsound ( "sound/doors/drull_smldoor_01.wav", 4, 1, 300);
+		$Gate3Top1.time(2);
+		$Gate3Top1.rotateZup( 90 );
+		$Gate3Top2.time(2);
+		$Gate3Top2.moveup( 48 );
+		$Gate3Top3.time(2);
+		$Gate3Top3.rotateZdown( 90 );
+		waitfor( $Gate3Top1 );
+		$Gate3Top1.playsound ( "sound/doors/drull_smldoor_stop_01.wav", 4, 1, 300);
+
+		$Gate3Bottom1.playsound ( "sound/doors/drull_bigdoor_01.wav", 5, 1, 300);
+		$Gate3Bottom1.time( 4 );
+		$Gate3Bottom1.moveDown( 48 );
+		$Gate3Mid1.time( 4 );
+		$Gate3Mid1.moveWest( 96 );
+		$Gate3Mid2.time( 4 );
+		$Gate3Mid2.moveEast( 96 );
+		waitfor( $Gate3Bottom1 );
+		$Gate3Bottom1.playsound ( "sound/doors/drull_bigdoor_stop_01.wav", 5, 1, 300);
+		$Gate3Top1.setFloatvar("coop_doorIsOpen",1);
+	}
+//CLOSE AGAIN
+	if($world.getFloatvar("coop_disableThread_gus1OpenDoor2") == 1 && $Gate3Top1.getFloatvar("coop_doorIsOpen") == 1){
+		wait(.7);
+		thread closeGate1();
+	}
+}
+
+void closeGate1 ()
+{
+	waitfor ( $Gate3Bottom1 );
+	if(cvar_bool_multiplayer){//Multiplayer
+		return;
+	}
+	$Gate3Top1.setFloatvar("coop_doorIsOpen",2);
+	$Gate3Bottom1.playsound ( "sound/doors/drull_bigdoor_01.wav", 5, 1, 300);
+	$Gate3Bottom1.time( 2 );
+	$Gate3Bottom1.moveUp( 48 );
+	$Gate3Mid1.time( 2 );
+	$Gate3Mid1.moveEast( 96 );
+	$Gate3Mid2.time( 2 );
+	$Gate3Mid2.moveWest( 96 );
+	waitfor( $Gate3Bottom1 );
+	$Gate3Bottom1.playsound ( "sound/doors/drull_bigdoor_stop_01.wav", 5, 1, 300);
+
+	$Gate3Top1.playsound ( "sound/doors/drull_smldoor_01.wav", 4, 1, 300);
+	$Gate3Top1.time(1);
+	$Gate3Top1.rotateZdown( 90 );
+	$Gate3Top2.time(1);
+	$Gate3Top2.movedown( 48 );
+	$Gate3Top3.time(1);
+	$Gate3Top3.rotateZup( 90 );
+	$Gate3Top1.playsound ( "sound/doors/drull_smldoor_stop_01.wav", 4, 1, 300);
+	waitfor ( $Gate3Top3 );
+
+	$Gate3Top1.setFloatvar("coop_doorIsOpen",0);
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		lockDoor ( "outerDoor1" );
+	}
+}
+
+
+void gus2OpenDoor()
+{
+	coop_setupGeneralHelpDialog($gus2,"m10l1/romguard_stopc.mp3");
+	globalCoop_alias_set($gus2,"gus2generalDialog","m10l1/romguard_hounds.mp3");
+
+	if(cvar_bool_multiplayer){//Multiplayer	
+	//Set spawnangles for this level
+		coop_float_spawnAngle1 				= 350;
+		coop_float_spawnAngle2 				= 350;
+		coop_float_spawnAngle3 				= 350;
+		coop_float_spawnAngle4 				= 350;
+		coop_float_spawnAngle5 				= 350;
+		coop_float_spawnAngle6 				= 350;
+		coop_float_spawnAngle7 				= 350;
+		coop_float_spawnAngle8 				= 350;
+		coop_vector_spawnOrigin8 			= '10720 200 180';
+		coop_vector_spawnOrigin7 			= '10720 130 180';
+		coop_vector_spawnOrigin6 			= '10720 60 180';
+		coop_vector_spawnOrigin5 			= '10790 200 180';
+		coop_vector_spawnOrigin4 			= '10790 130 180';
+		coop_vector_spawnOrigin3 			= '10790 60 180';
+		coop_vector_spawnOrigin2 			= '10860 200 180';
+		coop_vector_spawnOrigin1 			= '10860 130 180';
+		globalCoop_applaySpawnOriginOnReSpwanOrigin();
+	}
+	else{
+		globalCommon_Autosave ();
+	}
+	
+	thread globalCoop_objectives_update("complete",3,1);
+	//$player.setobjectivecomplete ( "AvoidBioScanners" , 1 );
+	$keycodePuzzle1.missionobjective ( 1 );
+	unlockDoor ( "outerDoor2" );
+
+	thread initOutdoorGuardDialog ( $gus2 , -1 );
+	
+	wait( 1 );
+	$Gate4Top1.playsound ( "sound/doors/drull_smldoor_01.wav", 4, 1, 300);
+	$Gate4Top1.time(2);
+	$Gate4Top1.rotateXup( 90 );
+	$Gate4Top2.time(2);
+	$Gate4Top2.moveup( 48 );
+	$Gate4Top3.time(2);
+	$Gate4Top3.rotateXdown( 90 );
+	waitfor( $Gate4Top1 );
+	$Gate3Top1.playsound ( "sound/doors/drull_smldoor_stop_01.wav", 4, 1, 300);
+
+	$Gate4Bottom1.playsound ( "sound/doors/drull_bigdoor_01.wav", 5, 1, 300);
+	$Gate4Bottom1.time( 4 );
+	$Gate4Bottom1.moveDown( 48 );
+	$Gate4Mid1.time( 4 );
+	$Gate4Mid1.moveNorth( 96 );
+	$Gate4Mid2.time( 4 );
+	$Gate4Mid2.moveSouth( 96 );
+	waitfor( $Gate4Bottom1 );
+	$Gate4Bottom1.playsound ( "sound/doors/drull_bigdoor_stop_01.wav", 5, 1, 300);
+	if(cvar_bool_multiplayer){//Multiplayer	
+		thread launchShuttle();
+	}
+}
+
+void closeGate2 ()
+{
+	if(cvar_bool_multiplayer){//Multiplayer
+		return;
+	}
+	waitfor ( $Gate4Bottom1 );
+	$Gate4Bottom1.playsound ( "sound/doors/drull_bigdoor_01.wav", 5, 1, 300);
+	$Gate4Bottom1.time( 2 );
+	$Gate4Bottom1.moveUp( 48 );
+	$Gate4Mid1.time( 2 );
+	$Gate4Mid1.moveSouth( 96 );
+	$Gate4Mid2.time( 2 );
+	$Gate4Mid2.moveNorth( 96 );
+	waitfor( $Gate4Bottom1 );
+	$Gate4Bottom1.playsound ( "sound/doors/drull_bigdoor_stop_01.wav", 5, 1, 300);
+//
+	$Gate4Top1.playsound ( "sound/doors/drull_smldoor_01.wav", 4, 1, 300);
+	$Gate4Top1.time(1);
+	$Gate4Top1.rotateXdown( 90 );
+	$Gate4Top2.time(1);
+	$Gate4Top2.movedown( 48 );
+	$Gate4Top3.time(1);
+	$Gate4Top3.rotateXup( 90 );
+	waitfor ( $Gate4Top3 );
+	$Gate3Top1.playsound ( "sound/doors/drull_smldoor_stop_01.wav", 4, 1, 300);
+	lockDoor ( "outerDoor2" );
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+	//Clean up a bit
+		deleteSearchLights();
+		globalCoop_level_remove($gus1);
+		globalCoop_level_remove($gus2);
+		$khoal.missionobjective ( 1 );
+	}
+}
+
+//=============================================================================
+// Informant and ComStation Stuff
+//==============================================================================
+
+//---------------------
+// ComStationButtons_Destroyed
+// ComStation button gets blown up
+//---------------------
+float panelsDestroyed = 0;
+void commDestroyedEvents ();
+void destroyEquipment()
+{
+	panelsDestroyed++;
+
+	entity arch,caller;
+	caller = getCurrentEntity ();
+	arch = getEntity ( caller.getStringVar ( "uservar1") );
+	globalCoop_level_remove(arch);
+
+	caller.playsound ( "sound/environment/electric/elec_impact.wav" , 3, 1, 10000 );
+
+	wait ( .5 );
+
+	caller.playsound ( "sound/environment/electric/elec_powerloop1.wav" , 3, 1, 10000 );
+
+	if ( panelsDestroyed >= 3 )
+	{
+		caller.playsound ( "sound/environment/electric/elec_powerloop1.wav" , 3, 1, 10000 );
+		thread commDestroyedEvents ();
+		$commCenterHallwayDestroyTrigger.triggerable ();
+		$commStationWaypoint.missionobjective ( 0 );
+		$commStationWaypoint.playsound ( "sound/impact/explosion/explo_console1.wav", 4, 1, 200);
+		$commStationWaypoint.playsound ( "sound/impact/explosion/expl_energy2.wav", 5, 1, 200);
+
+		trigger ( "$quaker" );
+
+
+		$world.light_lightstyle ( "commDestroyedRedLight" , "zzzzzzzzzzzzzzzzzzzzzzzzzzyzzzzzzzzzzzzzzzzzzz" , 1 );
+		$commEquipment.loopsound ( "sound/environment/electric/fritz4.wav" );
+
+		$world.light_lightstyle( "comLights" , "azahmbhideehothere" , 0 );
+
+		$exitDoorTrigger.missionobjective ( 1 );
+		$player.setobjectivecomplete ( "CreateDiversion" , 1 );
+		$exitDoorTrigger1.missionobjective ( 1 );
+
+		$player.loopsound ( "sound/ships/romulan/rom_redalert.wav", 1, 10001  );
+
+		trigger ( "$commRoomDisplayFX" );
+		$commRoomDisplay.hide ();
+		wait ( .25 );
+		$commRoomDisplay.show ();
+		wait ( .5 );
+		$commRoomDisplay.hide ();
+		wait ( .25 );
+		trigger ( "$commRoomDisplayFX2" );
+		$commRoomDisplay.show ();
+		wait ( .25 );
+
+		trigger ( "$commRoomDisplayFX" );
+		trigger ( "$commRoomDisplayFX2" );
+
+		trigger ( "$commRoomDisplayFX3" );
+		globalCoop_level_remove($rotatingDisplay1);
+
+		wait ( .25 );
+		trigger ( "$commRoomDisplayFX4" );
+		wait ( .25 );
+		trigger ( "$commRoomDisplayFX5" );
+	}
+}
+
+void commDestroyedEvents ()
+{
+	coop_vector_svnextmaporrebootDoloadnextmimapWaitingForTeam_y=1;//Allow loading next mission map
+	//make everyone hate the player
+	m10l1_FromStateMachine_ToEnemy ();
+	if(!cvar_bool_multiplayer){//Singleplayer
+		globalCoop_level_remove($khoal);
+	}
+
+	CommandToGroup ( 3 , "remove" , "" ,"" );	//get rid of the outdoor guys and replace them
+	AIShowGroup    ( 666 );
+	CommandToGroup ( 666 , "groupactortype" , "enemy" , "");
+	CommandToGroup ( 666 , "archetype" , "RomulanSnowGuardM10Rifle" , "" );
+	CommandToGroup ( 666 , "visiondistance" , "4000" , "" );
+	CommandToGroup ( 666 , "fov" , "360" , "" );
+	CommandToGroup ( 666 , "attack" , "$player" , "" );
+
+	//so the guys don't talk
+	globalCoop_level_remove($triggerReadinessConversationTrigger);
+
+	unlockDoor ( "exitDoor" );
+	$exitDoorTrigger1.triggerable ();
+	globalArchetype_Setup ( $exitDoorTriggerArchetype1 , "RomulanDoorPanel" );
+	globalArchetype_Setup ( $exitDoorTriggerArchetype2 , "RomulanDoorPanel" );
+}
+
+void commCenterHallwayDestroy ()
+{
+	trigger ( "$commRoomHallwayFX" );
+	wait ( .5 );
+	trigger ( "$commRoomHallwayFX2" );
+}
+//=============================================================================
+// Station Officer and Final Door Stuff
+//==============================================================================
+
+//---------------------
+// StationOfficerOuterDoor_MoveUp
+// door for station officer moving up
+//---------------------
+
+
+//------------------------------------------------------------------------
+//
+// Name: 		rotateSearchLightCones()
+// Description: Points searchlights
+// Parameters:  float searchlight number
+// Returns:		None
+//
+//------------------------------------------------------------------------
+void rotateSearchLightCones( float x )
+{
+	string thisSearchLightDest;
+	string thisSearchLightCone;
+	string thisSearchLightConeOrigin;
+	string thisSearchLightConeAttackOrigin;
+
+	entity currentSearchLightDest;
+	entity currentSearchLightConeOrigin;
+
+	vector srcOriginStash;
+	vector destOriginStash;
+	vector searchLightAngles;
+	vector dist;
+
+	float base;
+	float r;
+	float pitch;
+	float yaw;
+
+	thisSearchLightDest = "searchlight" + x;
+	thisSearchLightConeAttackOrigin = "searchLightConeAttackOrigin" + x;
+	thisSearchLightCone = "searchLightCone" + x;
+
+	currentSearchLightDest = getentity( thisSearchLightDest );
+
+	//save this off here so we can attack later if necessary
+	currentSearchLightDest.setstringvar ( "attackOrigin" , thisSearchLightConeAttackOrigin );
+	currentSearchLightDest.setstringvar ( "cone" , thisSearchLightCone );
+
+	//Hack in the sound here for now
+	thisSearchLightConeOrigin = "searchLightConeOrigin" + x;
+	currentSearchLightConeOrigin = getentity( thisSearchLightConeOrigin );
+	wait( .05 );
+
+
+	while( 1 )
+	{
+		srcOriginStash = currentSearchLightConeOrigin.getOrigin();
+		destOriginStash = currentSearchLightDest.getOrigin();
+		dist = destOriginStash - srcOriginStash;
+		r = vectorlength(dist);
+		base = sqrt(dist_x*dist_x+dist_y*dist_y);
+
+		pitch = arctandegrees( dist_z , base );
+		yaw = arctandegrees ( dist_y , dist_x);
+
+		searchLightAngles_x = 0 - pitch;
+		searchLightAngles_y = yaw;
+		searchLightAngles_z = 0;
+
+		currentSearchLightConeOrigin.angles( searchLightAngles );
+		wait( 0.1 );
+	}
+}
+
+
+float credentialsPlayMunroResponse = 0;	//does munro need to respond to the guard?
+
+void gus1OnUseSetup ()
+{
+	if(doesEntityExist($gus1)){
+		//credentialsPlayMunroResponse = 0;
+		$gus1.nouse();
+	}
+
+}
+
+void gus1OnUseSkip ()
+{
+	if($world.getFloatvar("coop_disableThread_gus1OnUseCredentials") == 1){
+		return;
+	}
+//Update Objectives
+	thread globalCoop_objectives_update("incomplete",3,1);
+
+	killthread ( "gus1OnUseCredentials" );
+	killthread ( "gus1OnUseNoCredentials" );
+	
+	if(doesEntityExist($gus1))
+	{
+		$gus1.stopdialog ();
+	}
+	
+	if($world.getFloatvar("coop_disableThread_gus1OnUseSkip") != 1){
+		$world.setFloatvar("coop_disableThread_gus1OnUseSkip",1);
+		initOutdoorGuardDialog  ($gus1 , -1 );
+		
+		if(!doesEntityExist($gus1)){
+			$gus1.ai_off();
+		}
+	}
+	
+	gus1OpenDoor();
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		if(doesEntityExist($gus1)){
+			$gus1.lookat ( $player );
+		}
+	}
+	
+	if(!doesEntityExist($gus1)){
+		$gus1.ai_on();
+	}
+	credentialsPlayMunroResponse = 0;
+}
+
+void gus1OnUseCredentials()
+{
+	if($world.getFloatvar("coop_disableThread_gus1OnUseCredentials") != 1){
+		$world.setFloatvar("coop_disableThread_gus1OnUseCredentials",1);
+		$gus1.noUse();
+		$gus1Credentials.setFloatVar("globalCoop_puzzle_disabled",1);
+		if ( credentialsPlayMunroResponse )
+		{
+			globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($door1Archetype),"m10l1/munro_ofcourse.mp3", 1, 100000 , 1);
+		}
+		globalCoop_level_remove($door1Archetype);
+		
+		if(cvar_bool_multiplayer){//Multiplayer
+		//Set spawnangles for this level
+			coop_float_spawnAngle1 				= 78;
+			coop_float_spawnAngle2 				= 78;
+			coop_float_spawnAngle3 				= 78;
+			coop_float_spawnAngle4 				= 78;
+			coop_float_spawnAngle5 				= 78;
+			coop_float_spawnAngle6 				= 78;
+			coop_float_spawnAngle7 				= 78;
+			coop_float_spawnAngle8 				= 78;
+			coop_vector_respawnOrigin1 			= '5938 -4795 160';
+			coop_vector_respawnOrigin2 			= '6000 -4795 160';
+			coop_vector_respawnOrigin3 			= '5860 -4795 160';
+			coop_vector_respawnOrigin4 			= '5938 -4795 160';
+			coop_vector_respawnOrigin5 			= '6000 -4795 160';
+			coop_vector_respawnOrigin6 			= '5860 -4795 160';
+			coop_vector_respawnOrigin7 			= '5938 -4795 160';
+			coop_vector_respawnOrigin8 			= '6000 -4795 160';
+		}
+		$gus1.headwatchtarget("none",20);
+		$gus1.resethead(20);
+		$gus1.ai_off();
+		wait(0.1);
+		$gus1.turntowardsentity( globalCoop_return_playerClosestPreferActive($gus1));
+		
+	//I see you’re transferring from Remus.   Make sure you check with Subcommander Khoal.  We've recently updated our security protocols and implemented bio-scanners throughout the installation to detect for any alien presence.   update from You’ll find our security measures a bit more rigorous here since we are relatively close to the Neutral Zone.  Just last week our base commander installed some new technology he took from an alien race.  He calls them bio-scanning spotlights.  When a lifeform that doesn’t possess Romulan bio-signs passes through these invisible lights many ahem unpleasant things will happen to it.  Well, you don’t have anything to worry about I’m sure.
+		globalCoop_dialog_play($gus1,"m10l1/romgate1_remus.mp3", 1, 800, 1);
+		
+		wait(0.1);
+		$gus1.angles('0 315 0');
+		$gus1.ai_on();
+
+		coop_setupGeneralHelpDialog($gus1,"m10l1/romguard_bored.mp3");
+		globalCoop_alias_set($gus1,"gus1generalDialog","m10l1/romguard_newrecruit.mp3");
+		thread globalCoop_level_onUse($gus1,"globalCoop_alias_play");	
+	}
+	gus1OpenDoor();
+}
+
+void gus1OnUseNoCredentials ()
+{
+	$gus1.nouse();
+	credentialsPlayMunroResponse = 1;
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$gus1.lookat($player);
+	}
+	else
+	{
+		$gus1.headwatchtarget("none",20);
+		$gus1.resethead(20);
+		$gus1.ai_off();
+		wait(0.1);
+		$gus1.turntowardsentity( globalCoop_return_playerClosestPreferActive($gus1));
+		globalCoop_dialog_play($gus1,"m10l1/romgate1_cred2.mp3", 1, 10000, 1); //Halt!  Your credentials please.
+		$gus1.headwatch($gus1Credentials,20);
+		wait(0.1);
+		$gus1.angles('0 315 0');
+		$gus1.ai_on();
+		//centerprint($gus1.getangles()+"");
+	}
+	thread globalCommon_OnUse ( $gus1 , "gus1OnUseNoCredentials" );
+}
+
+void gus2OnUseSetup ()
+{
+}
+
+void gus2OnUseSkip ()
+{
+	killthread ( "gus2OnUseCredentials" );
+	killthread ( "gus2OnUseNoCredentials" );
+
+	if(doesEntityExist($gus2)){
+		initOutdoorGuardDialog  ($gus2 , -1 );
+		$gus2.stopdialog ();
+		$gus2.ai_off();
+		$gus2.headwatch ( globalCoop_return_playerClosestPreferActive($gus2) );
+	}
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$gus2.ai_on();
+	}
+
+	credentialsPlayMunroResponse = 0;
+	gus2OpenDoor ();
+}
+
+void gus2OnUseCredentials ()
+{
+	gus2OnUseSetup ();
+
+	globalCoop_level_remove($door2Archetype);
+
+	if ( credentialsPlayMunroResponse )
+	{
+		globalCoop_dialog_play(globalCoop_return_playerClosestPreferActive($door2Archetype),"m10l1/munro_hereyouare.mp3", 1, 100000 , 1);
+	}
+
+	thread gus2OnUseSkip ();
+}
+
+void gus2OnUseNoCredentials ()
+{
+	if($world.getFloatVar("coop_disableThread_gus2OnUseNoCredentials") == 1){
+		return;
+	}
+	$world.setFloatVar("coop_disableThread_gus2OnUseNoCredentials",1);
+	if(doesEntityExist($gus2))
+	{
+		$gus2.nouse();
+		$gus2.stopdialog();
+		globalCoop_dialog_play($gus2,"m10l1/romgate1_cred.mp3", 1, 10000, 1); //Halt!  Your credentials please.
+		$gus2.headwatch ( globalCoop_return_playerClosestPreferActive($gus2) );
+	}
+	credentialsPlayMunroResponse = 1;
+	wait(4);
+	thread globalCommon_OnUse ( $gus2 , "gus2OnUseNoCredentials" );
+}
+
+
+void khoalOnUseSetup ()
+{
+	$khoal.nouse ();
+	$khoal.missionobjective ( 0 );
+	//thread endGuard1Dialog ();	//keep them from wiping out his headhud when they talk
+	thread endUpgradeConversation ();
+}
+
+void khoalOnUseCredentials ()
+{
+	if($world.getFloatVar("coop_disableThread_khoalOnUseCredentials") == 1){
+		return;
+	}
+	$world.setFloatVar("coop_disableThread_khoalOnUseCredentials",1);
+	globalCoop_level_remove($khoalCredentialInput);
+	
+	if(coop_bool_playerDiscovered != 1){
+		khoalOnUseSetup();
+		$khoal.stopdialog ();
+		$khoal.headwatch (globalCoop_return_playerClosestPreferActive($khoal) );
+
+		//Hmmph, Sector T… That was locked down days ago, it's… unusual… that you would be ordered there.
+		globalCoop_dialog_play($khoal,"m10l1/curck_tlock.mp3", 1, 300, 1);
+		$khoal.resethead(.5);
+		wait ( 3.5 );
+		$khoal.headwatch (globalCoop_return_playerClosestPreferActive($khoal) );
+		
+		//Well, Soldier… you APPEAR to have your credentials in order. I'llupgrade your security clearance.  Talk to the guards outside the security depot about getting into sector T.
+		globalCoop_dialog_play($khoal,"m10l1/curck_appearord.mp3", 1, 300, 1);
+	}
+
+	unlockDoor ( "securityDoor" );
+	setfloatvar ( "level.securityAccess" , 1 );
+	$securityStationArchetype.missionobjective ( 1 );
+	
+	if(coop_bool_playerDiscovered != 1){
+		$upgradeConversationTrigger.triggerable ();
+		initKhoalDialog($khoal);
+	}
+}
+
+void khoalOnUseNoCredentials()
+{
+	if($world.getFloatVar("coop_disableThread_khoalOnUseNoCredentials") == 1 || coop_bool_playerDiscovered == 1){
+		return;
+	}
+	$world.setFloatVar("coop_disableThread_khoalOnUseNoCredentials",1);
+	//endGuard1Dialog ();	//keep them from wiping out his headhud when they talk
+	khoalOnUseSetup();
+	$khoal.headwatch (globalCoop_return_playerClosestPreferActive($khoal));
+	globalCoop_dialog_play($khoal,"m10l1/curck_giveord.mp3", 1, 300, 1);
+	$khoalCredentials.setFloatVar("globalCoop_puzzle_disabled",0);
+	wait ( .5 );
+	$khoal.headwatch ( $khoalCredentials );
+}
+
+void securityStationOnUse ()
+{
+	entity e;
+	e = getcurrententity ();
+	e.nouse ();
+	e.playsound ( "sound/environment/switches/switch_01.wav" , 3, .3, 10000 );
+	e.playsound ( "sound/ships/romulan/rom_beep_yes.wav" , 7, .3, 10000 );
+
+	stage2DoorHacked = 1;
+	
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.addhud ( "codehud_m10_sectort" );
+		globalCoop_level_remove($securityStationArchetype);
+		$securityStationArchetype.missionobjective ( 0 );
+		$stage2Puzzle.missionobjective ( 1 );
+	}
+	else{
+		$stage2Puzzle.setFloatVar("globalCoop_puzzle_disabled",0);
+	}
+}
+
+void m10l1_FromStateMachine_ToEnemy ()
+{
+	//don't let 'em start talking about hounds in the middle of a battle.
+	globalCoop_level_remove($houndConversationTrigger);
+
+ 	thread killHoundConversation ();
+
+	$group1.groupactortype ( "enemy" );
+	$group2.groupactortype ( "enemy" );
+	$group3.groupactortype ( "enemy" );
+	CommandToGroup ( 4 , "groupactortype" , "enemy" , "");
+
+	$group1.sendeventtogroup ( "archetype" , "RomulanSnowGuardM10Rifle" );
+	$group2.sendeventtogroup ( "archetype" , "RomulanSnowGuardM10Rifle" );
+	$group3.sendeventtogroup ( "archetype" , "RomulanSnowGuardM10Rifle" );
+	CommandToGroup ( 4 , "archetype" , "RomulanSnowGuardM10Rifle" , "");
+
+	$group1.sendeventtogroup ( "visiondistance" , "4000" );
+	$group1.sendeventtogroup ( "fov" , "360" );
+
+	$group2.sendeventtogroup ( "visiondistance" , "4000" );
+	$group2.sendeventtogroup ( "fov" , "360" );
+
+	$group3.sendeventtogroup ( "visiondistance" , "4000" );
+	$group3.sendeventtogroup ( "fov" , "360" );
+
+	CommandToGroup ( 4 , "visiondistance" , "4000" , "");
+	CommandToGroup ( 4 , "fov" , "360" , "");
+	
+	//Allow the player to play this mission aggresivly
+	if(doesEntityExist($khoal)){
+		thread globalCoop_player_giveAll("models/weapons/worldmodel-rom-disruptor-romhands.tik",2);
+		coop_string_weapon1 = "models/weapons/worldmodel-rom-disruptor-romhands.tik";
+		coop_string_weapon2 = "models/weapons/worldmodel-rom-datapad.tik";
+	
+		$khoal.giveactorweapon("actorweapons/romulan-disruptor.tik");
+		$khoal.useactorweapon("RomulanDisruptor");
+		$khoal.nouse();
+		$khoal.ai_on();
+		$khoal.health(300 * globalCoop_return_integerPlayersQuantity(1));
+		$khoal.immortal(0);
+		coop_bool_playerDiscovered = 1;
+		$khoalCredentials.setFloatVar("globalCoop_puzzle_disabled",0);
+		vector vOrigin;
+		vOrigin = $khoal.getOrigin();
+		vOrigin_x -= 60;
+		$khoal.origin(vOrigin);
+	}
+
+	wait ( 5 );
+}
+
+void triggerUpgradeConversation ()
+{
+	if(coop_bool_playerDiscovered == 1){
+		return;
+	}
+	
+	threadname ( "triggerUpgradeConversation" );
+	$worker1.ai_off ();
+	$worker3.ai_off ();
+	wait ( .05 );
+
+	$worker3.headwatch ( $worker1 );
+	$worker1.headwatch ( $worker3 );
+
+	//$worker1.ai_on ();
+	//$worker3.ai_on ();
+	wait ( .05 );
+	$khoal.resethead(.5);
+	globalCoop_dialog_play($worker3,"m10l1/outrom1_feelhand.mp3", 1, 300, 0); //I can barely feel my hands.
+	globalCoop_dialog_play($worker1,"m10l1/outrom2_nocomp.mp3", 1, 300, 0); //The commander said no more complaining.
+	globalCoop_dialog_play($worker3,"m10l1/outrom1_freezing.mp3", 1, 300, 0); //He's not here, is he?  I'm freezing.
+	globalCoop_dialog_play($worker1,"m10l1/outrom2_donthear.mp3", 1, 300, 0); //I don't want to hear it.
+	globalCoop_dialog_play($worker3,"m10l1/outrom1_missed.mp3", 1, 300, 0); //It was really freezing last night, but you missed it.
+	globalCoop_dialog_play($worker1,"m10l1/outrom2_badmorale.mp3", 1, 300, 0); //Complaining is bad for morale.
+	globalCoop_dialog_play($worker3,"m10l1/outrom1_asleep.mp3", 1, 300, 0); //You missed it because you fell asleep.  On duty in the nice, warm officer's quarters…  Talk about bad for morale.
+	globalCoop_dialog_play($worker1,"m10l1/outrom2_intruders.mp3", 1, 300, 0); //I'm trying to listen for intruders.
+	globalCoop_dialog_play($worker3,"m10l1/outrom1_hardhear.mp3", 1, 300, 0); //It's hard to hear intruders when you're asleep.
+	thread endUpgradeConversation ();
+}
+
+void endUpgradeConversation ()
+{
+	killthread ( "triggerUpgradeConversation" );
+	$worker1.stopdialog ();
+	$worker3.stopdialog ();
+
+	$worker1.ai_off ();
+	$worker3.ai_off ();
+	wait ( .05 );
+
+	$worker3.headwatch(globalCoop_return_playerClosestPreferActive($worker3));
+	$worker1.headwatch(globalCoop_return_playerClosestPreferActive($worker1));
+
+	$worker1.ai_on ();
+	$worker3.ai_on ();
+}
+
+void runCrateSelector ()
+{
+	while ( 1 )
+	{
+		$crate1.time ( 2 );
+		$crate1.moveNorth ( 128 );
+		waitfor ( $crate1 );
+
+		$world.light_lightstyle ( "crateSelectorLights" , "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyzzzzzzzzzzzzzzzzzzzzzzz" , 1 );
+//		$crateSelectorScanner.show ();
+		$crateLift1.time ( 2 );
+		$crate1.movedown ( 128 );
+		$crateLift1.movedown ( 128 );
+		waitfor ( $crateLift1 );
+
+		$crate1.moveSouth ( 128 );
+		waitfor ( $crate1 );
+
+		$world.light_lightstyle ( "crateSelectorLights" , "lllllllllllllllllllllllllklllllllllllllllllllllllllllll" , 1 );
+//		$crateSelectorScanner.hide ();
+
+		$crate1.moveup ( 128 );
+		$crateLift1.moveup ( 128 );
+		waitfor ( $crate1 );
+
+		wait ( 2 );
+	}
+}
+
+void launchShuttle ()
+{
+//RUN ONLY ONCE, we have a failsave here calling this thread with timmer
+	if(fLunchShuttle!=0){
+		return;
+	}
+	fLunchShuttle++;
+	$shuttle1.forcealpha(1);
+	$shuttle1.alpha(1);
+	$shuttle1.followpath ( $m10l1_ShuttlePath );
+	$shuttle1.playsound ( "sound/vehicles/shuttlecraft/shuttle_takeoff.wav" ,3, 1, 10000 );
+	$shuttle1.loopsound ( "sound/ships/drull/drull_flyby2.wav" ,1, 10000 );
+	wait(11);
+	$shuttle1.playsound ( "sound/environment/transporter/transport_romulan.wav" ,3, 1, 10000 );
+	wait(1.5);
+	$shuttle1.fade(2.8,0.4);
+	$shuttle1.alpha(0.4);
+	waitfor ( $shuttle1 );
+	$shuttle1.hide();
+	wait(5);
+	globalCoop_level_remove($shuttle1);	
+	globalCoop_level_removePath($m10l1_ShuttlePath);
+}
+
+void openWindowPortal ()
+{
+	$windowAreaPortal.openPortal();
+	print ( "open\n" );
+}
+
+void closeWindowPortal ()
+{
+	$windowAreaPortal.closePortal();
+	print ( "closed\n" );
+}
+
+void killHoundConversation ();
+void triggerHoundConversation ()
+{
+	if ( (!isActorAlive ( "patrol6" )) || (!isActorAlive ( "patrol7" )) )
+		return;
+
+	$patrol6.ai_off ();
+	$patrol7.ai_off ();
+	wait ( .05 );
+
+	$patrol6.headwatch ( $patrol7 );
+	$patrol7.headwatch ( $patrol6 );
+
+	$patrol6.ai_on ();
+	$patrol7.ai_on ();
+
+	globalCoop_dialog_play($patrol6,"m10l1/outrom3_hearsome.mp3", 1, 300, 0); //Did you hear something?
+	globalCoop_dialog_play($patrol7,"m10l1/outrom4_didsound.mp3", 1, 300, 0); //Did it sound like a whine?
+
+	globalCoop_dialog_play($patrol6,"m10l1/outrom3_footstep.mp3", 1, 300, 0); //No. Like a footstep.
+	globalCoop_dialog_play($patrol7,"m10l1/outrom4_hounds.mp3", 1, 300, 0); //If it sounded like a whine, that would be one of the hounds.
+
+	globalCoop_dialog_play($patrol6,"m10l1/outrom3_whine.mp3", 1, 300, 0); //It didn't sound like a whine.
+	globalCoop_dialog_play($patrol7,"m10l1/outrom4_native.mp3", 1, 300, 0); //A few of them picked up a native stomach parasite. Three died last week.
+
+	globalCoop_dialog_play($patrol6,"m10l1/outrom3_food.mp3", 1, 300, 0); //I thought the food tasted better last week.
+	globalCoop_dialog_play($patrol7,"m10l1/outrom4_ha.mp3", 1, 300, 0); //Ha!
+
+	thread killHoundConversation();
+}
+
+
+//toggling these guys' AI makes them forget their enemy, so keep a flag so shawn doesn't have to change AI behavior at this point
+float attackThePlayerHound = 0;
+void killHoundConversationAttacked ()
+{
+	attackThePlayerHound = 1;
+	m10l1_FromStateMachine_ToEnemy();
+	killHoundConversation ();
+}
+
+void killHoundConversation ()
+{
+	killthread ( "triggerHoundConversation" );
+
+	$patrol6.ai_off ();
+	$patrol7.ai_off ();
+	wait ( .05 );
+
+	$patrol6.headwatch ( $nullEntity );
+	$patrol7.headwatch ( $nullEntity );
+
+	if ( attackThePlayerHound )
+	{
+		$patrol6.turntowardsentity(globalCoop_return_playerClosestPreferActive($patrol6));
+		$patrol7.turntowardsentity(globalCoop_return_playerClosestPreferActive($patrol7));
+	}
+
+	wait ( .05 );
+
+	$patrol6.ai_on ();
+	$patrol7.ai_on ();
+
+	$patrol6.stopdialog ();
+	$patrol7.stopdialog ();
+
+	$patrol6.addcustomthread ( "damaged" , "" );
+	$patrol7.addcustomthread ( "damaged" , "" );
+
+	globalCoop_level_remove($houndConversationTrigger);
+
+	if ( attackThePlayerHound )
+	{
+		$patrol6.attack ( $player );
+		$patrol7.attack ( $player );
+	}
+	else
+	{
+		wait ( 1 );
+		setupPatrollingGuard ( $patrol6 , 3 );
+		wait ( 2 );
+		setupPatrollingGuard ( $patrol7 , 3 );
+	}
+}
+
+
+void triggerProtectionConversation ()
+{
+
+	if(coop_bool_playerDiscovered == 1){
+		return;
+	}
+	$stationary6.ai_off ();
+	$stationary5.ai_off ();
+	wait ( .05 );
+
+	$stationary6.headwatch ( $stationary5 );
+	$stationary5.headwatch ( $stationary6 );
+
+	$stationary6.ai_on ();
+	$stationary5.ai_on ();
+
+
+	globalCoop_dialog_play($stationary6,"m10l1/outrom5_lastpost.mp3", 1, 128, 0); //Did I tell you that this is my last posting out here?
+	globalCoop_dialog_play($stationary5,"m10l1/outrom6_ten.mp3", 1, 128, 0); //About ten times.
+
+	globalCoop_dialog_play($stationary6,"m10l1/outrom5_officer.mp3", 1, 128, 0); //I think I'm going to like officer protection.
+	globalCoop_dialog_play($stationary5,"m10l1/outrom6_goodyou.mp3", 1, 128, 0); //Good for you.
+
+	globalCoop_dialog_play($stationary6,"m10l1/outrom5_misscold.mp3", 1, 128, 0); //I won't miss the cold.
+	globalCoop_dialog_play($stationary5,"m10l1/outrom6_boredom.mp3", 1, 128, 0); //Or the boredom.
+
+	globalCoop_dialog_play($stationary6,"m10l1/outrom5_fellasleep.mp3", 1, 128, 0); //Some poor fool fell asleep while protecting an officer. So he's transferred here, and I'm promoted inside to Operations.
+	globalCoop_dialog_play($stationary5,"m10l1/outrom6_notimp.mp3", 1, 128, 0); //I'm not impressed.
+
+	globalCoop_dialog_play($stationary6,"m10l1/outrom5_joinsecret.mp3", 1, 128, 0); //I've heard that I may even be able to join their secret society.
+	globalCoop_dialog_play($stationary5,"m10l1/outrom6_kidding.mp3", 1, 128, 0); //They're just kidding you.
+
+	globalCoop_dialog_play($stationary6,"m10l1/outrom5_jamming.mp3", 1, 128, 0); //No! They also said I could help install the new transporter jamming device.
+	globalCoop_dialog_play($stationary5,"m10l1/outrom6_sogreat.mp3", 1, 128, 0); //If it's so great, get me a posting in Operations.
+
+	globalCoop_dialog_play($stationary6,"m10l1/outrom5_perfect.mp3", 1, 128, 0); //No. You can only get inside when you have a perfect three-year record, like mine.
+	globalCoop_dialog_play($stationary5,"m10l1/outrom6_perfect.mp3", 1, 128, 0); //Perfect record?
+
+	globalCoop_dialog_play($stationary6,"m10l1/outrom5_notone.mp3", 1, 128, 0); //Not one successful enemy infiltration!
+	globalCoop_dialog_play($stationary5,"m10l1/outrom6_any.mp3", 1, 128, 0); //No enemy has even attempted an infiltration!
+
+	globalCoop_dialog_play($stationary6,"m10l1/outrom5_success.mp3", 1, 128, 0); //That kind of success speaks for itself. That's why I'll be inside with the officers, and not out here in the cold.
+
+	$stationary6.ai_off ();
+	$stationary5.ai_off ();
+	wait ( .05 );
+
+	$stationary6.headwatch ( $nullEntity );
+	$stationary5.headwatch ( $nullEntity );
+
+	$stationary6.ai_on ();
+	$stationary5.ai_on ();
+
+	initOutdoorGuardDialog ( $stationary5 , -1 );
+	initOutdoorGuardDialog ( $stationary6 , -1 );
+}
+
+void killReadinessConversation ();
+void triggerReadinessConversation ()
+{
+	$worker4.ai_off ();
+	$worker2.ai_off ();
+	wait ( .05 );
+
+	$worker4.headwatch ( $worker2 );
+	$worker2.headwatch ( $worker4 );
+
+	//$worker4.ai_on ();
+	//$worker2.ai_on ();
+	wait ( .05 );
+
+	globalCoop_dialog_play($worker4,"m10l1/indrom1_powering.mp3", 1, 128, 0); //Are you powering up your disruptor?
+	globalCoop_dialog_play($worker2,"m10l1/indrom2_improve.mp3", 1, 128, 0); //I'm just improving my readiness.
+
+	globalCoop_dialog_play($worker4,"m10l1/indrom1_follow.mp3", 1, 128, 0); //Follow your orders.
+	globalCoop_dialog_play($worker2,"m10l1/indrom2_bored.mp3", 1, 128, 0); //I'm bored. Where's the honor in waiting around?
+
+	globalCoop_dialog_play($worker4,"m10l1/indrom1_duty.mp3", 1, 128, 0); //Honor is in following our duty.
+	globalCoop_dialog_play($worker2,"m10l1/indrom2_honor.mp3", 1, 128, 0); //Honor is out there, on the front lines. In a cloaked ship near Klingon space. Where you can get into a hot war!
+
+	globalCoop_dialog_play($worker4,"m10l1/indrom1_calm.mp3", 1, 128, 0); //Calm down. We have five hours left in our patrol.
+	globalCoop_dialog_play($worker2,"m10l1/indrom2_empire.mp3", 1, 128, 0); //We didn't build the Empire sitting around on backwater ice planets.
+
+	globalCoop_dialog_play($worker4,"m10l1/indrom1_nobut.mp3", 1, 128, 0); //No. But that IS how we maintain the Empire.
+	globalCoop_dialog_play($worker2,"m10l1/indrom2_maintain.mp3", 1, 128, 0); //Well... You can maintain the empire. I'll make it bigger! I think I'll apply for a transfer. I want some action!
+
+	//clear out their damaged threads
+	thread killReadinessConversation ();
+}
+
+float attackThePlayerReadiness = 0;
+void killReadinessConversationAttacked ()
+{
+	attackThePlayerReadiness = 1;
+	killReadinessConversation();
+}
+
+void killReadinessConversation ()
+{
+	killthread ( "triggerReadinessConversation" );
+
+	$worker2.stopdialog ();
+	$worker4.stopdialog ();
+
+	$worker4.ai_off ();
+	$worker2.ai_off ();
+
+	if ( attackThePlayerReadiness )
+	{
+		$worker2.turntowardsentity ( $player );
+		$worker4.turntowardsentity ( $player );
+	}
+	wait ( .05 );
+
+	$worker4.headwatch ( $nullEntity );
+	$worker2.headwatch ( $nullEntity );
+
+	wait ( .05 );
+
+	$worker4.ai_on ();
+	$worker2.ai_on ();
+	wait ( .05 );
+
+	$worker2.addcustomthread ( "damaged" , "" );
+	$worker4.addcustomthread ( "damaged" , "" );
+
+	if ( attackThePlayerReadiness )
+	{
+		$worker2.attack ( $player );
+		$worker4.attack ( $player );
+	}
+	else
+	{
+		wait ( .5 );
+		setupPatrollingGuard ( $worker2 , 4 );
+		wait ( .4 );
+		setupPatrollingGuard ( $worker4 , 4 );
+
+		initGuardDialog ( $worker2 , -1 );
+		initGuardDialog ( $worker4 , -1 );
+	}
+}
+
+//triggered when you shoot up the secret grate in the far right building
+void makeWorkersAttack ()
+{
+	CommandToGroup ( 4 , "groupactortype" , "enemy" , "");
+	CommandToGroup ( 4 , "archetype" , "RomulanSoldierM10Pistol" , "" );
+	CommandToGroup ( 4 , "visiondistance" , "4000" , "" );
+	CommandToGroup ( 4 , "fov" , "360" , "" );
+	CommandToGroup ( 4 , "attack" , "$player" , "" );
+}
+
+//Sequence of events for the player to exit the level
+
+void closeFirstExitDoor();
+void openFirstExitDoor ()
+{
+	lockDoor ( "exitDoor2" );
+	$exitDoorTrigger1.playsound ( "sound/environment/switches/switch_01.wav" , 3, .3, 10000 );
+	$exitDoorTrigger1.playsound ( "sound/ships/romulan/rom_beep_yes.wav" , 7, .3, 10000 );
+	wait( .1 );
+
+	$exitDoorTrigger1.nottriggerable ();
+
+    $StationOfficerOuterDoorPart1.playsound ( "sound/doors/drull_bigdoor_01.wav", 5, 1, 300);
+	$StationOfficerOuterDoorPart1.time( 5 );
+	$StationOfficerOuterDoorPart1.moveUp( 6 );
+	$StationOfficerOuterDoorPart2.time( 5 );
+	$StationOfficerOuterDoorPart2.moveUp( 36 );
+	$StationOfficerOuterDoorPart3.time( 5 );
+	$StationOfficerOuterDoorPart3.moveUp( 66 );
+	$StationOfficerOuterDoorPart4.time( 5 );
+	$StationOfficerOuterDoorPart4.moveUp( 96 );
+	$StationOfficerOuterDoorPart5.time( 5 );
+	$StationOfficerOuterDoorPart5.moveUp( 126 );
+    $StationOfficerOuterDoorPart1.playsound ( "sound/doors/drull_bigdoor_stop_01.wav", 5, 1, 300);
+    waitfor ( $StationOfficerOuterDoorPart5 );
+
+	wait ( 4 );
+	if(cvar_bool_multiplayer){//Multiplayer	
+		coop_waitForTeam();
+	}
+	else{
+		closeFirstExitDoor ();
+	}
+}
+//---------------------
+void closeFirstExitDoor()
+{
+	$exitDoorTrigger1.playsound ( "sound/environment/switches/switch_01.wav" , 3, .3, 10000 );
+	$exitDoorTrigger1.playsound ( "sound/ships/romulan/rom_beep_yes.wav" , 7, .3, 10000 );
+
+    $StationOfficerOuterDoorPart1.playsound ( "sound/doors/drull_bigdoor_01.wav", 5, 1, 300);
+	$StationOfficerOuterDoorPart1.time( 3 );
+	$StationOfficerOuterDoorPart.moveDown( 6 );
+	$StationOfficerOuterDoorPart2.time( 3 );
+	$StationOfficerOuterDoorPart2.moveDown( 36 );
+	$StationOfficerOuterDoorPart3.time( 3 );
+	$StationOfficerOuterDoorPart3.moveDown( 66 );
+	$StationOfficerOuterDoorPart4.time( 3 );
+	$StationOfficerOuterDoorPart4.moveDown( 96 );
+	$StationOfficerOuterDoorPart5.time( 3 );
+	$StationOfficerOuterDoorPart5.moveDown( 126 );
+	waitfor( $StationOfficerOuterDoorPart1 );
+
+    $StationOfficerOuterDoorPart1.playsound ( "sound/doors/drull_bigdoor_stop_01.wav", 5, 1, 300);
+
+	$exitDoorTrigger1.triggerable ();
+    unlockDoor ( "exitDoor2" );
+}
+
+void openSecondExitDoor ()
+{
+	$exitDoorTrigger2.playsound ( "sound/ships/romulan/rom_beep_yes.wav" , 7, .3, 10000 );
+
+	wait ( .2 );
+
+	if(cvar_bool_multiplayer){
+		return;
+	}
+	spawn ( "trigger_changelevel", "targetname", "trigger_endlevel", "map", "m10l2a-romulan_installation" );
+ 	wait ( .1 );
+ 	triggerentity ( $trigger_endlevel );
+}
+
+//we don't need these using up CPU cycles once we've completed the sequence and can't see them anymore
+void deleteSearchLights ()
+{
+	float threadID;
+
+	string thisSearchLight;
+	string thisSearchLightCone;
+	string thisSearchLightBase;
+	string thisSearchLightConeOrigin;
+	string thisSearchLightConeAttackOrigin;
+
+	entity currentSearchLight;
+	entity currentSearchLightCone;
+	entity currentSearchLightBase;
+	entity currentSearchLightConeOrigin;
+	entity currentSearchLightConeAttackOrigin;
+
+	float x;
+	for( x = 1; x <= 10; x ++ )
+	{
+		thisSearchLight = "searchlight" + x;
+		thisSearchLightCone = "searchLightCone" + x;
+		thisSearchLightBase = "searchLightBase" + x;
+		thisSearchLightConeOrigin = "searchLightConeOrigin" + x;
+		thisSearchLightConeAttackOrigin = "searchLightConeAttackOrigin" + x;
+
+		currentSearchLight = getentity( thisSearchLight );
+		currentSearchLightCone = getentity( thisSearchLightCone );
+		currentSearchLightBase = getentity( thisSearchLightBase );
+		currentSearchLightConeOrigin = getentity( thisSearchLightConeOrigin );
+		currentSearchLightConeAttackOrigin = getentity( thisSearchLightConeAttackOrigin );
+
+		threadID = currentSearchLightCone.getfloatvar ( "myThreadID" );
+
+		terminate ( threadID );
+		globalCoop_level_remove(currentSearchLightCone);
+		globalCoop_level_remove(currentSearchLightBase);
+		globalCoop_level_remove(currentSearchLightConeOrigin);
+		globalCoop_level_remove(currentSearchLightConeAttackOrigin);
+		wait ( .05 );
+	}
+}
+
+
+float axis = -1;
+float exploded = 0;
+void rotateConduit ()
+{
+	entity e;
+	e = getcurrententity ();
+	e.nottriggerable();
+	$conduitOrigin.playsound ( "sound/ships/romulan/rom_beep_yes.wav" , 7, .3, 10000 );
+	axis ++;
+//	$conduitOrigin.angles ( '0 0 0' );
+	$conduitOrigin.time ( 3 );
+
+	if ( axis == 0 )
+		$conduitOrigin.rotateXUp ( 180 );
+	else if ( axis == 1 )
+		$conduitOrigin.rotateYUp ( 180 );
+	else if ( axis == 2 )
+		$conduitOrigin.rotateZUp ( 180 );
+	else if ( axis == 3 )	//move them apart
+	{
+		if ( !exploded )
+		{
+			$conduit1.time ( 2 );
+			$conduit2.time ( 2 );
+
+			$conduit1.moveBackward ( 4 );
+			$conduit2.moveForward ( 4 );
+
+/*			$conduitOrigin.rotateXUp ( 180 );
+			$conduitOrigin.rotateYUp ( 180 );
+			$conduitOrigin.rotateZUp ( 180 );
+*/
+			exploded = 1;
+		}
+		else
+		{
+			$conduit1.time ( 2 );
+			$conduit2.time ( 2 );
+
+			$conduit1.moveForward ( 4 );
+			$conduit2.moveBackward ( 4 );
+
+			exploded = 0;
+		}
+	}
+
+	if ( axis > 3 )
+		axis = -1;
+
+	waitfor ( $conduitOrigin );
+	e.triggerable ();
+}
+
+void openVent ()
+{
+	$secretVent.bind ( $secretVentOrigin );
+	$secretVent.playsound ( "sound/doors/klingon_jtube.wav" , 3, .3, 10000 );
+	$secretVentOrigin.time ( 1 );
+	$secretVentOrigin.moveup ( 8 );
+	waitfor ( $secretVentOrigin );
+	$secretVentOrigin.playsound ( "sound/doors/klingon_jtube.wav" , 3, .3, 10000 );
+	$secretVentOrigin.movenorth ( 62 );
+}
+
+
+void coop_changedModelplayer1(){globalCoop_player_transmitter($player1,"set mp_playermodel "+coop_string_playerModelResetTiki);}
+void coop_changedModelplayer2(){globalCoop_player_transmitter($player2,"set mp_playermodel "+coop_string_playerModelResetTiki);}
+void coop_changedModelplayer3(){globalCoop_player_transmitter($player3,"set mp_playermodel "+coop_string_playerModelResetTiki);}
+void coop_changedModelplayer4(){globalCoop_player_transmitter($player4,"set mp_playermodel "+coop_string_playerModelResetTiki);}
+void coop_changedModelplayer5(){globalCoop_player_transmitter($player5,"set mp_playermodel "+coop_string_playerModelResetTiki);}
+void coop_changedModelplayer6(){globalCoop_player_transmitter($player6,"set mp_playermodel "+coop_string_playerModelResetTiki);}
+void coop_changedModelplayer7(){globalCoop_player_transmitter($player7,"set mp_playermodel "+coop_string_playerModelResetTiki);}
+void coop_changedModelplayer8(){globalCoop_player_transmitter($player8,"set mp_playermodel "+coop_string_playerModelResetTiki);}
+
+
+void coop_waitForTeam()
+//------------------------------------------------------------------------------
+//waitForPlayers beeing close, end then the Level
+//------------------------------------------------------------------------------
+{
+	globalCoop_main_waitForTeam('18188 -1490 76','-256 -256 -200','256 256 64');
+	coop_endLevel();
+}
+
+
+
+void coop_endLevel()
+//------------------------------------------------------------------------------
+//Level end
+//------------------------------------------------------------------------------
+{
+	thread globalCoop_mission_completed("m10l2a-romulan_installation");
+}

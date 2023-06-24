@@ -1,0 +1,581 @@
+void introCinematic();
+void endIntroCinematic();
+void commanderDestroyedCinematic();
+void commanderDestroyedCinematicEnd();
+void incrementStageCinematic();
+void finalBoss_killthread();
+void finalBoss_end();
+
+entity ePlayer_cinematicWarp;
+
+
+void introCinematic()		//called from trigger_once
+{
+	entity eTrigger;
+	eTrigger	= getCurrentEntity();
+	if(doesEntityExist(eTrigger))
+	{
+		ePlayer_cinematicWarp		= eTrigger.getLastActivatingEntity();
+	}	
+	spawn ( "Camera" , "targetname" , "cam1" );
+	spawn ( "Camera" , "targetname" , "cam2" );
+	spawn ( "Camera" , "targetname" , "cam3" );
+	spawn ("Actor","model","models/char/hazardteam_munro.tik","targetname","munro","ai_off","1");
+	cam.load ( "m11l3b_munroentrancecam" );
+	cam.load ( "m11l3b_commanderzoomcam" );
+	
+	globalCoop_main_camFadeOut(.5);
+	globalCoop_cin_start();
+	
+    allowMusicDucking( 0 );
+    music ("aux1");
+
+	globalCoop_main_globalCommand("nodamage");
+	
+	wait ( .1 );
+	globalCoop_cin_skipThread( "endIntroCinematic" );
+	$munro.notsolid();
+	$munro.notarget();
+	$munro.warpto ( "$fakeplayerEntranceNodeStart" );
+	$munro.removeattachedmodel ( "tag_rhand" );
+	wait ( .1 );
+	vector v;
+	v = $munro.getorigin ();
+	v_y = v_y - 16;
+	v_z = v_z + 8;
+	$munro.origin ( v );
+
+
+	globalCoop_cin_followWatch($cam1,$m11l3b_munroentrancecam,$munro);
+	globalCoop_cin_fov($cam1, 50 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera ( $cam1 );
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+
+	thread globalCoop_dialog_play($munro,"m11l3/munro_itsover.mp3", 1, 10000, 0); //End of the line for the Empty Crown. It's over!
+	$munro.walkto ( "$fakeplayerEntranceNode" , "walk" );
+	globalCoop_dialog_waitForDialog( $munro );
+
+	globalCoop_cin_follow($cam2, $m11l3b_commanderzoomcam );
+	globalCoop_cin_fov($cam2, 70 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera( $cam2 );
+	wait ( .5 );
+
+	$munro.warpto ( "$fakeplayerEntranceNode" );
+
+	$renegade_romulan.anim  ( "suldok_point" );
+	thread globalCoop_dialog_play($renegade_romulan,"m11l3/renrom_ohno.mp3", 1, 10000, 0); //Oh no. It's just beginning.
+	waitforanimation ( $renegade_romulan , "suldok_point" );
+	$renegade_romulan.anim  ( "suldok_sit" );
+	globalCoop_dialog_waitForDialog( $renegade_romulan );
+
+	wait ( 3.25 );
+	cam_fadeout( .25, 1, 1, 1, 1, 0 );
+	thread endIntroCinematic ();
+}
+
+
+void endIntroCinematic()
+{
+	killthread ( "introCinematic" );
+	$munro.stopdialog ();
+	$renegade_romulan.stopdialog ();
+
+	$munro.warpto ( "$fakeplayerEntranceNode" );
+	$munro.hide();
+	wait ( .05 );
+	
+	vector vOrigin,vAngels;
+	vOrigin		= $munro.getOrigin();
+	vAngels_y	= vectorgety($munro.getAngles());
+	
+	if(!cvar_bool_multiplayer)
+	{
+		$player.warp(vOrigin);	
+		$player.playerviewangles(vAngels);
+	}
+
+	globalCoop_cin_end();
+	wait(0.05);
+	if(doesEntityExist(ePlayer_cinematicWarp))
+	{
+		ePlayer_cinematicWarp.warp(vOrigin);
+		ePlayer_cinematicWarp.playerviewangles(vAngels);
+	}
+	
+	cam_fadein( .25, 0, 0, 0, 1, 0 );
+	wait ( .2);
+
+	trigger ( "$firstBridge" );
+	$firstBridgeClip.remove ();
+
+	globalCoop_main_globalCommand("takedamage");
+
+	$renegade_romulan.missionobjective ( 1 );
+
+	thread runPowerupConsoles ();
+	thread randomCommanderDialog ();
+	thread runShieldPanelAttack();
+}
+
+
+void commanderDestroyedCinematic()
+{
+	//$player.setobjectivecomplete( "StopCommander", 1 );
+	globalCoop_objectives_update("complete",1,1);
+    allowMusicDucking( 0 );
+	globalCommon_Autosave ();
+
+	globalCoop_main_camFadeOut(.5);
+	thread tryToRemoveAllMonsters();
+	
+	$renegade_romulan.ai_off();
+	$renegade_romulan.immortal(1);
+	$renegade_romulan.health(1);
+	
+	cam.load ( "m11l3b_munrobossintrocam1" );
+
+	cam.load ( "m11l3b_cmdrShot1" );
+	cam.load ( "m11l3b_cmdrShot2" );
+	cam.load ( "m11l3b_cmdrShot3" );
+
+	cam.load ( "m11l3b_archShot1" );
+	cam.load ( "m11l3b_archShot2" );
+	cam.load ( "m11l3b_archShot3" );
+	cam.load ( "m11l3b_archShot4" );
+	cam.load ( "m11l3b_archShot5" );
+	cam.load ( "m11l3b_archShot6" );
+	
+	killthread ( "randomCommanderDialog" );
+	wait ( 1 );
+
+	globalCoop_cin_start();
+	
+	forcemusic ("aux5","action");
+	wait ( .05 );
+
+	$munro.origin ( '-252.71 4646.12 -1055.96' );
+	$munro.angles ( '0 270 0' );
+	$munro.show();
+	
+	globalCoop_cin_skipThread( "commanderDestroyedCinematicEnd" );
+
+	globalCoop_cin_follow($cam1,$m11l3b_cmdrShot1);
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera($cam1);
+
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+	
+	thread globalCoop_dialog_play($renegade_romulan,"m11l3/renrom_shot.mp3", 1, 80000, 0); //Ahhhh!
+	$renegade_romulan.anim ( "suldok_pain" );
+	globalCoop_dialog_waitForDialog( $renegade_romulan );
+	wait ( 1 );
+
+	globalCoop_cin_follow($cam2, $m11l3b_munrobossintrocam1 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera ($cam2);
+	
+	thread globalCoop_dialog_play($munro,"m11l3/munro_stuck.mp3", 1, 80000, 0); //The Master Control Facility is stuck in first gear. You need thousands of Exomorphs, and you only have a handful.
+	wait ( 4 );
+
+	globalCoop_cin_follow($cam1, $m11l3b_cmdrShot1 );
+	globalCoop_cin_cut($cam1);
+	thread animActor ( $munro , "conv-handsweep" , "idle" );
+	globalCoop_dialog_waitForDialog ( $munro );
+	globalCoop_cin_cuecamera ( $cam1 );
+
+	thread globalCoop_dialog_play($renegade_romulan,"m11l3/renrom_one.mp3", 1, 80000, 0); //I only need one.
+	$renegade_romulan.animateonce  ( "suldok_one" );
+	wait ( 2 );
+
+	globalCoop_cin_follow($cam1,$m11l3b_cmdrShot2 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera ($cam1);
+	wait ( 1.5 );
+
+	globalCoop_cin_follow($cam2, $m11l3b_cmdrShot3 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera ( $cam2 );
+	wait ( 4 );
+
+	//waitforanimation ( $renegade_romulan , "suldok_one" );
+	//$renegade_romulan.anim ( "suldok_death" );
+
+	//allow earthquakes to shake cinematic cameras
+	$world.canShakeCamera ( 1 );
+	$finalEarthquake.magnitude ( .25 );
+	$finalEarthquake.duration ( 10 );
+	triggerentity ( $finalEarthquake );
+
+	globalCoop_cin_follow($cam3, $m11l3b_archShot1 );
+	globalCoop_cin_cut($cam3);
+	globalCoop_cin_cuecamera ( $cam3 );
+
+	wait ( 2 );
+
+	$finalboss.ai_off ();
+	$finalboss.origin ( '0.38 3746.42 -1105.88' );
+	$finalboss.angles ( '0.00 104.79 0.00' );
+	$finalboss.anim ( "raise" );
+	$finalboss.show();
+
+	wait ( 1.5 );
+
+	globalCoop_cin_follow($cam1, $m11l3b_archShot2 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera ( $cam1 );
+	$world.canShakeCamera ( 0 );
+
+	wait ( 2.5 );
+
+	globalCoop_cin_follow($cam2, $m11l3b_archShot3 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera ( $cam2 );
+
+	$finalboss.anim ( "dropdown" );
+
+	wait ( 1.5 );
+
+	globalCoop_cin_follow($cam3,$m11l3b_archShot4 );
+	globalCoop_cin_cut($cam3);
+	globalCoop_cin_cuecamera ($cam3);
+
+	wait ( 1.5 );
+
+	globalCoop_cin_follow($cam1,$m11l3b_archShot5 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera ( $cam1 );
+
+	wait ( 1.5 );
+	$finalboss.hide ();
+	wait ( .1 );
+	$munro.morph( "exp_Skeptical" );
+	wait ( .5 );
+
+
+	globalCoop_cin_follow($cam2,$m11l3b_archShot6 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera ($cam2);
+
+	wait ( 1 );
+	//$munro.morph( "exp_brows_down" );
+	$munro.morph( "exp_Disgust" );
+
+	wait ( 3.0 );
+
+	thread commanderDestroyedCinematicEnd ();
+}
+
+
+void commanderDestroyedCinematicEnd()
+{
+	globalCoop_main_camFadeOut(.25);
+	killthread ( "commanderDestroyedCinematic" );
+	wait(.25);
+	$renegade_romulan.stopdialog ();
+	$transitionCam.remove ();
+	$munro.stopdialog ();
+	$munro.hide();
+	
+	globalCoop_level_removePath($m11l3b_cmdrShot1);
+	globalCoop_level_removePath($m11l3b_cmdrShot2);
+	globalCoop_level_removePath($m11l3b_cmdrShot3);
+	globalCoop_level_removePath($m11l3b_archShot1);
+	globalCoop_level_removePath($m11l3b_archShot2);
+	globalCoop_level_removePath($m11l3b_archShot3);
+	globalCoop_level_removePath($m11l3b_archShot4);
+	globalCoop_level_removePath($m11l3b_archShot5);
+	globalCoop_level_removePath($m11l3b_archShot6);
+
+	globalCoop_cin_end();
+	
+	$finalboss.hide ();
+	$finalboss.anim ( "idle" );
+	$finalboss.origin ( '0 0 0' );
+	
+	cam_fadein( .5, 0, 0, 0, 1, 0 );
+	wait ( 2 );
+
+	thread finalBoss_go();
+	$finalboss.show ();
+	maxTotalCreaturesKilled = 6;
+
+	//$player.setobjectiveshow( "DefeatUberMorph", 1 );
+	thread globalCoop_objectives_update("incomplete",2,1);
+}
+
+
+void incrementStageCinematic()
+{
+	if ( $finalboss.gethealth () <= 0 )
+		return;
+	
+	globalCoop_main_camFadeOut(.5);
+	wait ( 1 );
+	globalCoop_cin_start();
+    
+	allowMusicDucking( 0 );
+	wait ( .5 );
+	
+	level_ai ( 0 );
+	thread tryToRemoveAllMonsters();
+
+	if(!doesEntityExist($transitionCam))
+		spawn ( "Camera" , "targetname" , "transitionCam" );
+	$munro.origin ( '-252.71 4646.12 -1055.96' );
+	$munro.angles ( '0.00 298.28 0.00' );
+	wait ( .05 );
+	$finalboss.ai_off ();
+	$finalboss.nodamage ();
+	$finalboss.origin ( '0.38 3746.42 -1105.88' );
+	$finalboss.angles ( '0.00 104.79 0.00' );
+	$finalboss.show();
+	$munro.show ();
+
+	thread bossDialog();
+	wait ( .4 );
+
+	spawn ( "script_model" , "model" , "models/fx/fx-explosion-lavaburst-creature.tik" , "targetname" , "bossburst" );
+	vector v;
+	v = $finalboss.getangles ();
+	if ( $finalboss.getstage() == 1 )
+	{
+	//	globalCineFX_CameraPathRotate ( $m11l3b_transitioncam1 , v_y , '0.38 3746.42 -1105.88' ,$finalboss.getorigin ());
+		
+		cam.load ( "m11l3b_transitioncam1" );
+		wait ( .1 );
+		globalCoop_cin_follow($transitionCam,$m11l3b_transitioncam1 );
+        forcemusic ("aux2","action");
+	}
+	else if ( $finalboss.getstage() == 2 )
+	{
+	//	globalCineFX_CameraPathRotate ( $m11l3b_transitioncam2 , v_y , '0.38 3746.42 -1105.88' ,$finalboss.getorigin ());
+		cam.load ( "m11l3b_transitioncam2" );
+		wait ( .1 );
+		globalCoop_cin_follow($transitionCam,$m11l3b_transitioncam2 );
+        forcemusic ("aux3","action");
+	}
+	else if ( $finalboss.getstage() == 3 )
+	{
+	//	globalCineFX_CameraPathRotate ( $m11l3b_transitioncam3 , v_y , '0.38 3746.42 -1105.88' ,$finalboss.getorigin ());
+		cam.load ( "m11l3b_transitioncam3" );
+		wait ( .1 );
+		globalCoop_cin_follow($transitionCam,$m11l3b_transitioncam3 );
+        forcemusic ("aux3","action");
+	}
+	globalCoop_cin_cut($transitionCam);
+	globalCoop_cin_cuecamera ( $transitionCam );
+	cam_fadein( .5, 1, 1, 1, 1, 0 );
+	wait ( .25 );
+
+	$finalboss.anim ( "dropdown" );
+
+	$bossburst.origin ( $finalboss.getorigin () );
+	$bossburst.scale ( 16 );
+
+	//waitforanimation ( $finalboss , "dropdown" );
+	wait ( 4.25 );
+	$finalboss.hide ();
+	$bossburst.remove ();
+
+	cam_fadeout( .5, 1, 1, 1, 1, 0 );
+	wait ( .5 );
+
+	globalCoop_cin_end();
+	level_ai ( 1 );
+
+	$finalboss.ai_on ();
+	$finalboss.show ();
+	$munro.hide ();
+	$munro.notsolid ();
+	$finalboss.takedamage ();	
+	cam_fadein( .5, 1, 1, 1, 1, 0 );
+}
+
+
+void finalBoss_killthread()
+{
+	entity	snake;
+
+	// get rid of any monsters hanging around
+	thread tryToRemoveAllMonsters();
+	killthread ( "incrementStageCinematic" );
+	$finalboss.stopdialog ();
+	$munro.stopdialog ();
+	$munro.show ();
+	$munro.fadein (.1);
+
+	//$player.setobjectivecomplete( "DefeatUberMorph", 1 );
+	globalCoop_objectives_update("complete",2,1);
+
+	cam.load( "m11l3b_stage4death" );
+	cam.load( "m11l3b_stage4death_2" );
+	cam.load( "m11l3b_stage4death_3" );
+	cam.load( "m11l3b_stage4death_4" );
+	
+	cam.load ( "m11l3b_archShot1" );
+	cam.load ( "m11l3b_archShot2" );
+	cam.load ( "m11l3b_archShot3" );
+	cam.load ( "m11l3b_archShot4" );
+	cam.load ( "m11l3b_archShot5" );
+	cam.load ( "m11l3b_archShot6" );
+	
+	cam.load ( "m11l3b_archDeathShot1" );
+	cam.load ( "m11l3b_archDeathShot2" );
+	cam.load ( "m11l3b_archDeathShot3" );
+	
+	globalCoop_main_camFadeOut(.5);
+	wait( 0.7 );
+	globalCoop_cin_start();
+
+	$finalboss.remove();
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$player.warpto ( "fakeplayerEntranceNode" );
+	}
+    
+	allowMusicDucking( 0 );
+    forcemusic ("aux4");
+
+	snake = spawn( "char/alien-type6-snake.tik", "origin", "-160.38 4246.42 -1140.88", "angles", "0.00 104.79 0.00" , "scale" , "1.7" );
+	$munro.origin ( '-252.71 4646.12 -1055.96' );
+	wait ( 0.05 );
+	$munro.turntoangle ( 300 );
+	wait( 0.05 );
+
+	snake.ai_off();
+
+	snake.surface( "material12", "+nodraw" );
+	snake.surface( "material11", "+nodraw" );
+	snake.surface( "material10", "+nodraw" );
+
+	thread finalBoss_stage5_begin_snakeanim( snake );
+	$munro.anim( "idle" );
+
+
+	//allow earthquakes to shake cinematic cameras
+	$world.canShakeCamera ( 1 );
+	$finalEarthquake.magnitude ( .5 );
+	$finalEarthquake.duration ( 30 );
+	triggerentity ( $finalEarthquake );
+
+	globalCoop_cin_follow($cam1, $m11l3b_archDeathShot1 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+
+	//---------------- go
+	cam_fadein( 0.5, 0, 0, 0, 1 );
+	wait ( 1 );
+	thread lavaBursts ();
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$world.time_scale ( .5 );
+	}
+	triggerentity ( $finalRockBurst4 );
+	wait ( 7 );
+	$finalLavaburst5.scale ( 1 );
+
+	if(!cvar_bool_multiplayer){//Singleplayer
+		$world.time_scale ( .35 );
+	}
+	globalCoop_cin_follow($cam1,$m11l3b_archDeathShot2 );
+	globalCoop_cin_cut($cam1);
+	globalCoop_cin_cuecamera( $cam1 );
+
+	wait ( 1 );
+
+	$munro.playsound ( "sound/chars/finalboss/final_lavasplash.wav" , 1, 1, 10000 );
+	snake.playsound ( "sound/chars/finalboss/final_pre3.wav" , 2, 1, 10000 );
+
+	$finalLavaburst5.origin ( snake.getorigin () );
+	triggerentity ( $finalLavaburst5 );
+
+	globalCoop_cin_follow($cam2,$m11l3b_archDeathShot3 );
+	globalCoop_cin_cut($cam2);
+	globalCoop_cin_cuecamera( $cam2 );
+
+	wait ( 2 );
+	$world.time_scale ( 1.0 );
+
+	globalCoop_cin_fov($cam3, 40 );
+	globalCoop_cin_follow($cam3,$m11l3b_stage4death_3 );
+	globalCoop_cin_cut($cam3);
+	globalCoop_cin_cuecamera( $cam3 );
+
+	$munro.stopdialog();
+	thread globalCoop_dialog_play($munro,"m11l3/munro_sodamn.mp3", 1 , 10000 , 0); //Not so damn perfect now.
+
+	triggerentity ( $finalRockBurst1 );
+
+	globalCoop_dialog_waitForDialog( $munro );
+
+	$munro.headwatch ( $finalRockBurst2 );
+
+	$munro.anim ( "tap_comm" );
+	waitforanimation ( $munro , "tap_comm" );
+	$munro.anim ( "idle" );
+
+	triggerentity ( $finalLavaburst1 );
+
+	$munro.headwatch ( $cam3 );
+//	wait ( 1.5 );
+
+	triggerentity ( $finalRockBurst2 );
+
+//	$munro.turntoangle ( 120 );
+
+	triggerentity ( $finalLavaburst3 );
+	triggerentity ( $finalLavaburst5 );
+//	wait ( 1.5 );
+//	$munro.turntoangle ( 300 );
+//	$world.time_scale ( 1.0 );
+
+
+	$finalPlatform.time ( 5 );
+	$finalPlatform.movedown ( 64 );
+	triggerentity ( $finalRockBurst1 );
+	triggerentity ( $finalRockBurst2 );
+
+	wait ( .5 );
+	triggerentity ( $finalLavaburst3 );
+
+	$finalRock.time ( 2.3 );
+	$finalRock.movedown ( 1900 );
+
+	$munro.displayeffect ( "TransportOut" , "Federation" );
+	$munro.fadeout ( 2.0 );
+
+	wait ( .5 );
+	$munro.headwatch ( $finalRock );
+	wait ( .5 );
+
+	//$world.time_scale ( .5 );
+
+	wait ( .25 );
+	triggerentity ( $finalRockDebris );
+	$finalRockDebris.playsound ( "sound/environment/rock/bigrock.wav" , 1, 1, 1000 );
+
+	wait ( .75 );
+
+	//----------------- stop
+	cam_fadeout( 1, 0, 0, 0, 1 );
+	$world.time_scale ( 1 );
+	wait( 3 );
+
+	thread finalBoss_end();
+}
+
+
+void finalBoss_end()
+{
+	globalCoop_cin_end();
+	if(!cvar_bool_multiplayer){
+		spawn ( "trigger_changelevel", "targetname", "trigger_endlevel", "map", "m12-end" );
+		wait ( 0.1 );
+		trigger ( "$trigger_endlevel" );
+	}
+	else{
+		coop_endLevel();
+	}
+}
+

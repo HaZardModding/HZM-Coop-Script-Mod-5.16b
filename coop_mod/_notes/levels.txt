@@ -1,0 +1,43 @@
+m1l2a-borg_sphere///////////////////////////////////////////////////////
+m1l2aTom1l2b
+m1l2aTom1l2c
+
+2c
+m1l2c-borg_sphere$m1l2a-to-m1l2c
+m1l2c-borg_sphere$m1l2b-to-m1l2c
+
+2b
+m1l2b-borg_sphere$m1l2c-to-m1l2b
+m1l2b-borg_sphere$m1l2a-to-m1l2b
+
+//GAME - LEVEL VARIABLES
+//GAME - LEVEL VARIABLES
+//GAME - LEVEL VARIABLES
+
+game.breifingRoomVisited
+game.holoMissionVisited
+game.lockerRoomVisited
+game.goToLibaryIGM3
+game.spokenWithPicardIGM
+
+level.deckToChangeToIGM
+level.deckToChangeToIGM
+level.deckToChangeToIGM
+
+game.checkEntMission2RoomsVisited
+game.checkEntMission3RoomsVisited
+game.checkEntMission4RoomsVisited
+game.checkEntMission7RoomsVisited
+game.checkEntMission8RoomsVisited
+game.globalTurboliftRide
+
+game.IGM3MeetInBriefingRoom
+game.IGM7GoToBrig
+game.IGM7GoToArmory
+game.IGM7HoloDeck
+game.IGM7GoToBreifingRoom
+game.IGM7GoToSickBay
+
+game.IGM8RemoveImplants
+game.IGM8MeetWithPicard
+game.IGM8MeetTelsiaOrKleeya
